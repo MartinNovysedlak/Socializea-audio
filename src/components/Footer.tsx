@@ -12,7 +12,9 @@ const Footer = () => {
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <Music className="text-white" size={18} />
             </div>
-            <span className="text-lg font-bold tracking-tighter text-white">AUDIO<span className="text-indigo-500">RENT</span></span>
+            <span className="text-lg font-bold tracking-tighter text-white uppercase">
+              Socializea<span className="text-indigo-500">-audio</span>
+            </span>
           </div>
 
           <div className="flex gap-6">
@@ -28,7 +30,7 @@ const Footer = () => {
           </div>
 
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} AUDIORENT. Všetky práva vyhradené.
+            © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
           </p>
         </div>
       </div>
