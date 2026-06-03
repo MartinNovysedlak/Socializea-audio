@@ -15,9 +15,9 @@ interface PackageProps {
 
 const PackageCard = ({ title, price, features, image, isPopular }: PackageProps) => {
   return (
-    <Card className={`relative overflow-hidden bg-zinc-900/50 border-white/10 transition-all duration-300 hover:border-indigo-500/50 hover:translate-y-[-8px] ${isPopular ? 'ring-2 ring-indigo-500' : ''}`}>
+    <Card className={`relative overflow-hidden bg-zinc-900/50 border-white/10 transition-all duration-300 hover:border-blue-500/50 hover:translate-y-[-8px] ${isPopular ? 'ring-2 ring-blue-500' : ''}`}>
       {isPopular && (
-        <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-lg">
+        <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-lg">
           Populárne
         </div>
       )}
@@ -34,7 +34,7 @@ const PackageCard = ({ title, price, features, image, isPopular }: PackageProps)
       <CardHeader className="pt-6">
         <h3 className="text-2xl font-bold text-white">{title}</h3>
         <div className="flex items-baseline gap-1 mt-2">
-          <span className="text-3xl font-bold text-indigo-400">{price} €</span>
+          <span className="text-3xl font-bold text-blue-400">{price} €</span>
           <span className="text-gray-500 text-sm">/ deň</span>
         </div>
       </CardHeader>
@@ -43,7 +43,7 @@ const PackageCard = ({ title, price, features, image, isPopular }: PackageProps)
         <ul className="space-y-3">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-3 text-sm text-gray-400">
-              <Check className="text-indigo-500 shrink-0 mt-0.5" size={16} />
+              <Check className="text-blue-500 shrink-0 mt-0.5" size={16} />
               <span>{feature}</span>
             </li>
           ))}

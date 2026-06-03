@@ -9,11 +9,11 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Music className="text-white" size={18} />
             </div>
             <span className="text-lg font-bold tracking-tighter text-white uppercase">
-              Socializea<span className="text-indigo-500">-audio</span>
+              Socializea<span className="text-blue-500">-audio</span>
             </span>
           </div>
 

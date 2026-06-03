@@ -55,7 +55,7 @@ const ContactForm = () => {
 
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <div className="w-12 h-12 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                     <Phone size={20} />
                   </div>
                   <div>
@@ -64,16 +64,16 @@ const ContactForm = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <div className="w-12 h-12 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                     <Mail size={20} />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
-                    <p className="text-white text-lg">info@audiorent.sk</p>
+                    <p className="text-white text-lg">info@socializea-audio.sk</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                  <div className="w-12 h-12 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                     <MapPin size={20} />
                   </div>
                   <div>
@@ -95,7 +95,7 @@ const ContactForm = () => {
                         <FormItem>
                           <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
                           <FormControl>
-                            <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500" />
+                            <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-blue-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -108,7 +108,7 @@ const ContactForm = () => {
                         <FormItem>
                           <FormLabel className="text-gray-300">Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500" />
+                            <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-blue-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -123,7 +123,7 @@ const ContactForm = () => {
                         <FormItem>
                           <FormLabel className="text-gray-300">Telefón</FormLabel>
                           <FormControl>
-                            <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500" />
+                            <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-blue-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -136,7 +136,7 @@ const ContactForm = () => {
                         <FormItem>
                           <FormLabel className="text-gray-300">Dátum podujatia</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500" />
+                            <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-blue-500" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -152,7 +152,7 @@ const ContactForm = () => {
                         <FormControl>
                           <Textarea 
                             placeholder="Napíšte nám viac o vašom podujatí..." 
-                            className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-indigo-500" 
+                            className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-blue-500" 
                             {...field} 
                           />
                         </FormControl>
@@ -160,7 +160,7 @@ const ContactForm = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-14 rounded-xl text-lg font-bold group">
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14 rounded-xl text-lg font-bold group">
                     Odoslať nezáväzný dopyt
                     <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </Button>

@@ -67,12 +67,12 @@ const RentalCalculator = () => {
                     className="grid grid-cols-1 gap-3"
                   >
                     {Object.entries(packages).map(([id, pkg]) => (
-                      <div key={id} className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${selectedPackage === id ? 'bg-indigo-600/10 border-indigo-500' : 'bg-zinc-900 border-white/5 hover:border-white/20'}`}>
+                      <div key={id} className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${selectedPackage === id ? 'bg-blue-600/10 border-blue-500' : 'bg-zinc-900 border-white/5 hover:border-white/20'}`}>
                         <div className="flex items-center gap-3">
-                          <RadioGroupItem value={id} id={id} className="border-white/20 text-indigo-500" />
+                          <RadioGroupItem value={id} id={id} className="border-white/20 text-blue-500" />
                           <Label htmlFor={id} className="text-white font-medium cursor-pointer">{pkg.name}</Label>
                         </div>
-                        <span className="text-indigo-400 font-bold">{pkg.price} € / deň</span>
+                        <span className="text-blue-400 font-bold">{pkg.price} € / deň</span>
                       </div>
                     ))}
                   </RadioGroup>
@@ -81,7 +81,7 @@ const RentalCalculator = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-white text-lg">2. Počet dní prenájmu</Label>
-                    <span className="text-indigo-400 font-bold text-xl">{days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span>
+                    <span className="text-blue-400 font-bold text-xl">{days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span>
                   </div>
                   <Slider 
                     value={[days]} 
@@ -108,7 +108,7 @@ const RentalCalculator = () => {
                           id="mic" 
                           checked={addOns.mic} 
                           onCheckedChange={(checked) => setAddOns(prev => ({ ...prev, mic: !!checked }))}
-                          className="border-white/20 data-[state=checked]:bg-indigo-500"
+                          className="border-white/20 data-[state=checked]:bg-blue-500"
                         />
                         <Label htmlFor="mic" className="text-white cursor-pointer">Bezdrôtový mikrofón</Label>
                       </div>
@@ -120,7 +120,7 @@ const RentalCalculator = () => {
                           id="transport" 
                           checked={addOns.transport} 
                           onCheckedChange={(checked) => setAddOns(prev => ({ ...prev, transport: !!checked }))}
-                          className="border-white/20 data-[state=checked]:bg-indigo-500"
+                          className="border-white/20 data-[state=checked]:bg-blue-500"
                         />
                         <Label htmlFor="transport" className="text-white cursor-pointer">Doprava a montáž</Label>
                       </div>
@@ -131,10 +131,10 @@ const RentalCalculator = () => {
               </div>
             </div>
 
-            <Card className="bg-zinc-900 border-white/10 sticky top-28 shadow-2xl shadow-indigo-500/10">
+            <Card className="bg-zinc-900 border-white/10 sticky top-28 shadow-2xl shadow-blue-500/10">
               <CardHeader className="border-b border-white/5">
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Calculator className="text-indigo-500" />
+                  <Calculator className="text-blue-500" />
                   Prehľad ceny
                 </CardTitle>
               </CardHeader>
@@ -167,11 +167,11 @@ const RentalCalculator = () => {
                 <div className="pt-6 border-t border-white/5 space-y-4">
                   <div className="flex justify-between items-end">
                     <span className="text-white font-bold text-xl">Celková suma</span>
-                    <span className="text-indigo-400 font-bold text-4xl">{total.toFixed(2)} €</span>
+                    <span className="text-blue-400 font-bold text-4xl">{total.toFixed(2)} €</span>
                   </div>
                   
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
-                    <Info className="text-indigo-400 shrink-0 mt-1" size={18} />
+                    <Info className="text-blue-400 shrink-0 mt-1" size={18} />
                     <div className="text-sm text-gray-400">
                       <p className="font-medium text-white mb-1">Vratná záloha: {deposit} €</p>
                       <p>Záloha sa platí pri prevzatí techniky a je v plnej výške vrátená po skončení nájmu.</p>
