@@ -35,7 +35,7 @@ const equipmentData: EquipmentItem[] = [
   { id: "laser-bar", name: "Laserovy Bar 65W (8x červený laser)", category: "lighting", pricePerDay: 40, available: 1, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "fog-dj", name: "Dymostroj ADJ VF 1300", category: "lighting", pricePerDay: 25, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "bubble", name: "Bublinkostroj", category: "lighting", pricePerDay: 20, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
-  { id: "snow", name: "Snehostroj ADJ Snow Flurry HO", category: "lighting", pricePerDay: 25, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
+  { id: "snow", name: "Snehostroj ADJ Snow Flurry HO", category: "lighting", pricePerDay: 25, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "fire", name: "Výrobníky plameňov Fire Machine", category: "lighting", pricePerDay: 30, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "party-bar", name: "Svetlá BeamZ Party Bar", category: "lighting", pricePerDay: 20, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "uv-lights", name: "Samostatné Bodové UV svetlá", category: "lighting", pricePerDay: 10, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
@@ -50,7 +50,7 @@ const equipmentData: EquipmentItem[] = [
   { id: "speaker-construct", name: "Konštrukcia na zavesenie reproduktorov", category: "other", pricePerDay: 8, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "mic-stand", name: "Stojan na mikrofón", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "tripod", name: "Trojnožka na reproduktory", category: "other", pricePerDay: 10, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
-  { id: "speaker-mount", name: "Držiak pre dvojicu reproboxov", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
+  { id: "speaker-mount", name: "Držiak pre dvojicu reproboxov", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "telescopic", name: "Teleskopická stojanová tyč", category: "other", pricePerDay: 8, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
 ];
 
@@ -121,15 +121,15 @@ const EquipmentCatalog = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEquipment.map((item) => (
                 <Link 
                   key={item.id} 
                   to={`/equipment/${item.id}`}
-                  className="bg-white/5 border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer group"
+                  className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer group"
                 >
                   {/* Image with centered category bubble */}
-                  <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/10 relative">
+                  <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
                     <img
                       src={item.image}
                       alt={item.name}
@@ -137,7 +137,7 @@ const EquipmentCatalog = () => {
                       style={{ objectPosition: 'center' }}
                     />
                     {/* Category bubble centered at the bottom */}
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-md p-1">
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-full px-3 py-1">
                       <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">
                         {getCategoryLabel(item.category)}
                       </span>
@@ -145,65 +145,58 @@ const EquipmentCatalog = () => {
                   </div>
 
                   {/* Text Content */}
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors">
+                  <div className="flex-1 w-full">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2">
                       {item.name}
                     </h3>
-                    <span className="text-sm text-gray-400 group-hover:text-gray-500 transition-colors">
-                      {getCategoryLabel(item.category)}
-                    </span>
-                    <div className="mt-1 flex justify-between">
-                      <span className="text-xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
-                    </div>
-
-                    {/* Quantity Controls with availability */}
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleRemove(item.id);
-                          }}
-                          disabled={!quantities[item.id]}
-                          className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Minus size={12} />
-                        </button>
-                        <span className="w-9 text-center text-white font-medium">
-                          {quantities[item.id] || 0}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleAdd(item.id);
-                          }}
-                          disabled={(quantities[item.id] || 0) >= item.available}
-                          className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Plus size={12} />
-                        </button>
-                      </div>
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
                       <span className="text-gray-400 text-sm">
                         Dostupné: {getAvailabilityText(item.available)}
                       </span>
                     </div>
 
-                    {/* Action Button */}
-                    <div className="mt-3">
-                      <Button
-                        size="sm"
+                    {/* Quantity Controls */}
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          handleRemove(item.id);
                         }}
-                        className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-md"
                         disabled={!quantities[item.id]}
+                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
-                        Pridať do kalkulácie
-                      </Button>
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-12 text-center text-white font-medium text-lg">
+                        {quantities[item.id] || 0}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAdd(item.id);
+                        }}
+                        disabled={(quantities[item.id] || 0) >= item.available}
+                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      >
+                        <Plus size={14} />
+                      </button>
                     </div>
+
+                    {/* Action Button */}
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10"
+                      disabled={!quantities[item.id]}
+                    >
+                      Pridať do kalkulácie
+                    </Button>
                   </div>
                 </Link>
               ))}
