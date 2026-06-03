@@ -1,6 +1,27 @@
-"use client"; import React from "react"; import { Routes, Route } from "react-router-dom"; import EquipmentCatalog from "@/components/EquipmentCatalog"; import EquipmentDetail from "@/pages/EquipmentDetail"; import Index from "@/pages/Index"; function App() { return ( <Routes> <Route path="/" element={<Index />} /> <Route path="/equipment/:id" element={<EquipmentDetail />} /> {/* other existing routes */} </Routes> ); } export default App; ＜/dyad-write>
+"use client";
 
-Also maybe need to ensure that the file path is correct: maybe the import should be from "@/pages/Index.tsx"? but the alias @ resolves to src, so it's fine.
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import EquipmentCatalog from "@/components/EquipmentCatalog";
+import EquipmentDetail from "@/pages/EquipmentDetail";
+import Index from "@/pages/Index";
+import Prenajom from "@/pages/Prenajom";
+import Kontakt from "@/pages/Kontakt";
+import Predaj from "@/pages/Predaj";
+import NotFound from "@/pages/NotFound";
 
-Thus final answer includes that write.
-</think><dyad-write path="src/App.tsx" description="Fix import of Index component by using default import instead of named import."> "use client"; import React from "react"; import { Routes, Route } from "react-router-dom"; import EquipmentCatalog from "@/components/EquipmentCatalog"; import EquipmentDetail from "@/pages/EquipmentDetail"; import Index from "@/pages/Index"; function App() { return ( <Routes> <Route path="/" element={<Index />} /> <Route path="/equipment/:id" element={<EquipmentDetail />} /> {/* other existing routes */} </Routes> ); } export default App;
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/prenajom" element={<Prenajom />} />
+      <Route path="/kontakt" element={<Kontakt />} />
+      <Route path="/predaj" element={<Predaj />} />
+      <Route path="/equipment/:id" element={<EquipmentDetail />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+export default App;
+</dyad-chat-summary>
