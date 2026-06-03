@@ -4,9 +4,9 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import RentalSummary from '@/components/RentalSummary';
-import SalesSummary from '@/components/SalesSummary';
-import DJSection from '@/components/DJSection';
 import Catalog from '@/components/Catalog';
+import DJSection from '@/components/DJSection';
+import SalesSummary from '@/components/SalesSummary';
 import RentalCalculator from '@/components/RentalCalculator';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
@@ -19,9 +19,9 @@ const Index = () => {
       <main>
         <Hero />
         <RentalSummary />
-        <SalesSummary />
-        <DJSection />
         <Catalog />
+        <DJSection />
+        <SalesSummary />
         <RentalCalculator />
         <ContactForm />
       </main>
