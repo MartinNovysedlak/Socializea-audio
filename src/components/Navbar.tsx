@@ -13,11 +13,12 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f]/80 backdrop-blur-md border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#020721]/80 backdrop-blur-md border-b border-white/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-12 h-12 overflow-hidden rounded-lg border border-[#BD20D3]/30">
-            <img               src="/logo.png" 
+            <img 
+              src="/logo.png" 
               alt="Socializea Logo" 
               className="w-full h-full object-cover"
             />
@@ -41,7 +42,8 @@ const Navbar = () => {
           </div>
           <Link to="/kontakt">
             <Button className="hidden sm:flex btn-cyber rounded-full px-6 border-none">
-              Rezervovať            </Button>
+              Rezervovať
+            </Button>
           </Link>
         </div>
       </div>
