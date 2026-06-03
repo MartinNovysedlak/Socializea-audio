@@ -47,7 +47,7 @@ const ContactForm = () => {
             
             <div className="space-y-10">
               <div>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 neon-glow-blue">Rezervujte si termín</h2>
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
                 <p className="text-gray-300 text-lg leading-relaxed">
                   Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
                 </p>

@@ -48,7 +48,7 @@ const Catalog = () => {
     <section id="ponuka" className="py-24 bg-[#020721] relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 neon-glow-blue">Naša ponuka balíkov</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Naša ponuka balíkov</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Vyberte si z našich predpripravených setov, ktoré sme zostavili na základe dlhoročných skúseností.
           </p>

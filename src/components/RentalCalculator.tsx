@@ -52,7 +52,7 @@ const RentalCalculator = () => {
             
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 neon-glow-blue">Kalkulačka prenájmu</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kalkulačka prenájmu</h2>
                 <p className="text-gray-300">
                   Získajte okamžitý odhad ceny pre vaše podujatie. Stačí si vybrať balík a dĺžku prenájmu.
                 </p>
@@ -167,7 +167,7 @@ const RentalCalculator = () => {
                 <div className="pt-6 border-t border-white/5 space-y-4">
                   <div className="flex justify-between items-end">
                     <span className="text-white font-bold text-xl">Celková suma</span>
-                    <span className="text-[#BD20D3] font-bold text-4xl neon-glow-magenta">{total.toFixed(2)} €</span>
+                    <span className="text-[#BD20D3] font-bold text-4xl">{total.toFixed(2)} €</span>
                   </div>
                   
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">

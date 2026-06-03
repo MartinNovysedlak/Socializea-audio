@@ -28,7 +28,7 @@ const Hero = () => {
             <span>Prémiová technika pre vaše podujatia</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1] neon-glow-blue">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
             Profesionálny prenájom <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
               zvukovej a svetelnej techniky
