@@ -1,181 +1,149 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Minus, Filter } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Minus, Filter } from "lucide-react";
+import { Music, Sun, Gear } from "lucide-react";
 
-interface EquipmentItem {
-  id: string;
-  name: string;
-  category: 'sound' | 'lighting' | 'other';
-  pricePerDay: number;
-  available: number;
+interface PackageProps {
+  title: string;
+  price: number;
+  features: string[];
+  image: string;
+  isPopular?: boolean;
 }
 
-const equipmentData: EquipmentItem[] = [
-  // Sound
-  { id: 'mixer-x1222', name: 'Mixážny pult Behringer Xenyx X1222 USB', category: 'sound', pricePerDay: 25, available: 1 },
-  { id: 'mixer-802', name: 'Mixážny pult Behringer Xenyx 802', category: 'sound', pricePerDay: 15, available: 1 },
-  { id: 'mic-set', name: 'Sada 2 mikrofónov the t.bone free solo Twin HT', category: 'sound', pricePerDay: 20, available: 1 },
-  { id: 'mic-auna', name: 'Mikrofony a headsety Auna VHF', category: 'sound', pricePerDay: 10, available: 4 },
-  { id: 'speakers-b112d', name: 'Reproduktory Behringer b112d', category: 'sound', pricePerDay: 15, available: 4 },
-  { id: 'speaker-b208d', name: 'Reproduktor Behringer b208d', category: 'sound', pricePerDay: 12, available: 1 },
-  { id: 'sub-b1500xp', name: 'Subwoofery Behriger B1500XP', category: 'sound', pricePerDay: 30, available: 2 },
-  { id: 'sub-dsp18', name: 'Subwoofer The Box Pro DSP 18 Sub', category: 'sound', pricePerDay: 35, available: 5 },
-  
-  // Lighting
-  { id: 'dmx-pult', name: 'Riadiaci DMX pult Light4Me DMX 192', category: 'lighting', pricePerDay: 20, available: 1 },
-  { id: 'beamz-sushi', name: 'BeamZ SUSHI-DS', category: 'lighting', pricePerDay: 15, available: 1 },
-  { id: 'led-par', name: 'RGBWA UV Led Par svetlá', category: 'lighting', pricePerDay: 8, available: 8 },
-  { id: 'beam-head', name: 'Rotujúca 90w Beam hlava', category: 'lighting', pricePerDay: 25, available: 4 },
-  { id: 'led-bar', name: 'RGBW Led Bar 36w', category: 'lighting', pricePerDay: 12, available: 4 },
-  { id: 'laser-bar', name: 'Laserovy Bar 65W (8x červený laser)', category: 'lighting', pricePerDay: 40, available: 1 },
-  { id: 'fog-dj', name: 'Dymostroj ADJ VF 1300', category: 'lighting', pricePerDay: 25, available: 2 },
-  { id: 'bubble', name: 'Bublinkostroj', category: 'lighting', pricePerDay: 20, available: 2 },
-  { id: 'snow', name: 'Snehostroj ADJ Snow Flurry HO', category: 'lighting', pricePerDay: 25, available: 2 },
-  { id: 'fire', name: 'Výrobníky plameňov Fire Machine', category: 'lighting', pricePerDay: 30, available: 2 },
-  { id: 'party-bar', name: 'Svetlá BeamZ Party Bar', category: 'lighting', pricePerDay: 20, available: 1 },
-  { id: 'uv-lights', name: 'Samostatné Bodové UV svetlá', category: 'lighting', pricePerDay: 10, available: 2 },
-  { id: 'strobe', name: 'Stroboskop', category: 'lighting', pricePerDay: 15, available: 1 },
-  { id: 'holo-laser', name: 'Holografický Laser', category: 'lighting', pricePerDay: 35, available: 1 },
-  { id: 'red-green-laser', name: 'Červeno-zelený Laser', category: 'lighting', pricePerDay: 25, available: 1 },
-  
-  // Other
-  { id: 'projector', name: 'Premietačka Wanbo T6 MAX', category: 'other', pricePerDay: 20, available: 1 },
-  { id: 'screen', name: 'Premietacie plátno 110"', category: 'other', pricePerDay: 15, available: 1 },
-  { id: 'light-construct', name: 'Osvetľovacia konštrukcia na uchytenie -všetkých svetiel a efektov', category: 'other', pricePerDay: 10, available: 1 },
-  { id: 'speaker-construct', name: 'Konštrukcia na zavesenie reproduktorov na stenu', category: 'other', pricePerDay: 8, available: 2 },
-  { id: 'mic-stand', name: 'Stojan na mikrofón', category: 'other', pricePerDay: 5, available: 2 },
-  { id: 'tripod', name: 'Trojnožka na reproduktory', category: 'other', pricePerDay: 10, available: 2 },
-  { id: 'speaker-mount', name: 'Držiak pre dvojicu reproboxov', category: 'other', pricePerDay: 5, available: 2 },
-  { id: 'telescopic', name: 'Teleskopická stojanová tyč', category: 'other', pricePerDay: 8, available: 2 },
-];
+const PackageCard = ({ title, price, features, image, isPopular }: PackageProps) => {
+  return (
+    <Card className={`relative overflow-hidden bg-[#020721]/50 border-white/10 transition-all duration-300 hover:border-[#BD20D3]/50 hover:translate-y-[-8px] ${isPopular ? 'ring-1 ring-[#BD20D3]' : ''}`}>
+      {isPopular && (
+        <div className="absolute top-0 right-0 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-lg z-20">
+          Populárne        </div>
+      )}
+      
+      <div className="h-48 overflow-hidden bg-zinc-800 relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent z-10" />
+        <img 
+          src={image} 
+          alt={title} 
+          className="w-full h-full object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-500" 
+        />
+      </div>
+      
+      <CardHeader className="pt-6">
+        <div className="flex items-center gap-2">
+          {getIcon(package.category)}
+          <span className="text-2xl font-bold text-[#BD20D3]">{price} €</span>
+        </div>
+        <h3 className="text-2xl font-bold text-white">{title}</h3>
+        <div className="flex items-baseline gap-1 mt-2">
+          <span className="text-3xl font-bold text-[#BD20D3]">{price} €</span>
+          <span className="text-gray-400 text-sm">/ deň</span>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        <ul className="space-y-3">
+          {features.map((feature, index) => (
+            <li key={index} className="flex items-start gap-3 text-sm text-gray-300">
+              <Check className="text-[#BD20D3] shrink-0 mt-0.5" size={16} />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      
+      <CardFooter className="pb-6">
+        <Button className="w-full bg-white/5 hover:bg-[#BD20D3]/10 text-white border border-white/10 rounded-xl transition-colors">
+          Viac informácií
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
 
-const EquipmentCatalog = () => {
-  const [activeFilter, setActiveFilter] = useState<'all' | 'sound' | 'lighting' | 'other'>('all');
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+const getIcon = (category: string) => {
+  switch (category) {
+    case "sound":
+      return <Music className="text-[#BD20D3]" size={20} />;
+    case "lighting":
+      return <Sun className="text-[#1A4BFF]" size={20} />;
+    case "other":
+      return <Gear className="text-[#BD20D3]" size={20} />;
+    default:
+      return null;
+  }
+};
 
-  const filteredEquipment = activeFilter === 'all' 
-    ? equipmentData 
-    : equipmentData.filter(item => item.category === activeFilter);
-
-  const handleQuantityChange = (id: string, delta: number) => {
-    const item = equipmentData.find(i => i.id === id);
-    const currentQty = quantities[id] || 0;
-    const newQty = Math.max(0, Math.min(item?.available || 0, currentQty + delta));
-    setQuantities(prev => ({ ...prev, [id]: newQty }));
-  };
-
-  const handleAdd = (id: string) => {
-    handleQuantityChange(id, 1);
-  };
-
-  const handleRemove = (id: string) => {
-    handleQuantityChange(id, -1);
-  };
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'sound': return 'Zvuk';
-      case 'lighting': return 'Svetlá a efekty';
-      case 'other': return 'Ostatné';
-      default: return '';
-    }
-  };
+const Catalog = () => {
+  const packages = [
+    {
+      title: "Párty Set M",
+      price: 80,
+      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
+      features: [
+        "2x Aktívny reproduktor 12\"",
+        "Stojany na reproduktory",
+        "Kompletná kabeláž",
+        "Bluetooth prijímač",
+        "Vhodné do 50 osôb",
+      ],
+    },
+    {
+      title: "Svadobný Set L",
+      price: 150,
+      isPopular: true,
+      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800",
+      features: [
+        "2x Aktívny reproduktor 15\"",
+        "1x Aktívny subwoofer 18\"",
+        "Svetelná rampa (4x LED PAR)",
+        "Bezdrôtový mikrofón",
+        "Vhodné do 120 osôb",
+      ],
+    },
+    {
+      title: "Svetelný Balík",
+      price: 60,
+      image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800",
+      features: [
+        "4x LED Moving Head",
+        "Dymostroj s náplňou",
+        "DMX ovládač",
+        "Stojan na svetlá",
+        "Atmosférické osvetlenie",
+      ],
+    },
+  ];
 
   return (
-    <section className="py-12 bg-[#020721] relative">
+    <section id="ponuka" className="py-24 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-16 backdrop-blur-xl">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
-                <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
-              </div>
-              
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2">
-                <Filter className="text-[#BD20D3] ml-3" size={18} />
-                <div className="flex gap-1">
-                  {(['all', 'sound', 'lighting', 'other'] as const).map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setActiveFilter(filter)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        activeFilter === filter
-                          ? 'bg-[#BD20D3] text-white'
-                          : 'text-gray-400 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      {filter === 'all' ? 'Všetko' : getCategoryLabel(filter)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            Naša ponuka balíkov
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Vyberte si z našich predpripravených sad, ktoré sme zostavili na základe
+            dlhoročných skúseností.
+          </p>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEquipment.map((item) => (
-                <Card key={item.id} className="bg-white/5 border-white/10 hover:border-[#BD20D3]/30 transition-all duration-300">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-white text-base leading-tight">{item.name}</CardTitle>
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#BD20D3]/10 text-[#BD20D3] font-medium whitespace-nowrap">
-                        {getCategoryLabel(item.category)}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
-                        <span className="text-gray-500 text-sm">/ deň</span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        Dostupné: {item.available} {item.available === 1 ? 'kus' : 'kusy'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleRemove(item.id)}
-                          disabled={!quantities[item.id]}
-                          className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-8 text-center text-white font-medium">
-                          {quantities[item.id] || 0}
-                        </span>
-                        <button
-                          onClick={() => handleAdd(item.id)}
-                          disabled={(quantities[item.id] || 0) >= item.available}
-                          className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                      
-                      <Button
-                        size="sm"
-                        className="bg-[#BD20D3]/10 hover:bg-[#BD20D3]/20 text-[#BD20D3] border border-[#BD20D3]/30 rounded-xl"
-                        disabled={!quantities[item.id]}
-                      >
-                        Pridať do kalkulácie
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {packages.map((pkg, index) => (
+            <PackageCard key={index} {...pkg} />
+          ))}
         </div>
       </div>
     </section>
   );
 };
 
-export default EquipmentCatalog;
+export default Catalog;
