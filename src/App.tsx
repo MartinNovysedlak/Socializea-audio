@@ -2,12 +2,11 @@
 
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import EquipmentCatalog from "@/components/EquipmentCatalog";
-import EquipmentDetail from "@/pages/EquipmentDetail";
 import Index from "@/pages/Index";
 import Prenajom from "@/pages/Prenajom";
 import Kontakt from "@/pages/Kontakt";
 import Predaj from "@/pages/Predaj";
+import EquipmentDetail from "@/pages/EquipmentDetail";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -24,4 +23,3 @@ function App() {
 }
 
 export default App;
-</dyad-chat-summary>
