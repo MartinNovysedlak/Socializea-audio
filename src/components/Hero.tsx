@@ -10,6 +10,11 @@ const Hero = () => {
     element?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToCatalog = () => {
+    const element = document.getElementById('ponuka');
+    element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-black">
       {/* Background Glows */}
@@ -44,9 +49,10 @@ const Hero = () => {
               <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
+              onClick={scrollToCatalog}
               variant="outline" 
               size="lg" 
-              className="border-white/10 text-white hover:bg-white/5 text-lg px-8 py-7 rounded-full w-full sm:w-auto"
+              className="border-blue-600 text-blue-400 hover:bg-blue-600/10 text-lg px-8 py-7 rounded-full w-full sm:w-auto"
             >
               Pozrieť ponuku
             </Button>
