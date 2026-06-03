@@ -1,7 +1,6 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -10,33 +9,49 @@ interface ScrollRevealProps {
 }
 
 const ScrollReveal = ({ children, direction = 'up', delay = 0 }: ScrollRevealProps) => {
-  const directions = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { x: 40, y: 0 },
-    right: { x: -40, y: 0 },
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const currentRef = domRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+  const getDirectionClasses = () => {
+    switch (direction) {
+      case 'up': return isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0';
+      case 'down': return isVisible ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0';
+      case 'left': return isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0';
+      case 'right': return isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0';
+      default: return isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0';
+    }
   };
 
   return (
-    <motion.div
-      initial={{ 
-        opacity: 0, 
-        ...directions[direction] 
-      }}
-      whileInView={{ 
-        opacity: 1, 
-        x: 0, 
-        y: 0 
-      }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ 
-        duration: 0.8, 
-        delay: delay,
-        ease: [0.21, 0.47, 0.32, 0.98]
-      }}
+    <div
+      ref={domRef}
+      className={`transition-all duration-1000 ease-out ${getDirectionClasses()}`}
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
