@@ -1,20 +1,11 @@
 "use client";
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Sparkles } from 'lucide-react';
 
 const Hero = () => {
-  const scrollToCalculator = () => {
-    const element = document.getElementById('kalkulacka');
-    element?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const scrollToCatalog = () => {
-    const element = document.getElementById('ponuka');
-    element?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#020721]">
       {/* Background Glows */}
@@ -40,22 +31,24 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              onClick={scrollToCalculator}
-              size="lg" 
-              className="btn-cyber text-lg px-8 py-7 rounded-full w-full sm:w-auto group border-none"
-            >
-              Spočítať cenu prenájmu
-              <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button 
-              onClick={scrollToCatalog}
-              variant="outline" 
-              size="lg" 
-              className="border-[#1A4BFF] text-[#1A4BFF] hover:bg-[#1A4BFF]/10 hover:text-white text-lg px-8 py-7 rounded-full w-full sm:w-auto transition-all duration-300"
-            >
-              Pozrieť ponuku
-            </Button>
+            <Link to="/prenajom" className="w-full sm:w-auto">
+              <Button 
+                size="lg" 
+                className="btn-cyber text-lg px-8 py-7 rounded-full w-full group border-none"
+              >
+                Spočítať cenu prenájmu
+                <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/prenajom" className="w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-[#1A4BFF] text-[#1A4BFF] hover:bg-[#1A4BFF]/10 hover:text-white text-lg px-8 py-7 rounded-full w-full transition-all duration-300"
+              >
+                Pozrieť ponuku
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
