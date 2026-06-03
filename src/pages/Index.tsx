@@ -4,7 +4,6 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import RentalSummary from '@/components/RentalSummary';
-import Catalog from '@/components/Catalog';
 import DJSection from '@/components/DJSection';
 import SalesSummary from '@/components/SalesSummary';
 import RentalCalculator from '@/components/RentalCalculator';
@@ -19,7 +18,6 @@ const Index = () => {
       <main>
         <Hero />
         <RentalSummary />
-        <Catalog />
         <DJSection />
         <SalesSummary />
         <RentalCalculator />
