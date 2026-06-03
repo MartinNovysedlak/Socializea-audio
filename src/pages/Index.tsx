@@ -6,7 +6,6 @@ import Hero from '@/components/Hero';
 import RentalSummary from '@/components/RentalSummary';
 import DJSection from '@/components/DJSection';
 import SalesSummary from '@/components/SalesSummary';
-import RentalCalculator from '@/components/RentalCalculator';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import { MadeWithDyad } from "@/components/made-with-dyad";
@@ -20,7 +19,6 @@ const Index = () => {
         <RentalSummary />
         <DJSection />
         <SalesSummary />
-        <RentalCalculator />
         <ContactForm />
       </main>
       <Footer />
