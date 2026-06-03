@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Minus, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface EquipmentItem {
   id: string;
@@ -118,56 +119,67 @@ const EquipmentCatalog = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEquipment.map((item) => (
-                <Card key={item.id} className="bg-white/5 border-white/10 hover:border-[#BD20D3]/30 transition-all duration-300">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-white text-base leading-tight">{item.name}</CardTitle>
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#BD20D3]/10 text-[#BD20D3] font-medium whitespace-nowrap">
-                        {getCategoryLabel(item.category)}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
-                        <span className="text-gray-500 text-sm">/ deň</span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        Dostupné: {item.available} {item.available === 1 ? 'kus' : 'kusy'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleRemove(item.id)}
-                          disabled={!quantities[item.id]}
-                          className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-8 text-center text-white font-medium">
-                          {quantities[item.id] || 0}
+                <Card key={item.id} className="bg-white/5 border-white/10 hover:border-[#BD20D3]/30 transition-all duration-300 group cursor-pointer">
+                  <Link to={`/equipment/${item.id}`} className="block">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start gap-2">
+                        <CardTitle className="text-white text-base leading-tight group-hover:text-[#BD20D3] transition-colors">
+                          {item.name}
+                        </CardTitle>
+                        <span className="text-xs px-2 py-1 rounded-full bg-[#BD20D3]/10 text-[#BD20D3] font-medium whitespace-nowrap">
+                          {getCategoryLabel(item.category)}
                         </span>
-                        <button
-                          onClick={() => handleAdd(item.id)}
-                          disabled={(quantities[item.id] || 0) >= item.available}
-                          className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Plus size={14} />
-                        </button>
                       </div>
-                      
-                      <Button
-                        size="sm"
-                        className="bg-[#BD20D3]/10 hover:bg-[#BD20D3]/20 text-[#BD20D3] border border-[#BD20D3]/30 rounded-xl"
-                        disabled={!quantities[item.id]}
-                      >
-                        Pridať do kalkulácie
-                      </Button>
-                    </div>
-                  </CardContent>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
+                          <span className="text-gray-500 text-sm">/ deň</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          Dostupné: {item.available} {item.available === 1 ? 'kus' : 'kusy'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleRemove(item.id);
+                            }}
+                            disabled={!quantities[item.id]}
+                            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="w-8 text-center text-white font-medium">
+                            {quantities[item.id] || 0}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleAdd(item.id);
+                            }}
+                            disabled={(quantities[item.id] || 0) >= item.available}
+                            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        
+                        <Button
+                          size="sm"
+                          onClick={(e) => e.preventDefault()}
+                          className="bg-[#BD20D3]/10 hover:bg-[#BD20D3]/20 text-[#BD20D3] border border-[#BD20D3]/30 rounded-xl"
+                          disabled={!quantities[item.id]}
+                        >
+                          Pridať do kalkulácie
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Link>
                 </Card>
               ))}
             </div>
