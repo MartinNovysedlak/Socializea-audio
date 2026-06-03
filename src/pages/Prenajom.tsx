@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Navbar from '@/components/Navbar';
-import EquipmentCatalog from '@/components/EquipmentCatalog';
+import Catalog from '@/components/Catalog';
+import RentalCalculator from '@/components/RentalCalculator';
 import Footer from '@/components/Footer';
 
 const Prenajom = () => {
@@ -10,7 +11,8 @@ const Prenajom = () => {
     <main className="min-h-screen bg-[#020721]">
       <Navbar />
       <div className="pt-20">
-        <EquipmentCatalog />
+        <Catalog />
+        <RentalCalculator />
       </div>
       <Footer />
     </main>
