@@ -123,13 +123,17 @@ const EquipmentCatalog = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredEquipment.map((item) => (
-                <div key={item.id} className="bg-white/5 border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 hover:border-[#BD20D3]/30 transition-all duration-300 cursor-pointer">
+                <Link 
+                  key={item.id} 
+                  to={`/equipment/${item.id}`}
+                  className="bg-white/5 border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer group"
+                >
                   {/* Image with centered category bubble */}
                   <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/10 relative">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-transform duration-300"
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-300"
                       style={{ objectPosition: 'center' }}
                     />
                     {/* Category bubble centered at the bottom */}
@@ -158,6 +162,7 @@ const EquipmentCatalog = () => {
                         <button
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             handleRemove(item.id);
                           }}
                           disabled={!quantities[item.id]}
@@ -171,6 +176,7 @@ const EquipmentCatalog = () => {
                         <button
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             handleAdd(item.id);
                           }}
                           disabled={(quantities[item.id] || 0) >= item.available}
@@ -188,7 +194,10 @@ const EquipmentCatalog = () => {
                     <div className="mt-3">
                       <Button
                         size="sm"
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                         className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-md"
                         disabled={!quantities[item.id]}
                       >
@@ -196,7 +205,7 @@ const EquipmentCatalog = () => {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
