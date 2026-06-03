@@ -52,7 +52,7 @@ const Hero = () => {
               onClick={scrollToCatalog}
               variant="outline" 
               size="lg" 
-              className="border-blue-600 text-blue-400 hover:bg-blue-600/10 text-lg px-8 py-7 rounded-full w-full sm:w-auto"
+              className="border-blue-600 text-blue-400 hover:bg-zinc-800 hover:text-white text-lg px-8 py-7 rounded-full w-full sm:w-auto transition-colors"
             >
               Pozrieť ponuku
             </Button>
