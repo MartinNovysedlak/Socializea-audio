@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Music, Headphones, Mic2, Disc } from 'lucide-react';
+import { Music, Headphones, Mic2, Disc, Zap } from 'lucide-react';
 
 const DJSection = () => {
   return (
