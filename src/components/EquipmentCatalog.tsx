@@ -109,7 +109,8 @@ const EquipmentCatalog = () => {
                       key={filter}
                       onClick={() => setActiveFilter(filter)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        activeFilter === filter                          ? 'bg-[#BD20D3] text-white'
+                        activeFilter === filter
+                          ? 'bg-[#BD20D3] text-white'
                           : 'text-gray-400 hover:text-white hover:bg-white/10'
                       }`}
                     >
@@ -149,39 +150,38 @@ const EquipmentCatalog = () => {
                     </span>
                     <div className="mt-1 flex justify-between">
                       <span className="text-xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
-                      <span className="text-gray-400">
+                    </div>
+
+                    {/* Quantity Controls with availability */}
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRemove(item.id);
+                          }}
+                          disabled={!quantities[item.id]}
+                          className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="w-9 text-center text-white font-medium">
+                          {quantities[item.id] || 0}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleAdd(item.id);
+                          }}
+                          disabled={(quantities[item.id] || 0) >= item.available}
+                          className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                      <span className="text-gray-400 text-sm">
                         Dostupné: {getAvailabilityText(item.available)}
                       </span>
-                    </div>
-                    <p className="mt-2 text-gray-300 text-sm leading-relaxed">
-                      {item.description?.slice(0, 80) + "..."}
-                    </p>
-
-                    {/* Quantity Controls */}
-                    <div className="mt-3 flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemove(item.id);
-                        }}
-                        disabled={!quantities[item.id]}
-                        className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      >
-                        <Minus size={12} />
-                      </button>
-                      <span className="w-9 text-center text-white font-medium">
-                        {quantities[item.id] || 0}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleAdd(item.id);
-                        }}
-                        disabled={(quantities[item.id] || 0) >= item.available}
-                        className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      >
-                        <Plus size={12} />
-                      </button>
                     </div>
 
                     {/* Action Button */}
