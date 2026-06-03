@@ -86,6 +86,10 @@ const EquipmentCatalog = () => {
     }
   };
 
+  const getAvailabilityText = (available: number) => {
+    return `${available} ${available === 1 ? 'kus' : 'kusy'}`;
+  };
+
   return (
     <section className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
@@ -105,8 +109,7 @@ const EquipmentCatalog = () => {
                       key={filter}
                       onClick={() => setActiveFilter(filter)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        activeFilter === filter
-                          ? 'bg-[#BD20D3] text-white'
+                        activeFilter === filter                          ? 'bg-[#BD20D3] text-white'
                           : 'text-gray-400 hover:text-white hover:bg-white/10'
                       }`}
                     >
@@ -120,13 +123,16 @@ const EquipmentCatalog = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredEquipment.map((item) => (
                 <div key={item.id} className="bg-white/5 border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 hover:border-[#BD20D3]/30 transition-all duration-300 cursor-pointer">
-                  {/* Image & Category Tag */}
-                  <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/10">
-                    <img                       src={item.image} 
-                      alt={item.name} 
+                  {/* Image with centered category bubble */}
+                  <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/10 relative">
+                    <img
+                      src={item.image}
+                      alt={item.name}
                       className="w-full h-full object-cover grayscale hover:grayscale-0 transition-transform duration-300"
+                      style={{ objectPosition: 'center' }}
                     />
-                    <div className="absolute bottom-2 left-2 bg-[#BD20D3]/20 rounded-md p-1">
+                    {/* Category bubble centered at the bottom */}
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-md p-1">
                       <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">
                         {getCategoryLabel(item.category)}
                       </span>
@@ -144,7 +150,7 @@ const EquipmentCatalog = () => {
                     <div className="mt-1 flex justify-between">
                       <span className="text-xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
                       <span className="text-gray-400">
-                        Dostupné: {item.available} {item.available === 1 ? 'kus' : 'kusy'}
+                        Dostupné: {getAvailabilityText(item.available)}
                       </span>
                     </div>
                     <p className="mt-2 text-gray-300 text-sm leading-relaxed">
@@ -163,10 +169,11 @@ const EquipmentCatalog = () => {
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="w-9 text-center font-medium text-white">
+                      <span className="w-9 text-center text-white font-medium">
                         {quantities[item.id] || 0}
                       </span>
-                      <button                        onClick={(e) => {
+                      <button
+                        onClick={(e) => {
                           e.preventDefault();
                           handleAdd(item.id);
                         }}
