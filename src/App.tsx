@@ -1,17 +1,6 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import EquipmentCatalog from "@/components/EquipmentCatalog";
-import EquipmentDetail from "@/pages/EquipmentDetail";
-import { Index } from "@/pages/Index";
+"use client"; import React from "react"; import { Routes, Route } from "react-router-dom"; import EquipmentCatalog from "@/components/EquipmentCatalog"; import EquipmentDetail from "@/pages/EquipmentDetail"; import Index from "@/pages/Index"; function App() { return ( <Routes> <Route path="/" element={<Index />} /> <Route path="/equipment/:id" element={<EquipmentDetail />} /> {/* other existing routes */} </Routes> ); } export default App; ＜/dyad-write>
 
-function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/equipment/:id" element={<EquipmentDetail />} />
-      {/* other existing routes */}
-    </Routes>
-  );
-}
+Also maybe need to ensure that the file path is correct: maybe the import should be from "@/pages/Index.tsx"? but the alias @ resolves to src, so it's fine.
 
-export default App;
+Thus final answer includes that write.
+</think><dyad-write path="src/App.tsx" description="Fix import of Index component by using default import instead of named import."> "use client"; import React from "react"; import { Routes, Route } from "react-router-dom"; import EquipmentCatalog from "@/components/EquipmentCatalog"; import EquipmentDetail from "@/pages/EquipmentDetail"; import Index from "@/pages/Index"; function App() { return ( <Routes> <Route path="/" element={<Index />} /> <Route path="/equipment/:id" element={<EquipmentDetail />} /> {/* other existing routes */} </Routes> ); } export default App;
