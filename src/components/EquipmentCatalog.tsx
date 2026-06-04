@@ -118,7 +118,24 @@ const EquipmentCatalog = () => {
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "https://via.placeholder.com/128?text=No+Image";
+                        // Try different fallback paths
+                        const fallbackPaths = [
+                          `/public${item.mainImage}`,
+                          `${item.mainImage}`,
+                          `https://via.placeholder.com/128?text=${encodeURIComponent(item.name)}`,
+                          "https://via.placeholder.com/128?text=No+Image"
+                        ];
+                        
+                        let currentPath = fallbackPaths[0];
+                        const tryNextPath = () => {
+                          const nextIndex = fallbackPaths.indexOf(currentPath) + 1;
+                          if (nextIndex < fallbackPaths.length) {
+                            currentPath = fallbackPaths[nextIndex];
+                            target.src = currentPath;
+                          }
+                        };
+                        
+                        tryNextPath();
                       }}
                       style={{ objectPosition: "center" }}
                     />
