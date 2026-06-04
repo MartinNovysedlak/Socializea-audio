@@ -19,23 +19,22 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 25,
     available: 1,
-    description: "Profesionálny mixážny pult s USB nahrávacím modulom, 16 kanálov a many vstupov/výstupov. Ideálny pre live vystúpenia a nahrávanie.",
+    description: "Všestranný analógový mixážny pult s mimoriadne nízkym šumom, ideálny pre stredne veľké podujatia, živé kapely, svadby či firemné večierky. Vďaka integrovanému USB audio rozhraniu umožňuje priame prepojenie s notebookom.",
     mainImage: "/media/Mixážny pult Behringer Xenyx X1222 USB.jpg",
     images: [
       "/media/Mixážny pult Behringer Xenyx X1222 USB.jpg"
     ],
     specifications: [
-      "16 kanálov",
-      "USB nahrávanie",
-      "4-band EQ",
-      "2 AUX výstupy",
-      "2 preampy"
+      "Počet kanálov: 16 (4 mono, 4 stereo)",
+      "Ekvalizér: 3-pásmový na každom kanáli + 7-pásmový grafický hlavný EQ",
+      "Efektový procesor: Áno (24-bit, 16 predvolieb)",
+      "Pripojenie: USB, XLR, Jack 6.3 mm"
     ],
     features: [
-      "Profesionálne kvality",
-      "Kompaktný dizajn",
-      "Ľahké ovládanie",
-      "Vysoký výkon"
+      "Prémiové predzosilňovače: XENYX mikrofónne predzosilňovače zaručujú krištáľovo čistý zvuk.",
+      "Jednogombíkové kompresory: Jednoduché nastavenie dynamiky pre dokonale vyvážený hlas.",
+      "24-bitový Multi-FX procesor: Špičkové efekty (reverb, delay, chorus) pre profesionálny zvukový prejav.",
+      "USB pripojenie: Jednoduché prehrávanie podmazovej hudby alebo priamy nahrávanie celého eventu."
     ]
   },
   {
@@ -44,23 +43,21 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 15,
     available: 1,
-    description: "Kompaktný mixážny pult s 8 kanálmi, USB interfészom a jednoduchým ovládaním.",
+    description: "Ideálny pomocník pre menšie akcie, prezentácie, prednášky či ako pomocný mix pre DJ-ov. Ponúka skvelú kvalitu zvuku v maximálne kompaktnom a spoľahlivom tele.",
     mainImage: "/media/Mixážny pult Behringer Xenyx 802.jpg",
     images: [
       "/media/Mixážny pult Behringer Xenyx 802.jpg"
     ],
     specifications: [
-      "8 kanálov",
-      "USB interfész",
-      "2-band EQ",
-      "2 AUX výstupy",
-      "Phantom napájanie"
+      "Počet kanálov: 8 (2 mono, 2 stereo)",
+      "Mikrofónne predzosilňovače: 2x XENYX s fantómovým napájaním (+48 V)",
+      "Ekvalizér: 3-pásmový",
+      "Hlavný výstup: Jack 6.3 mm"
     ],
     features: [
-      "Prehľadné ovládanie",
-      "Kompaktné rozmery",
-      "Vysoká kvalita zvuku",
-      "Economicke riešenie"
+      "Kompaktné rozmery: Minimálne nároky na priestor, rýchla montáž a zapojenie.",
+      "Britský EQ: Trojpásmový ekvalizér poskytuje teplý a muzikálny charakter zvuku.",
+      "Flexibilita: Skvelé riešenie pre zapojenie dvoch mikrofónov a podmazovej hudby z telefónu či notebooku."
     ]
   },
   {
@@ -69,23 +66,21 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 20,
     available: 1,
-    description: "Drátové mikrofóny s headsetom, vhodné na prednášky a koncerty.",
+    description: "Špičkový set dvoch bezdrôtových dynamických mikrofónov do ruky, navrhnutý pre moderátorov, spevákov a rečníkov. Poskytuje stabilný prenos signálu bez výpadkov.",
     mainImage: "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg",
     images: [
       "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg"
     ],
     specifications: [
-      "2x drátový mikrofón",
-      "1x headset",
-      "Frekvenčný rozsah 20Hz-20kHz",
-      "Citlivosť -54dB",
-      "3.5mm jack výstup"
+      "Typ mikrofónov: Dynamické, kardioidná charakteristika",
+      "Pásmo: UHF (nastaviteľné frekvencie)",
+      "Výstupy: 2x XLR (samostatné) alebo 1x Jack 6.3 mm (mix)",
+      "Napájanie mikrofónov: 2x AA batéria"
     ],
     features: [
-      "Vysoká kvalita zvuku",
-      "Odolná konštrukcia",
-      "Komfortné použitie",
-      "Profesionálny výkon"
+      "Duálny systém: Jeden prijímač obsluhuje obidva mikrofóny súčasne, čo šetrí miesto a kabeláž.",
+      "Žiadne rušenie: Nastaviteľné frekvencie v bezpečnom pásme eliminujú riziko rušenia inými zariadeniami.",
+      "Jasný LCD displej: Neustály prehľad o stave batérie a sile signálu priamo na mikrofóne aj prijímači."
     ]
   },
   {
@@ -94,23 +89,20 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 10,
     available: 4,
-    description: "Bezdrôtové mikrofóny s vysokou kvalitou zvuku a jednoduchým ovládaním.",
+    description: "Komplexný bezdrôtový systém s dvoma mikrofónmi do ruky a dvoma hlavovými headsetmi (náhlavnými mikrofónmi). Perfektná voľba pre diskusné fóra, divadlá, konferencie či firemné teambuildingy.",
     mainImage: "/media/Mikrofony a headsety Auna VHF.jpg",
     images: [
       "/media/Mikrofony a headsety Auna VHF.jpg"
     ],
     specifications: [
-      "4x bezdrôtový mikrofón",
-      "Frekvenčný rozsah 50Hz-15kHz",
-      "Dosah do 30m",
-      "Citlivosť -65dB",
-      "Bateriový čas 8 hodín"
+      "Frekvenčné pásmo: VHF",
+      "Obsah balenia: 2x Handheld mikrofón, 2x Headset s bodypackom, 1x Prijímač",
+      "Dosah signálu: do 50 metrov (v otvorenom priestore)"
     ],
     features: [
-      "Vysoká kvalita zvuku",
-      "Bezdrôtové pripojenie",
-      "Dlhý čas batérie",
-      "Jednoduché ovládanie"
+      "Maximálna voľnosť pohybu: Headsety umožňujú rečníkom mať úplne voľné ruky pre prezentáciu.",
+      "Až 4 zdroje súčasne: Schopnosť ozvučiť až štyri osoby naraz pomocou jednej kompaktnej základne.",
+      "Dlhá výdrž: Energeticky úsporná konštrukcia zaručuje bezproblémové fungovanie počas celého eventu."
     ]
   },
   {
@@ -119,23 +111,21 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 15,
     available: 4,
-    description: "Kvalitné aktívne reproduktory s vynikajúcim zvukom a kompaktným dizajnom.",
+    description: "Výkonný dvojpásmový aktívny reproduktor s čistým a dynamickým prejavom. Ideálna voľba pre hlavné ozvučenie osláv, svadieb a stredne veľkých tanečných parketov.",
     mainImage: "/media/Reproduktory Behringer B112D.jpg",
     images: [
       "/media/Reproduktory Behringer B112D.jpg"
     ],
     specifications: [
-      "12\" woofer",
-      "1.35\" tweeter",
-      "400W výkon",
-      "XLR/TRS vstupy",
-      "Link výstup"
+      "Výkon: 1000 W (Peak)",
+      "Reproduktory: 12\" basový + 1.35\" hliníkový kompresný výškový menič",
+      "Vstupy: 2x XLR/Jack kombo vstupy s nezávislým nastavením hlasitosti",
+      "Hmotnosť: 12.3 kg"
     ],
     features: [
-      "Vysoký výkon",
-      "Kompaktný dizajn",
-      "Vynikajúca kvalita zvuku",
-      "Ľahká manipulácia"
+      "Vysoký výkon: 1000 W v špičke zabezpečí dostatočný akustický tlak aj pre zaplnený parket.",
+      "Class-D zosilňovač: Obrovský výkon a skvelý zvukový prejav v prekvapivo ľahkom šasi.",
+      "Wireless-ready: Možnosť priameho prepojenia s digitálnymi bezdrôtovými mikrofónmi Behringer."
     ]
   },
   {
@@ -144,23 +134,19 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 12,
     available: 1,
-    description: "Vysokovýkonný reproduktor s vynikajúcou kvalitou zvuku a kompaktnými rozmermi.",
+    description: "Ultra-kompaktný a ľahký aktívny reproduktor, ktorý skvele poslúži ako pódiový odposluch (monitor) pre DJ-a/speváka, alebo ako hlavné ozvučenie pre menšie prezentácie a tlačové konferencie.",
     mainImage: "/media/Reproduktor Behringer B208D.jpg",
     images: [
       "/media/Reproduktor Behringer B208D.jpg"
     ],
     specifications: [
-      "8\" woofer",
-      "1\" tweeter",
-      "200W výkon",
-      "XLR/TRS vstupy",
-      "Link výstup"
+      "Výkon: 200 W",
+      "Reproduktor: 8\" basový + 1.35\" výškový menič",
+      "Vstupy: 1x XLR, 1x Jack 6.3 mm"
     ],
     features: [
-      "Vysoký výkon",
-      "Kompaktný dizajn",
-      "Vynikajúca kvalita zvuku",
-      "Ľahká manipulácia"
+      "Maximálna mobilita: Vďaka nízkej váhe a integrovanému madlu je manipulácia hračkou.",
+      "Flexibilné umiestnenie: Trapézový tvar umožňuje umiestnenie na stojan alebo položenie na zem ako monitor."
     ]
   },
   {
@@ -169,23 +155,20 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 30,
     available: 2,
-    description: "Vysokovýkonný subwoofer s vynikajúcou kvalitou basov a kompaktnými rozmermi.",
+    description: "Profesionálny 15-palcový subwoofer s masívnym výkonom, navrhnutý pre nekompromisnú reprodukciu najnižších frekvencií. Dodá každej párty ten správny klubový ráz.",
     mainImage: "/media/Subwoofery Behriger B1500XP.jpg",
     images: [
       "/media/Subwoofery Behriger B1500XP.jpg"
     ],
     specifications: [
-      "15\" woofer",
-      "1000W výkon",
-      "Frekvenčný rozsah 35Hz-250Hz",
-      "XLR/TRS vstupy",
-      "Link výstup"
+      "Výkon: 3000 W",
+      "Reproduktor: 15\" Turbosound",
+      "Integrovaný Boost Frequency a Phase spínač pre precízne naladenie basov"
     ],
     features: [
-      "Vysoký výkon",
-      "Kompaktný dizajn",
-      "Vynikajúca kvalita basov",
-      "Ľahká manipulácia"
+      "Brutálne basy: 15\" menič Turbosound produkuje hlboký a čitateľný basový tlak, ktorý doslova ucítite.",
+      "Aktívna výhybka: Integrovaný stereo crossover posiela ideálne frekvencie priamo do vašich satelitných reproduktorov.",
+      "Ochranné obvody: Tepelná ochrana a limitácia chránia subwoofer aj pri celonočnom maximálnom zaťažení."
     ]
   },
   {
@@ -194,23 +177,21 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 35,
     available: 5,
-    description: "Vysokovýkonný subwoofer s digitálnym procesorom pre dokonalé basy.",
+    description: "Masívny 18-palcový subwoofer s integrovaným DSP procesorom. Navrhnutý pre veľké podujatia, stany a open-air akcie, kde je vyžadovaný extrémny tlak v basovom pásme a maximálna kontrola nad zvukom.",
     mainImage: "/media/The Box Pro DSP 18 Sub.jpg",
     images: [
       "/media/The Box Pro DSP 18 Sub.jpg"
     ],
     specifications: [
-      "18\" woofer",
-      "1000W výkon",
-      "DSP procesor",
-      "XLR vstupy/výstupy",
-      "Limitér"
+      "Výkon: 800 W (RMS) / 2400 W (Peak)",
+      "Reproduktor: 18\" s 4\" cievkou",
+      "Frekvenčný rozsah: 30 Hz – 150 Hz",
+      "Max SPL: 128 dB"
     ],
     features: [
-      "Vysoký výkon",
-      "Digitálne spracovanie",
-      "Profesionálna kvalita",
-      "Výborné basy"
+      "Maximálny akustický tlak: 18\" basový menič bez problémov zaplní basmi aj veľké priestranstvá.",
+      "Pokročilé DSP: Prednastavené režimy a konfigurácie umožňujú okamžité zladenie s akýmikoľvek satelitnými reproduktormi.",
+      "Robustná konštrukcia: Pevná drevená ozvučnica chráni komponenty a minimalizuje nechcené rezonancie."
     ]
   },
 
@@ -460,7 +441,7 @@ export const equipmentDatabase: EquipmentItem[] = [
     ],
     features: [
       "Vysoký výkon",
-      "Viacero efektov",
+      "Viacero efekty",
       "Profesionálna kvalita",
       "DMX ovládanie"
     ]
