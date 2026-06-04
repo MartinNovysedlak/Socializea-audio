@@ -166,7 +166,7 @@ export const equipmentDatabase: EquipmentItem[] = [
       "Integrovaný Boost Frequency a Phase spínač pre precízne naladenie basov"
     ],
     features: [
-      "Brutálne basy: 15\" menič Turbosound produkuje hlboký and čitateľný basový tlak, ktorý doslova ucítite.",
+      "Brutálne basy: 15\" menič Turbosound produkuje hlboký a čitateľný basový tlak, ktorý doslova ucítite.",
       "Aktívna výhybka: Integrovaný stereo crossover posiela ideálne frekvencie priamo do vašich satelitných reproduktorov.",
       "Ochranné obvody: Tepelná ochrana a limitácia chránia subwoofer aj pri celonočnom maximálnom zaťažení."
     ]
@@ -194,31 +194,6 @@ export const equipmentDatabase: EquipmentItem[] = [
       "Robustná konštrukcia: Pevná drevená ozvučnica chráni komponenty a minimalizuje nechcené rezonancie."
     ]
   },
-  {
-    id: "dj-controller",
-    name: "Numark Mixtrack Platinum FX",
-    category: "sound",
-    pricePerDay: 30,
-    available: 1,
-    description: "Profesionálny DJ controller pre mixovanie hudby.",
-    mainImage: "/media/Numark Mixtrack Platinum FX.jpg",
-    images: [
-      "/media/Numark Mixtrack Platinum FX.jpg"
-    ],
-    specifications: [
-      "2x jog wheel",
-      "4x deck",
-      "FX controls",
-      "USB pripojenie",
-      "MIDI ovládanie"
-    ],
-    features: [
-      "Profesionálna kvalita",
-      "Viacero efektov",
-      "USB pripojenie",
-      "MIDI ovládanie"
-    ]
-  },
 
   // Lighting Equipment
   {
@@ -227,293 +202,323 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "lighting",
     pricePerDay: 20,
     available: 1,
-    description: "Profesionálny ovládač svetelnej techniky, ktorý umožňuje kompletnú kontrolu nad celou svetelnou šou – od statických farieb po zložité pohyby hláv.",
+    description: "Profesionálny DMX pult pre riadenie svetelných efektov a zariadení.",
     mainImage: "/media/Riadiaci DMX pult Light4Me DMX 192.jpg",
     images: [
       "/media/Riadiaci DMX pult Light4Me DMX 192.jpg"
     ],
     specifications: [
-      "Počet DMX kanálov: 192",
-      "Ovládanie až 12 inteligentných svetiel (každé do 16 kanálov)",
-      "Zabudovaný mikrofón pre synchronizáciu svetiel s hudbou (Sound-to-Light)"
+      "192 DMX kanály",
+      "2 DMX výstupy",
+      "LCD displej",
+      "Preset pamäť",
+      "MIDI ovládanie"
     ],
     features: [
-      "Kontrola v reálnom čase: Umožňuje okamžite reagovať na zmenu atmosféry na parkete.",
-      "Programovateľné scény: Možnosť predpripraviť si svetelné scény pre rôzne fázy eventu (romantický tanec, divoká gradácia)."
-    ]
-  },
-  {
-    id: "beamz-sushi",
-    name: "Digitálne PC/DMX rozhranie BeamZ SUSHI-DS",
-    category: "lighting",
-    pricePerDay: 25,
-    available: 1,
-    description: "Ultra-kompaktné DMX rozhranie, ktoré premení váš počítač na profesionálny svetelný pult. Umožňuje programovanie svetelných šou cez moderné softvéry.",
-    mainImage: "/media/BeamZ SUSHI-Z1 DMX.jpg",
-    images: [
-      "/media/BeamZ SUSHI-Z1 DMX.jpg"
-    ],
-    specifications: [
-      "Počet kanálov: 128 (rozšíriteľné na 512)",
-      "Kompatibilita: Sunlite, Daslight, Light Rider a ďalšie"
-    ],
-    features: [
-      "Moderné ovládanie: Tvorba dychberúcich svetelných efektov vizuálne priamo na obrazovke notebooku.",
-      "Kompaktnosť: Zariadenie veľkosti USB kľúča, ktoré nahradí rozmerné hardvérové pulty."
+      "Profesionálne ovládanie",
+      "Vysoký počet kanálov",
+      "Jednoduché programovanie",
+      "Kompatibilné s DMX zariadeniami"
     ]
   },
   {
     id: "led-par",
-    name: "Profesionálne LED Par reflektory (RGBWA + UV)",
+    name: "RGBWA UV Led Par svetlá",
     category: "lighting",
     pricePerDay: 8,
     available: 8,
-    description: "Výkonné LED reflektory určené na nasvietenie sály (uplighting), pódia alebo vytvorenie dynamických farebných podmazov na tanečnom parkete.",
+    description: "Viacfarebné LED svetlá s UV efektom, ideálne pre párty a eventy.",
     mainImage: "/media/RGBWA UV Led Par svetlá.jpg",
     images: [
       "/media/RGBWA UV Led Par svetlá.jpg"
     ],
     specifications: [
-      "Zdroj svetla: High-power LED diódy",
-      "Režimy: DMX, Auto, Sound active (podľa hudby), Master/Slave"
+      "RGBWA UV farby",
+      "9x 3W LED diódy",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "6v1 technológia: Kombinácia farieb červená, zelená, modrá, biela, jantárová (Amber) a ultrafialová (UV) pre nekonečné spektrum farieb.",
-      "Dokonalá sýtosť: Jantárová zaručuje teplé pastelové tóny, UV svetlo vytvára magický neónový efekt."
+      "Viacfarebné osvetlenie",
+      "UV efekt",
+      "DMX ovládanie",
+      "Vysoká svietivosť"
     ]
   },
   {
     id: "beam-head",
-    name: "Inteligentná otočná hlava Moving Head 90W Beam",
+    name: "Rotujúca 90w Beam hlava",
     category: "lighting",
     pricePerDay: 25,
     available: 4,
-    description: "Rýchla a výkonná otočná hlava s úzkym, ostrým lúčom (Beam efekt). Vytvára ohromujúce svetelné divadlo v priestore, najmä v kombinácii s dymostrojom.",
+    description: "Profesionálne rotujúce svetelné hlavy s vysokým výkonom.",
     mainImage: "/media/Rotujúca 90w Beam hlava.webp",
     images: [
       "/media/Rotujúca 90w Beam hlava.webp"
     ],
     specifications: [
-      "Výkon LED: 90 W",
-      "Efekty: Gobo koleso, farebné koleso, prizma (rozklad lúča)",
-      "Ovládanie: DMX, Sound, Auto"
+      "90W výkon",
+      "Rotujúca hlava",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "Dynamika pohybu: Rýchla rotácia a presné smerovanie lúčov dodajú podujatiu klubovú energiu.",
-      "Gobo a farebné koleso: Množstvo svetelných obrazcov a sýtych farieb pre rozmanitú šou."
-    ]
-  },
-  {
-    id: "rgbw-bar",
-    name: "Svetelná LED lišta RGBW Led Bar 36W",
-    category: "lighting",
-    pricePerDay: 15,
-    available: 1,
-    description: "Dekoratívna svetelná lišta, ideálna na plošné podfarbenie stien (wall-washing), podsvietenie DJ pultu alebo dekoráciu konštrukcií.",
-    mainImage: "/media/RGBW Led Bar 36w.jpeg",
-    images: [
-      "/media/RGBW Led Bar 36w.jpeg"
-    ],
-    specifications: [
-      "Výkon: 36 W",
-      "Miešanie farieb: RGBW (červená, zelená, modrá, biela)"
-    ],
-    features: [
-      "Lineárne nasvietenie: Rovnomerne pokryje veľkú plochu steny elegantným farebným tónom.",
-      "Nízky profil: Nenápadný dizajn, ktorý opticky neruší vzhľad sály."
-    ]
-  },
-  {
-    id: "laser-bar",
-    name: "Efektový laserový bar 65W s ôsmimi červenými lúčmi",
-    category: "lighting",
-    pricePerDay: 25,
-    available: 1,
-    description: "Unikátny svetelný bar generujúci 8 paralelných, extrémne silných červených laserových lúčov. Vytvára efekt laserovej steny alebo stropu.",
-    mainImage: "/media/Laserový Bar 65W (8x červený laser).jpeg",
-    images: [
-      "/media/Laserový Bar 65W (8x červený laser).jpeg"
-    ],
-    specifications: [
-      "Celkový príkon: 65 W",
-      "Typ laseru: 8x červený laserový modul s nezávislým naklápaním (Tilt)"
-    ],
-    features: [
-      "Sci-Fi vizuál: Vytvára futuristickú atmosféru a dychberúcu geometriu v priestore.",
-      "Vysoká svietivosť: Lúče sú jasne viditeľné aj na dlhšie vzdialenosti."
-    ]
-  },
-  {
-    id: "smoke-machine",
-    name: "Profesionálny dymostroj ADJ VF 1300",
-    category: "lighting",
-    pricePerDay: 20,
-    available: 1,
-    description: "Výkonný generátor hmly, ktorý je kľúčový pre vizualizáciu svetelných a laserových lúčov. Bez dymu sú svetlá len škvrny na zemi – s ním tvoria priestorové umenie.",
-    mainImage: "/media/Dymostroj ADJ VF 1300.jpg",
-    images: [
-      "/media/Dymostroj ADJ VF 1300.jpg"
-    ],
-    specifications: [
-      "Výkon výhrevného telesa: 1300 W",
-      "Doba prvého žhavenia: cca 7 minút",
-      "Ovládanie: Káblové aj bezdrôtové diaľkové ovládanie"
-    ],
-    features: [
-      "Vysoká produkcia: Rýchlo zaplní tanečný parket hustou, bezpečnou hmlou.",
-      "Technológia ETS: Elektronické snímanie teploty zaisťuje optimálnu úroveň ohrevu bez prerušovania."
-    ]
-  },
-  {
-    id: "bubble-machine",
-    name: "Výkonný generátor mydlových bublín",
-    category: "lighting",
-    pricePerDay: 20,
-    available: 2,
-    description: "Skvelý efektový stroj, ktorý vyčaruje stovky bublín za minútu. Najpopulárnejší prvok pre detské oslavy, svadby (počas novomanželského tanca) a rodinné podujatia.",
-    mainImage: "/media/LIGHT4ME Výborník bublín.jpg",
-    images: [
-      "/media/LIGHT4ME Výborník bublín.jpg"
-    ],
-    specifications: [
-      "Veľkokapacitná nádrž pre nepretržitú prevádzku",
-      "Bezpečná prevádzka s certifikovanými náplňami"
-    ],
-    features: [
-      "Radosť pre všetkých: Zaručený úspech u detí a skvelý vizuál na svadobných fotografiách.",
-      "Jednoduchá obsluha: Stačí naliať kvapalinu a zapnúť."
-    ]
-  },
-  {
-    id: "snow-machine",
-    name: "Výkonný výrobník umelého snehu ADJ Snow Flurry HO",
-    category: "lighting",
-    pricePerDay: 25,
-    available: 2,
-    description: "Profesionálny stroj na tvorbu umelého snehu na báze peny. Vytvára autentickú zimnú atmosféru kedykoľvek počas roka – ideálny pre vianočné večierky či tematické fotenia.",
-    mainImage: "/media/Snehostroj ADJ Snow Flurry HO.jpg",
-    images: [
-      "/media/Snehostroj ADJ Snow Flurry HO.jpg"
-    ],
-    specifications: [
-      "Výkon: Vysokokapacitná produkcia (High Output)",
-      "Ovládanie: Diaľkový ovládač s časovačom (Timer)"
-    ],
-    features: [
-      "Okamžitá zima: Generuje penu, ktorá imituje padajúce snehové vločky a po dopade nezanecháva trvalé fľaky.",
-      "Prepínač množstva: Možnosť nastaviť od jemného sneženia až po hustú snehovú fujavicu."
-    ]
-  },
-  {
-    id: "fire-machine",
-    name: "Pódiový výrobník skutočných plameňov Fire Machine",
-    category: "lighting",
-    pricePerDay: 30,
-    available: 2,
-    description: "Extrémny vizuálny efekt generujúci kontrolované výšľahy reálneho ohňa. Používa sa na vyvrcholenie koncertov, predstavení alebo na veľkolepý úvod podujatí.",
-    mainImage: "/media/Výrobníky plameňov Fire Machine.jpg",
-    images: [
-      "/media/Výrobníky plameňov Fire Machine.jpg"
-    ],
-    specifications: [
-      "Výška plameňa: cca 2 až 3 metre",
-      "Palivo: Špeciálne aerosólové nádoby (flame spray)"
-    ],
-    features: [
-      "WOW Efekt: Ohromujúci prvok, ktorý okamžite pritiahne pozornosť celého publika a dodá akcii prestíž.",
-      "Bezpečné spustenie: Plne ovládateľné cez DMX protokol pre presné načasovanie do rytmu hudby."
-    ]
-  },
-  {
-    id: "party-bar",
-    name: "Kompletný svetelný set BeamZ Party Bar",
-    category: "lighting",
-    pricePerDay: 20,
-    available: 1,
-    description: "\"All-in-one\" svetelné riešenie na jednom stojane. Obsahuje kombináciu rôznych svetelných efektov, čo z neho robí ideálnu voľbu pre rýchle nasvietenie menších osláv a párty.",
-    mainImage: "/media/Svetlá BeamZ Party Bar.jpg",
-    images: [
-      "/media/Svetlá BeamZ Party Bar.jpg"
-    ],
-    specifications: [
-      "Svetelné zdroje: High-efficiency LED",
-      "Súčasťou balenia: Diaľkový ovládač, prepravná taška"
-    ],
-    features: [
-      "Všetko v jednom: Obsahuje PAR reflektory, derby efekty či stroboskopické diódy na jednej lište.",
-      "Plug & Play: Extrémne rýchla montáž – stačí postaviť na stojan, zapojiť do siete a zapnúť automatický režim."
+      "Vysoký výkon",
+      "Rotujúce efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
     ]
   },
   {
     id: "uv-lights",
-    name: "Bodový UV LED reflektor (Blacklight)",
+    name: "Samostatné Bodové UV svetlá",
     category: "lighting",
     pricePerDay: 10,
     available: 2,
-    description: "Reflektor vyžarujúci ultrafialové (UV) svetlo. Spôsobuje, že biele oblečenie a fluorescenčné predmety v tme jasne svietia.",
+    description: "Výkonné UV svetlá pre vytvorenie atmosférických efektov.",
     mainImage: "/media/Samostatné Bodové UV svetlá.jpg",
     images: [
       "/media/Samostatné Bodové UV svetlá.jpg"
     ],
     specifications: [
-      "Typ: UV LED diódy s vysokým výkonom a dlhou životnosťou"
+      "UV 395nm",
+      "10W výkon",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "Tajuplná atmosféra: Nenahraditeľný efekt pre tematické Halloween párty, diskotéky a retro akcie."
+      "Vysoký výkon",
+      "UV efekt",
+      "DMX ovládanie",
+      "Vysoká svietivosť"
+    ]
+  },
+  {
+    id: "party-bar",
+    name: "Svetlá BeamZ Party Bar",
+    category: "lighting",
+    pricePerDay: 20,
+    available: 1,
+    description: "Kompletný svetelný bar pre párty a eventy s viacerými efekty.",
+    mainImage: "/media/Svetlá BeamZ Party Bar.jpg",
+    images: [
+      "/media/Svetlá BeamZ Party Bar.jpg"
+    ],
+    specifications: [
+      "RGBW farby",
+      "7x 3W LED",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Viacfarebné efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie",
+      "Vysoká svietivosť"
+    ]
+  },
+  {
+    id: "snow-machine",
+    name: "Snehostroj ADJ Snow Flurry HO",
+    category: "lighting",
+    pricePerDay: 25,
+    available: 2,
+    description: "Výkonný snehostroj pre vytvorenie snežnej atmosféry.",
+    mainImage: "/media/Snehostroj ADJ Snow Flurry HO.jpg",
+    images: [
+      "/media/Snehostroj ADJ Snow Flurry HO.jpg"
+    ],
+    specifications: [
+      "500W výkon",
+      "2L nádrž",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Vysoký výkon",
+      "Veľká nádrž",
+      "Atmosférické efekty",
+      "DMX ovládanie"
+    ]
+  },
+  {
+    id: "bubble-machine",
+    name: "LIGHT4ME Výborník bublín",
+    category: "lighting",
+    pricePerDay: 20,
+    available: 2,
+    description: "Výkonný bublinkostroj pre vytvorenie bublinovej atmosféry.",
+    mainImage: "/media/LIGHT4ME Výborník bublín.jpg",
+    images: [
+      "/media/LIGHT4ME Výborník bublín.jpg"
+    ],
+    specifications: [
+      "400W výkon",
+      "1L nádrž",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Vysoký výkon",
+      "Malá nádrž",
+      "Atmosférické efekty",
+      "DMX ovládanie"
     ]
   },
   {
     id: "strobe",
-    name: "Výkonný zábleskový stroboskop",
+    name: "Stroboskop",
     category: "lighting",
     pricePerDay: 15,
     available: 1,
-    description: "Tradičný klubový efekt, ktorý generuje ultrarýchle, intenzívne biele záblesky. Opticky \"kúskuje\" pohyb na tanečnom parkete.",
+    description: "Výkonný stroboskop pre vytvorenie pulzného svetelného efektu.",
     mainImage: "/media/Stroboskop.jpg",
     images: [
       "/media/Stroboskop.jpg"
     ],
     specifications: [
-      "Nastaviteľná rýchlosť: Od pomalých pulzov až po extrémnu frekvenciu zábleskov"
+      "1200W výkon",
+      "1-20 Hz",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "Maximálna energia: Vybudí atmosféru na tanečnom parkete počas gradácie skladieb na maximum."
+      "Vysoký výkon",
+      "Rýchlosť regulácia",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
+    ]
+  },
+  {
+    id: "fire-machine",
+    name: "Výrobníky plameňov Fire Machine",
+    category: "lighting",
+    pricePerDay: 30,
+    available: 2,
+    description: "Výkonné výrobníky plameňov pre dramatické svetelné efekty.",
+    mainImage: "/media/Výrobníky plameňov Fire Machine.jpg",
+    images: [
+      "/media/Výrobníky plameňov Fire Machine.jpg"
+    ],
+    specifications: [
+      "2000W výkon",
+      "5L nádrž",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Vysoký výkon",
+      "Veľká nádrž",
+      "Dramatické efekty",
+      "DMX ovládanie"
+    ]
+  },
+  {
+    id: "laser-bar",
+    name: "Laserový Bar 65W (8x červený laser)",
+    category: "lighting",
+    pricePerDay: 25,
+    available: 1,
+    description: "Výkonný laserový bar s viacerými efektmi.",
+    mainImage: "/media/Laserový Bar 65W (8x červený laser).jpeg",
+    images: [
+      "/media/Laserový Bar 65W (8x červený laser).jpeg"
+    ],
+    specifications: [
+      "65W výkon",
+      "8x červený laser",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Vysoký výkon",
+      "Viacero efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
     ]
   },
   {
     id: "laser-holographic",
-    name: "Profesionálny multipoint holografický laser",
+    name: "Holografický Laser",
     category: "lighting",
     pricePerDay: 25,
     available: 1,
-    description: "Projektuje tisíce rotujúcich mikro-lúčov, čím vytvára efekt hviezdnej oblohy alebo komplexnej holografickej siete po celom priestore sály.",
+    description: "Holografický laser pre vytvorenie 3D efektov.",
     mainImage: "/media/Holografický Laser.jpg",
     images: [
       "/media/Holografický Laser.jpg"
     ],
     specifications: [
-      "Typ: Multipoint Holographic Laser"
+      "50W výkon",
+      "Holografický efekt",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "Plošné pokrytie: Jeden laser dokáže vizuálne zaplniť celú sálu jemnou a elegantnou sieťou lúčov."
+      "Vysoký výkon",
+      "3D efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
     ]
   },
   {
     id: "laser-red-green",
-    name: "Dvojfarebný grafický červeno-zelený laser",
+    name: "Červeno-zelený Laser",
     category: "lighting",
     pricePerDay: 20,
     available: 1,
-    description: "Klasický párty laser projektujúci dynamické geometrické tvary, tunely a roviny v dvoch základných farbách.",
+    description: "Červeno-zelený laser pre vytvorenie dynamických efektov.",
     mainImage: "/media/Červeno-zelený Laser.jpg",
     images: [
       "/media/Červeno-zelený Laser.jpg"
     ],
     specifications: [
-      "Farby: Červená, Zelená"
+      "30W výkon",
+      "Červený/zelený laser",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
     ],
     features: [
-      "Klubová klasika: Najlepšie vynikne v kombinácii s jemným dymom, kde vytvára jasné pohybujúce sa svetelné plochy."
+      "Vysoký výkon",
+      "Dynamické efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
+    ]
+  },
+  {
+    id: "beamz-sushi",
+    name: "BeamZ SUSHI-Z1 DMX",
+    category: "lighting",
+    pricePerDay: 25,
+    available: 1,
+    description: "Profesionálny DMX riadený svetelný efekt.",
+    mainImage: "/media/BeamZ SUSHI-Z1 DMX.jpg",
+    images: [
+      "/media/BeamZ SUSHI-Z1 DMX.jpg"
+    ],
+    specifications: [
+      "DMX512 ovládanie",
+      "RGBW farby",
+      "12/24V DC",
+      "IP20 ochrana",
+      "Automatické programy"
+    ],
+    features: [
+      "Profesionálna kvalita",
+      "DMX ovládanie",
+      "Automatické programy",
+      "Vysoká svietivosť"
     ]
   },
 
@@ -716,6 +721,56 @@ export const equipmentDatabase: EquipmentItem[] = [
       "Jednoduché nastavenie",
       "Univerzálny dizajn",
       "Odolná konštrukcia"
+    ]
+  },
+  {
+    id: "rgbw-bar",
+    name: "RGBW Led Bar 36w",
+    category: "lighting",
+    pricePerDay: 15,
+    available: 1,
+    description: "RGBW Led Bar s vysokým výkonom a viacerými efektmi.",
+    mainImage: "/media/RGBW Led Bar 36w.jpeg",
+    images: [
+      "/media/RGBW Led Bar 36w.jpeg"
+    ],
+    specifications: [
+      "36W výkon",
+      "RGBW farby",
+      "DMX512 ovládanie",
+      "12/24V DC",
+      "IP20 ochrana"
+    ],
+    features: [
+      "Vysoký výkon",
+      "Viacfarebné efekty",
+      "Profesionálna kvalita",
+      "DMX ovládanie"
+    ]
+  },
+  {
+    id: "dj-controller",
+    name: "Numark Mixtrack Platinum FX",
+    category: "sound",
+    pricePerDay: 30,
+    available: 1,
+    description: "Profesionálny DJ controller pre mixovanie hudby.",
+    mainImage: "/media/Numark Mixtrack Platinum FX.jpg",
+    images: [
+      "/media/Numark Mixtrack Platinum FX.jpg"
+    ],
+    specifications: [
+      "2x jog wheel",
+      "4x deck",
+      "FX controls",
+      "USB pripojenie",
+      "MIDI ovládanie"
+    ],
+    features: [
+      "Profesionálna kvalita",
+      "Viacero efektov",
+      "USB pripojenie",
+      "MIDI ovládanie"
     ]
   }
 ];
