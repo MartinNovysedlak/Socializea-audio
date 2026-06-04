@@ -5,7 +5,7 @@ import { Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
-import { equipmentDatabase, EquipmentItem } from "@/data/equipmentDatabase";
+import equipmentDatabase, { EquipmentItem } from "@/data/equipmentDatabase";
 
 const EquipmentCatalog = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">(

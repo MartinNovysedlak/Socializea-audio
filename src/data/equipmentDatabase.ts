@@ -1,3 +1,5 @@
+import { EquipmentItem } from "@/components/EquipmentCatalog";
+
 const equipmentDatabase: EquipmentItem[] = [
   {
     id: "1",
@@ -181,7 +183,6 @@ const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 35,
     available: 2,
     mainImage: "/images/dj-mixer-pioneer-djm-250mk2.jpg",
-    image: "/images/dj-mixer-pioneer-djm-250mk2.jpg",
     images: [
       "/images/dj-mixer-pioneer-djm-250mk2.jpg",
       "/images/dj-mixer-pioneer-djm-250mk2-2.jpg"
