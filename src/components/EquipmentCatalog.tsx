@@ -78,7 +78,8 @@ const equipmentData: EquipmentItem[] = [
   { id: 'beam-head', name: 'Rotujúca 90w Beam hlava', category: 'lighting', pricePerDay: 25, available: 4, image: `/Prenajom/${imageMap['61jOFLWAskS._AC_SL1500_.jpg']}` },
   { id: 'uv-lights', name: 'Samostatné Bodové UV svetlá', category: 'lighting', pricePerDay: 10, available: 2, image: `/Prenajom/${imageMap['4-share.jpg']}` },
 
-  // Other  { id: 'projector', name: 'Premietačka Wanbo T6 MAX', category: 'other', pricePerDay: 20, available: 1, image: `/Prenajom/${imageMap['wanbo-t6-max-cover-ovladac.jpg']}` },
+  // Other
+  { id: 'projector', name: 'Premietačka Wanbo T6 MAX', category: 'other', pricePerDay: 20, available: 1, image: `/Prenajom/${imageMap['wanbo-t6-max-cover-ovladac.jpg']}` },
   { id: 'screen', name: 'Premietacie plátno 110"', category: 'other', pricePerDay: 15, available: 1, image: `/Prenajom/${imageMap['5973-1_projekcne-prenosne-promitaciou-platno-16-9-na-projektor-100--s-regulovatelnym-stativom-domace-kino-interier-a-exterier-film.webp']}` },
   { id: 'light-construct', name: 'Osvetľovacia konštrukcia na uchytenie', category: 'other', pricePerDay: 10, available: 1, image: `/Prenajom/${imageMap['181547-superlarge_default.jpg']}` },
   { id: 'mic-stand', name: 'Stojan na mikrofón', category: 'other', pricePerDay: 5, available: 2, image: `/Prenajom/${imageMap['10010798_yy_0001_titel___aunapro_UHF_550_Quartett3_4_Kanal_Funkmikrofon_Set_reedit.webp']}` },
@@ -148,8 +149,9 @@ const EquipmentCatalog = () => {
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2">
                 <Filter className="text-[#BD20D3] ml-3" size={18} />
                 <div className="flex gap-1">
-                  {(['all', 'sound', 'lighting', 'other'] as const).map((filter) => (
-                    <button                      key={filter}
+                  {(['all', 'sound', 'lighting', 'other'] as const).map(filter => (
+                    <button
+                      key={filter}
                       onClick={() => setActiveFilter(filter)}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                         activeFilter === filter
@@ -174,21 +176,23 @@ const EquipmentCatalog = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEquipment.map((item) => (
+              {filteredEquipment.map(item => (
                 <Link
                   key={item.id}
                   to={`/equipment/${item.id}`}
                   className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 cursor-pointer group"
                 >
-                  {/* Image with centered category bubble */}
                   <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
                     <img
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-300"
+                      onError={e => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://via.placeholder.com/128?text=No+Image';
+                      }}
                       style={{ objectPosition: 'center' }}
                     />
-                    {/* Category bubble centered at the bottom */}
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-full px-3 py-1">
                       <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">
                         {getCategoryLabel(item.category)}
@@ -196,13 +200,11 @@ const EquipmentCatalog = () => {
                     </div>
                   </div>
 
-                  {/* Text Content */}
                   <div className="flex-1 w-full">
                     <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2">
                       {item.name}
                     </h3>
 
-                    {/* Price and availability on same line */}
                     <div className="flex justify-center items-center gap-3 mb-3">
                       <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
                       <span className="text-gray-400 text-sm">
@@ -210,10 +212,9 @@ const EquipmentCatalog = () => {
                       </span>
                     </div>
 
-                    {/* Action Button */}
                     <Button
                       size="sm"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
@@ -223,10 +224,9 @@ const EquipmentCatalog = () => {
                       Pridať do kalkulácie
                     </Button>
 
-                    {/* Small quantity counter */}
                     <div className="flex items-center justify-center gap-2">
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleRemove(item.id);
@@ -240,7 +240,7 @@ const EquipmentCatalog = () => {
                         {quantities[item.id] || 0}
                       </span>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleAdd(item.id);
