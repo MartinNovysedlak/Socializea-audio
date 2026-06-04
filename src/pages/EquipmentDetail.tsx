@@ -42,13 +42,6 @@ const EquipmentDetail = () => {
   }
 
   const fileSlug = slugify(item.name);
-  const mainImageCandidates = [
-    item.mainImage,
-    `/images/${fileSlug}.jpg`,
-    `/images/${fileSlug}.png`,
-    `/images/${fileSlug}.jpeg`,
-    `/public/images/${fileSlug}.jpg`
-  ];
 
   return (
     <main className="min-h-screen bg-[#020721]">
@@ -73,13 +66,23 @@ const EquipmentDetail = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {item.images.map((img, idx) => {
-                        const imageSlug = fileSlug + (idx > 0 ? `-${idx + 1}` : "");
+                        const suffix = idx > 0 ? `-${idx + 1}` : "";
+                        const nameWithSuffix = `${item.name}${suffix}`;
+                        const slugWithSuffix = `${fileSlug}${suffix}`;
+
                         const candidates = [
-                          img,
-                          `/images/${imageSlug}.jpg`,
-                          `/images/${imageSlug}.png`,
-                          `/images/${imageSlug}.jpeg`,
-                          `/public/images/${imageSlug}.jpg`
+                          // Exact match directly in root or images
+                          `/${nameWithSuffix}.jpg`,
+                          `/${nameWithSuffix}.png`,
+                          `/${nameWithSuffix}.jpeg`,
+                          `/images/${nameWithSuffix}.jpg`,
+                          `/images/${nameWithSuffix}.png`,
+                          `/images/${nameWithSuffix}.jpeg`,
+                          // Slugified format
+                          `/images/${slugWithSuffix}.jpg`,
+                          `/images/${slugWithSuffix}.png`,
+                          `/images/${slugWithSuffix}.jpeg`,
+                          img
                         ];
 
                         return (
@@ -92,11 +95,17 @@ const EquipmentDetail = () => {
                                 const target = e.target as HTMLImageElement;
                                 const currentSrc = target.src;
                                 
-                                const matchIndex = candidates.findIndex(c => currentSrc.endsWith(c));
-                                if (matchIndex !== -1 && matchIndex + 1 < candidates.length) {
-                                  target.src = candidates[matchIndex + 1];
+                                let nextIdx = -1;
+                                for (let i = 0; i < candidates.length; i++) {
+                                  if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
+                                    nextIdx = i + 1;
+                                    break;
+                                  }
+                                }
+
+                                if (nextIdx !== -1 && nextIdx < candidates.length) {
+                                  target.src = candidates[nextIdx];
                                 } else {
-                                  // Fallback options depending on category
                                   let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80";
                                   if (item.category === "sound") {
                                     fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=500&auto=format&fit=crop&q=80";

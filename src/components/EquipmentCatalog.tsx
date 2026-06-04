@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter } from "lucide-react";
+import { Filter, Minus, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus } from "lucide-react";
 import equipmentDatabase from "@/data/equipmentDatabase";
 
 // Helper function to convert item name to clean file slug
@@ -12,13 +11,13 @@ const slugify = (text: string) => {
   return text
     .toString()
     .toLowerCase()
-    .normalize("NFD") // separate accents from characters
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[æœ]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "") // remove special characters
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-") // spaces to hyphens
-    .replace(/-+/g, "-"); // multiple hyphens to single
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };
 
 const EquipmentCatalog = () => {
@@ -102,13 +101,23 @@ const EquipmentCatalog = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEquipment.map((item) => {
               const fileSlug = slugify(item.name);
-              // List of potential local image locations to check in sequence
-              const candidateImages = [
-                item.mainImage,
+              
+              // We build multiple candidates based on exact file names, path styles, and formats
+              const candidates = [
+                // 1. Exact name in / (for directly uploaded files with exact Slovak names)
+                `/${item.name}.jpg`,
+                `/${item.name}.png`,
+                `/${item.name}.jpeg`,
+                // 2. Exact name in /images/
+                `/images/${item.name}.jpg`,
+                `/images/${item.name}.png`,
+                `/images/${item.name}.jpeg`,
+                // 3. Slugified name in /images/
                 `/images/${fileSlug}.jpg`,
                 `/images/${fileSlug}.png`,
                 `/images/${fileSlug}.jpeg`,
-                `/public/images/${fileSlug}.jpg`,
+                // 4. Fallback in database
+                item.mainImage,
               ];
 
               return (
@@ -118,21 +127,26 @@ const EquipmentCatalog = () => {
                   <Link to={`/equipment/${item.id}`} className="w-full flex flex-col items-center mb-4 cursor-pointer">
                     <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
                       <img 
-                        src={candidateImages[0]} 
+                        src={candidates[0]} 
                         alt={item.name} 
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" 
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const currentSrc = target.src;
                           
-                          // Find current URL path to know which candidate failed
-                          const matchIndex = candidateImages.findIndex(img => currentSrc.endsWith(img));
-                          
-                          if (matchIndex !== -1 && matchIndex + 1 < candidateImages.length) {
-                            // Try the next local candidate path
-                            target.src = candidateImages[matchIndex + 1];
+                          // Try to find which candidate index failed by looking at how the URL ends
+                          let nextIdx = -1;
+                          for (let i = 0; i < candidates.length; i++) {
+                            if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
+                              nextIdx = i + 1;
+                              break;
+                            }
+                          }
+
+                          // If we couldn't match or we reached the end, use the Unsplash fallback
+                          if (nextIdx !== -1 && nextIdx < candidates.length) {
+                            target.src = candidates[nextIdx];
                           } else {
-                            // High quality Unsplash fallback
                             let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                             if (item.category === "sound") {
                               fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300&auto=format&fit=crop&q=80";
