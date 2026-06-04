@@ -150,6 +150,11 @@ const EquipmentCatalog = () => {
                       src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-300"
+                      onError={(e) => {
+                        // Fallback to a placeholder image if the original fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800";
+                      }}
                       style={{ objectPosition: 'center' }}
                     />
                     {/* Category bubble centered at the bottom */}
