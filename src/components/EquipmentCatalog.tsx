@@ -90,6 +90,13 @@ const EquipmentCatalog = () => {
     return `${available} ${available === 1 ? 'kus' : 'kusy'}`;
   };
 
+  const getTotalSum = () => {
+    return Object.entries(quantities).reduce((sum, [id, qty]) => {
+      const item = equipmentData.find(i => i.id === id);
+      return sum + (item ? item.pricePerDay * qty : 0);
+    }, 0);
+  };
+
   return (
     <section className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
@@ -121,6 +128,15 @@ const EquipmentCatalog = () => {
               </div>
             </div>
 
+            {/* Centered Total Sum */}
+            <div className="mb-8 text-center">
+              <div className="inline-block bg-[#BD20D3]/20 border border-[#BD20D3]/40 rounded-full px-8 py-3">
+                <span className="text-[#BD20D3] font-bold text-lg">
+                  Celková suma: {getTotalSum()} €
+                </span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEquipment.map((item) => (
                 <Link 
@@ -149,14 +165,16 @@ const EquipmentCatalog = () => {
                     <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2">
                       {item.name}
                     </h3>
-                    <div className="flex justify-between items-center mb-4">
+                    
+                    {/* Price and availability on same line */}
+                    <div className="flex justify-center items-center gap-3 mb-3">
                       <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
                       <span className="text-gray-400 text-sm">
                         Dostupné: {getAvailabilityText(item.available)}
                       </span>
                     </div>
 
-                    {/* Quantity Controls */}
+                    {/* Small quantity counter below price */}
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <button
                         onClick={(e) => {
@@ -165,11 +183,11 @@ const EquipmentCatalog = () => {
                           handleRemove(item.id);
                         }}
                         disabled={!quantities[item.id]}
-                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
-                        <Minus size={14} />
+                        <Minus size={12} />
                       </button>
-                      <span className="w-12 text-center text-white font-medium text-lg">
+                      <span className="w-10 text-center text-white font-medium text-base">
                         {quantities[item.id] || 0}
                       </span>
                       <button
@@ -179,9 +197,9 @@ const EquipmentCatalog = () => {
                           handleAdd(item.id);
                         }}
                         disabled={(quantities[item.id] || 0) >= item.available}
-                        className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
-                        <Plus size={14} />
+                        <Plus size={12} />
                       </button>
                     </div>
 
