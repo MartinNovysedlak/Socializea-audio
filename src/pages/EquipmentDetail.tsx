@@ -6,43 +6,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { equipmentDatabase } from "@/data/equipmentDatabase";
-
-// Helper function to convert item name to clean file slug
-const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[æœ]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-};
-
-// Function to generate all possible image paths for an item
-const getImageCandidates = (itemName: string) => {
-  return [
-    // 1. Presný názov v priečinku .dyad/media
-    `/media/${itemName}.jpg`,
-    `/media/${itemName}.png`,
-    `/media/${itemName}.jpeg`,
-    // 2. Presný názov v koreňovom priečinku
-    `/${itemName}.jpg`,
-    `/${itemName}.png`,
-    `/${itemName}.jpeg`,
-    // 3. Presný názov v priečinku images
-    `/images/${itemName}.jpg`,
-    `/images/${itemName}.png`,
-    `/images/${itemName}.jpeg`,
-    // 4. Presný názov v priečinku public/images
-    `/public/images/${itemName}.jpg`,
-    `/public/images/${itemName}.png`,
-    `/public/images/${itemName}.jpeg`,
-  ];
-};
+import { equipmentDatabase, EquipmentItem } from "@/data/equipmentDatabase";
 
 const EquipmentDetail = () => {
   const { id } = useParams();
@@ -54,7 +18,7 @@ const EquipmentDetail = () => {
         <Navbar />
         <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721]">
           <div className="text-white text-center">
-            <h1 className="text-2xl font-bold mb-2">Aparatúra nie je nájdená</h1>
+            <h1 className="text-2xl font-bold mb-2">Aparatura nie je nájdená</h1>
             <p className="text-gray-400">Požadovaná položka nebola nájdená v našom katalógu.</p>
           </div>
         </div>
@@ -85,49 +49,19 @@ const EquipmentDetail = () => {
                     </p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {item.images.map((img, idx) => {
-                        const suffix = idx > 0 ? `-${idx + 1}` : "";
-                        const nameWithSuffix = `${item.name}${suffix}`;
-                        const candidates = getImageCandidates(nameWithSuffix);
-
-                        return (
-                          <div key={idx} className="aspect-video rounded-lg overflow-hidden border border-white/10">
-                            <img 
-                              src={candidates[0]} 
-                              alt={`${item.name} - fotka ${idx + 1}`}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const currentSrc = target.src;
-                                
-                                let nextIdx = -1;
-                                for (let i = 0; i < candidates.length; i++) {
-                                  if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
-                                    nextIdx = i + 1;
-                                    break;
-                                  }
-                                }
-
-                                if (nextIdx !== -1 && nextIdx < candidates.length) {
-                                  target.src = candidates[nextIdx];
-                                } else {
-                                  let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80";
-                                  if (item.category === "sound") {
-                                    fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=500&auto=format&fit=crop&q=80";
-                                  } else if (item.category === "lighting") {
-                                    fallback = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop&q=80";
-                                  } else if (item.category === "other") {
-                                    fallback = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80";
-                                  }
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
+                      {item.images.map((img, idx) => (
+                        <div key={idx} className="aspect-video rounded-lg overflow-hidden border border-white/10">
+                          <img 
+                            src={img} 
+                            alt={`${item.name} - fotka ${idx + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "https://via.placeholder.com/128?text=No+Image";
+                            }}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                   <CardFooter className="pt-6 border-t border-white/5">
@@ -198,10 +132,10 @@ const EquipmentDetail = () => {
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
                   <h3 className="text-2xl font-bold text-white mb-4">Technické parametre</h3>
                   <ul className="space-y-2 text-gray-300">
-                    {Object.entries(item.specifications).map(([key, value], idx) => (
-                      <li key={idx} className="flex justify-between border-b border-white/5 pb-2">
-                        <span className="text-gray-400">{key}:</span>
-                        <span className="text-white font-medium">{value}</span>
+                    {item.specifications.map((spec, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-[#1A4BFF] rounded-full mt-2 flex-shrink-0"></div>
+                        <span>{spec}</span>
                       </li>
                     ))}
                   </ul>
