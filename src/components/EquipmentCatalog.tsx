@@ -1,41 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Filter, Minus, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { equipmentDatabase } from "@/data/equipmentDatabase"; // <-- opravený import
-
-// Helper function to convert item name to clean file slug
-const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[æœ]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-};
+import { equipmentDatabase } from "@/data/equipmentDatabase";
 
 // Function to generate all possible image paths for an item
 const getImageCandidates = (itemName: string) => {
   return [
-    // 1. Presný názov v priečinku .dyad/media
+    // 1. Presný názov v priečinku .dyad/media (vite public folder)
     `/media/${itemName}.jpg`,
     `/media/${itemName}.png`,
     `/media/${itemName}.jpeg`,
-    // 2. Presný názov v koreňovom priečinku (ak by bol nahraný tam)
+    // 2. Presný názov v priečinku public/.dyad/media
+    `/.dyad/media/${itemName}.jpg`,
+    `/.dyad/media/${itemName}.png`,
+    `/.dyad/media/${itemName}.jpeg`,
+    // 3. Presný názov v koreňovom priečinku
     `/${itemName}.jpg`,
     `/${itemName}.png`,
     `/${itemName}.jpeg`,
-    // 3. Presný názov v priečinku images
+    // 4. Presný názov v priečinku images
     `/images/${itemName}.jpg`,
     `/images/${itemName}.png`,
     `/images/${itemName}.jpeg`,
-    // 4. Presný názov v priečinku public/images
+    // 5. Presný názov v priečinku public/images
     `/public/images/${itemName}.jpg`,
     `/public/images/${itemName}.png`,
     `/public/images/${itemName}.jpeg`,
@@ -150,6 +140,7 @@ const EquipmentCatalog = () => {
                           if (nextIdx !== -1 && nextIdx < candidates.length) {
                             target.src = candidates[nextIdx];
                           } else {
+                            // Use Unsplash fallback based on category
                             let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                             if (item.category === "sound") {
                               fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300&auto=format&fit=crop&q=80";
