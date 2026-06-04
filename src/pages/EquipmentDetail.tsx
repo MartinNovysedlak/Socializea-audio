@@ -6,301 +6,11 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-interface EquipmentItem {
-  id: string;
-  name: string;
-  category: "sound" | "lighting" | "other";
-  pricePerDay: number;
-  available: number;
-  description: string;
-  images: string[];
-  specifications?: string[];
-  features?: string[];
-}
-
-const equipmentData: EquipmentItem[] = [
-  {
-    id: "mixer-x1222",
-    name: "Mixážny pult Behringer Xenyx X1222 USB",
-    category: "sound",
-    pricePerDay: 25,
-    available: 1,
-    description: "Profesionálny mixážny pult s USB nahrávacím modulom, 16 kanálov a many vstupov/výstupov. Ideálny pre live vystúpenia a nahrávanie.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "16 kanálov",
-      "USB nahrávanie",
-      "4-band EQ",
-      "2 AUX výstupy",
-      "2 preampy"
-    ],
-    features: [
-      "Profesionálne kvality",
-      "Kompaktný dizajn",
-      "Ľahké ovládanie",
-      "Vysoký výkon"
-    ]
-  },
-  {
-    id: "mixer-802",
-    name: "Mixážny pult Behringer Xenyx 802",
-    category: "sound",
-    pricePerDay: 15,
-    available: 1,
-    description: "Kompaktný mixážny pult s 8 kanálmi, USB interfészom a jednoduchým ovládaním.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "8 kanálov",
-      "USB interfész",
-      "2-band EQ",
-      "2 AUX výstupy",
-      "Phantom napájanie"
-    ],
-    features: [
-      "Prehľadné ovládanie",
-      "Kompaktné rozmery",
-      "Vysoká kvalita zvuku",
-      "Economicke riešenie"
-    ]
-  },
-  {
-    id: "mic-set",
-    name: "Sada 2 mikrofónov the t.bone free solo Twin HT",
-    category: "sound",
-    pricePerDay: 20,
-    available: 1,
-    description: "Drátové mikrofóny s headsetom, vhodné na prednášky a koncerty.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "2x drátový mikrofón",
-      "1x headset",
-      "Frekvenčný rozsah 20Hz-20kHz",
-      "Citlivosť -54dB",
-      "3.5mm jack výstup"
-    ],
-    features: [
-      "Vysoká kvalita zvuku",
-      "Odolná konštrukcia",
-      "Komfortné použitie",
-      "Profesionálny výkon"
-    ]
-  },
-  {
-    id: "speakers-b112d",
-    name: "Reproduktory Behringer b112d",
-    category: "sound",
-    pricePerDay: 15,
-    available: 4,
-    description: "Kvalitné aktívne reproduktory s vynikajúcim zvukom a kompaktným dizajnom.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "12\" woofer",
-      "1.35\" tweeter",
-      "400W výkon",
-      "XLR/TRS vstupy",
-      "Link výstup"
-    ],
-    features: [
-      "Vysoký výkon",
-      "Kompaktný dizajn",
-      "Vynikajúca kvalita zvuku",
-      "Ľahká manipulácia"
-    ]
-  },
-  {
-    id: "sub-dsp18",
-    name: "Subwoofer The Box Pro DSP 18 Sub",
-    category: "sound",
-    pricePerDay: 35,
-    available: 5,
-    description: "Vysokovýkonný subwoofer s digitálnym procesorom pre dokonalé basy.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "18\" woofer",
-      "1000W výkon",
-      "DSP procesor",
-      "XLR vstupy/výstupy",
-      "Limitér"
-    ],
-    features: [
-      "Vysoký výkon",
-      "Digitálne spracovanie",
-      "Profesionálna kvalita",
-      "Výborné basy"
-    ]
-  },
-  {
-    id: "led-par",
-    name: "RGBWA UV Led Par svetlá",
-    category: "lighting",
-    pricePerDay: 8,
-    available: 8,
-    description: "Viacfarebné LED svetlá s UV efektom, ideálne pre párty a eventy.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "RGBWA UV farby",
-      "9x 3W LED diódy",
-      "DMX512 ovládanie",
-      "12/24V DC",
-      "IP20 ochrana"
-    ],
-    features: [
-      "Viacfarebné osvetlenie",
-      "UV efekt",
-      "DMX ovládanie",
-      "Vysoká svietivosť"
-    ]
-  },
-  {
-    id: "beam-head",
-    name: "Rotujúca 90w Beam hlava",
-    category: "lighting",
-    pricePerDay: 25,
-    available: 4,
-    description: "Profesionálne rotujúce svetelné hlavy s vysokým výkonom.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "90W výkon",
-      "Rotujúca hlava",
-      "DMX512 ovládanie",
-      "12/24V DC",
-      "IP20 ochrana"
-    ],
-    features: [
-      "Vysoký výkon",
-      "Rotujúce efekty",
-      "Profesionálna kvalita",
-      "DMX ovládanie"
-    ]
-  },
-  {
-    id: "fog-dj",
-    name: "Dymostroj ADJ VF 1300",
-    category: "lighting",
-    pricePerDay: 25,
-    available: 2,
-    description: "Výkonný dymostroj pre vytvorenie atmosférických efektov.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "1300W výkon",
-      "2.5L nádrž",
-      "DMX ovládanie",
-      "12/24V DC",
-      "IP20 ochrana"
-    ],
-    features: [
-      "Vysoký výkon",
-      "Veľká nádrž",
-      "Atmosférické efekty",
-      "DMX ovládanie"
-    ]
-  },
-  {
-    id: "projector",
-    name: "Premietačka Wanbo T6 MAX",
-    category: "other",
-    pricePerDay: 20,
-    available: 1,
-    description: "Vysokokvalitná premietačka Wanbo T6 MAX s vysokým rozlíšením a jasom.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "4K rozlíšenie",
-      "5500 ANSI lúmenov",
-      "HDR10 podpora",
-      "WiFi pripojenie",
-      "HDMI vstup"
-    ],
-    features: [
-      "Vysoké rozlíšenie",
-      "Vysoký jas",
-      "HDR podpora",
-      "WiFi pripojenie"
-    ]
-  },
-  {
-    id: "screen",
-    name: "Premietacie plátno 110\"",
-    category: "other",
-    pricePerDay: 15,
-    available: 1,
-    description: "Premietacie plátno 110\" s vysokou kvalitou obrazu a jednoduchým nastavením.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "110\" rozmer",
-      "16:9 pomer",
-      "1.1 gain",
-      "White surface",
-      "Easy setup"
-    ],
-    features: [
-      "Vysoká kvalita obrazu",
-      "Veľké rozmer",
-      "Jednoduché nastavenie",
-      "Vynikajúca farba"
-    ]
-  },
-  {
-    id: "mic-stand",
-    name: "Stojan na mikrofón",
-    category: "other",
-    pricePerDay: 5,
-    available: 2,
-    description: "Stojan na mikrofón s vysokou stabilitou a jednoduchým nastavením.",
-    images: [
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800"
-    ],
-    specifications: [
-      "Stojan",
-      "Max 2m",
-      "Easy assembly",
-      "Stable base",
-      "Adjustable height"
-    ],
-    features: [
-      "Vysoká stabilita",
-      "Jednoduché nastavenie",
-      "Univerzálny dizajn",
-      "Odolná konštrukcia"
-    ]
-  }
-];
+import { equipmentDatabase, EquipmentItem } from "@/data/equipmentDatabase";
 
 const EquipmentDetail = () => {
   const { id } = useParams();
-  const item = equipmentData.find(i => i.id === id);
+  const item = equipmentDatabase.find((i) => i.id === id);
 
   if (!item) {
     return (
@@ -345,6 +55,10 @@ const EquipmentDetail = () => {
                             src={img} 
                             alt={`${item.name} - fotka ${idx + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "https://via.placeholder.com/128?text=No+Image";
+                            }}
                           />
                         </div>
                       ))}
@@ -415,33 +129,29 @@ const EquipmentDetail = () => {
                   </ul>
                 </Card>
 
-                {item.specifications && (
-                  <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-4">Technické parametre</h3>
-                    <ul className="space-y-2 text-gray-300">
-                      {item.specifications.map((spec, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-[#1A4BFF] rounded-full mt-2 flex-shrink-0"></div>
-                          <span>{spec}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                )}
+                <Card className="bg-white/5 border-white/10 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">Technické parametre</h3>
+                  <ul className="space-y-2 text-gray-300">
+                    {item.specifications.map((spec, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-[#1A4BFF] rounded-full mt-2 flex-shrink-0"></div>
+                        <span>{spec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
 
-                {item.features && (
-                  <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
-                    <ul className="space-y-2 text-gray-300">
-                      {item.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-[#BD20D3] rounded-full mt-2 flex-shrink-0"></div>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                )}
+                <Card className="bg-white/5 border-white/10 rounded-xl p-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
+                  <ul className="space-y-2 text-gray-300">
+                    {item.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-[#BD20D3] rounded-full mt-2 flex-shrink-0"></div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
               </div>
             </div>
           </div>
