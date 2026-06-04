@@ -20,10 +20,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 1,
     description: "Profesionálny mixážny pult s USB nahrávacím modulom, 16 kanálov a many vstupov/výstupov. Ideálny pre live vystúpenia a nahrávanie.",
-    mainImage: "/media/95a5d2b846e9b13c0ae9400ef54353429657cbfc13346bed3dcf1db885d07534.jpg",
+    mainImage: "/media/Mixážny pult Behringer Xenyx X1222 USB.jpg",
     images: [
-      "/media/95a5d2b846e9b13c0ae9400ef54353429657cbfc13346bed3dcf1db885d07534.jpg",
-      "/media/77492824a2be24d78ec734ab9ec8d83bad8203b551f5552678e36b31284c280a.jpg"
+      "/media/Mixážny pult Behringer Xenyx X1222 USB.jpg"
     ],
     specifications: [
       "16 kanálov",
@@ -46,9 +45,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 15,
     available: 1,
     description: "Kompaktný mixážny pult s 8 kanálmi, USB interfészom a jednoduchým ovládaním.",
-    mainImage: "/media/77492824a2be24d78ec734ab9ec8d83bad8203b551f5552678e36b31284c280a.jpg",
+    mainImage: "/media/Mixážny pult Behringer Xenyx 802.jpg",
     images: [
-      "/media/77492824a2be24d78ec734ab9ec8d83bad8203b551f5552678e36b31284c280a.jpg"
+      "/media/Mixážny pult Behringer Xenyx 802.jpg"
     ],
     specifications: [
       "8 kanálov",
@@ -71,9 +70,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Drátové mikrofóny s headsetom, vhodné na prednášky a koncerty.",
-    mainImage: "/media/d6052c5c81a138ce5304e4488c25f45f50162a32df6649711fd7e0ce077d380c.jpg",
+    mainImage: "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg",
     images: [
-      "/media/d6052c5c81a138ce5304e4488c25f45f50162a32df6649711fd7e0ce077d380c.jpg"
+      "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg"
     ],
     specifications: [
       "2x drátový mikrofón",
@@ -96,9 +95,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 10,
     available: 4,
     description: "Bezdrôtové mikrofóny s vysokou kvalitou zvuku a jednoduchým ovládaním.",
-    mainImage: "/media/d6052c5c81a138ce5304e4488c25f45f50162a32df6649711fd7e0ce077d380c.jpg",
+    mainImage: "/media/Mikrofony a headsety Auna VHF.jpg",
     images: [
-      "/media/d6052c5c81a138ce5304e4488c25f45f50162a32df6649711fd7e0ce077d380c.jpg"
+      "/media/Mikrofony a headsety Auna VHF.jpg"
     ],
     specifications: [
       "4x bezdrôtový mikrofón",
@@ -121,9 +120,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 15,
     available: 4,
     description: "Kvalitné aktívne reproduktory s vynikajúcim zvukom a kompaktným dizajnom.",
-    mainImage: "/media/1f9236c88f552f18691beb5bc8de7b65f355c4233101d873b2aba7a463f9931e.jpg",
+    mainImage: "/media/Reproduktory Behringer B112D.jpg",
     images: [
-      "/media/1f9236c88f552f18691beb5bc8de7b65f355c4233101d873b2aba7a463f9931e.jpg"
+      "/media/Reproduktory Behringer B112D.jpg"
     ],
     specifications: [
       "12\" woofer",
@@ -146,9 +145,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 12,
     available: 1,
     description: "Vysokovýkonný reproduktor s vynikajúcou kvalitou zvuku a kompaktnými rozmermi.",
-    mainImage: "/media/9f78e4e46bf41dccfcc8e5ed8bed1b7bdd6928c6bcc2b5e10a4ea8a72b140af8.jpg",
+    mainImage: "/media/Reproduktor Behringer B208D.jpg",
     images: [
-      "/media/9f78e4e46bf41dccfcc8e5ed8bed1b7bdd6928c6bcc2b5e10a4ea8a72b140af8.jpg"
+      "/media/Reproduktor Behringer B208D.jpg"
     ],
     specifications: [
       "8\" woofer",
@@ -171,9 +170,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 30,
     available: 2,
     description: "Vysokovýkonný subwoofer s vynikajúcou kvalitou basov a kompaktnými rozmermi.",
-    mainImage: "/media/a91da4c39ec68a6da7af7f26a347754cea55f023d4d89618e1a68acae99f5cca.jpg",
+    mainImage: "/media/Subwoofery Behriger B1500XP.jpg",
     images: [
-      "/media/a91da4c39ec68a6da7af7f26a347754cea55f023d4d89618e1a68acae99f5cca.jpg"
+      "/media/Subwoofery Behriger B1500XP.jpg"
     ],
     specifications: [
       "15\" woofer",
@@ -196,9 +195,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 35,
     available: 5,
     description: "Vysokovýkonný subwoofer s digitálnym procesorom pre dokonalé basy.",
-    mainImage: "/media/5d7b4e04dcdae02c0fa75f344bcbf2e37357f8c918017379142cbd820cd5000f.jpg",
+    mainImage: "/media/The Box Pro DSP 18 Sub.jpg",
     images: [
-      "/media/5d7b4e04dcdae02c0fa75f344bcbf2e37357f8c918017379142cbd820cd5000f.jpg"
+      "/media/The Box Pro DSP 18 Sub.jpg"
     ],
     specifications: [
       "18\" woofer",
@@ -223,9 +222,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Profesionálny DMX pult pre riadenie svetelných efektov a zariadení.",
-    mainImage: "/media/5492eb8d0887643200d3ba57d0f5c24ef26ebf3bacdfcf4dce885c8f74bceeb0.jpg",
+    mainImage: "/media/Riadiaci DMX pult Light4Me DMX 192.jpg",
     images: [
-      "/media/5492eb8d0887643200d3ba57d0f5c24ef26ebf3bacdfcf4dce885c8f74bceeb0.jpg"
+      "/media/Riadiaci DMX pult Light4Me DMX 192.jpg"
     ],
     specifications: [
       "192 DMX kanály",
@@ -248,9 +247,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 8,
     available: 8,
     description: "Viacfarebné LED svetlá s UV efektom, ideálne pre párty a eventy.",
-    mainImage: "/media/320e6751a06d767b4f4e31b2e51a4a60dea49a63dc143727e67890f3d879cd55.jpg",
+    mainImage: "/media/RGBWA UV Led Par svetlá.jpg",
     images: [
-      "/media/320e6751a06d767b4f4e31b2e51a4a60dea49a63dc143727e67890f3d879cd55.jpg"
+      "/media/RGBWA UV Led Par svetlá.jpg"
     ],
     specifications: [
       "RGBWA UV farby",
@@ -273,9 +272,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 4,
     description: "Profesionálne rotujúce svetelné hlavy s vysokým výkonom.",
-    mainImage: "/media/bbf40bc7309782c8efac01d0647863de4dc84bc581a82e5d67f3a8523e02d752.webp",
+    mainImage: "/media/Rotujúca 90w Beam hlava.webp",
     images: [
-      "/media/bbf40bc7309782c8efac01d0647863de4dc84bc581a82e5d67f3a8523e02d752.webp"
+      "/media/Rotujúca 90w Beam hlava.webp"
     ],
     specifications: [
       "90W výkon",
@@ -298,9 +297,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 10,
     available: 2,
     description: "Výkonné UV svetlá pre vytvorenie atmosférických efektov.",
-    mainImage: "/media/38b23589a011b1d166936914b2a7f0bd7e1612b7c7054a20010945a937caf1f1.jpg",
+    mainImage: "/media/Samostatné Bodové UV svetlá.jpg",
     images: [
-      "/media/38b23589a011b1d166936914b2a7f0bd7e1612b7c7054a20010945a937caf1f1.jpg"
+      "/media/Samostatné Bodové UV svetlá.jpg"
     ],
     specifications: [
       "UV 395nm",
@@ -323,9 +322,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Kompletný svetelný bar pre párty a eventy s viacerými efekty.",
-    mainImage: "/media/2143cfcbdbceef17a4641d34298063871f932bb8055950dd226723d47942649f.jpg",
+    mainImage: "/media/Svetlá BeamZ Party Bar.jpg",
     images: [
-      "/media/2143cfcbdbceef17a4641d34298063871f932bb8055950dd226723d47942649f.jpg"
+      "/media/Svetlá BeamZ Party Bar.jpg"
     ],
     specifications: [
       "RGBW farby",
@@ -348,9 +347,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 2,
     description: "Výkonný snehostroj pre vytvorenie snežnej atmosféry.",
-    mainImage: "/media/8b94e446dceb9a44e04c122d963209e7949fc7e779f59f14d0e6f0135260a878.jpg",
+    mainImage: "/media/Snehostroj ADJ Snow Flurry HO.jpg",
     images: [
-      "/media/8b94e446dceb9a44e04c122d963209e7949fc7e779f59f14d0e6f0135260a878.jpg"
+      "/media/Snehostroj ADJ Snow Flurry HO.jpg"
     ],
     specifications: [
       "500W výkon",
@@ -373,9 +372,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 2,
     description: "Výkonný bublinkostroj pre vytvorenie bublinovej atmosféry.",
-    mainImage: "/media/7b1c89d3451ba926975d2ec38368030dde21bf8187abdb887dbb858efc9a94e0.jpg",
+    mainImage: "/media/LIGHT4ME Výborník bublín.jpg",
     images: [
-      "/media/7b1c89d3451ba926975d2ec38368030dde21bf8187abdb887dbb858efc9a94e0.jpg"
+      "/media/LIGHT4ME Výborník bublín.jpg"
     ],
     specifications: [
       "400W výkon",
@@ -398,9 +397,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 15,
     available: 1,
     description: "Výkonný stroboskop pre vytvorenie pulzného svetelného efektu.",
-    mainImage: "/media/0152ea0b9526a7125263bc5153fecdda741a3584b1a91121ce4032f2f95bc2de.jpg",
+    mainImage: "/media/Stroboskop.jpg",
     images: [
-      "/media/0152ea0b9526a7125263bc5153fecdda741a3584b1a91121ce4032f2f95bc2de.jpg"
+      "/media/Stroboskop.jpg"
     ],
     specifications: [
       "1200W výkon",
@@ -423,9 +422,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 30,
     available: 2,
     description: "Výkonné výrobníky plameňov pre dramatické svetelné efekty.",
-    mainImage: "/media/6de058e94878cc09dd00dadf1b573d7e60c2415f7b27d4d6f07f2967145a4dc9.jpg",
+    mainImage: "/media/Výrobníky plameňov Fire Machine.jpg",
     images: [
-      "/media/6de058e94878cc09dd00dadf1b573d7e60c2415f7b27d4d6f07f2967145a4dc9.jpg"
+      "/media/Výrobníky plameňov Fire Machine.jpg"
     ],
     specifications: [
       "2000W výkon",
@@ -448,9 +447,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 1,
     description: "Výkonný laserový bar s viacerými efektmi.",
-    mainImage: "/media/762d7f97de4b7aabc36fe59b8694b54821e8b1375f233cab9f1c7d36f213abc8.jpeg",
+    mainImage: "/media/Laserový Bar 65W (8x červený laser).jpeg",
     images: [
-      "/media/762d7f97de4b7aabc36fe59b8694b54821e8b1375f233cab9f1c7d36f213abc8.jpeg"
+      "/media/Laserový Bar 65W (8x červený laser).jpeg"
     ],
     specifications: [
       "65W výkon",
@@ -473,9 +472,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 1,
     description: "Holografický laser pre vytvorenie 3D efektov.",
-    mainImage: "/media/76042596916dee8b1ebe0612eaf720ff57f7ab7f24dc1cf6414b91d7dde34460.jpg",
+    mainImage: "/media/Holografický Laser.jpg",
     images: [
-      "/media/76042596916dee8b1ebe0612eaf720ff57f7ab7f24dc1cf6414b91d7dde34460.jpg"
+      "/media/Holografický Laser.jpg"
     ],
     specifications: [
       "50W výkon",
@@ -498,9 +497,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Červeno-zelený laser pre vytvorenie dynamických efektov.",
-    mainImage: "/media/e565523e461eaee35a27f85114670121dc1494c7b29b2e0002f5f71ef308ba32.jpg",
+    mainImage: "/media/Červeno-zelený Laser.jpg",
     images: [
-      "/media/e565523e461eaee35a27f85114670121dc1494c7b29b2e0002f5f71ef308ba32.jpg"
+      "/media/Červeno-zelený Laser.jpg"
     ],
     specifications: [
       "30W výkon",
@@ -523,9 +522,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 25,
     available: 1,
     description: "Profesionálny DMX riadený svetelný efekt.",
-    mainImage: "/media/ac63713587518d2962e4854ac5a344ab2cf0e964faa2a3dc1c28c3b3278dfe40.jpg",
+    mainImage: "/media/BeamZ SUSHI-Z1 DMX.jpg",
     images: [
-      "/media/ac63713587518d2962e4854ac5a344ab2cf0e964faa2a3dc1c28c3b3278dfe40.jpg"
+      "/media/BeamZ SUSHI-Z1 DMX.jpg"
     ],
     specifications: [
       "DMX512 ovládanie",
@@ -550,9 +549,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Vysokokvalitná premietačka Wanbo T6 MAX s vysokým rozlíšením a jasom.",
-    mainImage: "/media/b45f164adaefbf0a9e2652fd7aa34dab0d9fa50bdab7205b55f009c6310ae8d2.jpg",
+    mainImage: "/media/Premietačka Wanbo T6 MAX.jpg",
     images: [
-      "/media/b45f164adaefbf0a9e2652fd7aa34dab0d9fa50bdab7205b55f009c6310ae8d2.jpg"
+      "/media/Premietačka Wanbo T6 MAX.jpg"
     ],
     specifications: [
       "4K rozlíšenie",
@@ -575,9 +574,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 15,
     available: 1,
     description: "Premietacie plátno 110\" s vysokou kvalitou obrazu a jednoduchým nastavením.",
-    mainImage: "/media/143f50714d3a307e6303f00a19a2e374a6996397ed82c5ce2a302ca39f2a28c8.png",
+    mainImage: "/media/Premietacie plátno 110”.png",
     images: [
-      "/media/143f50714d3a307e6303f00a19a2e374a6996397ed82c5ce2a302ca39f2a28c8.png"
+      "/media/Premietacie plátno 110”.png"
     ],
     specifications: [
       "110\" rozmer",
@@ -600,9 +599,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 10,
     available: 1,
     description: "Osvetľovacia konštrukcia pre uchytenie všetkých svetiel a efektov.",
-    mainImage: "/media/276c7f185f4188dcc24e9fa5a4daa1d10585c945bc41e94348a108846bc81e27.jpg",
+    mainImage: "/media/Konštrukcia na zavesenie reproduktorov na stenu.jpg",
     images: [
-      "/media/276c7f185f4188dcc24e9fa5a4daa1d10585c945bc41e94348a108846bc81e27.jpg"
+      "/media/Konštrukcia na zavesenie reproduktorov na stenu.jpg"
     ],
     specifications: [
       "Konštrukcia",
@@ -625,9 +624,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 5,
     available: 2,
     description: "Stojan na mikrofón s vysokou stabilitou a jednoduchým nastavením.",
-    mainImage: "/media/a9141bed0fd29e0f3937c2c1b2d1386ebbf1599932613ce429766e9af44bb859.jpg",
+    mainImage: "/media/Stojan na mikrofón.jpg",
     images: [
-      "/media/a9141bed0fd29e0f3937c2c1b2d1386ebbf1599932613ce429766e9af44bb859.jpg"
+      "/media/Stojan na mikrofón.jpg"
     ],
     specifications: [
       "Stojan",
@@ -650,9 +649,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 10,
     available: 2,
     description: "Trojnožka na reproduktory s vysokou stabilitou a jednoduchým nastavením.",
-    mainImage: "/media/4e6b4e90687ef8979804fb9500a24f5f8dbb0081d2404d899e6e28646467b823.jpg",
+    mainImage: "/media/Trojnožka na reproduktory.jpg",
     images: [
-      "/media/4e6b4e90687ef8979804fb9500a24f5f8dbb0081d2404d899e6e28646467b823.jpg"
+      "/media/Trojnožka na reproduktory.jpg"
     ],
     specifications: [
       "Trojnožka",
@@ -675,9 +674,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 5,
     available: 2,
     description: "Držiak pre dvojicu reproboxov s vysokou stabilitou a jednoduchým nastavením.",
-    mainImage: "/media/4898b82b26345a11992ce64614f023bd60aa83de7637eca713bcfb6c8ff39f88.jpg",
+    mainImage: "/media/Držiak pre dvojicu reproboxov.jpg",
     images: [
-      "/media/4898b82b26345a11992ce64614f023bd60aa83de7637eca713bcfb6c8ff39f88.jpg"
+      "/media/Držiak pre dvojicu reproboxov.jpg"
     ],
     specifications: [
       "Držiak",
@@ -700,9 +699,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 8,
     available: 2,
     description: "Teleskopická stojanová tyč s vysokou stabilitou a jednoduchým nastavením.",
-    mainImage: "/media/d7bfd119f6cd8102d754abd00090c255ff71dcacc6992e64b98050ccac0a5eb8.jpg",
+    mainImage: "/media/Teleskopická stojanová tyč.jpg",
     images: [
-      "/media/d7bfd119f6cd8102d754abd00090c255ff71dcacc6992e64b98050ccac0a5eb8.jpg"
+      "/media/Teleskopická stojanová tyč.jpg"
     ],
     specifications: [
       "Teleskopická tyč",
@@ -725,9 +724,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 10,
     available: 1,
     description: "Konštrukcia na zavesenie reproduktorov na stenu s vysokou stabilitou.",
-    mainImage: "/media/b548716b902e91a3960a040d2b1671f8a167aa32a9b10c23e2885a96a840eb0b.jpg",
+    mainImage: "/media/Konštrukcia na zavesenie reproduktorov na stenu.jpg",
     images: [
-      "/media/b548716b902e91a3960a040d2b1671f8a167aa32a9b10c23e2885a96a840eb0b.jpg"
+      "/media/Konštrukcia na zavesenie reproduktorov na stenu.jpg"
     ],
     specifications: [
       "Konštrukcia",
@@ -750,9 +749,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 15,
     available: 1,
     description: "RGBW Led Bar s vysokým výkonom a viacerými efektmi.",
-    mainImage: "/media/6ac3f94a868e09cb7022aa2b804d63ecfe67f482dfb6b7b0eedd25200b8ac861.jpeg",
+    mainImage: "/media/RGBW Led Bar 36w.jpeg",
     images: [
-      "/media/6ac3f94a868e09cb7022aa2b804d63ecfe67f482dfb6b7b0eedd25200b8ac861.jpeg"
+      "/media/RGBW Led Bar 36w.jpeg"
     ],
     specifications: [
       "36W výkon",
@@ -775,9 +774,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 30,
     available: 1,
     description: "Profesionálny DJ controller pre mixovanie hudby.",
-    mainImage: "/media/412c6788cb77b1f0d0316575d54c3c9c2edaca24c041e3e633157de297691e3a.jpg",
+    mainImage: "/media/Numark Mixtrack Platinum FX.jpg",
     images: [
-      "/media/412c6788cb77b1f0d0316575d54c3c9c2edaca24c041e3e633157de297691e3a.jpg"
+      "/media/Numark Mixtrack Platinum FX.jpg"
     ],
     specifications: [
       "2x jog wheel",
