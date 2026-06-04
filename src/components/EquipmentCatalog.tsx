@@ -98,21 +98,18 @@ const EquipmentCatalog = () => {
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform duration-300" 
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        const fallbackPaths = [
-                          `/public${item.mainImage}`,
-                          `${item.mainImage}`,
-                          `https://via.placeholder.com/128?text=${encodeURIComponent(item.name)}`,
-                          "https://via.placeholder.com/128?text=No+Image"
-                        ];
-                        let currentPath = fallbackPaths[0];
-                        const tryNextPath = () => {
-                          const nextIndex = fallbackPaths.indexOf(currentPath) + 1;
-                          if (nextIndex < fallbackPaths.length) {
-                            currentPath = fallbackPaths[nextIndex];
-                            target.src = currentPath;
-                          }
-                        };
-                        tryNextPath();
+                        // Beautiful Unsplash fallbacks corresponding to actual live DJ/Sound equipment
+                        let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
+                        if (item.category === "sound") {
+                          fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300&auto=format&fit=crop&q=80"; // Audio console/mix
+                        } else if (item.category === "lighting") {
+                          fallback = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80"; // Lighting & lasers
+                        } else if (item.category === "other") {
+                          fallback = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80"; // Mic and equipment stands
+                        }
+                        if (target.src !== fallback) {
+                          target.src = fallback;
+                        }
                       }} 
                       style={{ objectPosition: "center" }} 
                     />
