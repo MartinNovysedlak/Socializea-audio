@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Filter, Minus, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import equipmentDatabase from "@/data/equipmentDatabase";
+import { equipmentDatabase } from "@/data/equipmentDatabase"; // <-- opravený import
 
 // Helper function to convert item name to clean file slug
 const slugify = (text: string) => {
@@ -46,17 +46,14 @@ const EquipmentCatalog = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  const filteredEquipment = activeFilter === "all" 
-    ? equipmentDatabase 
+  const filteredEquipment = activeFilter === "all"
+    ? equipmentDatabase
     : equipmentDatabase.filter((item) => item.category === activeFilter);
 
   const handleQuantityChange = (id: string, delta: number) => {
     const item = equipmentDatabase.find((i) => i.id === id);
     const currentQty = quantities[id] ?? 0;
-    const newQty = Math.max(
-      0,
-      Math.min(item?.available ?? 0, currentQty + delta)
-    );
+    const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
     setQuantities((prev) => ({ ...prev, [id]: newQty }));
   };
 
@@ -103,10 +100,11 @@ const EquipmentCatalog = () => {
                 <Filter className="text-[#BD20D3] ml-3" size={18} />
                 <div className="flex gap-1">
                   {["all", "sound", "lighting", "other"].map((filter) => (
-                    <button 
-                      key={filter} 
-                      onClick={() => setActiveFilter(filter as any)} 
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${ activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10" }`}
+                    <button
+                      key={filter}
+                      onClick={() => setActiveFilter(filter as any)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
+                        }`}
                     >
                       {filter === "all" ? "Všetko" : getCategoryLabel(filter)}
                     </button>
@@ -129,19 +127,18 @@ const EquipmentCatalog = () => {
 
               return (
                 <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
-                  
                   {/* Clickable Image, Category and Title */}
                   <Link to={`/equipment/${item.id}`} className="w-full flex flex-col items-center mb-4 cursor-pointer">
                     <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
-                      <img 
-                        src={candidates[0]} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" 
+                      <img
+                        src={candidates[0]}
+                        alt={item.name}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           const currentSrc = target.src;
-                          
-                          // Try to find which candidate index failed by looking at how the URL ends
+
+                          // Find next candidate
                           let nextIdx = -1;
                           for (let i = 0; i < candidates.length; i++) {
                             if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
@@ -150,7 +147,6 @@ const EquipmentCatalog = () => {
                             }
                           }
 
-                          // If we couldn't match or we reached the end, use the Unsplash fallback
                           if (nextIdx !== -1 && nextIdx < candidates.length) {
                             target.src = candidates[nextIdx];
                           } else {
@@ -166,16 +162,16 @@ const EquipmentCatalog = () => {
                               target.src = fallback;
                             }
                           }
-                        }} 
-                        style={{ objectPosition: "center" }} 
+                        }}
+                        style={{ objectPosition: "center" }}
                       />
                       <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-full px-3 py-1">
-                        <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap"> {getCategoryLabel(item.category)} </span>
+                        <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">{getCategoryLabel(item.category)}</span>
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2 line-clamp-2"> 
-                      {item.name} 
+                    <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2 line-clamp-2">
+                      {item.name}
                     </h3>
                   </Link>
 
@@ -185,33 +181,32 @@ const EquipmentCatalog = () => {
                       <span className="text-gray-400 text-sm"> Dostupné: {getAvailabilityText(item.available)} </span>
                     </div>
 
-                    <Button 
-                      size="sm" 
-                      className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10 mb-4" 
+                    <Button
+                      size="sm"
+                      className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10 mb-4"
                       disabled={!quantities[item.id]}
                     >
                       Pridať do kalkulácie
                     </Button>
 
                     <div className="flex items-center justify-center gap-2">
-                      <button 
-                        onClick={() => handleRemove(item.id)} 
-                        disabled={!quantities[item.id]} 
+                      <button
+                        onClick={() => handleRemove(item.id)}
+                        disabled={!quantities[item.id]}
                         className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
                         <Minus size={12} />
                       </button>
-                      <span className="w-10 text-center text-white font-medium text-base"> {quantities[item.id] ?? 0} </span>
-                      <button 
-                        onClick={() => handleAdd(item.id)} 
-                        disabled={(quantities[item.id] ?? 0) >= item.available} 
+                      <span className="w-10 text-center text-white font-medium text-base">{quantities[item.id] ?? 0}</span>
+                      <button
+                        onClick={() => handleAdd(item.id)}
+                        disabled={(quantities[item.id] ?? 0) >= item.available}
                         className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
                         <Plus size={12} />
                       </button>
                     </div>
                   </div>
-
                 </div>
               );
             })}
