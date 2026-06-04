@@ -34,21 +34,21 @@ const equipmentData: EquipmentItem[] = [
   { id: "led-bar", name: "RGBW Led Bar 36w", category: "lighting", pricePerDay: 12, available: 4, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "laser-bar", name: "Laserovy Bar 65W (8x červený laser)", category: "lighting", pricePerDay: 40, available: 1, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "fog-dj", name: "Dymostroj ADJ VF 1300", category: "lighting", pricePerDay: 25, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
-  { id: "bubble", name: "Bublinkostroj", category: "lighting", pricePerDay: 20, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
+  { id: "bubble", name: "Bublinkostroj", category: "lighting", pricePerDay: 20, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "snow", name: "Snehostroj ADJ Snow Flurry HO", category: "lighting", pricePerDay: 25, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "fire", name: "Výrobníky plameňov Fire Machine", category: "lighting", pricePerDay: 30, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "party-bar", name: "Svetlá BeamZ Party Bar", category: "lighting", pricePerDay: 20, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "uv-lights", name: "Samostatné Bodové UV svetlá", category: "lighting", pricePerDay: 10, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "strobe", name: "Stroboskop", category: "lighting", pricePerDay: 15, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "holo-laser", name: "Holografický Laser", category: "lighting", pricePerDay: 35, available: 1, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
-  { id: "red-green-laser", name: "Červeno-zelený Laser", category: "lighting", pricePerDay: 25, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
+  { id: "red-green-laser", name: "Červeno-zelený Laser", category: "lighting", pricePerDay: 25, available: 1, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   
   // Other
   { id: "projector", name: "Premietačka Wanbo T6 MAX", category: "other", pricePerDay: 20, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "screen", name: "Premietacie plátno 110\"", category: "other", pricePerDay: 15, available: 1, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "light-construct", name: "Osvetľovacia konštrukcia na uchytenie", category: "other", pricePerDay: 10, available: 1, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
   { id: "speaker-construct", name: "Konštrukcia na zavesenie reproduktorov", category: "other", pricePerDay: 8, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
-  { id: "mic-stand", name: "Stojan na mikrofón", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800" },
+  { id: "mic-stand", name: "Stojan na mikrofón", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "tripod", name: "Trojnožka na reproduktory", category: "other", pricePerDay: 10, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "speaker-mount", name: "Držiak pre dvojicu reproboxov", category: "other", pricePerDay: 5, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
   { id: "telescopic", name: "Teleskopická stojanová tyč", category: "other", pricePerDay: 8, available: 2, image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80&w=800" },
@@ -174,8 +174,21 @@ const EquipmentCatalog = () => {
                       </span>
                     </div>
 
-                    {/* Small quantity counter below price */}
-                    <div className="flex items-center justify-center gap-2 mb-4">
+                    {/* Action Button - moved higher */}
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10 mb-4"
+                      disabled={!quantities[item.id]}
+                    >
+                      Pridať do kalkulácie
+                    </Button>
+
+                    {/* Small quantity counter below button */}
+                    <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -202,19 +215,6 @@ const EquipmentCatalog = () => {
                         <Plus size={12} />
                       </button>
                     </div>
-
-                    {/* Action Button */}
-                    <Button
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10"
-                      disabled={!quantities[item.id]}
-                    >
-                      Pridať do kalkulácie
-                    </Button>
                   </div>
                 </Link>
               ))}
