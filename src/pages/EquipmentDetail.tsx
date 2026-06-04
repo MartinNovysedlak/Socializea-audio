@@ -25,15 +25,19 @@ const slugify = (text: string) => {
 // Function to generate all possible image paths for an item
 const getImageCandidates = (itemName: string) => {
   return [
-    // Direct root with exact name
+    // 1. Presný názov v priečinku .dyad/media
+    `/media/${itemName}.jpg`,
+    `/media/${itemName}.png`,
+    `/media/${itemName}.jpeg`,
+    // 2. Presný názov v koreňovom priečinku
     `/${itemName}.jpg`,
     `/${itemName}.png`,
     `/${itemName}.jpeg`,
-    // In images folder with exact name
+    // 3. Presný názov v priečinku images
     `/images/${itemName}.jpg`,
     `/images/${itemName}.png`,
     `/images/${itemName}.jpeg`,
-    // In public/images folder with exact name
+    // 4. Presný názov v priečinku public/images
     `/public/images/${itemName}.jpg`,
     `/public/images/${itemName}.png`,
     `/public/images/${itemName}.jpeg`,

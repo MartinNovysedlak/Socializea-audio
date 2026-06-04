@@ -23,15 +23,19 @@ const slugify = (text: string) => {
 // Function to generate all possible image paths for an item
 const getImageCandidates = (itemName: string) => {
   return [
-    // Direct root with exact name
+    // 1. Presný názov v priečinku .dyad/media
+    `/media/${itemName}.jpg`,
+    `/media/${itemName}.png`,
+    `/media/${itemName}.jpeg`,
+    // 2. Presný názov v koreňovom priečinku (ak by bol nahraný tam)
     `/${itemName}.jpg`,
     `/${itemName}.png`,
     `/${itemName}.jpeg`,
-    // In images folder with exact name
+    // 3. Presný názov v priečinku images
     `/images/${itemName}.jpg`,
     `/images/${itemName}.png`,
     `/images/${itemName}.jpeg`,
-    // In public/images folder with exact name
+    // 4. Presný názov v priečinku public/images
     `/public/images/${itemName}.jpg`,
     `/public/images/${itemName}.png`,
     `/public/images/${itemName}.jpeg`,
@@ -43,8 +47,7 @@ const EquipmentCatalog = () => {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const filteredEquipment = activeFilter === "all" 
-    ? equipmentDatabase 
-    : equipmentDatabase.filter((item) => item.category === activeFilter);
+    ? equipmentDatabase     : equipmentDatabase.filter((item) => item.category === activeFilter);
 
   const handleQuantityChange = (id: string, delta: number) => {
     const item = equipmentDatabase.find((i) => i.id === id);
@@ -196,8 +199,7 @@ const EquipmentCatalog = () => {
                       </button>
                       <span className="w-10 text-center text-white font-medium text-base"> {quantities[item.id] ?? 0} </span>
                       <button 
-                        onClick={() => handleAdd(item.id)} 
-                        disabled={(quantities[item.id] ?? 0) >= item.available} 
+                        onClick={() => handleAdd(item.id)}                         disabled={(quantities[item.id] ?? 0) >= item.available} 
                         className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
                         <Plus size={12} />
