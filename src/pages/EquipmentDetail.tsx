@@ -135,11 +135,11 @@ const EquipmentDetail = () => {
 
               <div className="space-y-6">
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <h3 className="text-2xl font-bold text-white mb-6">Technické špecifikácie</h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">Technické parametre</h3>
                   <ul className="space-y-3 text-gray-300">
                     {item.specifications.map((spec, idx) => (
-                      <li key={idx} className="flex justify-between border-b border-white/5 pb-2">
-                        <span className="text-gray-400">Specifikácia {idx + 1}:</span>
+                      <li key={idx} className="flex items-start gap-3 border-b border-white/5 pb-2">
+                        <div className="w-1.5 h-1.5 bg-[#BD20D3] rounded-full mt-2.5 flex-shrink-0"></div>
                         <span className="text-white font-medium">{spec}</span>
                       </li>
                     ))}
