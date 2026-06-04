@@ -20,6 +20,24 @@ const slugify = (text: string) => {
     .replace(/-+/g, "-");
 };
 
+// Function to generate all possible image paths for an item
+const getImageCandidates = (itemName: string) => {
+  return [
+    // Direct root with exact name
+    `/${itemName}.jpg`,
+    `/${itemName}.png`,
+    `/${itemName}.jpeg`,
+    // In images folder with exact name
+    `/images/${itemName}.jpg`,
+    `/images/${itemName}.png`,
+    `/images/${itemName}.jpeg`,
+    // In public/images folder with exact name
+    `/public/images/${itemName}.jpg`,
+    `/public/images/${itemName}.png`,
+    `/public/images/${itemName}.jpeg`,
+  ];
+};
+
 const EquipmentCatalog = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -100,25 +118,7 @@ const EquipmentCatalog = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEquipment.map((item) => {
-              const fileSlug = slugify(item.name);
-              
-              // We build multiple candidates based on exact file names, path styles, and formats
-              const candidates = [
-                // 1. Exact name in / (for directly uploaded files with exact Slovak names)
-                `/${item.name}.jpg`,
-                `/${item.name}.png`,
-                `/${item.name}.jpeg`,
-                // 2. Exact name in /images/
-                `/images/${item.name}.jpg`,
-                `/images/${item.name}.png`,
-                `/images/${item.name}.jpeg`,
-                // 3. Slugified name in /images/
-                `/images/${fileSlug}.jpg`,
-                `/images/${fileSlug}.png`,
-                `/images/${fileSlug}.jpeg`,
-                // 4. Fallback in database
-                item.mainImage,
-              ];
+              const candidates = getImageCandidates(item.name);
 
               return (
                 <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">

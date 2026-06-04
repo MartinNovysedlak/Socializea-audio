@@ -22,6 +22,24 @@ const slugify = (text: string) => {
     .replace(/-+/g, "-");
 };
 
+// Function to generate all possible image paths for an item
+const getImageCandidates = (itemName: string) => {
+  return [
+    // Direct root with exact name
+    `/${itemName}.jpg`,
+    `/${itemName}.png`,
+    `/${itemName}.jpeg`,
+    // In images folder with exact name
+    `/images/${itemName}.jpg`,
+    `/images/${itemName}.png`,
+    `/images/${itemName}.jpeg`,
+    // In public/images folder with exact name
+    `/public/images/${itemName}.jpg`,
+    `/public/images/${itemName}.png`,
+    `/public/images/${itemName}.jpeg`,
+  ];
+};
+
 const EquipmentDetail = () => {
   const { id } = useParams();
   const item = equipmentDatabase.find((i) => i.id === id);
@@ -40,8 +58,6 @@ const EquipmentDetail = () => {
       </main>
     );
   }
-
-  const fileSlug = slugify(item.name);
 
   return (
     <main className="min-h-screen bg-[#020721]">
@@ -68,22 +84,7 @@ const EquipmentDetail = () => {
                       {item.images.map((img, idx) => {
                         const suffix = idx > 0 ? `-${idx + 1}` : "";
                         const nameWithSuffix = `${item.name}${suffix}`;
-                        const slugWithSuffix = `${fileSlug}${suffix}`;
-
-                        const candidates = [
-                          // Exact match directly in root or images
-                          `/${nameWithSuffix}.jpg`,
-                          `/${nameWithSuffix}.png`,
-                          `/${nameWithSuffix}.jpeg`,
-                          `/images/${nameWithSuffix}.jpg`,
-                          `/images/${nameWithSuffix}.png`,
-                          `/images/${nameWithSuffix}.jpeg`,
-                          // Slugified format
-                          `/images/${slugWithSuffix}.jpg`,
-                          `/images/${slugWithSuffix}.png`,
-                          `/images/${slugWithSuffix}.jpeg`,
-                          img
-                        ];
+                        const candidates = getImageCandidates(nameWithSuffix);
 
                         return (
                           <div key={idx} className="aspect-video rounded-lg overflow-hidden border border-white/10">
