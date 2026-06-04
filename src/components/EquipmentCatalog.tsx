@@ -400,7 +400,8 @@ const EquipmentCatalog = () => {
                     </Button>
 
                     <div className="flex items-center justify-center gap-2">
-                      <button                        onClick={(e) => {
+                      <button
+                        onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleRemove(item.id);
