@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { Send, Phone, Mail, MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
@@ -43,13 +42,7 @@ const ContactForm = () => {
   return (
     <section id="kontakt" className="py-12 bg-[#020721] relative overflow-hidden">
       <div className="container mx-auto px-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-16 backdrop-blur-xl relative overflow-hidden"
-        >
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-16 backdrop-blur-xl relative overflow-hidden">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
               
@@ -178,7 +171,7 @@ const ContactForm = () => {
 
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
