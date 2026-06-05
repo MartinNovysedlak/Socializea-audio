@@ -14,6 +14,32 @@ const SalesSummary = () => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
+              <div className="w-full lg:w-1/2">
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-7 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                    <img 
+                      src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800" 
+                      alt="Audio technika" 
+                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    />
+                  </div>
+                  <div className="col-span-5 space-y-4">
+                    <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                      <img 
+                        src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=600" 
+                        alt="Svetelná technika" 
+                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                      />
+                    </div>
+                    <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#1A4BFF] to-[#BD20D3] p-6 flex items-center justify-center text-center">
+                      <p className="text-white font-bold text-lg leading-tight">
+                        Nová <br /> technika <br /> skladom
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="w-full lg:w-1/2 space-y-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 text-[#1A4BFF] text-xs font-bold uppercase tracking-widest">
                   Predaj techniky
@@ -47,32 +73,6 @@ const SalesSummary = () => {
                     Prejsť do ponuky predaja
                   </Button>
                 </Link>
-              </div>
-              
-              <div className="w-full lg:w-1/2">
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-7 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-                    <img 
-                      src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800" 
-                      alt="Audio technika" 
-                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                    />
-                  </div>
-                  <div className="col-span-5 space-y-4">
-                    <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-                      <img 
-                        src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=600" 
-                        alt="Svetelná technika" 
-                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                      />
-                    </div>
-                    <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#1A4BFF] to-[#BD20D3] p-6 flex items-center justify-center text-center">
-                      <p className="text-white font-bold text-lg leading-tight">
-                        Nová <br /> technika <br /> skladom
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
             
