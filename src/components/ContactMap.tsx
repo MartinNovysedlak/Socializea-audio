@@ -64,7 +64,7 @@ const ContactMap = () => {
             Budova SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
           </p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden -mt-52 relative z-10">
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden relative z-10">
           <div 
             ref={mapRef}
             className="w-full h-[650px] rounded-2xl"
