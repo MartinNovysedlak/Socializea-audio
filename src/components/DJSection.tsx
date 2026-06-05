@@ -25,7 +25,30 @@ const DJSection = () => {
             {/* Decorative glow */}
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#BD20D3]/10 rounded-full blur-[100px]" />
             
-            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12">
+            <div className="relative z-10 flex flex-col lg:flex-row-reverse items-center gap-12">
+              <div className="w-full lg:w-2/5 grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#BD20D3]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
+                    <Music className="text-[#BD20D3] mb-2" size={32} />
+                    <span className="text-xs font-bold text-white uppercase">Svadby</span>
+                  </div>
+                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#1A4BFF]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
+                    <Mic2 className="text-[#1A4BFF] mb-2" size={32} />
+                    <span className="text-xs font-bold text-white uppercase">Eventy</span>
+                  </div>
+                </div>
+                <div className="space-y-4 pt-8">
+                  <div className="aspect-square rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center p-4">
+                    <Disc className="text-gray-400 mb-2" size={32} />
+                    <span className="text-xs font-bold text-white uppercase">Párty</span>
+                  </div>
+                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#BD20D3]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
+                    <Zap className="text-[#BD20D3] mb-2" size={32} />
+                    <span className="text-xs font-bold text-white uppercase">Oslavy</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="w-full lg:w-3/5 space-y-8">
                 <div className="flex items-center gap-3 text-[#BD20D3]">
                   <Headphones size={24} />
@@ -48,29 +71,6 @@ const DJSection = () => {
                   <div className="flex items-center gap-4 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium">
                     <Disc className="animate-spin-slow text-[#BD20D3]" size={20} />
                     Všetky žánre
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full lg:w-2/5 grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#BD20D3]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
-                    <Music className="text-[#BD20D3] mb-2" size={32} />
-                    <span className="text-xs font-bold text-white uppercase">Svadby</span>
-                  </div>
-                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#1A4BFF]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
-                    <Mic2 className="text-[#1A4BFF] mb-2" size={32} />
-                    <span className="text-xs font-bold text-white uppercase">Eventy</span>
-                  </div>
-                </div>
-                <div className="space-y-4 pt-8">
-                  <div className="aspect-square rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center text-center p-4">
-                    <Disc className="text-gray-400 mb-2" size={32} />
-                    <span className="text-xs font-bold text-white uppercase">Párty</span>
-                  </div>
-                  <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#BD20D3]/20 to-transparent border border-white/10 flex flex-col items-center justify-center text-center p-4">
-                    <Zap className="text-[#BD20D3] mb-2" size={32} />
-                    <span className="text-xs font-bold text-white uppercase">Oslavy</span>
                   </div>
                 </div>
               </div>
