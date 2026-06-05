@@ -16,7 +16,7 @@ const ContactMap = () => {
 
     mapInstanceRef.current = L.map(mapRef.current, {
       center: targetCoords,
-      zoom: 17, // Priblíženie pre lepšiu presnosť
+      zoom: 17,
       zoomControl: false,
       attributionControl: false,
     });
@@ -58,16 +58,16 @@ const ContactMap = () => {
   return (
     <section id="mapa" className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete</h2>
+        <div className="text-center mb-8 relative z-10">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete?</h2>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             Budova SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
           </p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden -mt-20 relative z-0">
           <div 
             ref={mapRef}
-            className="w-full h-[450px] rounded-2xl z-10"
+            className="w-full h-[650px] rounded-2xl"
           />
         </div>
       </div>
