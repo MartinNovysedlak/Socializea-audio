@@ -5,28 +5,34 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
 const ContactMap = () => {
   const mapRef = useRef<any>(null);
   const center = [49.21302405266172, 18.747822075596567];
 
-  // Custom marker icon in brand color
-  const customIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-    className: 'custom-marker',
+  // Custom purple/magenta marker icon (#BD20D3)
+  const customIcon = L.divIcon({
+    className: 'custom-brand-marker',
+    html: `
+      <div style="
+        width: 28px;
+        height: 42px;
+        background: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png') no-repeat center/contain;
+        filter: hue-rotate(280deg) saturate(3) brightness(1.2);
+        transform: rotate(0deg);
+      "></div>
+      <div style="
+        width: 14px;
+        height: 14px;
+        background: #BD20D3;
+        border: 3px solid #020721;
+        border-radius: 50%;
+        margin: -8px auto 0;
+        box-shadow: 0 0 12px #BD20D3, 0 0 24px #BD20D3;
+      "></div>
+    `,
+    iconSize: [28, 46],
+    iconAnchor: [14, 46],
+    popupAnchor: [0, -40],
   });
 
   useEffect(() => {
@@ -67,10 +73,24 @@ const ContactMap = () => {
                   maxZoom={19}
                 />
                 <Marker position={center} icon={customIcon}>
-                  <Popup>
-                    <div className="text-white p-1">
-                      <strong>Socializea-audio</strong><br />
-                      Vysokoškolská 4, 010 01 Žilina
+                  <Popup
+                    closeButton={false}
+                    autoClose={false}
+                    className="custom-popup"
+                  >
+                    <div className="text-white p-3 min-w-[200px]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-[#BD20D3]"></div>
+                        <strong className="text-lg">Socializea-audio</strong>
+                      </div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        Vysokoškolská 4, 010 01 Žilina<br />
+                        <span className="text-[#BD20D3]">Budova SADOP</span>
+                      </p>
+                      <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2 text-xs text-gray-400">
+                        <span>📍</span>
+                        <span>49.2130° N, 18.7478° E</span>
+                      </div>
                     </div>
                   </Popup>
                 </Marker>
@@ -89,6 +109,35 @@ const ContactMap = () => {
           </div>
         </div>
       </div>
+      
+      <style jsx global>{`
+        .custom-brand-marker {
+          transition: transform 0.2s ease;
+        }
+        .custom-brand-marker:hover {
+          transform: scale(1.15);
+        }
+        .leaflet-popup-content-wrapper.custom-popup {
+          background: linear-gradient(135deg, #0a0d1f 0%, #020721 100%) !important;
+          border: 1px solid #BD20D3/40 !important;
+          border-radius: 16px !important;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(189,32,211,0.15) !important;
+          padding: 0 !important;
+        }
+        .leaflet-popup-content {
+          margin: 0 !important;
+          width: auto !important;
+        }
+        .leaflet-popup-tip {
+          background: #020721 !important;
+          border: 1px solid #BD20D3/40 !important;
+          border-right: none !important;
+          border-bottom: none !important;
+        }
+        .leaflet-popup-close-button {
+          display: none !important;
+        }
+      `}</style>
     </section>
   );
 };
