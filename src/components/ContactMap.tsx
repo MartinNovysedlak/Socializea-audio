@@ -7,7 +7,6 @@ const ContactMap = () => {
 
   useEffect(() => {
     if (mapContainerRef.current) {
-      // Using a styled iframe with OpenStreetMap embed
       const iframe = document.createElement('iframe');
       iframe.src = 'https://www.openstreetmap.org/export/embed.html?bbox=18.735%2C49.220%2C18.745%2C49.225&layer=mapnik&marker=49.2225%2C18.74';
       iframe.width = '100%';
@@ -37,16 +36,26 @@ const ContactMap = () => {
             </p>
           </div>
           
-          <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden relative">
+            {/* Top glow accent */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
+            
             <div 
               ref={mapContainerRef}
-              className="h-[400px] rounded-3xl overflow-hidden"
-              style={{ filter: 'grayscale(1) contrast(1.2) brightness(0.7) sepia(0.2) hue-rotate(240deg) saturate(0.8)' }}
+              className="h-[400px] rounded-3xl overflow-hidden relative"
+              style={{ 
+                filter: 'grayscale(1) contrast(1.3) brightness(0.6) sepia(0.3) hue-rotate(260deg) saturate(1.5)',
+                backgroundColor: '#020721'
+              }}
             />
+            
+            {/* Bottom accent line */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
           </div>
           
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm flex items-center justify-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]"></span>
               <strong>Adresa:</strong> Vysokoškolská 4, 010 01 Žilina, Slovensko (Budova SADOP)
             </p>
           </div>
