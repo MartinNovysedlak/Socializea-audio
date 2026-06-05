@@ -7,8 +7,9 @@ const ContactMap = () => {
 
   useEffect(() => {
     if (mapContainerRef.current) {
+      // New coordinates: 49.21302405266172, 18.747822075596567
       const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.openstreetmap.org/export/embed.html?bbox=18.735%2C49.220%2C18.745%2C49.225&layer=mapnik&marker=49.2225%2C18.74';
+      iframe.src = 'https://www.openstreetmap.org/export/embed.html?bbox=18.737%2C49.203%2C18.758%2C49.223&layer=mapnik&marker=49.21302405266172%2C18.747822075596567';
       iframe.width = '100%';
       iframe.height = '100%';
       iframe.frameBorder = '0';
@@ -44,7 +45,7 @@ const ContactMap = () => {
               ref={mapContainerRef}
               className="h-[400px] rounded-3xl overflow-hidden relative"
               style={{ 
-                filter: 'grayscale(1) contrast(1.3) brightness(0.6) sepia(0.3) hue-rotate(260deg) saturate(1.5)',
+                filter: 'grayscale(100%) contrast(1.4) brightness(0.5)',
                 backgroundColor: '#020721'
               }}
             />
