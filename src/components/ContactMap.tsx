@@ -5,11 +5,14 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+// Completely disable default Leaflet marker icons
+L.Icon.Default.prototype._getIconUrl = () => '';
+
 const ContactMap = () => {
   const mapRef = useRef<any>(null);
   const center = [49.21302405266172, 18.747822075596567];
 
-  // Custom purple/magenta marker icon (#BD20D3)
+  // Custom purple/magenta marker icon (#BD20D3) - no green!
   const customIcon = L.divIcon({
     className: 'custom-brand-marker',
     html: `
@@ -18,7 +21,6 @@ const ContactMap = () => {
         height: 42px;
         background: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png') no-repeat center/contain;
         filter: hue-rotate(280deg) saturate(3) brightness(1.2);
-        transform: rotate(0deg);
       "></div>
       <div style="
         width: 14px;
@@ -46,7 +48,6 @@ const ContactMap = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
-            {/* Top glow accent */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="text-center mb-8">
@@ -65,7 +66,6 @@ const ContactMap = () => {
                 className="w-full h-full"
                 style={{ backgroundColor: '#020721' }}
               >
-                {/* CartoDB Dark Matter - true black/white tiles */}
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                   url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -78,16 +78,16 @@ const ContactMap = () => {
                     autoClose={false}
                     className="custom-popup"
                   >
-                    <div className="text-white p-3 min-w-[200px]">
+                    <div className="p-4 min-w-[220px] text-white">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-[#BD20D3]"></div>
-                        <strong className="text-lg">Socializea-audio</strong>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#BD20D3]"></div>
+                        <span className="text-lg font-bold text-white">Socializea-audio</span>
                       </div>
-                      <p className="text-gray-300 text-sm leading-relaxed">
+                      <p className="text-gray-200 text-sm leading-relaxed mb-3">
                         Vysokoškolská 4, 010 01 Žilina<br />
-                        <span className="text-[#BD20D3]">Budova SADOP</span>
+                        <span className="text-[#BD20D3] font-medium">Budova SADOP</span>
                       </p>
-                      <div className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2 text-xs text-gray-400">
+                      <div className="pt-3 border-t border-white/10 flex items-center gap-2 text-xs text-gray-400">
                         <span>📍</span>
                         <span>49.2130° N, 18.7478° E</span>
                       </div>
@@ -97,7 +97,6 @@ const ContactMap = () => {
               </MapContainer>
             </div>
             
-            {/* Bottom accent line */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
             
             <div className="mt-6 text-center">
@@ -111,26 +110,36 @@ const ContactMap = () => {
       </div>
       
       <style jsx global>{`
+        /* Remove default Leaflet marker shadow completely */
+        .leaflet-marker-shadow {
+          display: none !important;
+        }
+        .leaflet-marker-icon.leaflet-interactive:not(.custom-brand-marker) {
+          display: none !important;
+        }
+        
         .custom-brand-marker {
           transition: transform 0.2s ease;
         }
         .custom-brand-marker:hover {
           transform: scale(1.15);
         }
+        
         .leaflet-popup-content-wrapper.custom-popup {
           background: linear-gradient(135deg, #0a0d1f 0%, #020721 100%) !important;
-          border: 1px solid #BD20D3/40 !important;
+          border: 1px solid rgba(189,32,211,0.4) !important;
           border-radius: 16px !important;
           box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(189,32,211,0.15) !important;
           padding: 0 !important;
         }
-        .leaflet-popup-content {
+        .leaflet-popup-content-wrapper.custom-popup .leaflet-popup-content {
           margin: 0 !important;
           width: auto !important;
+          color: white !important;
         }
         .leaflet-popup-tip {
           background: #020721 !important;
-          border: 1px solid #BD20D3/40 !important;
+          border: 1px solid rgba(189,32,211,0.4) !important;
           border-right: none !important;
           border-bottom: none !important;
         }
