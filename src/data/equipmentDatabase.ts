@@ -74,13 +74,13 @@ export const equipmentDatabase: EquipmentItem[] = [
     specifications: [
       "Typ mikrofónov: Dynamické, kardioidná charakteristika",
       "Pásmo: UHF (nastaviteľné frekvencie)",
-      "Výstupy: 2x XLR (samostatné) alebo 1x Jack 6.mm (mix)",
+      "Výstupy: 2x XLR (samostatné) alebo 1x Jack 6.3 mm (mix)",
       "Napájanie mikrofónov: 2x AA batéria"
     ],
     features: [
       "Duálny systém: Jeden prijímač obsluhuje obidva mikrofóny súčasne, čo šetrí miesto a kabeláž.",
       "Žiadne rušenie: Nastaviteľné frekvencie v bezpečnom pásme eliminujú riziko rušenia inými zariadeniami.",
-      "Jasný LCD displej: Neustály prehľad o stave batérie a sile signálu priamo na mikrofóne aj prijímači."
+      "Jasný LCD displej: Neustály prehľad o stave batérie a sile signálu priamo na mikrofóne aj prijíbači."
     ]
   },
   {
@@ -719,4 +719,3 @@ export const equipmentDatabase: EquipmentItem[] = [
     ]
   }
 ];
-<dyad-chat-summary>Pokračovanie v aktualizácii databázy svetelnej techniky</dyad-chat-summary>
