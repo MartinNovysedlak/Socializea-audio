@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { motion } from 'framer-motion';
 
 const ContactMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -58,18 +59,30 @@ const ContactMap = () => {
   return (
     <section id="mapa" className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8 relative z-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8 relative z-20"
+        >
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete?</h2>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             Budova SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
           </p>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] px-4 pb-4 pt-48 backdrop-blur-xl overflow-hidden -mt-48 relative z-10">
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white/5 border border-white/10 rounded-[2.5rem] px-4 pb-4 pt-48 backdrop-blur-xl overflow-hidden -mt-48 relative z-10"
+        >
           <div 
             ref={mapRef}
             className="w-full h-[650px] rounded-2xl"
           />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
