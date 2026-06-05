@@ -70,7 +70,7 @@ const ContactForm = () => {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
-                      <p className="text-white text-lg">info@socializea-audio.sk</p>
+                      <p className="text-white text-lg">socializea@socializea.com</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
