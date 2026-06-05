@@ -1,28 +1,31 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const ContactMap = () => {
-  // Coordinates for Žilina, Vysokoškolská, budova SADOP (University of Žilina area)
-  const mapCenter: [number, number] = [49.2236, 18.7428];
-  const zoomLevel = 16;
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  // Koordináty pre fialový bod v Žiline (ulica Republiky)
+  const targetCoords: [number, number] = [49.212968, 18.747859];
 
   useEffect(() => {
-    const map = L.map('contact-map', {
-      center: mapCenter,
-      zoom: zoomLevel,
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    mapInstanceRef.current = L.map(mapRef.current, {
+      center: targetCoords,
+      zoom: 17,
       zoomControl: false,
       attributionControl: false,
     });
 
-    // Dark themed tile layer to match website colors
+    // Tmavý motív mapy pre dokonalú integráciu do dizajnu
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-    }).addTo(map);
+    }).addTo(mapInstanceRef.current);
 
-    // Custom purple marker with glow effect
     const customIcon = L.divIcon({
       className: 'custom-marker',
       html: `<div style="
@@ -37,32 +40,34 @@ const ContactMap = () => {
       iconAnchor: [12, 12],
     });
 
-    L.marker(mapCenter, { icon: customIcon }).addTo(map)
+    L.marker(targetCoords, { icon: customIcon }).addTo(mapInstanceRef.current)
       .bindPopup(
-        '<div style="color: #333; font-family: sans-serif; text-align: center;"><strong>Socializea Audio</strong><br/>Vysokoškolská, budova SADOP<br/>Žilina</div>'
+        '<div style="color: #333; font-family: sans-serif; text-align: center; padding: 4px;"><strong>Socializea Audio</strong><br/>Budova SADOP<br/>Vysokoškolákov 2989/6<br/>010 08 Žilina</div>'
       );
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(mapInstanceRef.current);
 
     return () => {
-      map.remove();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
   }, []);
 
   return (
     <section id="mapa" className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete</h2>
+        <div className="text-center mb-8 relative z-20">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete?</h2>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Navštívte nás v Žiline na adrese Vysokoškolská, budova SADOP. Tešíme sa na vás!
+            Budova SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
           </p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden">
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] px-4 pb-4 pt-48 backdrop-blur-xl overflow-hidden -mt-48 relative z-10">
           <div 
-            id="contact-map" 
-            className="w-full h-[450px] rounded-2xl"
-            style={{ zIndex: 1 }}
+            ref={mapRef}
+            className="w-full h-[650px] rounded-2xl"
           />
         </div>
       </div>
