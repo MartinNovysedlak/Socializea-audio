@@ -67,9 +67,9 @@ export const equipmentDatabase: EquipmentItem[] = [
     pricePerDay: 20,
     available: 1,
     description: "Špičkový set dvoch bezdrôtových dynamických mikrofónov do ruky, navrhnutý pre moderátorov, spevákov a rečníkov. Poskytuje stabilný prenos signálu bez výpadkov.",
-    mainImage: "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg",
+    mainImage: "/media/Sada 2 mikrofónov the t.bone free solo Twin HT.jpg",
     images: [
-      "/media/Sada 4 Mikrofónov Omnitronic UHF-304.jpg"
+      "/media/Sada 2 mikrofónov the t.bone free solo Twin HT.jpg"
     ],
     specifications: [
       "Typ mikrofónov: Dynamické, kardioidná charakteristika",
@@ -80,7 +80,7 @@ export const equipmentDatabase: EquipmentItem[] = [
     features: [
       "Duálny systém: Jeden prijímač obsluhuje obidva mikrofóny súčasne, čo šetrí miesto a kabeláž.",
       "Žiadne rušenie: Nastaviteľné frekvencie v bezpečnom pásme eliminujú riziko rušenia inými zariadeniami.",
-      "Jasný LCD displej: Neustály prehľad o stave batérie a sile signálu priamo na mikrofóne aj prijíbači."
+      "Jasný LCD displej: Neustály prehľad o stave batérie a sile signálu priamo na mikrofóne aj prijímači."
     ]
   },
   {
@@ -89,7 +89,7 @@ export const equipmentDatabase: EquipmentItem[] = [
     category: "sound",
     pricePerDay: 10,
     available: 4,
-    description: "Komplexný bezdrôtový systém s dvoma mikrofónmi do ruky a dvoma hlavovými headsetmi (náhlavnými mikrofónmi). Perfektná voľba pre diskusné fóra, divadlá, konferencie či firemné teambuildingy.",
+    description: "Komplexný bezdrôtový systém s dvoma mikrofónmi do ruky and dvoma hlavovými headsetmi (náhlavnými mikrofónmi). Perfektná voľba pre diskusné fóra, divadlá, konferencie či firemné teambuildingy.",
     mainImage: "/media/Mikrofony a headsety Auna VHF.jpg",
     images: [
       "/media/Mikrofony a headsety Auna VHF.jpg"
@@ -299,7 +299,7 @@ export const equipmentDatabase: EquipmentItem[] = [
       "Ovládanie: DMX, Sound, Auto"
     ],
     features: [
-      "Dynamika pohybu: Rýchla rotácia a presné smerovanie lúčov dodajú podujatiu klubovú energiu.",
+      "Dynamika pohybu: Rýchla rotácia and presné smerovanie lúčov dodajú podujatiu klubovú energiu.",
       "Gobo a farebné koleso: Množstvo svetelných obrazcov a sýtych farieb pre rozmanitú šou."
     ]
   },
@@ -456,7 +456,7 @@ export const equipmentDatabase: EquipmentItem[] = [
       "/media/Samostatné Bodové UV svetlá.jpg"
     ],
     specifications: [
-      "Typ: UV LED diódy s vysokým výkonom a dlhou životnosťou"
+      "Typ: UV LED diódy s vysokým výkonom and dlhou životnosťou"
     ],
     features: [
       "Tajuplná atmosféra: Nenahraditeľný efekt pre tematické Halloween párty, diskotéky a retro akcie."
