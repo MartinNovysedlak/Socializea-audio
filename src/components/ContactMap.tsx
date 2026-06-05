@@ -1,28 +1,37 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 const ContactMap = () => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const center = [49.21302405266172, 18.747822075596567];
+
+  // Custom marker icon in brand color
+  const customIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'custom-marker',
+  });
 
   useEffect(() => {
-    if (mapContainerRef.current) {
-      // New coordinates: 49.21302405266172, 18.747822075596567
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.openstreetmap.org/export/embed.html?bbox=18.737%2C49.203%2C18.758%2C49.223&layer=mapnik&marker=49.21302405266172%2C18.747822075596567';
-      iframe.width = '100%';
-      iframe.height = '100%';
-      iframe.frameBorder = '0';
-      iframe.style.border = '0';
-      iframe.title = 'Mapa lokality Socializea-audio v Žiline';
-      iframe.allowFullScreen = true;
-      mapContainerRef.current.appendChild(iframe);
-
-      return () => {
-        if (mapContainerRef.current) {
-          mapContainerRef.current.innerHTML = '';
-        }
-      };
+    if (mapRef.current) {
+      mapRef.current.invalidateSize();
     }
   }, []);
 
@@ -41,14 +50,32 @@ const ContactMap = () => {
               </p>
             </div>
             
-            <div 
-              ref={mapContainerRef}
-              className="h-[400px] rounded-3xl overflow-hidden relative"
-              style={{ 
-                filter: 'grayscale(100%) contrast(1.4) brightness(0.5)',
-                backgroundColor: '#020721'
-              }}
-            />
+            <div className="h-[400px] rounded-3xl overflow-hidden relative">
+              <MapContainer
+                ref={mapRef}
+                center={center}
+                zoom={15}
+                scrollWheelZoom={false}
+                className="w-full h-full"
+                style={{ backgroundColor: '#020721' }}
+              >
+                {/* CartoDB Dark Matter - true black/white tiles */}
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  subdomains={['a', 'b', 'c', 'd']}
+                  maxZoom={19}
+                />
+                <Marker position={center} icon={customIcon}>
+                  <Popup>
+                    <div className="text-white p-1">
+                      <strong>Socializea-audio</strong><br />
+                      Vysokoškolská 4, 010 01 Žilina
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
             
             {/* Bottom accent line */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
