@@ -40,136 +40,142 @@ const ContactForm = () => {
   }
 
   return (
-    <section id="kontakt" className="py-12 bg-[#020721] relative overflow-hidden">
+    <section id="kontakt" className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-16 backdrop-blur-xl relative overflow-hidden">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
+            
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
               
-              <div className="space-y-10">
-                <div>
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
-                  <p className="text-gray-300 text-lg leading-relaxed">
-                    Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
-                  </p>
+                <div className="space-y-10">
+                  <div>
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
+                    </p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                        <Phone size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Zavolajte nám</p>
+                        <p className="text-white text-lg">+421 900 123 456</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                        <Mail size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
+                        <p className="text-white text-lg">socializea@socializea.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                        <MapPin size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Kde nás nájdete</p>
+                        <p className="text-white text-lg">Bratislava, Slovensko</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
-                      <Phone size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Zavolajte nám</p>
-                      <p className="text-white text-lg">+421 900 123 456</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
-                      <Mail size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
-                      <p className="text-white text-lg">socializea@socializea.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
-                      <MapPin size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Kde nás nájdete</p>
-                      <p className="text-white text-lg">Bratislava, Slovensko</p>
-                    </div>
-                  </div>
+                <div className="bg-black/20 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-sm">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Telefón</FormLabel>
+                              <FormControl>
+                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Dátum podujatia</FormLabel>
+                              <FormControl>
+                                <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="message"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Vaša správa</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Napíšte nám viac o vašom podujatí..." 
+                                className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full btn-cyber h-14 rounded-xl text-lg font-bold group border-none">
+                        Odoslať nezáväzný dopyt
+                        <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </Button>
+                    </form>
+                  </Form>
                 </div>
-              </div>
 
-              <div className="bg-black/20 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-sm">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Email</FormLabel>
-                            <FormControl>
-                              <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Telefón</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="date"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Dátum podujatia</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-300">Vaša správa</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Napíšte nám viac o vašom podujatí..." 
-                              className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full btn-cyber h-14 rounded-xl text-lg font-bold group border-none">
-                      Odoslať nezáväzný dopyt
-                      <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </Button>
-                  </form>
-                </Form>
               </div>
-
             </div>
+            
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
           </div>
         </div>
       </div>
