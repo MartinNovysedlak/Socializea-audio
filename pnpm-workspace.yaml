@@ -91,8 +91,8 @@ allowBuilds:
   "@serialport/bindings-cpp": true
   "@shopify/ngrok": true
   "@shopify/plugin-cloudflare": true
-  "@sitespeed.io/edgedriver": true
   "@sitespeed.io/chromedriver": true
+  "@sitespeed.io/edgedriver": true
   "@softvisio/core": true
   "@splunk/otel": true
   "@strapi/strapi": true
@@ -129,6 +129,8 @@ allowBuilds:
   canvacord: true
   canvas: true
   cbor-extract: true
+  chromedriver: true
+  chromium: true
   classic-level: true
   cld: true
   cldr-data: true
@@ -201,8 +203,6 @@ allowBuilds:
   hnswlib-node: true
   hugo-bin: true
   hummus: true
-  chromedriver: true
-  chromium: true
   ibm_db: true
   iconv: true
   iedriver: true
@@ -281,8 +281,8 @@ allowBuilds:
   phantomjs: true
   phantomjs-prebuilt: true
   pkcs11js: true
-  playwright-firefox: true
   playwright-chromium: true
+  playwright-firefox: true
   playwright-webkit: true
   pngout-bin: true
   pngquant-bin: true
