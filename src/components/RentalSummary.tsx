@@ -67,6 +67,7 @@ const RentalSummary = () => {
                   </Button>
                 </Link>
               </div>
+            </div>
             
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
           </div>
