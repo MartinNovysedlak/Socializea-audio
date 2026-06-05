@@ -58,13 +58,13 @@ const ContactMap = () => {
   return (
     <section id="mapa" className="py-12 bg-[#020721] relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8 relative z-10">
+        <div className="text-center mb-8 relative z-20">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Kde nás nájdete?</h2>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             Budova SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
           </p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden -mt-20 relative z-0">
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-4 backdrop-blur-xl overflow-hidden -mt-52 relative z-10">
           <div 
             ref={mapRef}
             className="w-full h-[650px] rounded-2xl"
