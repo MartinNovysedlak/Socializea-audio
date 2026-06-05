@@ -8,20 +8,20 @@ const ContactMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
-  // Presné súradnice pre Budovu SADOP, Vysokoškolákov 2989/6, 010 08 Žilina
-  const targetCoords: [number, number] = [49.223508, 18.742815];
+  // Presné súradnice pre Budovu SADOP (Univerzita Žilina, kampus)
+  const targetCoords: [number, number] = [49.2235, 18.7430];
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
     mapInstanceRef.current = L.map(mapRef.current, {
       center: targetCoords,
-      zoom: 16,
+      zoom: 17, // Priblíženie pre lepšiu presnosť
       zoomControl: false,
       attributionControl: false,
     });
 
-    // Tmavý motív mapy pre lepšiu integráciu do dizajnu
+    // Tmavý motív mapy pre dokonalú integráciu do dizajnu
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
     }).addTo(mapInstanceRef.current);
