@@ -5,36 +5,39 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Completely disable default Leaflet marker icons
+// Completely disable default Leaflet marker icons to prevent any fallback image leaks
 L.Icon.Default.prototype._getIconUrl = () => '';
 
 const ContactMap = () => {
   const mapRef = useRef<any>(null);
   const center = [49.21302405266172, 18.747822075596567];
 
-  // Custom purple/magenta marker icon (#BD20D3) - no green!
+  // Pure custom SVG markup for a beautiful neon magenta/purple pin - NO external images, NO hue-rotate errors!
   const customIcon = L.divIcon({
     className: 'custom-brand-marker',
     html: `
-      <div style="
-        width: 28px;
-        height: 42px;
-        background: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png') no-repeat center/contain;
-        filter: hue-rotate(280deg) saturate(3) brightness(1.2);
-      "></div>
-      <div style="
-        width: 14px;
-        height: 14px;
-        background: #BD20D3;
-        border: 3px solid #020721;
-        border-radius: 50%;
-        margin: -8px auto 0;
-        box-shadow: 0 0 12px #BD20D3, 0 0 24px #BD20D3;
-      "></div>
+      <div style="position: relative; width: 32px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <!-- Neon Glow Ring at the bottom -->
+        <div style="
+          position: absolute;
+          bottom: -2px;
+          width: 12px;
+          height: 12px;
+          background: rgba(189, 32, 211, 0.8);
+          border-radius: 50%;
+          box-shadow: 0 0 10px #BD20D3, 0 0 20px #BD20D3;
+          animation: pulse 2s infinite ease-in-out;
+        "></div>
+        <!-- High Quality SVG Map Pin (pure Magenta #BD20D3 with blue core #1A4BFF) -->
+        <svg width="32" height="42" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 8px rgba(0,0,0,0.5));">
+          <path d="M16 0C7.16 0 0 7.16 0 16C0 28 16 42 16 42C16 42 32 28 32 16C32 7.16 24.84 0 16 0ZM16 22C12.68 22 10 19.32 10 16C10 12.68 12.68 10 16 10C19.32 10 22 12.68 22 16C22 19.32 19.32 22 16 22Z" fill="#BD20D3"/>
+          <circle cx="16" cy="16" r="4" fill="#1A4BFF" />
+        </svg>
+      </div>
     `,
-    iconSize: [28, 46],
-    iconAnchor: [14, 46],
-    popupAnchor: [0, -40],
+    iconSize: [32, 46],
+    iconAnchor: [16, 44],
+    popupAnchor: [0, -42],
   });
 
   useEffect(() => {
@@ -57,7 +60,7 @@ const ContactMap = () => {
               </p>
             </div>
             
-            <div className="h-[400px] rounded-3xl overflow-hidden relative">
+            <div className="h-[400px] rounded-3xl overflow-hidden relative border border-white/5">
               <MapContainer
                 ref={mapRef}
                 center={center}
@@ -124,25 +127,34 @@ const ContactMap = () => {
         .custom-brand-marker:hover {
           transform: scale(1.15);
         }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.4); opacity: 0.3; }
+        }
         
-        .leaflet-popup-content-wrapper.custom-popup {
+        /* Overriding Leaflet classes from the custom-popup parent wrapper */
+        .custom-popup .leaflet-popup-content-wrapper {
           background: linear-gradient(135deg, #0a0d1f 0%, #020721 100%) !important;
           border: 1px solid rgba(189,32,211,0.4) !important;
           border-radius: 16px !important;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(189,32,211,0.15) !important;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(189,32,211,0.15) !important;
           padding: 0 !important;
         }
-        .leaflet-popup-content-wrapper.custom-popup .leaflet-popup-content {
+        
+        .custom-popup .leaflet-popup-content {
           margin: 0 !important;
           width: auto !important;
           color: white !important;
         }
-        .leaflet-popup-tip {
+        
+        .custom-popup .leaflet-popup-tip {
           background: #020721 !important;
           border: 1px solid rgba(189,32,211,0.4) !important;
           border-right: none !important;
           border-bottom: none !important;
         }
+        
         .leaflet-popup-close-button {
           display: none !important;
         }
