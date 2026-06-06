@@ -46,7 +46,6 @@ const Admin = () => {
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const isDraggingRef = useRef(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -124,17 +123,13 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('admin_authenticated');
     toast.info('Boli ste odhlásený.');
   };
 
-  const handleOpenAddForm = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
+  const handleOpenAddForm = () => {
     setEditingItem(null);
     setFormData({
       name: '',
@@ -175,9 +170,8 @@ const Admin = () => {
     }
   };
 
-  // Drag & Drop handlers - only from grip handle
+  // Drag & Drop handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
-    isDraggingRef.current = true;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
@@ -197,7 +191,6 @@ const Admin = () => {
   };
 
   const handleDragEnd = () => {
-    isDraggingRef.current = false;
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
@@ -268,10 +261,7 @@ const Admin = () => {
     checkAndScroll(e.clientY);
   };
 
-  const handleSaveOrder = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleSaveOrder = async () => {
     const updates = localOrder.map((item, index) => ({
       id: item.id,
       order_index: index
@@ -647,27 +637,23 @@ const Admin = () => {
                               </tr>
                             )}
                             <tr 
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, index)}
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(e) => handleDragOver(e, index)}
+                              onDragLeave={handleDragLeave}
+                              onDrop={(e) => handleDrop(e, index)}
                               className={`
-                                row-transition
+                                row-transition cursor-move
                                 ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
                               `}
                             >
-                              <td 
-                                className="px-4 py-4 cursor-grab active:cursor-grabbing"
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, index)}
-                                onDragEnd={handleDragEnd}
-                              >
+                              <td className="px-4 py-4">
                                 <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
                                   <GripVertical size={18} />
                                 </div>
                               </td>
-                              <td 
-                                className="px-6 py-4"
-                                onDragOver={(e) => handleDragOver(e, index)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, index)}
-                              >
+                              <td className="px-6 py-4">
                                 <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
                                   <img 
                                     src={displayImg} 
@@ -679,21 +665,10 @@ const Admin = () => {
                                   />
                                 </div>
                               </td>
-                              <td 
-                                className="px-6 py-4 font-semibold text-white max-w-[280px] truncate"
-                                title={item.name}
-                                onDragOver={(e) => handleDragOver(e, index)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, index)}
-                              >
+                              <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
                                 {item.name}
                               </td>
-                              <td 
-                                className="px-6 py-4"
-                                onDragOver={(e) => handleDragOver(e, index)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, index)}
-                              >
+                              <td className="px-6 py-4">
                                 <div className="flex items-center gap-2">
                                   {getCategoryIcon(item.category)}
                                   <span className="capitalize">
@@ -701,20 +676,10 @@ const Admin = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td 
-                                className="px-6 py-4 text-center font-bold text-[#BD20D3]"
-                                onDragOver={(e) => handleDragOver(e, index)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, index)}
-                              >
+                              <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
                                 {item.price_per_day} €
                               </td>
-                              <td 
-                                className="px-6 py-4 text-center"
-                                onDragOver={(e) => handleDragOver(e, index)}
-                                onDragLeave={handleDragLeave}
-                                onDrop={(e) => handleDrop(e, index)}
-                              >
+                              <td className="px-6 py-4 text-center">
                                 {item.available}
                               </td>
                               <td className="px-6 py-4 text-right">
