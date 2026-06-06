@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/data/equipmentDatabase';
 import { 
@@ -44,9 +45,9 @@ const Admin = () => {
     available: 1,
     description: '',
     mainImage: '',
-    imagesRaw: '',
-    specificationsRaw: '',
-    featuresRaw: ''
+    images: [] as string[],
+    specifications: [] as string[],
+    features: [] as string[]
   });
 
   // Overenie prihlásenia zo sessionStorage
@@ -88,9 +89,9 @@ const Admin = () => {
       available: 1,
       description: '',
       mainImage: '',
-      imagesRaw: '',
-      specificationsRaw: '',
-      featuresRaw: ''
+      images: [],
+      specifications: [],
+      features: []
     });
     setIsFormOpen(true);
   };
@@ -105,9 +106,9 @@ const Admin = () => {
       available: item.available,
       description: item.description,
       mainImage: item.mainImage || '',
-      imagesRaw: item.images ? item.images.join('\n') : '',
-      specificationsRaw: item.specifications ? item.specifications.join('\n') : '',
-      featuresRaw: item.features ? item.features.join('\n') : ''
+      images: item.images || [],
+      specifications: item.specifications || [],
+      features: item.features || []
     });
     setIsFormOpen(true);
   };
@@ -129,9 +130,7 @@ const Admin = () => {
       return;
     }
 
-    const imagesArray = formData.imagesRaw
-      ? formData.imagesRaw.split('\n').map(x => x.trim()).filter(Boolean)
-      : formData.mainImage ? [formData.mainImage.trim()] : [];
+    const mainImage = formData.mainImage.trim() || (formData.images[0] || '');
 
     const parsedItem: Omit<EquipmentItem, 'id'> = {
       name: formData.name.trim(),
@@ -139,10 +138,10 @@ const Admin = () => {
       pricePerDay: Number(formData.pricePerDay),
       available: Number(formData.available),
       description: formData.description.trim(),
-      mainImage: formData.mainImage.trim() || (imagesArray[0] || ''),
-      images: imagesArray,
-      specifications: formData.specificationsRaw.split('\n').map(x => x.trim()).filter(Boolean),
-      features: formData.featuresRaw.split('\n').map(x => x.trim()).filter(Boolean)
+      mainImage: mainImage,
+      images: formData.images,
+      specifications: formData.specifications,
+      features: formData.features
     };
 
     if (editingItem) {
@@ -355,36 +354,28 @@ const Admin = () => {
                     />
                   </div>
 
+                  {/* Dynamic Bubble Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Galéria obrázkov (jeden riadok = jedna URL)</Label>
-                      <Textarea
-                        value={formData.imagesRaw}
-                        onChange={(e) => setFormData(p => ({ ...p, imagesRaw: e.target.value }))}
-                        placeholder="/media/obr1.jpg&#10;/media/obr2.jpg"
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[120px] font-mono text-sm"
-                      />
-                    </div>
+                    <DynamicBubbleInput
+                      label="Galéria obrázkov"
+                      placeholder="Zadajte URL obrázku..."
+                      items={formData.images}
+                      onChange={(images) => setFormData(p => ({ ...p, images }))}
+                    />
 
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Technické parametre (jeden riadok = jeden parameter)</Label>
-                      <Textarea
-                        value={formData.specificationsRaw}
-                        onChange={(e) => setFormData(p => ({ ...p, specificationsRaw: e.target.value }))}
-                        placeholder="Frekvencia: 40 Hz - 200 Hz&#10;Výkon: 1000W RMS"
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[120px] font-mono text-sm"
-                      />
-                    </div>
+                    <DynamicBubbleInput
+                      label="Technické parametre"
+                      placeholder="Napr. Frekvencia: 40 Hz - 200 Hz"
+                      items={formData.specifications}
+                      onChange={(specifications) => setFormData(p => ({ ...p, specifications }))}
+                    />
 
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Kľúčové vlastnosti (jeden riadok = jedna vlastnosť)</Label>
-                      <Textarea
-                        value={formData.featuresRaw}
-                        onChange={(e) => setFormData(p => ({ ...p, featuresRaw: e.target.value }))}
-                        placeholder="Vysoký akustický výkon&#10;Robustná drevená konštrukcia"
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[120px] font-mono text-sm"
-                      />
-                    </div>
+                    <DynamicBubbleInput
+                      label="Kľúčové vlastnosti"
+                      placeholder="Napr. Vysoký akustický výkon"
+                      items={formData.features}
+                      onChange={(features) => setFormData(p => ({ ...p, features }))}
+                    />
                   </div>
 
                   <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
