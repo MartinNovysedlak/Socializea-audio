@@ -11,8 +11,8 @@ import {
   MessageSquare, 
   Plus, 
   Minus,
-  CheckCircle,
-  Clock
+  Clock,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ interface FloatingCartProps {
 
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -130,16 +131,71 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   return (
     <>
-      {/* FLOATING ACTION BUTTON */}
-      <div className="fixed bottom-8 right-8 z-[999] animate-bounce">
+      {/* FLOATING ACTION BUTTON WITH HOVER PREVIEW */}
+      <div 
+        className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* HOVER PREVIEW CONTAINER */}
+        {isHovered && !isOpen && (
+          <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">
+              Položky v košíku
+            </h4>
+            
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              {cartItems.map(({ item, qty }) => {
+                const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
+                return (
+                  <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
+                    <img 
+                      src={img} 
+                      alt="" 
+                      className="w-8 h-8 rounded object-cover border border-white/10" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
+                      }}
+                    />
+                    <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
+                    <span className="truncate flex-grow">{item.name}</span>
+                    <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
+              <span className="text-gray-400">Celkom na deň:</span>
+              <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
+            </div>
+            
+            <button 
+              onClick={() => setIsOpen(true)}
+              className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1"
+            >
+              <span>Otvoriť rezerváciu</span>
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
+
+        {/* CART TRIGGER BUTTON */}
         <button
           onClick={() => setIsOpen(true)}
-          className="relative flex items-center justify-center w-16 h-16 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-110 active:scale-95 group border-none"
+          className="relative flex items-center justify-between gap-3 h-14 pl-5 pr-4 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none"
         >
-          <ShoppingBag size={28} className="text-white group-hover:rotate-12 transition-transform" />
-          <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
-            {totalItems}
-          </span>
+          <div className="flex flex-col items-start pr-2 border-r border-white/20">
+            <span className="text-[10px] text-white/70 uppercase font-semibold leading-tight">Suma prenájmu</span>
+            <span className="text-white font-extrabold text-sm leading-tight">{subtotalPerDay.toFixed(2)} € / d</span>
+          </div>
+          
+          <div className="relative flex items-center justify-center">
+            <ShoppingBag size={22} className="text-white group-hover:rotate-12 transition-transform" />
+            <span className="absolute -top-2 -right-2 bg-white text-[#BD20D3] font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
+              {totalItems}
+            </span>
+          </div>
         </button>
       </div>
 
@@ -355,7 +411,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </Label>
                       <Textarea
                         id="message"
-                        placeholder="Napr. Potrebujem dovoz a montáž, typ svadby..."
+                        placeholder="Napíšte nám podrobnosti..."
                         value={formData.message}
                         onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                         className="bg-black/50 border-white/10 text-white rounded-xl min-h-[80px]"

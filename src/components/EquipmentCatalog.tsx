@@ -164,7 +164,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                           <Button
                             onClick={() => handleAdd(item.id)}
                             size="sm"
-                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-lg h-10 mb-4 transition-all"
+                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg h-10 mb-4 transition-all"
                           >
                             <ShoppingBag size={14} className="mr-2" />
                             Pridať do košíka
@@ -174,9 +174,9 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                             onClick={() => handleAdd(item.id)}
                             disabled={inCartQty >= item.available}
                             size="sm"
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-10 mb-4 transition-all"
+                            className="w-full btn-cyber hover:opacity-95 text-white rounded-lg h-10 mb-4 transition-all border-none"
                           >
-                            <Check size={14} className="mr-2" />
+                            <Check size={14} className="mr-2 animate-pulse" />
                             V košíku ({inCartQty})
                           </Button>
                         )}
