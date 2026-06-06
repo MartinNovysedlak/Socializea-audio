@@ -123,13 +123,17 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsAuthenticated(false);
     sessionStorage.removeItem('admin_authenticated');
     toast.info('Boli ste odhlásený.');
   };
 
-  const handleOpenAddForm = () => {
+  const handleOpenAddForm = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     setEditingItem(null);
     setFormData({
       name: '',
@@ -144,7 +148,11 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  const handleOpenEditForm = (item: EquipmentItem) => {
+  const handleOpenEditForm = (e: React.MouseEvent, item: EquipmentItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    
     setEditingItem(item);
     setFormData({
       name: item.name,
@@ -159,7 +167,11 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  const handleDeleteItem = async (id: string, name: string) => {
+  const handleDeleteItem = async (e: React.MouseEvent, id: string, name: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    
     if (window.confirm(`Naozaj chcete vymazať produkt: "${name}"?`)) {
       const success = await deleteEquipment(id);
       if (success) {
@@ -261,7 +273,10 @@ const Admin = () => {
     checkAndScroll(e.clientY);
   };
 
-  const handleSaveOrder = async () => {
+  const handleSaveOrder = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const updates = localOrder.map((item, index) => ({
       id: item.id,
       order_index: index
@@ -644,17 +659,26 @@ const Admin = () => {
                               onDragLeave={handleDragLeave}
                               onDrop={(e) => handleDrop(e, index)}
                               className={`
-                                row-transition cursor-move
+                                row-transition
                                 ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
                               `}
+                              onPointerDown={(e) => {
+                                // Only handle drag on the grip column
+                                const target = e.target as HTMLElement;
+                                if (!target.closest('button') && target.closest('td:first-child')) {
+                                  e.currentTarget.draggable = true;
+                                } else if (!target.closest('td:first-child')) {
+                                  e.currentTarget.draggable = false;
+                                }
+                              }}
                             >
                               <td className="px-4 py-4">
-                                <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
+                                <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors cursor-grab active:cursor-grabbing">
                                   <GripVertical size={18} />
                                 </div>
                               </td>
                               <td className="px-6 py-4">
-                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 shrink-0">
                                   <img 
                                     src={displayImg} 
                                     alt={item.name} 
@@ -685,7 +709,7 @@ const Admin = () => {
                               <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <Button
-                                    onClick={() => handleOpenEditForm(item)}
+                                    onClick={(e) => handleOpenEditForm(e, item)}
                                     size="sm"
                                     className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
                                     title="Upraviť"
@@ -694,7 +718,7 @@ const Admin = () => {
                                     <span className="hidden sm:inline">Upraviť</span>
                                   </Button>
                                   <Button
-                                    onClick={() => handleDeleteItem(item.id, item.name)}
+                                    onClick={(e) => handleDeleteItem(e, item.id, item.name)}
                                     size="sm"
                                     variant="outline"
                                     className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
