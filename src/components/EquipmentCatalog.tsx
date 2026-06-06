@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter, Minus, Plus } from "lucide-react";
+import { Filter, Minus, Plus, Volume2, Lightbulb, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEquipment } from "@/hooks/useEquipment";
@@ -37,6 +37,22 @@ const EquipmentCatalog = () => {
       case "lighting": return "Svetlá a efekty";
       case "other": return "Ostatné";
       default: return "";
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "sound": return <Volume2 size={13} />;
+      case "lighting": return <Lightbulb size={13} />;
+      default: return <Layers size={13} />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "sound": return { bg: "bg-cyan-500/10", border: "border-cyan-500/25", text: "text-cyan-400", icon: "text-cyan-400" };
+      case "lighting": return { bg: "bg-amber-500/10", border: "border-amber-500/25", text: "text-amber-400", icon: "text-amber-400" };
+      default: return { bg: "bg-purple-500/10", border: "border-purple-500/25", text: "text-purple-400", icon: "text-purple-400" };
     }
   };
 
@@ -106,6 +122,7 @@ const EquipmentCatalog = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => {
                   const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
+                  const catColor = getCategoryColor(item.category);
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
@@ -120,9 +137,11 @@ const EquipmentCatalog = () => {
                             }}
                             style={{ objectPosition: "center" }}
                           />
-                          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-full px-3 py-1">
-                            <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">{getCategoryLabel(item.category)}</span>
-                          </div>
+                        </div>
+
+                        <div className={`inline-flex items-center gap-1.5 ${catColor.bg} border ${catColor.border} rounded-full px-3 py-1 mb-3`}>
+                          <span className={catColor.icon}>{getCategoryIcon(item.category)}</span>
+                          <span className={`text-xs font-semibold ${catColor.text} whitespace-nowrap`}>{getCategoryLabel(item.category)}</span>
                         </div>
 
                         <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2 line-clamp-2">
