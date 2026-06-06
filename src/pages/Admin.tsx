@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,8 +25,6 @@ import {
   Layers, 
   Save, 
   X,
-  ChevronUp,
-  ChevronDown,
   GripVertical
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,6 +39,11 @@ const Admin = () => {
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
   const [localOrder, setLocalOrder] = useState<EquipmentItem[]>([]);
   const [hasOrderChanges, setHasOrderChanges] = useState(false);
+
+  // Drag & Drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragItemRef = useRef<number | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -126,20 +129,58 @@ const Admin = () => {
     }
   };
 
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const newOrder = [...localOrder];
-    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
-    setLocalOrder(newOrder);
-    setHasOrderChanges(true);
+  // Drag & Drop handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    dragItemRef.current = index;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    
+    // Add dragging class for visual feedback
+    const target = e.target as HTMLElement;
+    target.style.opacity = '0.5';
   };
 
-  const handleMoveDown = (index: number) => {
-    if (index === localOrder.length - 1) return;
+  const handleDragEnd = (e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+    
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    dragItemRef.current = null;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    if (dragItemRef.current !== null && dragItemRef.current !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
     const newOrder = [...localOrder];
-    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    const [draggedItem] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(dropIndex, 0, draggedItem);
+    
     setLocalOrder(newOrder);
     setHasOrderChanges(true);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+    dragItemRef.current = null;
   };
 
   const handleSaveOrder = async () => {
@@ -450,7 +491,7 @@ const Admin = () => {
                     Zoznam všetkých produktov ({localOrder.length})
                   </CardTitle>
                   <p className="text-gray-400 text-sm mt-1">
-                    Použite šípku hore/dole pre zmenu poradia. Poradie sa automaticky prejaví na webe.
+                    Pretiahnite produkt myšou pre zmenu poradia. Poradie sa automaticky prejaví na webe.
                   </p>
                 </div>
                 {hasOrderChanges && (
@@ -471,7 +512,7 @@ const Admin = () => {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
-                        <th className="px-4 py-4 w-20 text-center">Poradie</th>
+                        <th className="px-4 py-4 w-16 text-center"></th>
                         <th className="px-6 py-4">Obrázok</th>
                         <th className="px-6 py-4">Názov</th>
                         <th className="px-6 py-4">Kategória</th>
@@ -484,26 +525,21 @@ const Admin = () => {
                       {localOrder.map((item, index) => {
                         const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                         return (
-                          <tr key={item.id} className="hover:bg-white/2 transition-colors">
+                          <tr 
+                            key={item.id} 
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            className={`hover:bg-white/2 transition-colors cursor-move ${
+                              dragOverIndex === index ? 'bg-[#BD20D3]/10 border-t-2 border-t-[#BD20D3]' : ''
+                            } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                          >
                             <td className="px-4 py-4">
-                              <div className="flex flex-col items-center gap-1">
-                                <button
-                                  onClick={() => handleMoveUp(index)}
-                                  disabled={index === 0}
-                                  className="w-7 h-7 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                  title="Presunúť hore"
-                                >
-                                  <ChevronUp size={14} />
-                                </button>
-                                <span className="text-xs font-bold text-[#BD20D3]">{index + 1}</span>
-                                <button
-                                  onClick={() => handleMoveDown(index)}
-                                  disabled={index === localOrder.length - 1}
-                                  className="w-7 h-7 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                                  title="Presunúť dole"
-                                >
-                                  <ChevronDown size={14} />
-                                </button>
+                              <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
+                                <GripVertical size={18} />
                               </div>
                             </td>
                             <td className="px-6 py-4">
