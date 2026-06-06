@@ -16,6 +16,7 @@ export type EquipmentItem = {
   images: string[];
   specifications: string[];
   features: string[];
+  order_index: number;
   created_at: string;
   updated_at: string;
 };

@@ -1,11 +1,11 @@
 import { supabase, EquipmentItem } from './supabase';
 
 export const equipmentService = {
-  // Načítať všetky produkty
   async getAll(): Promise<EquipmentItem[]> {
     const { data, error } = await supabase
       .from('equipment')
       .select('*')
+      .order('order_index', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -16,7 +16,6 @@ export const equipmentService = {
     return data || [];
   },
 
-  // Načítať jeden produkt podľa ID
   async getById(id: string): Promise<EquipmentItem | null> {
     const { data, error } = await supabase
       .from('equipment')
@@ -32,7 +31,6 @@ export const equipmentService = {
     return data;
   },
 
-  // Pridať nový produkt
   async create(item: {
     name: string;
     category: 'sound' | 'lighting' | 'other';
@@ -44,6 +42,15 @@ export const equipmentService = {
     specifications: string[];
     features: string[];
   }): Promise<EquipmentItem | null> {
+    const { data: maxOrderData } = await supabase
+      .from('equipment')
+      .select('order_index')
+      .order('order_index', { ascending: false })
+      .limit(1)
+      .single();
+
+    const newOrderIndex = (maxOrderData?.order_index ?? -1) + 1;
+
     const { data, error } = await supabase
       .from('equipment')
       .insert({
@@ -55,7 +62,8 @@ export const equipmentService = {
         main_image: item.mainImage || null,
         images: item.images,
         specifications: item.specifications,
-        features: item.features
+        features: item.features,
+        order_index: newOrderIndex
       })
       .select()
       .single();
@@ -68,7 +76,6 @@ export const equipmentService = {
     return data;
   },
 
-  // Aktualizovať produkt
   async update(id: string, item: {
     name?: string;
     category?: 'sound' | 'lighting' | 'other';
@@ -107,7 +114,25 @@ export const equipmentService = {
     return data;
   },
 
-  // Vymazať produkt
+  async updateOrder(updates: { id: string; order_index: number }[]): Promise<boolean> {
+    const promises = updates.map(({ id, order_index }) =>
+      supabase
+        .from('equipment')
+        .update({ order_index })
+        .eq('id', id)
+    );
+
+    const results = await Promise.all(promises);
+    const hasError = results.some(r => r.error);
+
+    if (hasError) {
+      console.error('Error updating order:', results);
+      return false;
+    }
+
+    return true;
+  },
+
   async delete(id: string): Promise<boolean> {
     const { error } = await supabase
       .from('equipment')
@@ -122,7 +147,6 @@ export const equipmentService = {
     return true;
   },
 
-  // Nahrať obrázok
   async uploadImage(file: File): Promise<string | null> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -144,7 +168,6 @@ export const equipmentService = {
     return data.publicUrl;
   },
 
-  // Vymazať obrázok
   async deleteImage(url: string): Promise<boolean> {
     const path = url.split('/').pop();
     if (!path) return false;

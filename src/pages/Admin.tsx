@@ -12,6 +12,7 @@ import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/lib/supabase';
+import { equipmentService } from '@/lib/equipmentService';
 import { 
   Lock, 
   LogOut, 
@@ -23,7 +24,10 @@ import {
   Lightbulb, 
   Layers, 
   Save, 
-  X
+  X,
+  ChevronUp,
+  ChevronDown,
+  GripVertical
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -35,6 +39,8 @@ const Admin = () => {
   const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, refetch } = useEquipment();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+  const [localOrder, setLocalOrder] = useState<EquipmentItem[]>([]);
+  const [hasOrderChanges, setHasOrderChanges] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -53,6 +59,10 @@ const Admin = () => {
       setIsAuthenticated(true);
     }
   }, []);
+
+  useEffect(() => {
+    setLocalOrder([...equipment]);
+  }, [equipment]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +123,38 @@ const Admin = () => {
       } else {
         toast.error('Chyba pri mazaní produktu.');
       }
+    }
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...localOrder];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    setLocalOrder(newOrder);
+    setHasOrderChanges(true);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index === localOrder.length - 1) return;
+    const newOrder = [...localOrder];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    setLocalOrder(newOrder);
+    setHasOrderChanges(true);
+  };
+
+  const handleSaveOrder = async () => {
+    const updates = localOrder.map((item, index) => ({
+      id: item.id,
+      order_index: index
+    }));
+
+    const success = await equipmentService.updateOrder(updates);
+    if (success) {
+      toast.success('Poradie bolo úspešne uložené!');
+      setHasOrderChanges(false);
+      refetch();
+    } else {
+      toast.error('Chyba pri ukladaní poradia.');
     }
   };
 
@@ -239,7 +281,7 @@ const Admin = () => {
                   <h1 className="text-3xl font-extrabold text-white">Správa produktov</h1>
                 </div>
                 <p className="text-gray-400 mt-1">
-                  Spravujte ponuku svojej techniky, pridávajte nové kusy a aktualizujte ceny.
+                  Spravujte ponoku svojej techniky, pridávajte nové kusy a aktualizujte ceny.
                 </p>
               </div>
 
@@ -402,10 +444,24 @@ const Admin = () => {
             )}
 
             <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
-              <CardHeader className="border-b border-white/10 px-6 py-5">
-                <CardTitle className="text-xl font-bold text-white">
-                  Zoznam všetkých produktov ({equipment.length})
-                </CardTitle>
+              <CardHeader className="border-b border-white/10 px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle className="text-xl font-bold text-white">
+                    Zoznam všetkých produktov ({localOrder.length})
+                  </CardTitle>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Použite šípku hore/dole pre zmenu poradia. Poradie sa automaticky prejaví na webe.
+                  </p>
+                </div>
+                {hasOrderChanges && (
+                  <Button
+                    onClick={handleSaveOrder}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 px-5"
+                  >
+                    <Save size={16} className="mr-2" />
+                    Uložiť poradie
+                  </Button>
+                )}
               </CardHeader>
               
               {loading ? (
@@ -415,6 +471,7 @@ const Admin = () => {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                        <th className="px-4 py-4 w-20 text-center">Poradie</th>
                         <th className="px-6 py-4">Obrázok</th>
                         <th className="px-6 py-4">Názov</th>
                         <th className="px-6 py-4">Kategória</th>
@@ -424,10 +481,31 @@ const Admin = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                      {equipment.map((item) => {
+                      {localOrder.map((item, index) => {
                         const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                         return (
                           <tr key={item.id} className="hover:bg-white/2 transition-colors">
+                            <td className="px-4 py-4">
+                              <div className="flex flex-col items-center gap-1">
+                                <button
+                                  onClick={() => handleMoveUp(index)}
+                                  disabled={index === 0}
+                                  className="w-7 h-7 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                  title="Presunúť hore"
+                                >
+                                  <ChevronUp size={14} />
+                                </button>
+                                <span className="text-xs font-bold text-[#BD20D3]">{index + 1}</span>
+                                <button
+                                  onClick={() => handleMoveDown(index)}
+                                  disabled={index === localOrder.length - 1}
+                                  className="w-7 h-7 rounded-md bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                  title="Presunúť dole"
+                                >
+                                  <ChevronDown size={14} />
+                                </button>
+                              </div>
+                            </td>
                             <td className="px-6 py-4">
                               <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
                                 <img 
@@ -482,9 +560,9 @@ const Admin = () => {
                           </tr>
                         );
                       })}
-                      {equipment.length === 0 && (
+                      {localOrder.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
+                          <td colSpan={7} className="px-6 py-12 text-center text-gray-500 italic">
                             V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
                           </td>
                         </tr>
