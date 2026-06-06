@@ -1,16 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter, Minus, Plus, Volume2, Lightbulb, Layers } from "lucide-react";
+import { Filter, Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useEquipment } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
 
-const EquipmentCatalog = () => {
-  const { equipment, loading } = useEquipment();
+interface EquipmentCatalogProps {
+  equipment: EquipmentItem[];
+  loading: boolean;
+  quantities: Record<string, number>;
+  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+}
+
+const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: EquipmentCatalogProps) => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const filteredEquipment = activeFilter === "all"
     ? equipment
@@ -123,6 +127,7 @@ const EquipmentCatalog = () => {
                 {filteredEquipment.map((item) => {
                   const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                   const catColor = getCategoryColor(item.category);
+                  const inCartQty = quantities[item.id] ?? 0;
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
@@ -155,13 +160,26 @@ const EquipmentCatalog = () => {
                           <span className="text-gray-400 text-sm">Dostupné: {getAvailabilityText(item.available)}</span>
                         </div>
 
-                        <Button
-                          size="sm"
-                          className="w-full bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 rounded-lg h-10 mb-4"
-                          disabled={!quantities[item.id]}
-                        >
-                          Pridať do kalkulácie
-                        </Button>
+                        {inCartQty === 0 ? (
+                          <Button
+                            onClick={() => handleAdd(item.id)}
+                            size="sm"
+                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-lg h-10 mb-4 transition-all"
+                          >
+                            <ShoppingBag size={14} className="mr-2" />
+                            Pridať do košíka
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => handleAdd(item.id)}
+                            disabled={inCartQty >= item.available}
+                            size="sm"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-10 mb-4 transition-all"
+                          >
+                            <Check size={14} className="mr-2" />
+                            V košíku ({inCartQty})
+                          </Button>
+                        )}
 
                         <div className="flex items-center justify-center gap-2">
                           <button
