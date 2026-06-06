@@ -121,9 +121,17 @@ const Admin = () => {
   // Submit Add or Edit Form
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    if (!formData.name.trim() || !formData.description.trim()) {
-      toast.error('Meno a popis sú povinné polia!');
+    console.log('Form submitted', formData);
+
+    if (!formData.name.trim()) {
+      toast.error('Názov produktu je povinný!');
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      toast.error('Popis produktu je povinný!');
       return;
     }
 
@@ -257,6 +265,7 @@ const Admin = () => {
             {isFormOpen && (
               <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/30 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/5">
                 <button 
+                  type="button"
                   onClick={() => setIsFormOpen(false)}
                   className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
                 >
