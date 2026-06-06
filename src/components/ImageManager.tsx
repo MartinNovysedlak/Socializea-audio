@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Upload, Trash2, ArrowLeft, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { Upload, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ImageManagerProps {
@@ -15,13 +15,49 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Convert File to Base64
-  const fileToBase64 = (file: File): Promise<string> => {
+  // Kompresia a zmenšenie obrázku pomocou HTML5 Canvas
+  const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800; // Maximálna šírka pre optimálnu veľkosť v localStorage
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(event.target?.result as string); // fallback na originál ak canvas zlyhá
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Kompresia do formátu JPEG s kvalitou 0.7 (vynikajúci pomer veľkosť/kvalita)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
     });
   };
 
@@ -33,16 +69,15 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       return;
     }
 
-    const toastId = toast.loading('Nahrávam a spracovávam obrázky...');
+    const toastId = toast.loading('Optimalizujem a nahrávam obrázky...');
 
     try {
-      const base64Promises = validImageFiles.map(file => fileToBase64(file));
-      const newBase64Images = await Promise.all(base64Promises);
+      const compressedPromises = validImageFiles.map(file => compressImage(file));
+      const newCompressedImages = await Promise.all(compressedPromises);
       
-      // Merge with existing images
-      onChange([...images, ...newBase64Images]);
+      onChange([...images, ...newCompressedImages]);
       toast.dismiss(toastId);
-      toast.success('Obrázky boli úspešne nahrané!');
+      toast.success('Obrázky boli úspešne optimalizované a nahrané!');
     } catch (error) {
       toast.dismiss(toastId);
       toast.error('Chyba pri spracovaní obrázkov.');
@@ -127,7 +162,7 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
         </div>
         <div>
           <p className="text-white font-medium">Kliknite sem alebo pretiahnite súbory na nahranie</p>
-          <p className="text-gray-400 text-xs mt-1">Podporuje JPG, PNG, WEBP</p>
+          <p className="text-gray-400 text-xs mt-1">Podporuje JPG, PNG, WEBP (fotky sa automaticky skomprimujú)</p>
         </div>
       </div>
 
