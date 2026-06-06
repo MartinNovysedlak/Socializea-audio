@@ -12,7 +12,7 @@ import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/lib/supabase';
-import { equipmentService } from '@/lib/equipmentService';
+import { seedEquipmentData } from '@/data/seedEquipment';
 import { 
   Lock, 
   LogOut, 
@@ -24,7 +24,9 @@ import {
   Lightbulb, 
   Layers, 
   Save, 
-  X 
+  X,
+  DatabaseBackup,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,8 +34,9 @@ const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment } = useEquipment();
+  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, refetch } = useEquipment();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
 
@@ -113,6 +116,49 @@ const Admin = () => {
         toast.success('Produkt úspešne vymazaný.');
       } else {
         toast.error('Chyba pri mazaní produktu.');
+      }
+    }
+  };
+
+  const handleSeedDatabase = async () => {
+    if (window.confirm(`Chystáte sa importovať ${seedEquipmentData.length} predvolených produktov priamo do Supabase databázy. Chcete pokračovať?`)) {
+      setIsSeeding(true);
+      const loadingToastId = toast.loading(`Importujem produkty (0/${seedEquipmentData.length})...`);
+      
+      try {
+        let successCount = 0;
+        for (let i = 0; i < seedEquipmentData.length; i++) {
+          const item = seedEquipmentData[i];
+          const newItem = await addEquipment({
+            name: item.name,
+            category: item.category,
+            pricePerDay: item.pricePerDay,
+            available: item.available,
+            description: item.description,
+            images: item.images,
+            specifications: item.specifications,
+            features: item.features
+          });
+          
+          if (newItem) {
+            successCount++;
+          }
+          
+          // Aktualizácia toast statusu
+          toast.loading(`Importujem produkty (${successCount}/${seedEquipmentData.length})...`, {
+            id: loadingToastId
+          });
+        }
+        
+        toast.dismiss(loadingToastId);
+        toast.success(`Import dokončený! Úspešne nahraných ${successCount} z ${seedEquipmentData.length} produktov.`);
+        refetch();
+      } catch (err) {
+        toast.dismiss(loadingToastId);
+        toast.error("Vyskytla sa chyba počas hromadného importu.");
+        console.error(err);
+      } finally {
+        setIsSeeding(false);
       }
     }
   };
@@ -244,7 +290,21 @@ const Admin = () => {
                 </p>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={handleSeedDatabase}
+                  disabled={isSeeding}
+                  variant="outline"
+                  className="border-[#BD20D3]/40 bg-[#BD20D3]/10 text-white hover:bg-[#BD20D3]/20 rounded-xl h-11 px-5 disabled:opacity-40"
+                >
+                  {isSeeding ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <DatabaseBackup size={18} className="mr-2" />
+                  )}
+                  Importovať prednastavené
+                </Button>
+
                 <Button 
                   onClick={handleOpenAddForm}
                   className="btn-cyber rounded-xl h-11 px-6 border-none"
@@ -480,7 +540,7 @@ const Admin = () => {
                       {equipment.length === 0 && (
                         <tr>
                           <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
-                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
+                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie, alebo kliknite na tlačidlo "Importovať prednastavené" pre nahratie celej tvojej ponuky!
                           </td>
                         </tr>
                       )}

@@ -33,7 +33,17 @@ export const equipmentService = {
   },
 
   // Pridať nový produkt
-  async create(item: Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>): Promise<EquipmentItem | null> {
+  async create(item: {
+    name: string;
+    category: 'sound' | 'lighting' | 'other';
+    pricePerDay: number;
+    available: number;
+    description: string;
+    mainImage?: string;
+    images: string[];
+    specifications: string[];
+    features: string[];
+  }): Promise<EquipmentItem | null> {
     const { data, error } = await supabase
       .from('equipment')
       .insert({
@@ -42,7 +52,7 @@ export const equipmentService = {
         price_per_day: item.pricePerDay,
         available: item.available,
         description: item.description,
-        main_image: item.mainImage,
+        main_image: item.mainImage || null,
         images: item.images,
         specifications: item.specifications,
         features: item.features
@@ -59,7 +69,17 @@ export const equipmentService = {
   },
 
   // Aktualizovať produkt
-  async update(id: string, item: Partial<Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>>): Promise<EquipmentItem | null> {
+  async update(id: string, item: {
+    name?: string;
+    category?: 'sound' | 'lighting' | 'other';
+    pricePerDay?: number;
+    available?: number;
+    description?: string;
+    mainImage?: string;
+    images?: string[];
+    specifications?: string[];
+    features?: string[];
+  }): Promise<EquipmentItem | null> {
     const updateData: any = {};
     
     if (item.name !== undefined) updateData.name = item.name;

@@ -17,7 +17,17 @@ export function useEquipment() {
     fetchEquipment();
   }, []);
 
-  const addEquipment = async (item: Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>) => {
+  const addEquipment = async (item: {
+    name: string;
+    category: 'sound' | 'lighting' | 'other';
+    pricePerDay: number;
+    available: number;
+    description: string;
+    mainImage?: string;
+    images: string[];
+    specifications: string[];
+    features: string[];
+  }) => {
     const newItem = await equipmentService.create(item);
     if (newItem) {
       setEquipment(prev => [newItem, ...prev]);
@@ -25,7 +35,17 @@ export function useEquipment() {
     return newItem;
   };
 
-  const updateEquipment = async (id: string, updatedItem: Partial<Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>>) => {
+  const updateEquipment = async (id: string, updatedItem: {
+    name?: string;
+    category?: 'sound' | 'lighting' | 'other';
+    pricePerDay?: number;
+    available?: number;
+    description?: string;
+    mainImage?: string;
+    images?: string[];
+    specifications?: string[];
+    features?: string[];
+  }) => {
     const updated = await equipmentService.update(id, updatedItem);
     if (updated) {
       setEquipment(prev => prev.map(item => item.id === id ? updated : item));
