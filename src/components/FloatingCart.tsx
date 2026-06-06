@@ -68,11 +68,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const subtotalPerDay = getSubtotal();
   const baseTotal = subtotalPerDay * days;
   
-  // Apply 15% discount for rentals of 3 or more days
   const discount = days >= 3 ? baseTotal * 0.15 : 0;
   const grandTotal = baseTotal - discount;
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -113,7 +111,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       description: "Náš tím vás bude čoskoro kontaktovať pre potvrdenie rezervácie."
     });
 
-    // Reset state
     setQuantities({});
     setFormData({
       firstName: "",
@@ -183,19 +180,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         {/* CART TRIGGER BUTTON */}
         <button
           onClick={() => setIsOpen(true)}
-          className="relative flex items-center justify-between gap-3 h-14 pl-5 pr-4 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none"
+          className="relative flex items-center justify-center w-16 h-16 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none"
         >
-          <div className="flex flex-col items-start pr-2 border-r border-white/20">
-            <span className="text-[10px] text-white/70 uppercase font-semibold leading-tight">Suma prenájmu</span>
-            <span className="text-white font-extrabold text-sm leading-tight">{subtotalPerDay.toFixed(2)} € / d</span>
-          </div>
-          
-          <div className="relative flex items-center justify-center">
-            <ShoppingBag size={22} className="text-white group-hover:rotate-12 transition-transform" />
-            <span className="absolute -top-2 -right-2 bg-white text-[#BD20D3] font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
-              {totalItems}
-            </span>
-          </div>
+          <ShoppingBag size={28} className="text-white group-hover:rotate-12 transition-transform" />
+          <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
+            {totalItems}
+          </span>
         </button>
       </div>
 

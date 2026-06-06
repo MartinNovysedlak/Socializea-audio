@@ -64,13 +64,6 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
     return `${available} ${available === 1 ? "kus" : "kusy"}`;
   };
 
-  const getTotalSum = () => {
-    return Object.entries(quantities).reduce((sum, [id, qty]) => {
-      const item = equipment.find((i) => i.id === id);
-      return sum + (item ? item.price_per_day * qty : 0);
-    }, 0);
-  };
-
   if (loading) {
     return (
       <section className="py-12 bg-[#020721] relative">
@@ -109,12 +102,6 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="mb-8 text-center">
-              <div className="inline-block bg-[#BD20D3]/20 border border-[#BD20D3]/40 rounded-full px-8 py-3">
-                <span className="text-[#BD20D3] font-bold text-lg">Celková suma: {getTotalSum()} €</span>
               </div>
             </div>
 
@@ -205,7 +192,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
               </div>
             )}
             
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
+            <div className="absolute bottom-0 left-1-2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
           </div>
         </div>
       </div>
