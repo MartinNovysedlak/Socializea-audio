@@ -1,70 +1,76 @@
-"use client";
-
 import { useState, useEffect } from 'react';
-import { equipmentDatabase, EquipmentItem } from '@/data/equipmentDatabase';
-
-const STORAGE_KEY = 'socializea_equipment_data';
-
-export function getStoredEquipment(): EquipmentItem[] {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(equipmentDatabase));
-    return equipmentDatabase;
-  }
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return equipmentDatabase;
-  }
-}
+import { equipmentService } from '@/lib/equipmentService';
+import { EquipmentItem } from '@/lib/supabase';
 
 export function useEquipment() {
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setEquipment(getStoredEquipment());
-  }, []);
-
-  const saveEquipment = (newItems: EquipmentItem[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
-    setEquipment(newItems);
-    window.dispatchEvent(new Event('equipment-updated'));
+  const fetchEquipment = async () => {
+    setLoading(true);
+    const data = await equipmentService.getAll();
+    setEquipment(data);
+    setLoading(false);
   };
 
   useEffect(() => {
-    const handleUpdate = () => {
-      setEquipment(getStoredEquipment());
-    };
-    window.addEventListener('equipment-updated', handleUpdate);
-    return () => window.removeEventListener('equipment-updated', handleUpdate);
+    fetchEquipment();
   }, []);
 
-  const addEquipment = (item: Omit<EquipmentItem, 'id'>) => {
-    const items = getStoredEquipment();
-    const newItem: EquipmentItem = {
-      ...item,
-      id: `item-${Date.now()}`
-    };
-    saveEquipment([...items, newItem]);
+  const addEquipment = async (item: Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>) => {
+    const newItem = await equipmentService.create(item);
+    if (newItem) {
+      setEquipment(prev => [newItem, ...prev]);
+    }
     return newItem;
   };
 
-  const updateEquipment = (id: string, updatedItem: Partial<EquipmentItem>) => {
-    const items = getStoredEquipment();
-    const newItems = items.map(item => item.id === id ? { ...item, ...updatedItem } as EquipmentItem : item);
-    saveEquipment(newItems);
+  const updateEquipment = async (id: string, updatedItem: Partial<Omit<EquipmentItem, 'id' | 'created_at' | 'updated_at'>>) => {
+    const updated = await equipmentService.update(id, updatedItem);
+    if (updated) {
+      setEquipment(prev => prev.map(item => item.id === id ? updated : item));
+    }
+    return updated;
   };
 
-  const deleteEquipment = (id: string) => {
-    const items = getStoredEquipment();
-    const newItems = items.filter(item => item.id !== id);
-    saveEquipment(newItems);
+  const deleteEquipment = async (id: string) => {
+    const success = await equipmentService.delete(id);
+    if (success) {
+      setEquipment(prev => prev.filter(item => item.id !== id));
+    }
+    return success;
   };
 
   return {
     equipment,
+    loading,
     addEquipment,
     updateEquipment,
-    deleteEquipment
+    deleteEquipment,
+    refetch: fetchEquipment
   };
+}
+
+export function useEquipmentItem(id: string) {
+  const [item, setItem] = useState<EquipmentItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      setLoading(true);
+      const data = await equipmentService.getById(id);
+      setItem(data);
+      setLoading(false);
+    };
+
+    if (id) {
+      fetchItem();
+    }
+  }, [id]);
+
+  return { item, loading };
+}
+
+export function getStoredEquipment(): EquipmentItem[] {
+  return [];
 }

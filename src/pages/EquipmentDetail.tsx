@@ -6,23 +6,14 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getStoredEquipment } from "@/hooks/useEquipment";
-import { EquipmentItem } from "@/data/equipmentDatabase";
+import { useEquipmentItem } from "@/hooks/useEquipment";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const EquipmentDetail = () => {
   const { id } = useParams();
-  const [item, setItem] = useState<EquipmentItem | null>(null);
+  const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    const items = getStoredEquipment();
-    const found = items.find((i) => i.id === id);
-    if (found) {
-      setItem(found);
-    }
-  }, [id]);
 
   const images = item?.images && item.images.length > 0
     ? item.images
@@ -45,7 +36,6 @@ const EquipmentDetail = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
 
-  // Keyboard navigation
   useEffect(() => {
     if (!lightboxOpen) return;
 
@@ -63,6 +53,18 @@ const EquipmentDetail = () => {
       document.body.style.overflow = "";
     };
   }, [lightboxOpen, goNext, goPrev]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#020721]">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721]">
+          <div className="text-white text-center">Načítavam...</div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
 
   if (!item) {
     return (
@@ -102,7 +104,6 @@ const EquipmentDetail = () => {
                   <CardContent className="space-y-6">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
-                    {/* Main Image - clickable */}
                     <div
                       className="aspect-video rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative"
                       onClick={() => openLightbox(0)}
@@ -122,7 +123,6 @@ const EquipmentDetail = () => {
                       </div>
                     </div>
 
-                    {/* Thumbnail Grid - if more than 1 image */}
                     {images.length > 1 && (
                       <div className="grid grid-cols-3 gap-3">
                         {images.slice(1).map((img, idx) => (
@@ -148,7 +148,7 @@ const EquipmentDetail = () => {
                   <CardFooter className="pt-6 border-t border-white/5">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
                       <div>
-                        <span className="text-3xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
+                        <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
                         <span className="text-gray-500 ml-2">/ deň</span>
                         <p className="text-gray-400 mt-1">
                           Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
@@ -202,13 +202,11 @@ const EquipmentDetail = () => {
       </section>
       <Footer />
 
-      {/* Lightbox Overlay */}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 md:p-8"
           onClick={closeLightbox}
         >
-          {/* Close button */}
           <button
             onClick={closeLightbox}
             className="absolute top-4 right-4 md:top-6 md:right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-all z-10"
@@ -216,14 +214,12 @@ const EquipmentDetail = () => {
             <X size={28} />
           </button>
 
-          {/* Image counter */}
           {images.length > 1 && (
             <div className="absolute top-4 left-4 md:top-6 md:left-6 text-white/60 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
               {currentImageIndex + 1} / {images.length}
             </div>
           )}
 
-          {/* Previous button */}
           {images.length > 1 && (
             <button
               onClick={(e) => {
@@ -236,7 +232,6 @@ const EquipmentDetail = () => {
             </button>
           )}
 
-          {/* Image - adapts to natural size, max 90vh/90vw */}
           <img
             src={images[currentImageIndex]}
             alt={`${item.name} - fotka ${currentImageIndex + 1}`}
@@ -247,7 +242,6 @@ const EquipmentDetail = () => {
             }}
           />
 
-          {/* Next button */}
           {images.length > 1 && (
             <button
               onClick={(e) => {
@@ -260,7 +254,6 @@ const EquipmentDetail = () => {
             </button>
           )}
 
-          {/* Dot indicators */}
           {images.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
               {images.map((_, idx) => (

@@ -5,9 +5,10 @@ import { Filter, Minus, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEquipment } from "@/hooks/useEquipment";
+import { EquipmentItem } from "@/lib/supabase";
 
 const EquipmentCatalog = () => {
-  const { equipment } = useEquipment();
+  const { equipment, loading } = useEquipment();
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -46,9 +47,19 @@ const EquipmentCatalog = () => {
   const getTotalSum = () => {
     return Object.entries(quantities).reduce((sum, [id, qty]) => {
       const item = equipment.find((i) => i.id === id);
-      return sum + (item ? item.pricePerDay * qty : 0);
+      return sum + (item ? item.price_per_day * qty : 0);
     }, 0);
   };
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-[#020721] relative">
+        <div className="container mx-auto px-4">
+          <div className="text-center text-gray-400 py-12">Načítavam produktov...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-[#020721] relative">
@@ -60,8 +71,8 @@ const EquipmentCatalog = () => {
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2"> Ponuka aparatúry </h2>
-                  <p className="text-gray-400"> Vyberte si jednotlivé položky a pridajte ich do kalkulačky </p>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
+                  <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
                 </div>
 
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2">
@@ -71,8 +82,7 @@ const EquipmentCatalog = () => {
                       <button
                         key={filter}
                         onClick={() => setActiveFilter(filter as any)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
-                          }`}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"}`}
                       >
                         {filter === "all" ? "Všetko" : getCategoryLabel(filter)}
                       </button>
@@ -84,7 +94,7 @@ const EquipmentCatalog = () => {
 
             <div className="mb-8 text-center">
               <div className="inline-block bg-[#BD20D3]/20 border border-[#BD20D3]/40 rounded-full px-8 py-3">
-                <span className="text-[#BD20D3] font-bold text-lg"> Celková suma: {getTotalSum()} € </span>
+                <span className="text-[#BD20D3] font-bold text-lg">Celková suma: {getTotalSum()} €</span>
               </div>
             </div>
 
@@ -95,8 +105,7 @@ const EquipmentCatalog = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => {
-                  // Spoliehame sa výhradne na nahrané obrázky v databáze, inak ukážeme pekný unsplash placeholder
-                  const displayImage = item.mainImage || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
+                  const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
@@ -107,7 +116,6 @@ const EquipmentCatalog = () => {
                             alt={item.name}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                             onError={(e) => {
-                              // Ak sa nepodarí načítať (napr. stará adresa), okamžite hodíme jednotný zástupný obrázok
                               (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                             }}
                             style={{ objectPosition: "center" }}
@@ -124,8 +132,8 @@ const EquipmentCatalog = () => {
 
                       <div className="flex-1 w-full flex flex-col justify-end">
                         <div className="flex justify-center items-center gap-3 mb-4">
-                          <span className="text-2xl font-bold text-[#BD20D3]">{item.pricePerDay} €</span>
-                          <span className="text-gray-400 text-sm"> Dostupné: {getAvailabilityText(item.available)} </span>
+                          <span className="text-2xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
+                          <span className="text-gray-400 text-sm">Dostupné: {getAvailabilityText(item.available)}</span>
                         </div>
 
                         <Button

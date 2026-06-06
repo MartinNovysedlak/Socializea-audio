@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
-import { EquipmentItem } from '@/data/equipmentDatabase';
+import { EquipmentItem } from '@/lib/supabase';
+import { equipmentService } from '@/lib/equipmentService';
 import { 
   Lock, 
   LogOut, 
@@ -32,12 +33,10 @@ const Admin = () => {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // CRUD States
-  const { equipment, addEquipment, updateEquipment, deleteEquipment } = useEquipment();
+  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment } = useEquipment();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
 
-  // Form Fields
   const [formData, setFormData] = useState({
     name: '',
     category: 'sound' as 'sound' | 'lighting' | 'other',
@@ -49,7 +48,6 @@ const Admin = () => {
     features: [] as string[]
   });
 
-  // Overenie prihlásenia zo sessionStorage
   useEffect(() => {
     const authStatus = sessionStorage.getItem('admin_authenticated');
     if (authStatus === 'true') {
@@ -78,7 +76,6 @@ const Admin = () => {
     toast.info('Boli ste odhlásený.');
   };
 
-  // Open Form for Adding
   const handleOpenAddForm = () => {
     setEditingItem(null);
     setFormData({
@@ -94,15 +91,14 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  // Open Form for Editing
   const handleOpenEditForm = (item: EquipmentItem) => {
     setEditingItem(item);
     setFormData({
       name: item.name,
       category: item.category,
-      pricePerDay: item.pricePerDay,
+      pricePerDay: item.price_per_day,
       available: item.available,
-      description: item.description,
+      description: item.description || '',
       images: item.images || [],
       specifications: item.specifications || [],
       features: item.features || []
@@ -110,20 +106,20 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  // Delete Action
-  const handleDeleteItem = (id: string, name: string) => {
+  const handleDeleteItem = async (id: string, name: string) => {
     if (window.confirm(`Naozaj chcete vymazať produkt: "${name}"?`)) {
-      deleteEquipment(id);
-      toast.success('Produkt úspešne vymazaný.');
+      const success = await deleteEquipment(id);
+      if (success) {
+        toast.success('Produkt úspešne vymazaný.');
+      } else {
+        toast.error('Chyba pri mazaní produktu.');
+      }
     }
   };
 
-  // Submit Add or Edit Form
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    console.log('Form submitted', formData);
 
     if (!formData.name.trim()) {
       toast.error('Názov produktu je povinný!');
@@ -135,10 +131,9 @@ const Admin = () => {
       return;
     }
 
-    // Default mainImage is the first image in the list
     const mainImage = formData.images[0] || '';
 
-    const parsedItem: Omit<EquipmentItem, 'id'> = {
+    const itemData = {
       name: formData.name.trim(),
       category: formData.category,
       pricePerDay: Number(formData.pricePerDay),
@@ -151,15 +146,24 @@ const Admin = () => {
     };
 
     if (editingItem) {
-      updateEquipment(editingItem.id, parsedItem);
-      toast.success('Produkt bol úspešne upravený!');
+      const updated = await updateEquipment(editingItem.id, itemData);
+      if (updated) {
+        toast.success('Produkt bol úspešne upravený!');
+        setIsFormOpen(false);
+        setEditingItem(null);
+      } else {
+        toast.error('Chyba pri úprave produktu.');
+      }
     } else {
-      addEquipment(parsedItem);
-      toast.success('Nový produkt bol úspešne pridaný do databázy!');
+      const newItem = await addEquipment(itemData);
+      if (newItem) {
+        toast.success('Nový produkt bol úspešne pridaný do databázy!');
+        setIsFormOpen(false);
+        setEditingItem(null);
+      } else {
+        toast.error('Chyba pri pridávaní produktu.');
+      }
     }
-
-    setIsFormOpen(false);
-    setEditingItem(null);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -229,7 +233,6 @@ const Admin = () => {
           </div>
         ) : (
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Header section with Stats and dynamic logout */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#020721]/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
               <div>
                 <div className="flex items-center gap-3">
@@ -261,7 +264,6 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* Form Drawer / overlay card */}
             {isFormOpen && (
               <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/30 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/5">
                 <button 
@@ -350,7 +352,6 @@ const Admin = () => {
                     />
                   </div>
 
-                  {/* Base64 Drag & Drop Image Manager */}
                   <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
                     <ImageManager
                       images={formData.images}
@@ -358,7 +359,6 @@ const Admin = () => {
                     />
                   </div>
 
-                  {/* Dynamic Bubble Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <DynamicBubbleInput
                       label="Technické parametre"
@@ -396,93 +396,98 @@ const Admin = () => {
               </Card>
             )}
 
-            {/* List of Products (table layout) */}
             <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
               <CardHeader className="border-b border-white/10 px-6 py-5">
-                <CardTitle className="text-xl font-bold text-white">Zoznam všetkých produktov ({equipment.length})</CardTitle>
+                <CardTitle className="text-xl font-bold text-white">
+                  Zoznam všetkých produktov ({equipment.length})
+                </CardTitle>
               </CardHeader>
               
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
-                      <th className="px-6 py-4">Obrázok</th>
-                      <th className="px-6 py-4">Názov</th>
-                      <th className="px-6 py-4">Kategória</th>
-                      <th className="px-6 py-4 text-center">Cena / deň</th>
-                      <th className="px-6 py-4 text-center">Kusy</th>
-                      <th className="px-6 py-4 text-right">Akcie</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                    {equipment.map((item) => {
-                      const displayImg = item.mainImage || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                      return (
-                        <tr key={item.id} className="hover:bg-white/2 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                              <img 
-                                src={displayImg} 
-                                alt={item.name} 
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                                }}
-                              />
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
-                            {item.name}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {getCategoryIcon(item.category)}
-                              <span className="capitalize">
-                                {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
-                            {item.pricePerDay} €
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            {item.available}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                onClick={() => handleOpenEditForm(item)}
-                                size="sm"
-                                variant="outline"
-                                className="border-white/10 hover:border-[#BD20D3] hover:bg-[#BD20D3]/10 text-white rounded-lg h-9 w-9 p-0"
-                                title="Upraviť"
-                              >
-                                <Edit size={14} />
-                              </Button>
-                              <Button
-                                onClick={() => handleDeleteItem(item.id, item.name)}
-                                size="sm"
-                                variant="outline"
-                                className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
-                                title="Vymazať"
-                              >
-                                <Trash2 size={14} />
-                              </Button>
-                            </div>
+              {loading ? (
+                <div className="text-center py-12 text-gray-400">Načítavam...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                        <th className="px-6 py-4">Obrázok</th>
+                        <th className="px-6 py-4">Názov</th>
+                        <th className="px-6 py-4">Kategória</th>
+                        <th className="px-6 py-4 text-center">Cena / deň</th>
+                        <th className="px-6 py-4 text-center">Kusy</th>
+                        <th className="px-6 py-4 text-right">Akcie</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                      {equipment.map((item) => {
+                        const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                        return (
+                          <tr key={item.id} className="hover:bg-white/2 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                                <img 
+                                  src={displayImg} 
+                                  alt={item.name} 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                                  }}
+                                />
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
+                              {item.name}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                {getCategoryIcon(item.category)}
+                                <span className="capitalize">
+                                  {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
+                              {item.price_per_day} €
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              {item.available}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  onClick={() => handleOpenEditForm(item)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-white/10 hover:border-[#BD20D3] hover:bg-[#BD20D3]/10 text-white rounded-lg h-9 w-9 p-0"
+                                  title="Upraviť"
+                                >
+                                  <Edit size={14} />
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteItem(item.id, item.name)}
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
+                                  title="Vymazať"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {equipment.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
+                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
                           </td>
                         </tr>
-                      );
-                    })}
-                    {equipment.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
-                          V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </Card>
           </div>
         )}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Upload, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { equipmentService } from '@/lib/equipmentService';
 
 interface ImageManagerProps {
   images: string[];
@@ -14,52 +15,7 @@ interface ImageManagerProps {
 const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-
-  // Kompresia a zmenšenie obrázku pomocou HTML5 Canvas
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800; // Maximálna šírka pre optimálnu veľkosť v localStorage
-          const MAX_HEIGHT = 600;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            resolve(event.target?.result as string); // fallback na originál ak canvas zlyhá
-            return;
-          }
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // Kompresia do formátu JPEG s kvalitou 0.7 (vynikajúci pomer veľkosť/kvalita)
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          resolve(dataUrl);
-        };
-        img.onerror = (err) => reject(err);
-      };
-      reader.onerror = (err) => reject(err);
-    });
-  };
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFiles = async (files: FileList) => {
     const validImageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
@@ -69,19 +25,29 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       return;
     }
 
-    const toastId = toast.loading('Optimalizujem a nahrávam obrázky...');
+    setIsUploading(true);
+    const toastId = toast.loading('Nahrávam obrázky na server...');
 
     try {
-      const compressedPromises = validImageFiles.map(file => compressImage(file));
-      const newCompressedImages = await Promise.all(compressedPromises);
+      const uploadPromises = validImageFiles.map(file => equipmentService.uploadImage(file));
+      const uploadedUrls = await Promise.all(uploadPromises);
       
-      onChange([...images, ...newCompressedImages]);
-      toast.dismiss(toastId);
-      toast.success('Obrázky boli úspešne optimalizované a nahrané!');
+      const successfulUrls = uploadedUrls.filter(url => url !== null) as string[];
+      
+      if (successfulUrls.length > 0) {
+        onChange([...images, ...successfulUrls]);
+        toast.dismiss(toastId);
+        toast.success(`Úspešne nahraných ${successfulUrls.length} obrázkov!`);
+      } else {
+        toast.dismiss(toastId);
+        toast.error('Chyba pri nahrávaní obrázkov.');
+      }
     } catch (error) {
       toast.dismiss(toastId);
       toast.error('Chyba pri spracovaní obrázkov.');
       console.error(error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -108,9 +74,15 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
     }
   };
 
-  const handleRemove = (indexToRemove: number) => {
+  const handleRemove = async (indexToRemove: number) => {
+    const imageUrl = images[indexToRemove];
+    
+    // Pokus o vymazanie zo storage
+    await equipmentService.deleteImage(imageUrl);
+    
     const updated = images.filter((_, idx) => idx !== indexToRemove);
     onChange(updated);
+    toast.success('Obrázok odstránený.');
   };
 
   const handleMove = (index: number, direction: 'left' | 'right') => {
@@ -120,7 +92,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
     const updated = [...images];
     const targetIndex = direction === 'left' ? index - 1 : index + 1;
     
-    // Swap elements
     const temp = updated[index];
     updated[index] = updated[targetIndex];
     updated[targetIndex] = temp;
@@ -137,16 +108,17 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
         </p>
       </div>
 
-      {/* Drag & Drop Upload Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
-          isDragging 
-            ? 'border-[#BD20D3] bg-[#BD20D3]/10' 
-            : 'border-white/10 bg-black/30 hover:border-[#BD20D3]/50 hover:bg-white/5'
+        onClick={() => !isUploading && fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
+          isUploading 
+            ? 'border-[#BD20D3]/50 bg-[#BD20D3]/5 cursor-wait' 
+            : isDragging 
+              ? 'border-[#BD20D3] bg-[#BD20D3]/10 cursor-pointer' 
+              : 'border-white/10 bg-black/30 hover:border-[#BD20D3]/50 hover:bg-white/5 cursor-pointer'
         }`}
       >
         <input
@@ -156,17 +128,19 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
           multiple
           accept="image/*"
           className="hidden"
+          disabled={isUploading}
         />
         <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 flex items-center justify-center text-[#BD20D3]">
           <Upload size={24} />
         </div>
         <div>
-          <p className="text-white font-medium">Kliknite sem alebo pretiahnite súbory na nahranie</p>
-          <p className="text-gray-400 text-xs mt-1">Podporuje JPG, PNG, WEBP (fotky sa automaticky skomprimujú)</p>
+          <p className="text-white font-medium">
+            {isUploading ? 'Nahrávam...' : 'Kliknite sem alebo pretiahnite súbory na nahranie'}
+          </p>
+          <p className="text-gray-400 text-xs mt-1">Podporuje JPG, PNG, WEBP</p>
         </div>
       </div>
 
-      {/* Image Previews & Ordering */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {images.map((img, index) => {
@@ -178,7 +152,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
                   isMain ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]' : 'border-white/10'
                 }`}
               >
-                {/* Thumbnail Preview */}
                 <div className="aspect-video w-full bg-zinc-900 relative">
                   <img
                     src={img}
@@ -191,7 +164,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
                     </span>
                   )}
                   
-                  {/* Delete button (overlay on hover) */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -205,7 +177,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
                   </button>
                 </div>
 
-                {/* Reordering Controls */}
                 <div className="p-2 bg-white/5 flex items-center justify-between gap-1 border-t border-white/5">
                   <Button
                     type="button"
