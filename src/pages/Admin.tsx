@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -43,7 +43,9 @@ const Admin = () => {
   // Drag & Drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const dragItemRef = useRef<number | null>(null);
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -66,6 +68,27 @@ const Admin = () => {
   useEffect(() => {
     setLocalOrder([...equipment]);
   }, [equipment]);
+
+  // Auto-scroll when dragging near edges
+  const startAutoScroll = useCallback((direction: 'up' | 'down') => {
+    if (scrollIntervalRef.current) return;
+    
+    scrollIntervalRef.current = setInterval(() => {
+      const scrollContainer = document.documentElement;
+      if (direction === 'up') {
+        scrollContainer.scrollTop -= 10;
+      } else {
+        scrollContainer.scrollTop += 10;
+      }
+    }, 30);
+  }, []);
+
+  const stopAutoScroll = useCallback(() => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,39 +155,59 @@ const Admin = () => {
   // Drag & Drop handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
-    dragItemRef.current = index;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     
-    // Add dragging class for visual feedback
-    const target = e.target as HTMLElement;
-    target.style.opacity = '0.5';
+    // Create custom drag image
+    const row = (e.target as HTMLElement).closest('tr');
+    if (row) {
+      const dragImage = row.cloneNode(true) as HTMLElement;
+      dragImage.style.width = `${row.offsetWidth}px`;
+      dragImage.style.opacity = '0.8';
+      dragImage.style.position = 'absolute';
+      dragImage.style.top = '-1000px';
+      document.body.appendChild(dragImage);
+      e.dataTransfer.setDragImage(dragImage, 0, 0);
+      setTimeout(() => document.body.removeChild(dragImage), 0);
+    }
   };
 
-  const handleDragEnd = (e: React.DragEvent) => {
-    const target = e.target as HTMLElement;
-    target.style.opacity = '1';
-    
+  const handleDragEnd = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
-    dragItemRef.current = null;
+    setDragPosition(null);
+    stopAutoScroll();
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     
-    if (dragItemRef.current !== null && dragItemRef.current !== index) {
+    if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
+      
+      // Check if near top or bottom of viewport for auto-scroll
+      const rect = (e.target as HTMLElement).getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const navbarHeight = 80; // Approximate navbar height
+      
+      if (rect.top < navbarHeight + 50) {
+        startAutoScroll('up');
+      } else if (rect.bottom > viewportHeight - 100) {
+        startAutoScroll('down');
+      } else {
+        stopAutoScroll();
+      }
     }
   };
 
   const handleDragLeave = () => {
-    setDragOverIndex(null);
+    // Don't clear dragOverIndex here to prevent flickering
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
+    stopAutoScroll();
     
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
@@ -180,7 +223,26 @@ const Admin = () => {
     setHasOrderChanges(true);
     setDraggedIndex(null);
     setDragOverIndex(null);
-    dragItemRef.current = null;
+  };
+
+  // Handle drag over the table itself (for empty areas)
+  const handleTableDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    
+    // Check for auto-scroll
+    const scrollContainer = document.documentElement;
+    const rect = tableRef.current?.getBoundingClientRect();
+    
+    if (rect) {
+      const navbarHeight = 80;
+      if (rect.top < navbarHeight + 50) {
+        startAutoScroll('up');
+      } else if (rect.bottom > window.innerHeight - 100) {
+        startAutoScroll('down');
+      } else {
+        stopAutoScroll();
+      }
+    }
   };
 
   const handleSaveOrder = async () => {
@@ -491,7 +553,7 @@ const Admin = () => {
                     Zoznam všetkých produktov ({localOrder.length})
                   </CardTitle>
                   <p className="text-gray-400 text-sm mt-1">
-                    Pretiahnite produkt myšou pre zmenu poradia. Poradie sa automaticky prejaví na webe.
+                    Pretiahnite produkt myšou pre zmenu poradia. Stránka sa automaticky posunie pri okrajoch.
                   </p>
                 </div>
                 {hasOrderChanges && (
@@ -509,7 +571,11 @@ const Admin = () => {
                 <div className="text-center py-12 text-gray-400">Načítavam...</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table 
+                    ref={tableRef}
+                    className="w-full text-left border-collapse"
+                    onDragOver={handleTableDragOver}
+                  >
                     <thead>
                       <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
                         <th className="px-4 py-4 w-16 text-center"></th>
@@ -524,6 +590,9 @@ const Admin = () => {
                     <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
                       {localOrder.map((item, index) => {
                         const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                        const isDragged = draggedIndex === index;
+                        const isDragOver = dragOverIndex === index;
+                        
                         return (
                           <tr 
                             key={item.id} 
@@ -533,9 +602,12 @@ const Admin = () => {
                             onDragOver={(e) => handleDragOver(e, index)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, index)}
-                            className={`hover:bg-white/2 transition-colors cursor-move ${
-                              dragOverIndex === index ? 'bg-[#BD20D3]/10 border-t-2 border-t-[#BD20D3]' : ''
-                            } ${draggedIndex === index ? 'opacity-50' : ''}`}
+                            className={`
+                              hover:bg-white/2 transition-all duration-200 cursor-move
+                              ${isDragged ? 'opacity-30 scale-95 bg-[#BD20D3]/5' : ''}
+                              ${isDragOver && draggedIndex !== null && draggedIndex > index ? 'border-t-2 border-t-[#BD20D3] pt-2' : ''}
+                              ${isDragOver && draggedIndex !== null && draggedIndex < index ? 'border-b-2 border-b-[#BD20D3] pb-2' : ''}
+                            `}
                           >
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
