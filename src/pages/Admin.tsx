@@ -172,6 +172,13 @@ const Admin = () => {
 
   // Drag & Drop handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
+    // Prevent dragging if initiated from actions or buttons
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('select') || target.closest('input')) {
+      e.preventDefault();
+      return;
+    }
+
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
@@ -682,10 +689,16 @@ const Admin = () => {
                               <td className="px-6 py-4 text-center">
                                 {item.available}
                               </td>
-                              <td className="px-6 py-4 text-right">
+                              <td 
+                                className="px-6 py-4 text-right"
+                                onMouseDown={(e) => e.stopPropagation()}
+                              >
                                 <div className="flex items-center justify-end gap-2">
                                   <Button
-                                    onClick={() => handleOpenEditForm(item)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenEditForm(item);
+                                    }}
                                     size="sm"
                                     className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
                                     title="Upraviť"
@@ -694,7 +707,10 @@ const Admin = () => {
                                     <span className="hidden sm:inline">Upraviť</span>
                                   </Button>
                                   <Button
-                                    onClick={() => handleDeleteItem(item.id, item.name)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteItem(item.id, item.name);
+                                    }}
                                     size="sm"
                                     variant="outline"
                                     className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
