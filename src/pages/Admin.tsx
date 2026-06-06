@@ -29,6 +29,20 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+const CATEGORY_ORDER: Record<string, number> = {
+  sound: 0,
+  lighting: 1,
+  other: 2,
+};
+
+const sortedByCategory = (items: EquipmentItem[]): EquipmentItem[] => {
+  return [...items].sort((a, b) => {
+    const catDiff = (CATEGORY_ORDER[a.category] ?? 99) - (CATEGORY_ORDER[b.category] ?? 99);
+    if (catDiff !== 0) return catDiff;
+    return (a.order_index ?? 0) - (b.order_index ?? 0);
+  });
+};
+
 const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -66,7 +80,7 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    setLocalOrder([...equipment]);
+    setLocalOrder(sortedByCategory(equipment));
   }, [equipment]);
 
   // Prevent background scroll when modal is open
@@ -81,31 +95,27 @@ const Admin = () => {
     };
   }, [isFormOpen]);
 
-  // Auto-scroll when dragging near edges - only very close to edge
+  // Auto-scroll when dragging near edges
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
     const navbarHeight = 80;
     
-    // Define very small trigger zones (only 30px from edges)
     const topTriggerZone = navbarHeight + 30;
     const bottomTriggerZone = viewportHeight - 30;
     
     if (clientY < topTriggerZone) {
-      // Near top - scroll up
       if (!scrollIntervalRef.current) {
         scrollIntervalRef.current = setInterval(() => {
           window.scrollBy(0, -15);
         }, 50);
       }
     } else if (clientY > bottomTriggerZone) {
-      // Near bottom - scroll down
       if (!scrollIntervalRef.current) {
         scrollIntervalRef.current = setInterval(() => {
           window.scrollBy(0, 15);
         }, 50);
       }
     } else {
-      // Not near any edge - stop scrolling
       if (scrollIntervalRef.current) {
         clearInterval(scrollIntervalRef.current);
         scrollIntervalRef.current = null;
@@ -188,7 +198,6 @@ const Admin = () => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     
-    // Create custom drag image from the row
     const cell = e.target as HTMLElement;
     const row = cell.closest('tr');
     if (row) {
@@ -341,6 +350,17 @@ const Admin = () => {
       default: return <Layers className="text-purple-400" size={16} />;
     }
   };
+
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'sound': return 'Zvuk';
+      case 'lighting': return 'Svetlá';
+      default: return 'Ostatné';
+    }
+  };
+
+  // Track which category groups we've rendered headers for
+  let lastCategory: string | null = null;
 
   return (
     <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
@@ -582,7 +602,7 @@ const Admin = () => {
                     Zoznam všetkých produktov ({localOrder.length})
                   </CardTitle>
                   <p className="text-gray-400 text-sm mt-1">
-                    Chyťte a potiahnite ikonu úchytu (bodky vľavo) pre zmenu poradia produktov.
+                    Zoradené podľa kategórií: Zvuk → Svetlá a efekty → Ostatné. Chyťte a potiahnite ikonu úchytu pre zmenu poradia v rámci kategórie.
                   </p>
                 </div>
                 {hasOrderChanges && (
@@ -643,15 +663,42 @@ const Admin = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                      {(() => {
+                        lastCategory = null;
+                        return null;
+                      })()}
                       {localOrder.map((item, index) => {
                         const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                         const isDragged = draggedIndex === index;
                         const isDragOver = dragOverIndex === index;
                         const showPlaceholderAbove = isDragOver && dropPosition === 'above' && draggedIndex !== null && draggedIndex > index;
                         const showPlaceholderBelow = isDragOver && dropPosition === 'below' && draggedIndex !== null && draggedIndex < index;
+
+                        const showCategoryHeader = item.category !== lastCategory;
+                        if (showCategoryHeader) {
+                          lastCategory = item.category;
+                        }
+
+                        const categoryHeaderRow = showCategoryHeader ? (
+                          <tr key={`cat-header-${item.category}`} className="bg-gradient-to-r from-white/[0.03] to-transparent">
+                            <td colSpan={7} className="px-6 py-3">
+                              <div className="flex items-center gap-3">
+                                {getCategoryIcon(item.category)}
+                                <span className="text-white font-bold text-sm uppercase tracking-wider">
+                                  {getCategoryLabel(item.category)}
+                                </span>
+                                <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+                                <span className="text-gray-500 text-xs">
+                                  {localOrder.filter(i => i.category === item.category).length} položiek
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : null;
                         
                         return (
                           <React.Fragment key={item.id}>
+                            {categoryHeaderRow}
                             {showPlaceholderAbove && (
                               <tr className="drag-placeholder">
                                 <td colSpan={7} className="h-16 bg-gradient-to-r from-[#BD20D3]/20 via-[#BD20D3]/10 to-[#BD20D3]/20 border-l-4 border-[#BD20D3] border-r-4">
@@ -701,7 +748,7 @@ const Admin = () => {
                                 <div className="flex items-center gap-2">
                                   {getCategoryIcon(item.category)}
                                   <span className="capitalize">
-                                    {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                                    {getCategoryLabel(item.category)}
                                   </span>
                                 </div>
                               </td>
