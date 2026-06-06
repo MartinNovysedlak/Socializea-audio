@@ -1,30 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter, Minus, Plus } from "lucide-react";
+import { Filter, Minus, Plus, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEquipment } from "@/hooks/useEquipment";
-
-const getImageCandidates = (itemName: string) => {
-  return [
-    `/media/${itemName}.jpg`,
-    `/media/${itemName}.png`,
-    `/media/${itemName}.jpeg`,
-    `/.dyad/media/${itemName}.jpg`,
-    `/.dyad/media/${itemName}.png`,
-    `/.dyad/media/${itemName}.jpeg`,
-    `/${itemName}.jpg`,
-    `/${itemName}.png`,
-    `/${itemName}.jpeg`,
-    `/images/${itemName}.jpg`,
-    `/images/${itemName}.png`,
-    `/images/${itemName}.jpeg`,
-    `/public/images/${itemName}.jpg`,
-    `/public/images/${itemName}.png`,
-    `/public/images/${itemName}.jpeg`,
-  ];
-};
 
 const EquipmentCatalog = () => {
   const { equipment } = useEquipment();
@@ -115,47 +95,25 @@ const EquipmentCatalog = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => {
-                  const candidates = getImageCandidates(item.name);
-                  const displayImage = item.mainImage || candidates[0];
+                  const displayImage = item.images && item.images.length > 0 ? item.images[0] : item.mainImage;
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
                       <Link to={`/equipment/${item.id}`} className="w-full flex flex-col items-center mb-4 cursor-pointer">
-                        <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
-                          <img
-                            src={displayImage}
-                            alt={item.name}
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const currentSrc = target.src;
-
-                              let nextIdx = -1;
-                              for (let i = 0; i < candidates.length; i++) {
-                                if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
-                                  nextIdx = i + 1;
-                                  break;
-                                }
-                              }
-
-                              if (nextIdx !== -1 && nextIdx < candidates.length) {
-                                target.src = candidates[nextIdx];
-                              } else {
-                                let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
-                                if (item.category === "sound") {
-                                  fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300&auto=format&fit=crop&q=80";
-                                } else if (item.category === "lighting") {
-                                  fallback = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80";
-                                } else if (item.category === "other") {
-                                  fallback = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80";
-                                }
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }
-                            }}
-                            style={{ objectPosition: "center" }}
-                          />
+                        <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4 bg-black/40 flex items-center justify-center">
+                          {displayImage ? (
+                            <img
+                              src={displayImage}
+                              alt={item.name}
+                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                              style={{ objectPosition: "center" }}
+                            />
+                          ) : (
+                            <div className="text-gray-600 flex flex-col items-center gap-1">
+                              <ImageIcon size={32} />
+                              <span className="text-[10px]">Bez fotky</span>
+                            </div>
+                          )}
                           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#BD20D3]/20 rounded-full px-3 py-1">
                             <span className="text-xs font-medium text-[#BD20D3] whitespace-nowrap">{getCategoryLabel(item.category)}</span>
                           </div>
