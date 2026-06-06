@@ -43,6 +43,7 @@ const Admin = () => {
   // Drag & Drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -70,7 +71,6 @@ const Admin = () => {
 
   // Auto-scroll when dragging near edges - only very close to edge
   const checkAndScroll = useCallback((clientY: number) => {
-    const scrollContainer = document.documentElement;
     const viewportHeight = window.innerHeight;
     const navbarHeight = 80;
     
@@ -193,6 +193,7 @@ const Admin = () => {
   const handleDragEnd = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
+    setDropPosition(null);
     stopAutoScroll();
   };
 
@@ -202,6 +203,15 @@ const Admin = () => {
     
     if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
+      
+      // Determine if we're in the top or bottom half of the row
+      const row = (e.target as HTMLElement).closest('tr');
+      if (row) {
+        const rect = row.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const position = e.clientY < midY ? 'above' : 'below';
+        setDropPosition(position);
+      }
       
       // Check for auto-scroll based on mouse position
       checkAndScroll(e.clientY);
@@ -219,17 +229,30 @@ const Admin = () => {
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
       setDragOverIndex(null);
+      setDropPosition(null);
       return;
+    }
+
+    // Adjust drop index based on position
+    let finalDropIndex = dropIndex;
+    if (dropPosition === 'below') {
+      finalDropIndex = dropIndex + 1;
+    }
+    
+    // If dragging from above, we need to adjust
+    if (draggedIndex < finalDropIndex) {
+      finalDropIndex = finalDropIndex - 1;
     }
 
     const newOrder = [...localOrder];
     const [draggedItem] = newOrder.splice(draggedIndex, 1);
-    newOrder.splice(dropIndex, 0, draggedItem);
+    newOrder.splice(finalDropIndex, 0, draggedItem);
     
     setLocalOrder(newOrder);
     setHasOrderChanges(true);
     setDraggedIndex(null);
     setDragOverIndex(null);
+    setDropPosition(null);
   };
 
   // Handle drag over the table itself (for empty areas)
@@ -564,6 +587,18 @@ const Admin = () => {
                 <div className="text-center py-12 text-gray-400">Načítavam...</div>
               ) : (
                 <div className="overflow-x-auto">
+                  <style>{`
+                    @keyframes pulse-placeholder {
+                      0%, 100% { opacity: 0.3; }
+                      50% { opacity: 0.6; }
+                    }
+                    .drag-placeholder {
+                      animation: pulse-placeholder 1.5s ease-in-out infinite;
+                    }
+                    .row-transition {
+                      transition: transform 0.3s ease, opacity 0.3s ease;
+                    }
+                  `}</style>
                   <table 
                     ref={tableRef}
                     className="w-full text-left border-collapse"
@@ -585,80 +620,103 @@ const Admin = () => {
                         const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                         const isDragged = draggedIndex === index;
                         const isDragOver = dragOverIndex === index;
+                        const showPlaceholderAbove = isDragOver && dropPosition === 'above' && draggedIndex !== null && draggedIndex > index;
+                        const showPlaceholderBelow = isDragOver && dropPosition === 'below' && draggedIndex !== null && draggedIndex < index;
                         
                         return (
-                          <tr 
-                            key={item.id} 
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, index)}
-                            className={`
-                              hover:bg-white/2 transition-all duration-200 cursor-move
-                              ${isDragged ? 'opacity-30 scale-95 bg-[#BD20D3]/5' : ''}
-                              ${isDragOver && draggedIndex !== null && draggedIndex > index ? 'border-t-2 border-t-[#BD20D3] pt-2' : ''}
-                              ${isDragOver && draggedIndex !== null && draggedIndex < index ? 'border-b-2 border-b-[#BD20D3] pb-2' : ''}
-                            `}
-                          >
-                            <td className="px-4 py-4">
-                              <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
-                                <GripVertical size={18} />
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                                <img 
-                                  src={displayImg} 
-                                  alt={item.name} 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                                  }}
-                                />
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
-                              {item.name}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-2">
-                                {getCategoryIcon(item.category)}
-                                <span className="capitalize">
-                                  {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
-                              {item.price_per_day} €
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              {item.available}
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  onClick={() => handleOpenEditForm(item)}
-                                  size="sm"
-                                  className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
-                                  title="Upraviť"
-                                >
-                                  <Edit size={14} />
-                                  <span className="hidden sm:inline">Upraviť</span>
-                                </Button>
-                                <Button
-                                  onClick={() => handleDeleteItem(item.id, item.name)}
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
-                                  title="Vymazať"
-                                >
-                                  <Trash2 size={14} />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
+                          <React.Fragment key={item.id}>
+                            {showPlaceholderAbove && (
+                              <tr className="drag-placeholder">
+                                <td colSpan={7} className="h-16 bg-gradient-to-r from-[#BD20D3]/20 via-[#BD20D3]/10 to-[#BD20D3]/20 border-l-4 border-[#BD20D3] border-r-4">
+                                  <div className="flex items-center justify-center h-full">
+                                    <div className="w-8 h-8 rounded-full bg-[#BD20D3]/30 flex items-center justify-center">
+                                      <div className="w-3 h-3 rounded-full bg-[#BD20D3]"></div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                            <tr 
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, index)}
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(e) => handleDragOver(e, index)}
+                              onDragLeave={handleDragLeave}
+                              onDrop={(e) => handleDrop(e, index)}
+                              className={`
+                                row-transition cursor-move
+                                ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
+                              `}
+                            >
+                              <td className="px-4 py-4">
+                                <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
+                                  <GripVertical size={18} />
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                                  <img 
+                                    src={displayImg} 
+                                    alt={item.name} 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                                    }}
+                                  />
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
+                                {item.name}
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  {getCategoryIcon(item.category)}
+                                  <span className="capitalize">
+                                    {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
+                                {item.price_per_day} €
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                {item.available}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    onClick={() => handleOpenEditForm(item)}
+                                    size="sm"
+                                    className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
+                                    title="Upraviť"
+                                  >
+                                    <Edit size={14} />
+                                    <span className="hidden sm:inline">Upraviť</span>
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDeleteItem(item.id, item.name)}
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
+                                    title="Vymazať"
+                                  >
+                                    <Trash2 size={14} />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                            {showPlaceholderBelow && (
+                              <tr className="drag-placeholder">
+                                <td colSpan={7} className="h-16 bg-gradient-to-r from-[#BD20D3]/20 via-[#BD20D3]/10 to-[#BD20D3]/20 border-l-4 border-[#BD20D3] border-r-4">
+                                  <div className="flex items-center justify-center h-full">
+                                    <div className="w-8 h-8 rounded-full bg-[#BD20D3]/30 flex items-center justify-center">
+                                      <div className="w-3 h-3 rounded-full bg-[#BD20D3]"></div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         );
                       })}
                       {localOrder.length === 0 && (
