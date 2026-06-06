@@ -43,9 +43,8 @@ const Admin = () => {
   // Drag & Drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -69,18 +68,37 @@ const Admin = () => {
     setLocalOrder([...equipment]);
   }, [equipment]);
 
-  // Auto-scroll when dragging near edges
-  const startAutoScroll = useCallback((direction: 'up' | 'down') => {
-    if (scrollIntervalRef.current) return;
+  // Auto-scroll when dragging near edges - only very close to edge
+  const checkAndScroll = useCallback((clientY: number) => {
+    const scrollContainer = document.documentElement;
+    const viewportHeight = window.innerHeight;
+    const navbarHeight = 80;
     
-    scrollIntervalRef.current = setInterval(() => {
-      const scrollContainer = document.documentElement;
-      if (direction === 'up') {
-        scrollContainer.scrollTop -= 10;
-      } else {
-        scrollContainer.scrollTop += 10;
+    // Define very small trigger zones (only 30px from edges)
+    const topTriggerZone = navbarHeight + 30;
+    const bottomTriggerZone = viewportHeight - 30;
+    
+    if (clientY < topTriggerZone) {
+      // Near top - scroll up
+      if (!scrollIntervalRef.current) {
+        scrollIntervalRef.current = setInterval(() => {
+          window.scrollBy(0, -15);
+        }, 50);
       }
-    }, 30);
+    } else if (clientY > bottomTriggerZone) {
+      // Near bottom - scroll down
+      if (!scrollIntervalRef.current) {
+        scrollIntervalRef.current = setInterval(() => {
+          window.scrollBy(0, 15);
+        }, 50);
+      }
+    } else {
+      // Not near any edge - stop scrolling
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
+      }
+    }
   }, []);
 
   const stopAutoScroll = useCallback(() => {
@@ -175,7 +193,6 @@ const Admin = () => {
   const handleDragEnd = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
-    setDragPosition(null);
     stopAutoScroll();
   };
 
@@ -186,18 +203,8 @@ const Admin = () => {
     if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
       
-      // Check if near top or bottom of viewport for auto-scroll
-      const rect = (e.target as HTMLElement).getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const navbarHeight = 80; // Approximate navbar height
-      
-      if (rect.top < navbarHeight + 50) {
-        startAutoScroll('up');
-      } else if (rect.bottom > viewportHeight - 100) {
-        startAutoScroll('down');
-      } else {
-        stopAutoScroll();
-      }
+      // Check for auto-scroll based on mouse position
+      checkAndScroll(e.clientY);
     }
   };
 
@@ -228,21 +235,7 @@ const Admin = () => {
   // Handle drag over the table itself (for empty areas)
   const handleTableDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    
-    // Check for auto-scroll
-    const scrollContainer = document.documentElement;
-    const rect = tableRef.current?.getBoundingClientRect();
-    
-    if (rect) {
-      const navbarHeight = 80;
-      if (rect.top < navbarHeight + 50) {
-        startAutoScroll('up');
-      } else if (rect.bottom > window.innerHeight - 100) {
-        startAutoScroll('down');
-      } else {
-        stopAutoScroll();
-      }
-    }
+    checkAndScroll(e.clientY);
   };
 
   const handleSaveOrder = async () => {
@@ -553,7 +546,7 @@ const Admin = () => {
                     Zoznam všetkých produktov ({localOrder.length})
                   </CardTitle>
                   <p className="text-gray-400 text-sm mt-1">
-                    Pretiahnite produkt myšou pre zmenu poradia. Stránka sa automaticky posunie pri okrajoch.
+                    Pretiahnite produkt myšou pre zmenu poradia. Stránka sa posunie len pri veľmi blízkom okraji.
                   </p>
                 </div>
                 {hasOrderChanges && (
