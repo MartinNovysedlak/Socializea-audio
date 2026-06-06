@@ -41,6 +41,7 @@ const Admin = () => {
   const [hasOrderChanges, setHasOrderChanges] = useState(false);
 
   // Drag & Drop state
+  const [canDrag, setCanDrag] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
@@ -200,6 +201,7 @@ const Admin = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
+    setCanDrag(false);
     stopAutoScroll();
   };
 
@@ -234,6 +236,7 @@ const Admin = () => {
       setDraggedIndex(null);
       setDragOverIndex(null);
       setDropPosition(null);
+      setCanDrag(false);
       return;
     }
 
@@ -250,25 +253,33 @@ const Admin = () => {
     const [draggedItem] = newOrder.splice(draggedIndex, 1);
     newOrder.splice(finalDropIndex, 0, draggedItem);
     
+    // Okamžite aktualizovať lokálny stav pre plynulú zmenu
     setLocalOrder(newOrder);
-    setHasOrderChanges(true);
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
+    setCanDrag(false);
 
-    // Automaticky uložiť poradie do databázy
+    // Vytvoriť zoznam na uloženie do DB
     const updates = newOrder.map((item, index) => ({
       id: item.id,
       order_index: index
     }));
 
+    setHasOrderChanges(false);
+
     const success = await equipmentService.updateOrder(updates);
     if (success) {
       toast.success('Poradie bolo úspešne uložené!');
-      setHasOrderChanges(false);
-      refetch();
+      
+      // Pridané 500ms oneskorenie pre refetch, čím predídeme "revertu" z dôvodu replikačného oneskorenia Supabase
+      setTimeout(() => {
+        refetch();
+      }, 500);
     } else {
       toast.error('Chyba pri ukladaní poradia.');
+      // Vrátiť staré poradie pri chybe
+      setLocalOrder([...equipment]);
     }
   };
 
@@ -672,6 +683,9 @@ const Admin = () => {
                               </tr>
                             )}
                             <tr 
+                              draggable={canDrag}
+                              onDragStart={(e) => handleDragStart(e, index)}
+                              onDragEnd={handleDragEnd}
                               onDragOver={(e) => handleDragOver(e, index)}
                               onDragLeave={handleDragLeave}
                               onDrop={(e) => handleDrop(e, index)}
@@ -682,9 +696,8 @@ const Admin = () => {
                             >
                               <td 
                                 className="px-4 py-4 drag-handle cursor-grab active:cursor-grabbing text-center"
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, index)}
-                                onDragEnd={handleDragEnd}
+                                onMouseDown={() => setCanDrag(true)}
+                                onMouseUp={() => setCanDrag(false)}
                               >
                                 <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
                                   <GripVertical size={18} />
