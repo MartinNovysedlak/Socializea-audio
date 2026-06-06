@@ -46,7 +46,6 @@ const Admin = () => {
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const formRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -69,6 +68,18 @@ const Admin = () => {
   useEffect(() => {
     setLocalOrder([...equipment]);
   }, [equipment]);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (isFormOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isFormOpen]);
 
   // Auto-scroll when dragging near edges - only very close to edge
   const checkAndScroll = useCallback((clientY: number) => {
@@ -143,11 +154,6 @@ const Admin = () => {
       features: []
     });
     setIsFormOpen(true);
-    
-    // Smooth scroll to form
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
   };
 
   const handleOpenEditForm = (item: EquipmentItem) => {
@@ -163,11 +169,6 @@ const Admin = () => {
       features: item.features || []
     });
     setIsFormOpen(true);
-    
-    // Smooth scroll to form
-    setTimeout(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
   };
 
   const handleDeleteItem = async (id: string, name: string) => {
@@ -183,19 +184,13 @@ const Admin = () => {
 
   // Drag & Drop handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
-    // ONLY allow dragging if initiated from the grip handle (has class .drag-handle)
-    const target = e.target as HTMLElement;
-    if (!target.closest('.drag-handle')) {
-      e.preventDefault();
-      return;
-    }
-
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     
-    // Create custom drag image
-    const row = (e.target as HTMLElement).closest('tr');
+    // Create custom drag image from the row
+    const cell = e.target as HTMLElement;
+    const row = cell.closest('tr');
     if (row) {
       const dragImage = row.cloneNode(true) as HTMLElement;
       dragImage.style.width = `${row.offsetWidth}px`;
@@ -222,7 +217,6 @@ const Admin = () => {
     if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
       
-      // Determine if we're in the top or bottom half of the row
       const row = (e.target as HTMLElement).closest('tr');
       if (row) {
         const rect = row.getBoundingClientRect();
@@ -231,7 +225,6 @@ const Admin = () => {
         setDropPosition(position);
       }
       
-      // Check for auto-scroll based on mouse position
       checkAndScroll(e.clientY);
     }
   };
@@ -251,13 +244,11 @@ const Admin = () => {
       return;
     }
 
-    // Adjust drop index based on position
     let finalDropIndex = dropIndex;
     if (dropPosition === 'below') {
       finalDropIndex = dropIndex + 1;
     }
     
-    // If dragging from above, we need to adjust
     if (draggedIndex < finalDropIndex) {
       finalDropIndex = finalDropIndex - 1;
     }
@@ -273,7 +264,6 @@ const Admin = () => {
     setDropPosition(null);
   };
 
-  // Handle drag over the table itself (for empty areas)
   const handleTableDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     checkAndScroll(e.clientY);
@@ -442,143 +432,146 @@ const Admin = () => {
               </div>
             </div>
 
+            {/* POP-UP MODAL PRE PRIDANIE / ÚPRAVU */}
             {isFormOpen && (
-              <div ref={formRef}>
-                <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/30 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/5">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setIsFormOpen(false);
-                      setEditingItem(null);
-                    }}
-                    className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-                  <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
-                    <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
-                      {editingItem ? <Edit size={20} /> : <Plus size={20} />}
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+                <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+                  <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setIsFormOpen(false);
+                        setEditingItem(null);
+                      }}
+                      className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
+                    >
+                      <X size={24} />
+                    </button>
+                    <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                      <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                        {editingItem ? <Edit size={20} /> : <Plus size={20} />}
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-white">
+                          {editingItem ? 'Upraviť produkt' : 'Pridať nový produkt'}
+                        </h2>
+                        <p className="text-gray-400 text-sm">
+                          {editingItem ? 'Vykonajte úpravy v nasledujúcich poliach.' : 'Vyplňte informácie o novom produkte pre katalóg.'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">
-                        {editingItem ? 'Upraviť produkt' : 'Pridať nový produkt'}
-                      </h2>
-                      <p className="text-gray-400 text-sm">
-                        {editingItem ? 'Vykonajte úpravy v nasledujúcich poliach.' : 'Vyplňte informácie o novom produkte pre katalóg.'}
-                      </p>
-                    </div>
-                  </div>
 
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form onSubmit={handleFormSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-gray-300">Názov produktu *</Label>
+                          <Input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
+                            placeholder="Napr. Subwoofer DB Technologies"
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-gray-300">Kategória</Label>
+                          <select
+                            value={formData.category}
+                            onChange={(e) => setFormData(p => ({ ...p, category: e.target.value as any }))}
+                            className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3]"
+                          >
+                            <option value="sound">Zvuk</option>
+                            <option value="lighting">Svetlá a efekty</option>
+                            <option value="other">Ostatné</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-gray-300">Cena za deň (€) *</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={formData.pricePerDay}
+                            onChange={(e) => setFormData(p => ({ ...p, pricePerDay: Number(e.target.value) }))}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-gray-300">Počet kusov skladom *</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={formData.available}
+                            onChange={(e) => setFormData(p => ({ ...p, available: Number(e.target.value) }))}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
+                            required
+                          />
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
-                        <Label className="text-gray-300">Názov produktu *</Label>
-                        <Input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
-                          placeholder="Napr. Subwoofer DB Technologies"
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-12"
+                        <Label className="text-gray-300">Popis produktu *</Label>
+                        <Textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                          placeholder="Krátky alebo dlhší opis vlastností..."
+                          className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]"
                           required
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Kategória</Label>
-                        <select
-                          value={formData.category}
-                          onChange={(e) => setFormData(p => ({ ...p, category: e.target.value as any }))}
-                          className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3]"
+                      <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
+                        <ImageManager
+                          images={formData.images}
+                          onChange={(images) => setFormData(p => ({ ...p, images }))}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <DynamicBubbleInput
+                          label="Technické parametre"
+                          placeholder="Napr. Frekvencia: 40 Hz - 200 Hz"
+                          items={formData.specifications}
+                          onChange={(specifications) => setFormData(p => ({ ...p, specifications }))}
+                        />
+
+                        <DynamicBubbleInput
+                          label="Kľúčové vlastnosti"
+                          placeholder="Napr. Vysoký akustický výkon"
+                          items={formData.features}
+                          onChange={(features) => setFormData(p => ({ ...p, features }))}
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setIsFormOpen(false);
+                            setEditingItem(null);
+                          }}
+                          className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6"
                         >
-                          <option value="sound">Zvuk</option>
-                          <option value="lighting">Svetlá a efekty</option>
-                          <option value="other">Ostatné</option>
-                        </select>
+                          Zrušiť
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="btn-cyber rounded-xl h-12 px-8 border-none"
+                        >
+                          <Save size={18} className="mr-2" />
+                          {editingItem ? 'Uložiť zmeny' : 'Uložiť produkt'}
+                        </Button>
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Cena za deň (€) *</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={formData.pricePerDay}
-                          onChange={(e) => setFormData(p => ({ ...p, pricePerDay: Number(e.target.value) }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Počet kusov skladom *</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={formData.available}
-                          onChange={(e) => setFormData(p => ({ ...p, available: Number(e.target.value) }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Popis produktu *</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
-                        placeholder="Krátky alebo dlhší opis vlastností..."
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]"
-                        required
-                      />
-                    </div>
-
-                    <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
-                      <ImageManager
-                        images={formData.images}
-                        onChange={(images) => setFormData(p => ({ ...p, images }))}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <DynamicBubbleInput
-                        label="Technické parametre"
-                        placeholder="Napr. Frekvencia: 40 Hz - 200 Hz"
-                        items={formData.specifications}
-                        onChange={(specifications) => setFormData(p => ({ ...p, specifications }))}
-                      />
-
-                      <DynamicBubbleInput
-                        label="Kľúčové vlastnosti"
-                        placeholder="Napr. Vysoký akustický výkon"
-                        items={formData.features}
-                        onChange={(features) => setFormData(p => ({ ...p, features }))}
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setIsFormOpen(false);
-                          setEditingItem(null);
-                        }}
-                        className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6"
-                      >
-                        Zrušiť
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="btn-cyber rounded-xl h-12 px-8 border-none"
-                      >
-                        <Save size={18} className="mr-2" />
-                        {editingItem ? 'Uložiť zmeny' : 'Uložiť produkt'}
-                      </Button>
-                    </div>
-                  </form>
-                </Card>
+                    </form>
+                  </Card>
+                </div>
               </div>
             )}
 
@@ -589,7 +582,7 @@ const Admin = () => {
                     Zoznam všetkých produktov ({localOrder.length})
                   </CardTitle>
                   <p className="text-gray-400 text-sm mt-1">
-                    Pretiahnite produkt za úchyt (bodky vľavo) pre zmenu poradia.
+                    Chyťte a potiahnite ikonu úchytu (bodky vľavo) pre zmenu poradia produktov.
                   </p>
                 </div>
                 {hasOrderChanges && (
@@ -617,6 +610,20 @@ const Admin = () => {
                     }
                     .row-transition {
                       transition: transform 0.3s ease, opacity 0.3s ease;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar {
+                      width: 8px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                      background: rgba(255, 255, 255, 0.02);
+                      border-radius: 999px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                      background: rgba(189, 32, 211, 0.3);
+                      border-radius: 999px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                      background: rgba(189, 32, 211, 0.5);
                     }
                   `}</style>
                   <table 
@@ -657,18 +664,20 @@ const Admin = () => {
                               </tr>
                             )}
                             <tr 
-                              draggable
-                              onDragStart={(e) => handleDragStart(e, index)}
-                              onDragEnd={handleDragEnd}
                               onDragOver={(e) => handleDragOver(e, index)}
                               onDragLeave={handleDragLeave}
                               onDrop={(e) => handleDrop(e, index)}
                               className={`
-                                row-transition cursor-move
+                                row-transition
                                 ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
                               `}
                             >
-                              <td className="px-4 py-4 drag-handle cursor-grab active:cursor-grabbing">
+                              <td 
+                                className="px-4 py-4 drag-handle cursor-grab active:cursor-grabbing text-center"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnd={handleDragEnd}
+                              >
                                 <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
                                   <GripVertical size={18} />
                                 </div>
@@ -702,36 +711,22 @@ const Admin = () => {
                               <td className="px-6 py-4 text-center">
                                 {item.available}
                               </td>
-                              <td 
-                                className="px-6 py-4 text-right"
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onClick={(e) => e.stopPropagation()}
-                              >
+                              <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <Button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleOpenEditForm(item);
-                                    }}
+                                    onClick={() => handleOpenEditForm(item)}
                                     size="sm"
-                                    className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5 relative z-30"
+                                    className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
                                     title="Upraviť"
                                   >
                                     <Edit size={14} />
                                     <span className="hidden sm:inline">Upraviť</span>
                                   </Button>
                                   <Button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleDeleteItem(item.id, item.name);
-                                    }}
+                                    onClick={() => handleDeleteItem(item.id, item.name)}
                                     size="sm"
                                     variant="outline"
-                                    className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0 relative z-30"
+                                    className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
                                     title="Vymazať"
                                   >
                                     <Trash2 size={14} />
