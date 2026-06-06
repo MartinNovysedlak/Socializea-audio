@@ -81,31 +81,25 @@ const Admin = () => {
     };
   }, [isFormOpen]);
 
-  // Auto-scroll when dragging near edges - only very close to edge
+  // Auto-scroll when dragging near edges
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
-    const navbarHeight = 80;
-    
-    // Define very small trigger zones (only 30px from edges)
-    const topTriggerZone = navbarHeight + 30;
+    const topTriggerZone = 110;
     const bottomTriggerZone = viewportHeight - 30;
     
     if (clientY < topTriggerZone) {
-      // Near top - scroll up
       if (!scrollIntervalRef.current) {
         scrollIntervalRef.current = setInterval(() => {
           window.scrollBy(0, -15);
         }, 50);
       }
     } else if (clientY > bottomTriggerZone) {
-      // Near bottom - scroll down
       if (!scrollIntervalRef.current) {
         scrollIntervalRef.current = setInterval(() => {
           window.scrollBy(0, 15);
         }, 50);
       }
     } else {
-      // Not near any edge - stop scrolling
       if (scrollIntervalRef.current) {
         clearInterval(scrollIntervalRef.current);
         scrollIntervalRef.current = null;
@@ -188,7 +182,6 @@ const Admin = () => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
     
-    // Create custom drag image from the row
     const cell = e.target as HTMLElement;
     const row = cell.closest('tr');
     if (row) {
@@ -233,7 +226,7 @@ const Admin = () => {
     // Don't clear dragOverIndex here to prevent flickering
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     stopAutoScroll();
     
@@ -262,6 +255,21 @@ const Admin = () => {
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
+
+    // Automaticky uložiť poradie do databázy
+    const updates = newOrder.map((item, index) => ({
+      id: item.id,
+      order_index: index
+    }));
+
+    const success = await equipmentService.updateOrder(updates);
+    if (success) {
+      toast.success('Poradie bolo úspešne uložené!');
+      setHasOrderChanges(false);
+      refetch();
+    } else {
+      toast.error('Chyba pri ukladaní poradia.');
+    }
   };
 
   const handleTableDragOver = (e: React.DragEvent) => {
