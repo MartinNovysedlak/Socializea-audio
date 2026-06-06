@@ -6,26 +6,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEquipment } from "@/hooks/useEquipment";
 
-const getImageCandidates = (itemName: string) => {
-  return [
-    `/media/${itemName}.jpg`,
-    `/media/${itemName}.png`,
-    `/media/${itemName}.jpeg`,
-    `/.dyad/media/${itemName}.jpg`,
-    `/.dyad/media/${itemName}.png`,
-    `/.dyad/media/${itemName}.jpeg`,
-    `/${itemName}.jpg`,
-    `/${itemName}.png`,
-    `/${itemName}.jpeg`,
-    `/images/${itemName}.jpg`,
-    `/images/${itemName}.png`,
-    `/images/${itemName}.jpeg`,
-    `/public/images/${itemName}.jpg`,
-    `/public/images/${itemName}.png`,
-    `/public/images/${itemName}.jpeg`,
-  ];
-};
-
 const EquipmentCatalog = () => {
   const { equipment } = useEquipment();
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
@@ -115,8 +95,8 @@ const EquipmentCatalog = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => {
-                  const candidates = getImageCandidates(item.name);
-                  const displayImage = item.mainImage || candidates[0];
+                  // Spoliehame sa výhradne na nahrané obrázky v databáze, inak ukážeme pekný unsplash placeholder
+                  const displayImage = item.mainImage || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
@@ -127,32 +107,8 @@ const EquipmentCatalog = () => {
                             alt={item.name}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                             onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const currentSrc = target.src;
-
-                              let nextIdx = -1;
-                              for (let i = 0; i < candidates.length; i++) {
-                                if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
-                                  nextIdx = i + 1;
-                                  break;
-                                }
-                              }
-
-                              if (nextIdx !== -1 && nextIdx < candidates.length) {
-                                target.src = candidates[nextIdx];
-                              } else {
-                                let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
-                                if (item.category === "sound") {
-                                  fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=300&auto=format&fit=crop&q=80";
-                                } else if (item.category === "lighting") {
-                                  fallback = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300&auto=format&fit=crop&q=80";
-                                } else if (item.category === "other") {
-                                  fallback = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80";
-                                }
-                                if (target.src !== fallback) {
-                                  target.src = fallback;
-                                }
-                              }
+                              // Ak sa nepodarí načítať (napr. stará adresa), okamžite hodíme jednotný zástupný obrázok
+                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                             }}
                             style={{ objectPosition: "center" }}
                           />

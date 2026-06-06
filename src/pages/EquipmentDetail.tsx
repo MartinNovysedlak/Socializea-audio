@@ -9,26 +9,6 @@ import Footer from "@/components/Footer";
 import { getStoredEquipment } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/data/equipmentDatabase";
 
-const getImageCandidates = (itemName: string) => {
-  return [
-    `/media/${itemName}.jpg`,
-    `/media/${itemName}.png`,
-    `/media/${itemName}.jpeg`,
-    `/.dyad/media/${itemName}.jpg`,
-    `/.dyad/media/${itemName}.png`,
-    `/.dyad/media/${itemName}.jpeg`,
-    `/${itemName}.jpg`,
-    `/${itemName}.png`,
-    `/${itemName}.jpeg`,
-    `/images/${itemName}.jpg`,
-    `/images/${itemName}.png`,
-    `/images/${itemName}.jpeg`,
-    `/public/images/${itemName}.jpg`,
-    `/public/images/${itemName}.png`,
-    `/public/images/${itemName}.jpeg`,
-  ];
-};
-
 const EquipmentDetail = () => {
   const { id } = useParams();
   const [item, setItem] = useState<EquipmentItem | null>(null);
@@ -80,49 +60,28 @@ const EquipmentDetail = () => {
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {item.images && item.images.map((img, idx) => {
-                        const suffix = idx > 0 ? `-${idx + 1}` : "";
-                        const nameWithSuffix = `${item.name}${suffix}`;
-                        const candidates = getImageCandidates(nameWithSuffix);
-
-                        return (
+                      {item.images && item.images.length > 0 ? (
+                        item.images.map((img, idx) => (
                           <div key={idx} className="aspect-video rounded-lg overflow-hidden border border-white/10">
                             <img
-                              src={img || candidates[0]}
+                              src={img}
                               alt={`${item.name} - fotka ${idx + 1}`}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const currentSrc = target.src;
-
-                                let nextIdx = -1;
-                                for (let i = 0; i < candidates.length; i++) {
-                                  if (currentSrc.endsWith(encodeURI(candidates[i])) || currentSrc.endsWith(candidates[i])) {
-                                    nextIdx = i + 1;
-                                    break;
-                                  }
-                                }
-
-                                if (nextIdx !== -1 && nextIdx < candidates.length) {
-                                  target.src = candidates[nextIdx];
-                                } else {
-                                  let fallback = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80";
-                                  if (item.category === "sound") {
-                                    fallback = "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=500&auto=format&fit=crop&q=80";
-                                  } else if (item.category === "lighting") {
-                                    fallback = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&auto=format&fit=crop&q=80";
-                                  } else if (item.category === "other") {
-                                    fallback = "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80";
-                                  }
-                                  if (target.src !== fallback) {
-                                    target.src = fallback;
-                                  }
-                                }
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80";
                               }}
                             />
                           </div>
-                        );
-                      })}
+                        ))
+                      ) : (
+                        <div className="aspect-video rounded-lg overflow-hidden border border-white/10 col-span-2">
+                          <img
+                            src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80"
+                            alt="Predvolený obrázok"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter className="pt-6 border-t border-white/5">
