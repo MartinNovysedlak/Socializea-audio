@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getStoredEquipment } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/data/equipmentDatabase";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const EquipmentDetail = () => {
   const { id } = useParams();
   const [item, setItem] = useState<EquipmentItem | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const items = getStoredEquipment();
@@ -20,6 +23,46 @@ const EquipmentDetail = () => {
       setItem(found);
     }
   }, [id]);
+
+  const images = item?.images && item.images.length > 0
+    ? item.images
+    : ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80"];
+
+  const openLightbox = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const goNext = useCallback(() => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
+
+  const goPrev = useCallback(() => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  }, [images.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [lightboxOpen, goNext, goPrev]);
 
   if (!item) {
     return (
@@ -59,30 +102,48 @@ const EquipmentDetail = () => {
                   <CardContent className="space-y-6">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {item.images && item.images.length > 0 ? (
-                        item.images.map((img, idx) => (
-                          <div key={idx} className="aspect-video rounded-lg overflow-hidden border border-white/10">
+                    {/* Main Image - clickable */}
+                    <div
+                      className="aspect-video rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative"
+                      onClick={() => openLightbox(0)}
+                    >
+                      <img
+                        src={images[0]}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50 px-4 py-2 rounded-full text-sm font-medium">
+                          Zväčšiť
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Thumbnail Grid - if more than 1 image */}
+                    {images.length > 1 && (
+                      <div className="grid grid-cols-3 gap-3">
+                        {images.slice(1).map((img, idx) => (
+                          <div
+                            key={idx + 1}
+                            className="aspect-video rounded-lg overflow-hidden border border-white/10 cursor-pointer group relative"
+                            onClick={() => openLightbox(idx + 1)}
+                          >
                             <img
                               src={img}
-                              alt={`${item.name} - fotka ${idx + 1}`}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              alt={`${item.name} - fotka ${idx + 2}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80";
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                               }}
                             />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                           </div>
-                        ))
-                      ) : (
-                        <div className="aspect-video rounded-lg overflow-hidden border border-white/10 col-span-2">
-                          <img
-                            src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80"
-                            alt="Predvolený obrázok"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                   <CardFooter className="pt-6 border-t border-white/5">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
@@ -140,6 +201,86 @@ const EquipmentDetail = () => {
         </div>
       </section>
       <Footer />
+
+      {/* Lightbox Overlay */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 md:p-8"
+          onClick={closeLightbox}
+        >
+          {/* Close button */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-all z-10"
+          >
+            <X size={28} />
+          </button>
+
+          {/* Image counter */}
+          {images.length > 1 && (
+            <div className="absolute top-4 left-4 md:top-6 md:left-6 text-white/60 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+              {currentImageIndex + 1} / {images.length}
+            </div>
+          )}
+
+          {/* Previous button */}
+          {images.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goPrev();
+              }}
+              className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-10"
+            >
+              <ChevronLeft size={32} />
+            </button>
+          )}
+
+          {/* Image - adapts to natural size, max 90vh/90vw */}
+          <img
+            src={images[currentImageIndex]}
+            alt={`${item.name} - fotka ${currentImageIndex + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
+            }}
+          />
+
+          {/* Next button */}
+          {images.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                goNext();
+              }}
+              className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-10"
+            >
+              <ChevronRight size={32} />
+            </button>
+          )}
+
+          {/* Dot indicators */}
+          {images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex(idx);
+                  }}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    idx === currentImageIndex
+                      ? "bg-[#BD20D3] scale-125"
+                      : "bg-white/30 hover:bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 };
