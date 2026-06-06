@@ -46,6 +46,7 @@ const Admin = () => {
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isDraggingRef = useRef(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -148,11 +149,7 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  const handleOpenEditForm = (e: React.MouseEvent, item: EquipmentItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    
+  const handleOpenEditForm = (item: EquipmentItem) => {
     setEditingItem(item);
     setFormData({
       name: item.name,
@@ -167,11 +164,7 @@ const Admin = () => {
     setIsFormOpen(true);
   };
 
-  const handleDeleteItem = async (e: React.MouseEvent, id: string, name: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    
+  const handleDeleteItem = async (id: string, name: string) => {
     if (window.confirm(`Naozaj chcete vymazať produkt: "${name}"?`)) {
       const success = await deleteEquipment(id);
       if (success) {
@@ -182,8 +175,9 @@ const Admin = () => {
     }
   };
 
-  // Drag & Drop handlers
+  // Drag & Drop handlers - only from grip handle
   const handleDragStart = (e: React.DragEvent, index: number) => {
+    isDraggingRef.current = true;
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
@@ -203,6 +197,7 @@ const Admin = () => {
   };
 
   const handleDragEnd = () => {
+    isDraggingRef.current = false;
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
@@ -652,33 +647,28 @@ const Admin = () => {
                               </tr>
                             )}
                             <tr 
-                              draggable
-                              onDragStart={(e) => handleDragStart(e, index)}
-                              onDragEnd={handleDragEnd}
-                              onDragOver={(e) => handleDragOver(e, index)}
-                              onDragLeave={handleDragLeave}
-                              onDrop={(e) => handleDrop(e, index)}
                               className={`
                                 row-transition
                                 ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
                               `}
-                              onPointerDown={(e) => {
-                                // Only handle drag on the grip column
-                                const target = e.target as HTMLElement;
-                                if (!target.closest('button') && target.closest('td:first-child')) {
-                                  e.currentTarget.draggable = true;
-                                } else if (!target.closest('td:first-child')) {
-                                  e.currentTarget.draggable = false;
-                                }
-                              }}
                             >
-                              <td className="px-4 py-4">
-                                <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors cursor-grab active:cursor-grabbing">
+                              <td 
+                                className="px-4 py-4 cursor-grab active:cursor-grabbing"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnd={handleDragEnd}
+                              >
+                                <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
                                   <GripVertical size={18} />
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
-                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40 shrink-0">
+                              <td 
+                                className="px-6 py-4"
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                              >
+                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
                                   <img 
                                     src={displayImg} 
                                     alt={item.name} 
@@ -689,10 +679,21 @@ const Admin = () => {
                                   />
                                 </div>
                               </td>
-                              <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
+                              <td 
+                                className="px-6 py-4 font-semibold text-white max-w-[280px] truncate"
+                                title={item.name}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                              >
                                 {item.name}
                               </td>
-                              <td className="px-6 py-4">
+                              <td 
+                                className="px-6 py-4"
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                              >
                                 <div className="flex items-center gap-2">
                                   {getCategoryIcon(item.category)}
                                   <span className="capitalize">
@@ -700,16 +701,26 @@ const Admin = () => {
                                   </span>
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
+                              <td 
+                                className="px-6 py-4 text-center font-bold text-[#BD20D3]"
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                              >
                                 {item.price_per_day} €
                               </td>
-                              <td className="px-6 py-4 text-center">
+                              <td 
+                                className="px-6 py-4 text-center"
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, index)}
+                              >
                                 {item.available}
                               </td>
                               <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <Button
-                                    onClick={(e) => handleOpenEditForm(e, item)}
+                                    onClick={() => handleOpenEditForm(item)}
                                     size="sm"
                                     className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
                                     title="Upraviť"
@@ -718,7 +729,7 @@ const Admin = () => {
                                     <span className="hidden sm:inline">Upraviť</span>
                                   </Button>
                                   <Button
-                                    onClick={(e) => handleDeleteItem(e, item.id, item.name)}
+                                    onClick={() => handleDeleteItem(item.id, item.name)}
                                     size="sm"
                                     variant="outline"
                                     className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
