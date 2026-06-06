@@ -9,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import DynamicBubbleInput from '@/components/DynamicBubbleInput';
+import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/data/equipmentDatabase';
 import { 
   Lock, 
   LogOut, 
-  ShieldAlert, 
   LayoutDashboard, 
   Plus, 
   Edit, 
@@ -44,7 +44,6 @@ const Admin = () => {
     pricePerDay: 10,
     available: 1,
     description: '',
-    mainImage: '',
     images: [] as string[],
     specifications: [] as string[],
     features: [] as string[]
@@ -88,7 +87,6 @@ const Admin = () => {
       pricePerDay: 10,
       available: 1,
       description: '',
-      mainImage: '',
       images: [],
       specifications: [],
       features: []
@@ -105,7 +103,6 @@ const Admin = () => {
       pricePerDay: item.pricePerDay,
       available: item.available,
       description: item.description,
-      mainImage: item.mainImage || '',
       images: item.images || [],
       specifications: item.specifications || [],
       features: item.features || []
@@ -130,7 +127,8 @@ const Admin = () => {
       return;
     }
 
-    const mainImage = formData.mainImage.trim() || (formData.images[0] || '');
+    // Default mainImage is the first image in the list
+    const mainImage = formData.images[0] || '';
 
     const parsedItem: Omit<EquipmentItem, 'id'> = {
       name: formData.name.trim(),
@@ -306,7 +304,7 @@ const Admin = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-gray-300">Cena za deň (€) *</Label>
                       <Input
@@ -330,17 +328,6 @@ const Admin = () => {
                         required
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Hlavný obrázok (URL)</Label>
-                      <Input
-                        type="text"
-                        value={formData.mainImage}
-                        onChange={(e) => setFormData(p => ({ ...p, mainImage: e.target.value }))}
-                        placeholder="Napr. /media/obrazok.jpg alebo Unsplash URL"
-                        className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                      />
-                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -354,15 +341,16 @@ const Admin = () => {
                     />
                   </div>
 
-                  {/* Dynamic Bubble Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <DynamicBubbleInput
-                      label="Galéria obrázkov"
-                      placeholder="Zadajte URL obrázku..."
-                      items={formData.images}
+                  {/* Base64 Drag & Drop Image Manager */}
+                  <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
+                    <ImageManager
+                      images={formData.images}
                       onChange={(images) => setFormData(p => ({ ...p, images }))}
                     />
+                  </div>
 
+                  {/* Dynamic Bubble Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <DynamicBubbleInput
                       label="Technické parametre"
                       placeholder="Napr. Frekvencia: 40 Hz - 200 Hz"
@@ -418,61 +406,64 @@ const Admin = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                    {equipment.map((item) => (
-                      <tr key={item.id} className="hover:bg-white/2 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                            <img 
-                              src={item.mainImage || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"} 
-                              alt={item.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                              }}
-                            />
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
-                          {item.name}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            {getCategoryIcon(item.category)}
-                            <span className="capitalize">
-                              {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
-                          {item.pricePerDay} €
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          {item.available}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              onClick={() => handleOpenEditForm(item)}
-                              size="sm"
-                              variant="outline"
-                              className="border-white/10 hover:border-[#BD20D3] hover:bg-[#BD20D3]/10 text-white rounded-lg h-9 w-9 p-0"
-                              title="Upraviť"
-                            >
-                              <Edit size={14} />
-                            </Button>
-                            <Button
-                              onClick={() => handleDeleteItem(item.id, item.name)}
-                              size="sm"
-                              variant="outline"
-                              className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
-                              title="Vymazať"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {equipment.map((item) => {
+                      const displayImg = item.mainImage || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                      return (
+                        <tr key={item.id} className="hover:bg-white/2 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                              <img 
+                                src={displayImg} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                                }}
+                              />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
+                            {item.name}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              {getCategoryIcon(item.category)}
+                              <span className="capitalize">
+                                {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
+                            {item.pricePerDay} €
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            {item.available}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                onClick={() => handleOpenEditForm(item)}
+                                size="sm"
+                                variant="outline"
+                                className="border-white/10 hover:border-[#BD20D3] hover:bg-[#BD20D3]/10 text-white rounded-lg h-9 w-9 p-0"
+                                title="Upraviť"
+                              >
+                                <Edit size={14} />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteItem(item.id, item.name)}
+                                size="sm"
+                                variant="outline"
+                                className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
+                                title="Vymazať"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                     {equipment.length === 0 && (
                       <tr>
                         <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
