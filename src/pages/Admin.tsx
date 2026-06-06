@@ -34,7 +34,7 @@ const Admin = () => {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, refetch } = useEquipment();
+  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
   const [localOrder, setLocalOrder] = useState<EquipmentItem[]>([]);
@@ -253,14 +253,16 @@ const Admin = () => {
     const [draggedItem] = newOrder.splice(draggedIndex, 1);
     newOrder.splice(finalDropIndex, 0, draggedItem);
     
-    // Okamžite aktualizovať lokálny stav pre plynulú zmenu
+    // Okamžite aktualizujeme lokálny aj globálny hook stav pre okamžitú vizuálnu odozvu
     setLocalOrder(newOrder);
+    setEquipment(newOrder);
+    
     setDraggedIndex(null);
     setDragOverIndex(null);
     setDropPosition(null);
     setCanDrag(false);
 
-    // Vytvoriť zoznam na uloženie do DB
+    // Vytvoriť zoznam na uloženie do databázy
     const updates = newOrder.map((item, index) => ({
       id: item.id,
       order_index: index
@@ -271,15 +273,11 @@ const Admin = () => {
     const success = await equipmentService.updateOrder(updates);
     if (success) {
       toast.success('Poradie bolo úspešne uložené!');
-      
-      // Pridané 500ms oneskorenie pre refetch, čím predídeme "revertu" z dôvodu replikačného oneskorenia Supabase
-      setTimeout(() => {
-        refetch();
-      }, 500);
     } else {
-      toast.error('Chyba pri ukladaní poradia.');
-      // Vrátiť staré poradie pri chybe
+      toast.error('Chyba pri ukladaní poradia do databázy.');
+      // Vrátiť staré poradie pri chybe databázy
       setLocalOrder([...equipment]);
+      setEquipment([...equipment]);
     }
   };
 
@@ -698,6 +696,8 @@ const Admin = () => {
                                 className="px-4 py-4 drag-handle cursor-grab active:cursor-grabbing text-center"
                                 onMouseDown={() => setCanDrag(true)}
                                 onMouseUp={() => setCanDrag(false)}
+                                onTouchStart={() => setCanDrag(true)}
+                                onTouchEnd={() => setCanDrag(false)}
                               >
                                 <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
                                   <GripVertical size={18} />

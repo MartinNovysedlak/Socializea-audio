@@ -67,6 +67,7 @@ export function useEquipment() {
     addEquipment,
     updateEquipment,
     deleteEquipment,
+    setEquipment,
     refetch: fetchEquipment
   };
 }
