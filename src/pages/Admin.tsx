@@ -12,7 +12,6 @@ import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/lib/supabase';
-import { seedEquipmentData } from '@/data/seedEquipment';
 import { 
   Lock, 
   LogOut, 
@@ -24,9 +23,7 @@ import {
   Lightbulb, 
   Layers, 
   Save, 
-  X,
-  DatabaseBackup,
-  Loader2
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -34,7 +31,6 @@ const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
 
   const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, refetch } = useEquipment();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -116,49 +112,6 @@ const Admin = () => {
         toast.success('Produkt úspešne vymazaný.');
       } else {
         toast.error('Chyba pri mazaní produktu.');
-      }
-    }
-  };
-
-  const handleSeedDatabase = async () => {
-    if (window.confirm(`Chystáte sa importovať ${seedEquipmentData.length} predvolených produktov priamo do Supabase databázy. Chcete pokračovať?`)) {
-      setIsSeeding(true);
-      const loadingToastId = toast.loading(`Importujem produkty (0/${seedEquipmentData.length})...`);
-      
-      try {
-        let successCount = 0;
-        for (let i = 0; i < seedEquipmentData.length; i++) {
-          const item = seedEquipmentData[i];
-          const newItem = await addEquipment({
-            name: item.name,
-            category: item.category,
-            pricePerDay: item.pricePerDay,
-            available: item.available,
-            description: item.description,
-            images: item.images,
-            specifications: item.specifications,
-            features: item.features
-          });
-          
-          if (newItem) {
-            successCount++;
-          }
-          
-          // Aktualizácia toast statusu
-          toast.loading(`Importujem produkty (${successCount}/${seedEquipmentData.length})...`, {
-            id: loadingToastId
-          });
-        }
-        
-        toast.dismiss(loadingToastId);
-        toast.success(`Import dokončený! Úspešne nahraných ${successCount} z ${seedEquipmentData.length} produktov.`);
-        refetch();
-      } catch (err) {
-        toast.dismiss(loadingToastId);
-        toast.error("Vyskytla sa chyba počas hromadného importu.");
-        console.error(err);
-      } finally {
-        setIsSeeding(false);
       }
     }
   };
@@ -292,20 +245,6 @@ const Admin = () => {
 
               <div className="flex flex-wrap gap-3">
                 <Button 
-                  onClick={handleSeedDatabase}
-                  disabled={isSeeding}
-                  variant="outline"
-                  className="border-[#BD20D3]/40 bg-[#BD20D3]/10 text-white hover:bg-[#BD20D3]/20 rounded-xl h-11 px-5 disabled:opacity-40"
-                >
-                  {isSeeding ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <DatabaseBackup size={18} className="mr-2" />
-                  )}
-                  Importovať prednastavené
-                </Button>
-
-                <Button 
                   onClick={handleOpenAddForm}
                   className="btn-cyber rounded-xl h-11 px-6 border-none"
                 >
@@ -328,7 +267,10 @@ const Admin = () => {
               <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/30 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/5">
                 <button 
                   type="button"
-                  onClick={() => setIsFormOpen(false)}
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setEditingItem(null);
+                  }}
                   className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
                 >
                   <X size={24} />
@@ -439,7 +381,10 @@ const Admin = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setIsFormOpen(false)}
+                      onClick={() => {
+                        setIsFormOpen(false);
+                        setEditingItem(null);
+                      }}
                       className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6"
                     >
                       Zrušiť
@@ -449,7 +394,7 @@ const Admin = () => {
                       className="btn-cyber rounded-xl h-12 px-8 border-none"
                     >
                       <Save size={18} className="mr-2" />
-                      Uložiť produkt
+                      {editingItem ? 'Uložiť zmeny' : 'Uložiť produkt'}
                     </Button>
                   </div>
                 </form>
@@ -517,11 +462,11 @@ const Admin = () => {
                                 <Button
                                   onClick={() => handleOpenEditForm(item)}
                                   size="sm"
-                                  variant="outline"
-                                  className="border-white/10 hover:border-[#BD20D3] hover:bg-[#BD20D3]/10 text-white rounded-lg h-9 w-9 p-0"
+                                  className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
                                   title="Upraviť"
                                 >
                                   <Edit size={14} />
+                                  <span className="hidden sm:inline">Upraviť</span>
                                 </Button>
                                 <Button
                                   onClick={() => handleDeleteItem(item.id, item.name)}
@@ -540,7 +485,7 @@ const Admin = () => {
                       {equipment.length === 0 && (
                         <tr>
                           <td colSpan={6} className="px-6 py-12 text-center text-gray-500 italic">
-                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie, alebo kliknite na tlačidlo "Importovať prednastavené" pre nahratie celej tvojej ponuky!
+                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
                           </td>
                         </tr>
                       )}
