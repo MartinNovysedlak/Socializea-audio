@@ -7,9 +7,15 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
+import { toast } from "sonner";
 
-const EquipmentDetail = () => {
+interface EquipmentDetailProps {
+  cartQuantity?: number;
+  onAddToCart?: () => void;
+}
+
+const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps) => {
   const { id } = useParams();
   const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -35,6 +41,15 @@ const EquipmentDetail = () => {
   const goPrev = useCallback(() => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
+
+  const handleAddToCart = () => {
+    if (onAddToCart) {
+      onAddToCart();
+      toast.success("Produkt bol pridaný do košíka!", {
+        description: `${item?.name} je teraz vo vašom košíku.`,
+      });
+    }
+  };
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -81,6 +96,8 @@ const EquipmentDetail = () => {
       </main>
     );
   }
+
+  const isInCart = cartQuantity > 0;
 
   return (
     <main className="min-h-screen bg-[#020721]">
@@ -156,11 +173,34 @@ const EquipmentDetail = () => {
                           Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
                         </p>
                       </div>
-                      <Link to="/prenajom">
-                        <Button className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 text-[#BD20D3] border border-[#BD20D3]/40 h-12 px-6">
-                          Späť do ponuky
+                      <div className="flex gap-3">
+                        <Link to="/prenajom">
+                          <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6">
+                            Späť do ponuky
+                          </Button>
+                        </Link>
+                        <Button 
+                          onClick={handleAddToCart}
+                          disabled={item.available === 0}
+                          className={`h-12 px-6 font-bold transition-all ${
+                            isInCart 
+                              ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
+                              : "btn-cyber border-none"
+                          }`}
+                        >
+                          {isInCart ? (
+                            <>
+                              <Check size={18} className="mr-2" />
+                              V košíku ({cartQuantity})
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingBag size={18} className="mr-2" />
+                              Pridať do košíka
+                            </>
+                          )}
                         </Button>
-                      </Link>
+                      </div>
                     </div>
                   </CardFooter>
                 </Card>
