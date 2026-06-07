@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
@@ -16,7 +16,25 @@ import { useEquipment } from './hooks/useEquipment';
 
 function App() {
   const { equipment } = useEquipment();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  
+  // Inicializácia stavu košíka priamo z localStorage, aby bol v celej aplikácii identický
+  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem("cyber_cart_quantities");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  // Uloženie stavu do localStorage pri každej zmene
+  useEffect(() => {
+    try {
+      localStorage.setItem("cyber_cart_quantities", JSON.stringify(quantities));
+    } catch (e) {
+      console.error("Nedá sa uložiť košík do localStorage:", e);
+    }
+  }, [quantities]);
 
   return (
     <BrowserRouter>
