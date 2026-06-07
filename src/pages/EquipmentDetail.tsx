@@ -104,14 +104,15 @@ const EquipmentDetail = () => {
                   <CardContent className="space-y-6">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
+                    {/* Hlavný obrázok — celý produkt viditeľný */}
                     <div
-                      className="aspect-video rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative"
+                      className="aspect-[4/3] rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
                       onClick={() => openLightbox(0)}
                     >
                       <img
                         src={images[0]}
                         alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
                         }}
@@ -123,18 +124,19 @@ const EquipmentDetail = () => {
                       </div>
                     </div>
 
+                    {/* Náhľady — tiež object-contain */}
                     {images.length > 1 && (
                       <div className="grid grid-cols-3 gap-3">
                         {images.slice(1).map((img, idx) => (
                           <div
                             key={idx + 1}
-                            className="aspect-video rounded-lg overflow-hidden border border-white/10 cursor-pointer group relative"
+                            className="aspect-[4/3] rounded-lg overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
                             onClick={() => openLightbox(idx + 1)}
                           >
                             <img
                               src={img}
                               alt={`${item.name} - fotka ${idx + 2}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                               }}
