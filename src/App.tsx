@@ -1,30 +1,29 @@
-"use client";
-
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Index from "@/pages/Index";
-import Prenajom from "@/pages/Prenajom";
-import Kontakt from "@/pages/Kontakt";
-import Predaj from "@/pages/Predaj";
-import Admin from "@/pages/Admin";
-import Blog from "@/pages/Blog";
-import BlogPostDetail from "@/pages/BlogPostDetail";
-import EquipmentDetail from "@/pages/EquipmentDetail";
-import NotFound from "@/pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Ponuka from "./pages/Ponuka";
+import Predaj from "./pages/Predaj";
+import ProductDetail from "./pages/ProductDetail";
+import Blog from "./pages/Blog";
+import BlogPostDetail from "./pages/BlogPostDetail";
+import Admin from "./pages/Admin";
+import { Toaster } from "@/components/ui/sonner";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/prenajom" element={<Prenajom />} />
-      <Route path="/kontakt" element={<Kontakt />} />
-      <Route path="/predaj" element={<Predaj />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:id" element={<BlogPostDetail />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/equipment/:id" element={<EquipmentDetail />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <Router>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/ponuka" element={<Ponuka />} />
+        <Route path="/predaj" element={<Predaj />} />
+        <Route path="/predaj/:id" element={<ProductDetail />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogPostDetail />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+      <Toaster position="top-right" theme="dark" />
+    </Router>
   );
 }
 
