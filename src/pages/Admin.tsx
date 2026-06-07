@@ -8,11 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import DynamicBubbleInput from '@/components/DynamicBubbleInput';
 import ImageManager from '@/components/ImageManager';
 import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/lib/supabase';
 import { equipmentService } from '@/lib/equipmentService';
+import { salesService, SalesItem } from '@/lib/salesService';
+import { blogService, BlogPost } from '@/lib/blogService';
 import { 
   Lock, 
   LogOut, 
@@ -25,7 +28,11 @@ import {
   Layers, 
   Save, 
   X,
-  GripVertical
+  GripVertical,
+  ShoppingBag,
+  BookOpen,
+  User,
+  Heart
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,12 +40,23 @@ const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
 
-  const { equipment, loading, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+  // --- 1. RENTAL STATE (Existing) ---
+  const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
+  const [isRentalFormOpen, setIsRentalFormOpen] = useState(false);
+  const [editingRental, setEditingRental] = useState<EquipmentItem | null>(null);
   const [localOrder, setLocalOrder] = useState<EquipmentItem[]>([]);
-  const [hasOrderChanges, setHasOrderChanges] = useState(false);
+  const [rentalFormData, setRentalFormData] = useState({
+    name: '',
+    category: 'sound' as 'sound' | 'lighting' | 'other',
+    pricePerDay: 10,
+    available: 1,
+    description: '',
+    images: [] as string[],
+    specifications: [] as string[],
+    features: [] as string[]
+  });
 
   // Drag & Drop state
   const [canDrag, setCanDrag] = useState(false);
@@ -48,15 +66,32 @@ const Admin = () => {
   const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [formData, setFormData] = useState({
+  // --- 2. SALES STATE ---
+  const [salesItems, setSalesItems] = useState<SalesItem[]>([]);
+  const [loadingSales, setLoadingSales] = useState(true);
+  const [isSalesFormOpen, setIsSalesFormOpen] = useState(false);
+  const [editingSales, setEditingSales] = useState<SalesItem | null>(null);
+  const [salesFormData, setSalesFormData] = useState({
     name: '',
-    category: 'sound' as 'sound' | 'lighting' | 'other',
-    pricePerDay: 10,
-    available: 1,
+    price: 99,
+    condition: 'new' as 'new' | 'used',
     description: '',
     images: [] as string[],
-    specifications: [] as string[],
-    features: [] as string[]
+    specs: [] as string[],
+    available: true
+  });
+
+  // --- 3. BLOG STATE ---
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loadingBlog, setLoadingBlog] = useState(true);
+  const [isBlogFormOpen, setIsBlogFormOpen] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
+  const [blogFormData, setBlogFormData] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    image: '',
+    author: 'Admin Team'
   });
 
   useEffect(() => {
@@ -70,9 +105,31 @@ const Admin = () => {
     setLocalOrder([...equipment]);
   }, [equipment]);
 
+  // Load Sales and Blog on Auth success
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadSalesData();
+      loadBlogData();
+    }
+  }, [isAuthenticated]);
+
+  const loadSalesData = async () => {
+    setLoadingSales(true);
+    const data = await salesService.getAll();
+    setSalesItems(data);
+    setLoadingSales(false);
+  };
+
+  const loadBlogData = async () => {
+    setLoadingBlog(true);
+    const data = await blogService.getAll();
+    setBlogPosts(data);
+    setLoadingBlog(false);
+  };
+
   // Prevent background scroll when modal is open
   useEffect(() => {
-    if (isFormOpen) {
+    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -80,7 +137,7 @@ const Admin = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isFormOpen]);
+  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen]);
 
   // Auto-scroll when dragging near edges
   const checkAndScroll = useCallback((clientY: number) => {
@@ -136,9 +193,10 @@ const Admin = () => {
     toast.info('Boli ste odhlásený.');
   };
 
-  const handleOpenAddForm = () => {
-    setEditingItem(null);
-    setFormData({
+  // --- RENTAL FUNCTIONS ---
+  const handleOpenRentalAdd = () => {
+    setEditingRental(null);
+    setRentalFormData({
       name: '',
       category: 'sound',
       pricePerDay: 10,
@@ -148,12 +206,12 @@ const Admin = () => {
       specifications: [],
       features: []
     });
-    setIsFormOpen(true);
+    setIsRentalFormOpen(true);
   };
 
-  const handleOpenEditForm = (item: EquipmentItem) => {
-    setEditingItem(item);
-    setFormData({
+  const handleOpenRentalEdit = (item: EquipmentItem) => {
+    setEditingRental(item);
+    setRentalFormData({
       name: item.name,
       category: item.category,
       pricePerDay: item.price_per_day,
@@ -163,11 +221,11 @@ const Admin = () => {
       specifications: item.specifications || [],
       features: item.features || []
     });
-    setIsFormOpen(true);
+    setIsRentalFormOpen(true);
   };
 
-  const handleDeleteItem = async (id: string, name: string) => {
-    if (window.confirm(`Naozaj chcete vymazať produkt: "${name}"?`)) {
+  const handleDeleteRental = async (id: string, name: string) => {
+    if (window.confirm(`Naozaj chcete vymazať produkt na prenájom: "${name}"?`)) {
       const success = await deleteEquipment(id);
       if (success) {
         toast.success('Produkt úspešne vymazaný.');
@@ -177,24 +235,52 @@ const Admin = () => {
     }
   };
 
-  // Drag & Drop handlers
+  const handleRentalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rentalFormData.name.trim() || !rentalFormData.description.trim()) {
+      toast.error('Vyplňte povinné polia!');
+      return;
+    }
+
+    const mainImage = rentalFormData.images[0] || '';
+
+    const itemData = {
+      name: rentalFormData.name.trim(),
+      category: rentalFormData.category,
+      pricePerDay: Number(rentalFormData.pricePerDay),
+      available: Number(rentalFormData.available),
+      description: rentalFormData.description.trim(),
+      mainImage: mainImage,
+      images: rentalFormData.images,
+      specifications: rentalFormData.specifications,
+      features: rentalFormData.features
+    };
+
+    if (editingRental) {
+      const updated = await updateEquipment(editingRental.id, itemData);
+      if (updated) {
+        toast.success('Produkt na prenájom bol upravený!');
+        setIsRentalFormOpen(false);
+        setEditingRental(null);
+      } else {
+        toast.error('Chyba pri úprave produktu.');
+      }
+    } else {
+      const newItem = await addEquipment(itemData);
+      if (newItem) {
+        toast.success('Nový produkt bol úspešne pridaný!');
+        setIsRentalFormOpen(false);
+      } else {
+        toast.error('Chyba pri pridávaní produktu.');
+      }
+    }
+  };
+
+  // Drag & Drop handlers for Rentals
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
-    
-    const cell = e.target as HTMLElement;
-    const row = cell.closest('tr');
-    if (row) {
-      const dragImage = row.cloneNode(true) as HTMLElement;
-      dragImage.style.width = `${row.offsetWidth}px`;
-      dragImage.style.opacity = '0.8';
-      dragImage.style.position = 'absolute';
-      dragImage.style.top = '-1000px';
-      document.body.appendChild(dragImage);
-      e.dataTransfer.setDragImage(dragImage, 0, 0);
-      setTimeout(() => document.body.removeChild(dragImage), 0);
-    }
   };
 
   const handleDragEnd = () => {
@@ -207,155 +293,175 @@ const Admin = () => {
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
     if (draggedIndex !== null && draggedIndex !== index) {
       setDragOverIndex(index);
-      
       const row = (e.target as HTMLElement).closest('tr');
       if (row) {
         const rect = row.getBoundingClientRect();
         const midY = rect.top + rect.height / 2;
-        const position = e.clientY < midY ? 'above' : 'below';
-        setDropPosition(position);
+        setDropPosition(e.clientY < midY ? 'above' : 'below');
       }
-      
       checkAndScroll(e.clientY);
     }
-  };
-
-  const handleDragLeave = () => {
-    // Nepremazávame dragOverIndex pri opustení riadku, zabráni to blikaniu
   };
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
     stopAutoScroll();
-    
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-      setDropPosition(null);
-      setCanDrag(false);
-      return;
-    }
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
 
     let finalDropIndex = dropIndex;
-    if (dropPosition === 'below') {
-      finalDropIndex = dropIndex + 1;
-    }
-    
-    if (draggedIndex < finalDropIndex) {
-      finalDropIndex = finalDropIndex - 1;
-    }
+    if (dropPosition === 'below') finalDropIndex = dropIndex + 1;
+    if (draggedIndex < finalDropIndex) finalDropIndex = finalDropIndex - 1;
 
     const newOrder = [...localOrder];
     const [draggedItem] = newOrder.splice(draggedIndex, 1);
     newOrder.splice(finalDropIndex, 0, draggedItem);
     
-    // Okamžite aktualizujeme stav v Reacte
     setLocalOrder(newOrder);
     setEquipment(newOrder);
-    
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-    setDropPosition(null);
-    setCanDrag(false);
+    handleDragEnd();
 
-    // Vytvoriť zoznam pre Supabase
-    const updates = newOrder.map((item, index) => ({
-      id: item.id,
-      order_index: index
-    }));
-
-    setHasOrderChanges(false);
-
+    const updates = newOrder.map((item, idx) => ({ id: item.id, order_index: idx }));
     const success = await equipmentService.updateOrder(updates);
     if (success) {
-      toast.success('Poradie bolo úspešne uložené!');
+      toast.success('Poradie úspešne uložené!');
     } else {
-      toast.error('Chyba pri ukladaní poradia.');
-      // Spätná obnova ak uloženie zlyhá
-      setLocalOrder([...equipment]);
-      setEquipment([...equipment]);
+      toast.error('Nepodarilo sa uložiť poradie.');
     }
   };
 
-  const handleTableDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    checkAndScroll(e.clientY);
+  // --- SALES FUNCTIONS ---
+  const handleOpenSalesAdd = () => {
+    setEditingSales(null);
+    setSalesFormData({
+      name: '',
+      price: 100,
+      condition: 'new',
+      description: '',
+      images: [],
+      specs: [],
+      available: true
+    });
+    setIsSalesFormOpen(true);
   };
 
-  const handleSaveOrder = async () => {
-    const updates = localOrder.map((item, index) => ({
-      id: item.id,
-      order_index: index
-    }));
+  const handleOpenSalesEdit = (item: SalesItem) => {
+    setEditingSales(item);
+    setSalesFormData({
+      name: item.name,
+      price: item.price,
+      condition: item.condition,
+      description: item.description,
+      images: item.images || [],
+      specs: item.specs || [],
+      available: item.available
+    });
+    setIsSalesFormOpen(true);
+  };
 
-    const success = await equipmentService.updateOrder(updates);
-    if (success) {
-      toast.success('Poradie bolo úspešne uložené!');
-      setHasOrderChanges(false);
-      refetch();
-    } else {
-      toast.error('Chyba pri ukladaní poradia.');
+  const handleDeleteSales = async (id: string, name: string) => {
+    if (window.confirm(`Naozaj chcete vymazať produkt na predaj: "${name}"?`)) {
+      const success = await salesService.delete(id);
+      if (success) {
+        toast.success('Produkt na predaj úspešne vymazaný.');
+        loadSalesData();
+      } else {
+        toast.error('Chyba pri mazaní.');
+      }
     }
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleSalesSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-
-    if (!formData.name.trim()) {
-      toast.error('Názov produktu je povinný!');
+    if (!salesFormData.name.trim() || !salesFormData.description.trim()) {
+      toast.error('Vyplňte názov a popis!');
       return;
     }
 
-    if (!formData.description.trim()) {
-      toast.error('Popis produktu je povinný!');
-      return;
-    }
-
-    const mainImage = formData.images[0] || '';
-
-    const itemData = {
-      name: formData.name.trim(),
-      category: formData.category,
-      pricePerDay: Number(formData.pricePerDay),
-      available: Number(formData.available),
-      description: formData.description.trim(),
-      mainImage: mainImage,
-      images: formData.images,
-      specifications: formData.specifications,
-      features: formData.features
-    };
-
-    if (editingItem) {
-      const updated = await updateEquipment(editingItem.id, itemData);
+    if (editingSales) {
+      const updated = await salesService.update(editingSales.id, salesFormData);
       if (updated) {
-        toast.success('Produkt bol úspešne upravený!');
-        setIsFormOpen(false);
-        setEditingItem(null);
+        toast.success('Produkt na predaj úspešne upravený!');
+        setIsSalesFormOpen(false);
+        loadSalesData();
       } else {
-        toast.error('Chyba pri úprave produktu.');
+        toast.error('Chyba pri úprave.');
       }
     } else {
-      const newItem = await addEquipment(itemData);
-      if (newItem) {
-        toast.success('Nový produkt bol úspešne pridaný do databázy!');
-        setIsFormOpen(false);
-        setEditingItem(null);
+      const created = await salesService.create(salesFormData);
+      if (created) {
+        toast.success('Nový produkt na predaj pridaný!');
+        setIsSalesFormOpen(false);
+        loadSalesData();
       } else {
-        toast.error('Chyba pri pridávaní produktu.');
+        toast.error('Chyba pri pridávaní.');
       }
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'sound': return <Volume2 className="text-cyan-400" size={16} />;
-      case 'lighting': return <Lightbulb className="text-amber-400" size={16} />;
-      default: return <Layers className="text-purple-400" size={16} />;
+  // --- BLOG FUNCTIONS ---
+  const handleOpenBlogAdd = () => {
+    setEditingBlog(null);
+    setBlogFormData({
+      title: '',
+      excerpt: '',
+      content: '',
+      image: '',
+      author: 'Admin Team'
+    });
+    setIsBlogFormOpen(true);
+  };
+
+  const handleOpenBlogEdit = (post: BlogPost) => {
+    setEditingBlog(post);
+    setBlogFormData({
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      image: post.image,
+      author: post.author
+    });
+    setIsBlogFormOpen(true);
+  };
+
+  const handleDeleteBlog = async (id: string, title: string) => {
+    if (window.confirm(`Naozaj chcete vymazať článok: "${title}"?`)) {
+      const success = await blogService.delete(id);
+      if (success) {
+        toast.success('Článok bol vymazaný.');
+        loadBlogData();
+      } else {
+        toast.error('Chyba pri mazaní.');
+      }
+    }
+  };
+
+  const handleBlogSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blogFormData.title.trim() || !blogFormData.content.trim()) {
+      toast.error('Vyplňte názov a obsah článku!');
+      return;
+    }
+
+    if (editingBlog) {
+      const updated = await blogService.update(editingBlog.id, blogFormData);
+      if (updated) {
+        toast.success('Článok bol úspešne upravený!');
+        setIsBlogFormOpen(false);
+        loadBlogData();
+      } else {
+        toast.error('Chyba pri úprave.');
+      }
+    } else {
+      const created = await blogService.create(blogFormData);
+      if (created) {
+        toast.success('Nový článok bol úspešne uverejnený!');
+        setIsBlogFormOpen(false);
+        loadBlogData();
+      } else {
+        toast.error('Chyba pri uverejňovaní.');
+      }
     }
   };
 
@@ -418,26 +524,19 @@ const Admin = () => {
           </div>
         ) : (
           <div className="max-w-6xl mx-auto space-y-8">
+            {/* ADMIN NAV/HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#020721]/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
               <div>
                 <div className="flex items-center gap-3">
                   <LayoutDashboard className="text-[#BD20D3]" size={32} />
-                  <h1 className="text-3xl font-extrabold text-white">Správa produktov</h1>
+                  <h1 className="text-3xl font-extrabold text-white">Administrácia systému</h1>
                 </div>
                 <p className="text-gray-400 mt-1">
-                  Spravujte ponoku svojej techniky, pridávajte nové kusy a aktualizujte ceny.
+                  Kompletná správa produktov na prenájom, techniky na predaj a firemného blogu.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button 
-                  onClick={handleOpenAddForm}
-                  className="btn-cyber rounded-xl h-11 px-6 border-none"
-                >
-                  <Plus size={18} className="mr-2" />
-                  Pridať produkt
-                </Button>
-
                 <Button 
                   onClick={handleLogout} 
                   variant="outline" 
@@ -449,322 +548,427 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* POP-UP MODAL PRE PRIDANIE / ÚPRAVU */}
-            {isFormOpen && (
-              <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-                <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
-                  <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        setIsFormOpen(false);
-                        setEditingItem(null);
-                      }}
-                      className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
-                    >
-                      <X size={24} />
-                    </button>
-                    <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
-                      <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
-                        {editingItem ? <Edit size={20} /> : <Plus size={20} />}
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">
-                          {editingItem ? 'Upraviť produkt' : 'Pridať nový produkt'}
-                        </h2>
-                        <p className="text-gray-400 text-sm">
-                          {editingItem ? 'Vykonajte úpravy v nasledujúcich poliach.' : 'Vyplňte informácie o novom produkte pre katalóg.'}
-                        </p>
-                      </div>
-                    </div>
+            {/* TAB CONTROLLERS */}
+            <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
+              <TabsList className="bg-white/5 border border-white/10 p-1.5 rounded-2xl flex flex-wrap gap-1 max-w-lg">
+                <TabsTrigger value="rentals" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
+                  <Volume2 size={16} />
+                  Prenájom
+                </TabsTrigger>
+                <TabsTrigger value="sales" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
+                  <ShoppingBag size={16} />
+                  Predaj
+                </TabsTrigger>
+                <TabsTrigger value="blog" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
+                  <BookOpen size={16} />
+                  Blog
+                </TabsTrigger>
+              </TabsList>
 
-                    <form onSubmit={handleFormSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Názov produktu *</Label>
-                          <Input
-                            type="text"
-                            value={formData.name}
-                            onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
-                            placeholder="Napr. Subwoofer DB Technologies"
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Kategória</Label>
-                          <select
-                            value={formData.category}
-                            onChange={(e) => setFormData(p => ({ ...p, category: e.target.value as any }))}
-                            className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3]"
-                          >
-                            <option value="sound">Zvuk</option>
-                            <option value="lighting">Svetlá a efekty</option>
-                            <option value="other">Ostatné</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Cena za deň (€) *</Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={formData.pricePerDay}
-                            onChange={(e) => setFormData(p => ({ ...p, pricePerDay: Number(e.target.value) }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Počet kusov skladom *</Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            value={formData.available}
-                            onChange={(e) => setFormData(p => ({ ...p, available: Number(e.target.value) }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-12"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Popis produktu *</Label>
-                        <Textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
-                          placeholder="Krátky alebo dlhší opis vlastností..."
-                          className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]"
-                          required
-                        />
-                      </div>
-
-                      <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
-                        <ImageManager
-                          images={formData.images}
-                          onChange={(images) => setFormData(p => ({ ...p, images }))}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <DynamicBubbleInput
-                          label="Technické parametre"
-                          placeholder="Napr. Frekvencia: 40 Hz - 200 Hz"
-                          items={formData.specifications}
-                          onChange={(specifications) => setFormData(p => ({ ...p, specifications }))}
-                        />
-
-                        <DynamicBubbleInput
-                          label="Kľúčové vlastnosti"
-                          placeholder="Napr. Vysoký akustický výkon"
-                          items={formData.features}
-                          onChange={(features) => setFormData(p => ({ ...p, features }))}
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setIsFormOpen(false);
-                            setEditingItem(null);
-                          }}
-                          className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6"
-                        >
-                          Zrušiť
-                        </Button>
-                        <Button
-                          type="submit"
-                          className="btn-cyber rounded-xl h-12 px-8 border-none"
-                        >
-                          <Save size={18} className="mr-2" />
-                          {editingItem ? 'Uložiť zmeny' : 'Uložiť produkt'}
-                        </Button>
-                      </div>
-                    </form>
-                  </Card>
-                </div>
-              </div>
-            )}
-
-            <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
-              <CardHeader className="border-b border-white/10 px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <CardTitle className="text-xl font-bold text-white">
-                    Zoznam všetkých produktov ({localOrder.length})
-                  </CardTitle>
-                  <p className="text-gray-400 text-sm mt-1">
-                    Chyťte a potiahnite ikonu úchytu (bodky vľavo) pre zmenu poradia produktov.
-                  </p>
-                </div>
-                {hasOrderChanges && (
-                  <Button
-                    onClick={handleSaveOrder}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 px-5"
-                  >
-                    <Save size={16} className="mr-2" />
-                    Uložiť poradie
+              {/* RENTALS TAB PANEL */}
+              <TabsContent value="rentals" className="space-y-6">
+                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <span className="text-sm text-gray-400">Správa inventára pre prenájom aparatúry</span>
+                  <Button onClick={handleOpenRentalAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
+                    <Plus size={16} className="mr-1.5" /> Pridať na prenájom
                   </Button>
-                )}
-              </CardHeader>
-              
-              {loading ? (
-                <div className="text-center py-12 text-gray-400">Načítavam...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <style>{`
-                    .row-transition {
-                      transition: transform 0.2s ease, opacity 0.2s ease;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar {
-                      width: 8px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-track {
-                      background: rgba(255, 255, 255, 0.02);
-                      border-radius: 999px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                      background: rgba(189, 32, 211, 0.3);
-                      border-radius: 999px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                      background: rgba(189, 32, 211, 0.5);
-                    }
-                    /* Box shadow indicators for stable dragging without layout shifts */
-                    .drag-over-above td {
-                      box-shadow: inset 0 4px 0 0 #BD20D3 !important;
-                    }
-                    .drag-over-below td {
-                      box-shadow: inset 0 -4px 0 0 #BD20D3 !important;
-                    }
-                  `}</style>
-                  <table 
-                    ref={tableRef}
-                    className="w-full text-left border-collapse"
-                    onDragOver={handleTableDragOver}
-                  >
-                    <thead>
-                      <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
-                        <th className="px-4 py-4 w-16 text-center"></th>
-                        <th className="px-6 py-4">Obrázok</th>
-                        <th className="px-6 py-4">Názov</th>
-                        <th className="px-6 py-4">Kategória</th>
-                        <th className="px-6 py-4 text-center">Cena / deň</th>
-                        <th className="px-6 py-4 text-center">Kusy</th>
-                        <th className="px-6 py-4 text-right">Akcie</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                      {localOrder.map((item, index) => {
-                        const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                        const isDragged = draggedIndex === index;
-                        const isDragOver = dragOverIndex === index;
-                        
-                        let dragIndicatorClass = '';
-                        if (isDragOver && draggedIndex !== null) {
-                          dragIndicatorClass = dropPosition === 'above' ? 'drag-over-above' : 'drag-over-below';
-                        }
-                        
-                        return (
-                          <tr 
-                            key={item.id}
-                            draggable={canDrag}
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, index)}
-                            className={`
-                              row-transition
-                              ${dragIndicatorClass}
-                              ${isDragged ? 'opacity-40 bg-[#BD20D3]/10 scale-[0.98]' : 'hover:bg-white/2'}
-                            `}
-                          >
-                            <td 
-                              className="px-4 py-4 drag-handle cursor-grab active:cursor-grabbing text-center"
-                              onMouseDown={() => setCanDrag(true)}
-                              onMouseUp={() => setCanDrag(false)}
-                              onTouchStart={() => setCanDrag(true)}
-                              onTouchEnd={() => setCanDrag(false)}
-                            >
-                              <div className="flex items-center justify-center text-gray-500 hover:text-[#BD20D3] transition-colors">
-                                <GripVertical size={18} />
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                                <img 
-                                  src={displayImg} 
-                                  alt={item.name} 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
-                                  }}
-                                />
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate" title={item.name}>
-                              {item.name}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-2">
-                                  {getCategoryIcon(item.category)}
-                                  <span className="capitalize">
-                                    {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">
-                                {item.price_per_day} €
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                {item.available}
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button
-                                    onClick={() => handleOpenEditForm(item)}
-                                    size="sm"
-                                    className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-lg h-9 px-3 gap-1.5"
-                                    title="Upraviť"
-                                  >
-                                    <Edit size={14} />
-                                    <span className="hidden sm:inline">Upraviť</span>
-                                  </Button>
-                                  <Button
-                                    onClick={() => handleDeleteItem(item.id, item.name)}
-                                    size="sm"
-                                    variant="outline"
-                                    className="border-white/10 hover:border-red-500 hover:bg-red-500/10 text-red-400 rounded-lg h-9 w-9 p-0"
-                                    title="Vymazať"
-                                  >
-                                    <Trash2 size={14} />
-                                  </Button>
-                                </div>
-                              </td>
-                          </tr>
-                        );
-                      })}
-                      {localOrder.length === 0 && (
-                        <tr>
-                          <td colSpan={7} className="px-6 py-12 text-center text-gray-500 italic">
-                            V databáze nie sú žiadne produkty. Pridajte prvý pomocou tlačidla vyššie.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
                 </div>
-              )}
-            </Card>
+
+                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
+                  {loadingRentals ? (
+                    <div className="text-center py-12 text-gray-400">Načítavam prenájmy...</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse" onDragOver={(e) => e.preventDefault()}>
+                        <thead>
+                          <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                            <th className="px-4 py-4 w-16 text-center"></th>
+                            <th className="px-6 py-4">Obrázok</th>
+                            <th className="px-6 py-4">Názov</th>
+                            <th className="px-6 py-4">Kategória</th>
+                            <th className="px-6 py-4 text-center">Cena / deň</th>
+                            <th className="px-6 py-4 text-center">Kusy</th>
+                            <th className="px-6 py-4 text-right">Akcie</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                          {localOrder.map((item, index) => {
+                            const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                            const isDragged = draggedIndex === index;
+                            const isDragOver = dragOverIndex === index;
+                            return (
+                              <tr 
+                                key={item.id}
+                                draggable={canDrag}
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragEnd={handleDragEnd}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDrop={(e) => handleDrop(e, index)}
+                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : 'hover:bg-white/2'}`}
+                              >
+                                <td 
+                                  className="px-4 py-4 cursor-grab active:cursor-grabbing text-center"
+                                  onMouseDown={() => setCanDrag(true)}
+                                  onMouseUp={() => setCanDrag(false)}
+                                >
+                                  <GripVertical size={16} className="text-gray-500 mx-auto" />
+                                </td>
+                                <td className="px-6 py-4">
+                                  <img src={displayImg} alt="" className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-white max-w-[240px] truncate">{item.name}</td>
+                                <td className="px-6 py-4 capitalize">{item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}</td>
+                                <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{item.price_per_day} €</td>
+                                <td className="px-6 py-4 text-center">{item.available}</td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button onClick={() => handleOpenRentalEdit(item)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                      <Edit size={12} />
+                                    </Button>
+                                    <Button onClick={() => handleDeleteRental(item.id, item.name)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              {/* SALES TAB PANEL */}
+              <TabsContent value="sales" className="space-y-6">
+                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <span className="text-sm text-gray-400">Správa produktov určených na priamy predaj</span>
+                  <Button onClick={handleOpenSalesAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
+                    <Plus size={16} className="mr-1.5" /> Pridať na predaj
+                  </Button>
+                </div>
+
+                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
+                  {loadingSales ? (
+                    <div className="text-center py-12 text-gray-400">Načítavam predaje...</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                            <th className="px-6 py-4">Obrázok</th>
+                            <th className="px-6 py-4">Názov</th>
+                            <th className="px-6 py-4">Stav</th>
+                            <th className="px-6 py-4 text-center">Dostupný</th>
+                            <th className="px-6 py-4 text-center">Predajná cena</th>
+                            <th className="px-6 py-4 text-right">Akcie</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                          {salesItems.map((item) => {
+                            const img = item.images?.[0] || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                            return (
+                              <tr key={item.id} className="hover:bg-white/2">
+                                <td className="px-6 py-4">
+                                  <img src={img} alt="" className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-white max-w-[280px] truncate">{item.name}</td>
+                                <td className="px-6 py-4">
+                                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${item.condition === 'new' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                    {item.condition === 'new' ? 'Nový' : 'Bazár'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className={item.available ? "text-emerald-400" : "text-red-400"}>
+                                    {item.available ? "Skladom" : "Vypredané"}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{item.price} €</td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button onClick={() => handleOpenSalesEdit(item)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                      <Edit size={12} />
+                                    </Button>
+                                    <Button onClick={() => handleDeleteSales(item.id, item.name)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {salesItems.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="text-center py-8 text-gray-500 italic">Žiadna technika na predaj.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              {/* BLOG TAB PANEL */}
+              <TabsContent value="blog" className="space-y-6">
+                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <span className="text-sm text-gray-400">Správa firemných článkov a noviniek</span>
+                  <Button onClick={handleOpenBlogAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
+                    <Plus size={16} className="mr-1.5" /> Pridať článok
+                  </Button>
+                </div>
+
+                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
+                  {loadingBlog ? (
+                    <div className="text-center py-12 text-gray-400">Načítavam články...</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                            <th className="px-6 py-4">Obrázok</th>
+                            <th className="px-6 py-4">Názov článku</th>
+                            <th className="px-6 py-4">Autor</th>
+                            <th className="px-6 py-4">Dátum publikovania</th>
+                            <th className="px-6 py-4 text-right">Akcie</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                          {blogPosts.map((post) => {
+                            return (
+                              <tr key={post.id} className="hover:bg-white/2">
+                                <td className="px-6 py-4">
+                                  <img src={post.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"} alt="" className="w-12 h-10 rounded object-cover border border-white/10" />
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">{post.title}</td>
+                                <td className="px-6 py-4 text-gray-400">{post.author}</td>
+                                <td className="px-6 py-4 text-xs text-gray-400">
+                                  {new Date(post.published_at).toLocaleDateString('sk-SK')}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button onClick={() => handleOpenBlogEdit(post)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                      <Edit size={12} />
+                                    </Button>
+                                    <Button onClick={() => handleDeleteBlog(post.id, post.title)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {blogPosts.length === 0 && (
+                            <tr>
+                              <td colSpan={5} className="text-center py-8 text-gray-500 italic">Žiadne články v blogu.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
+
+      {/* --- RENTALS POP-UP MODAL --- */}
+      {isRentalFormOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+            <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button onClick={() => { setIsRentalFormOpen(false); setEditingRental(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                  {editingRental ? <Edit size={20} /> : <Plus size={20} />}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingRental ? 'Upraviť prenájom' : 'Nový produkt na prenájom'}
+                  </h2>
+                </div>
+              </div>
+
+              <form onSubmit={handleRentalSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Názov produktu *</Label>
+                    <Input type="text" value={rentalFormData.name} onChange={(e) => setRentalFormData(p => ({ ...p, name: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Kategória</Label>
+                    <select value={rentalFormData.category} onChange={(e) => setRentalFormData(p => ({ ...p, category: e.target.value as any }))} className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:ring-1 focus:ring-[#BD20D3] focus:outline-none">
+                      <option value="sound">Zvuk</option>
+                      <option value="lighting">Svetlá a efekty</option>
+                      <option value="other">Ostatné</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cena za deň (€) *</Label>
+                    <Input type="number" min="1" value={rentalFormData.pricePerDay} onChange={(e) => setRentalFormData(p => ({ ...p, pricePerDay: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Počet kusov skladom *</Label>
+                    <Input type="number" min="1" value={rentalFormData.available} onChange={(e) => setRentalFormData(p => ({ ...p, available: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Popis produktu *</Label>
+                  <Textarea value={rentalFormData.description} onChange={(e) => setRentalFormData(p => ({ ...p, description: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]" required />
+                </div>
+
+                <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
+                  <ImageManager images={rentalFormData.images} onChange={(images) => setRentalFormData(p => ({ ...p, images }))} />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <DynamicBubbleInput label="Technické parametre" placeholder="Pridať parameter..." items={rentalFormData.specifications} onChange={(specifications) => setRentalFormData(p => ({ ...p, specifications }))} />
+                  <DynamicBubbleInput label="Kľúčové vlastnosti" placeholder="Pridať vlastnosť..." items={rentalFormData.features} onChange={(features) => setRentalFormData(p => ({ ...p, features }))} />
+                </div>
+
+                <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                  <Button type="button" variant="outline" onClick={() => { setIsRentalFormOpen(false); setEditingRental(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
+                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uložiť</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* --- SALES POP-UP MODAL --- */}
+      {isSalesFormOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+            <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button onClick={() => { setIsSalesFormOpen(false); setEditingSales(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                  <ShoppingBag size={20} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingSales ? 'Upraviť produkt na predaj' : 'Pridať produkt na predaj'}
+                  </h2>
+                </div>
+              </div>
+
+              <form onSubmit={handleSalesSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Názov produktu na predaj *</Label>
+                    <Input type="text" value={salesFormData.name} onChange={(e) => setSalesFormData(p => ({ ...p, name: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Stav produktu</Label>
+                    <select value={salesFormData.condition} onChange={(e) => setSalesFormData(p => ({ ...p, condition: e.target.value as any }))} className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:ring-1 focus:ring-[#BD20D3] focus:outline-none">
+                      <option value="new">Nový kus (Ihneď skladom)</option>
+                      <option value="used">B-Stock / Použitý (Rozbalený bazár)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Predajná cena (€) *</Label>
+                    <Input type="number" min="1" value={salesFormData.price} onChange={(e) => setSalesFormData(p => ({ ...p, price: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2 flex flex-col justify-center">
+                    <Label className="text-gray-300 mb-2">Dostupnosť</Label>
+                    <div className="flex items-center gap-3 bg-black/20 p-3 border border-white/5 rounded-xl">
+                      <input type="checkbox" checked={salesFormData.available} onChange={(e) => setSalesFormData(p => ({ ...p, available: e.target.checked }))} className="accent-[#BD20D3] w-5 h-5 rounded" id="sales-avail" />
+                      <Label htmlFor="sales-avail" className="text-white cursor-pointer select-none">Je skladom na okamžitý predaj</Label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Detailný popis produktu na predaj *</Label>
+                  <Textarea value={salesFormData.description} onChange={(e) => setSalesFormData(p => ({ ...p, description: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]" required />
+                </div>
+
+                <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
+                  <ImageManager images={salesFormData.images} onChange={(images) => setSalesFormData(p => ({ ...p, images }))} />
+                </div>
+
+                <DynamicBubbleInput label="Špecifikácie produktu" placeholder="Napr. Príkon: 500W..." items={salesFormData.specs} onChange={(specs) => setSalesFormData(p => ({ ...p, specs }))} />
+
+                <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                  <Button type="button" variant="outline" onClick={() => { setIsSalesFormOpen(false); setEditingSales(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
+                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uložiť produkt</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* --- BLOG POP-UP MODAL --- */}
+      {isBlogFormOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+            <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                  <BookOpen size={20} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingBlog ? 'Upraviť článok' : 'Pridať nový článok'}
+                  </h2>
+                </div>
+              </div>
+
+              <form onSubmit={handleBlogSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Titulok článku *</Label>
+                    <Input type="text" value={blogFormData.title} onChange={(e) => setBlogFormData(p => ({ ...p, title: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Autor článku *</Label>
+                    <Input type="text" value={blogFormData.author} onChange={(e) => setBlogFormData(p => ({ ...p, author: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Krátky úvod / Excerpt * (Zobrazuje sa v náhľade)</Label>
+                  <Input type="text" value={blogFormData.excerpt} onChange={(e) => setBlogFormData(p => ({ ...p, excerpt: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Hlavný obrázok URL *</Label>
+                  <Input type="text" value={blogFormData.image} onChange={(e) => setBlogFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://images.unsplash.com/..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Obsah článku * (Umožňuje formátovaný text)</Label>
+                  <Textarea value={blogFormData.content} onChange={(e) => setBlogFormData(p => ({ ...p, content: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[250px]" required />
+                </div>
+
+                <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                  <Button type="button" variant="outline" onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
+                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uverejniť článok</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>
