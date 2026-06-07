@@ -172,7 +172,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     <>
       <style>{`
         .rdp {
-          --rdp-cell-size: 36px;
+          --rdp-cell-size: 32px;
           --rdp-accent-color: #BD20D3;
           --rdp-background-color: rgba(189, 32, 211, 0.1);
           --rdp-accent-color-dark: #BD20D3;
@@ -185,25 +185,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           justify-content: center;
         }
         .rdp-month {
-          background: rgba(10, 13, 31, 0.95);
-          border: 1px solid rgba(189, 32, 211, 0.3);
-          border-radius: 16px;
-          padding: 12px;
+          background: rgba(10, 13, 31, 0.98);
+          border: 1px solid rgba(189, 32, 211, 0.4);
+          border-radius: 12px;
+          padding: 8px;
         }
         .rdp-caption {
           color: white;
           font-weight: 700;
-          font-size: 14px;
+          font-size: 13px;
         }
         .rdp-head_cell {
           color: #9ca3af;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 600;
         }
         .rdp-day {
           color: #e5e7eb;
-          border-radius: 8px;
-          font-size: 13px;
+          border-radius: 6px;
+          font-size: 12px;
+          width: 32px;
+          height: 32px;
         }
         .rdp-day:hover:not(.rdp-day_selected) {
           background: rgba(189, 32, 211, 0.2) !important;
@@ -223,11 +225,47 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
         .rdp-nav_button {
           color: #9ca3af;
-          border-radius: 8px;
+          border-radius: 6px;
+          width: 28px;
+          height: 28px;
         }
         .rdp-nav_button:hover {
           background: rgba(189, 32, 211, 0.2) !important;
           color: white !important;
+        }
+        .rdp-caption_dropdowns {
+          gap: 4px;
+        }
+        .rdp-dropdown {
+          background: rgba(189, 32, 211, 0.1);
+          border: 1px solid rgba(189, 32, 211, 0.3);
+          border-radius: 6px;
+          color: white;
+          font-size: 11px;
+          padding: 2px 4px;
+        }
+        .rdp-dropdown:focus {
+          outline: none;
+          border-color: #BD20D3;
+        }
+        .rdp-vhidden {
+          display: none;
+        }
+        @media (max-width: 640px) {
+          .rdp {
+            --rdp-cell-size: 28px;
+          }
+          .rdp-day {
+            width: 28px;
+            height: 28px;
+            font-size: 11px;
+          }
+          .rdp-month {
+            padding: 6px;
+          }
+          .rdp-caption {
+            font-size: 12px;
+          }
         }
       `}</style>
 
@@ -294,14 +332,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
       {/* POP-UP MODAL */}
       {isOpen && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
-            <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+        <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-5xl my-4 md:my-8">
+            <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-4 md:p-6 lg:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
               
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
+                className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5 z-10"
               >
                 <X size={24} />
               </button>
@@ -311,27 +349,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   <ShoppingBag size={20} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Nezáväzná kalkulácia & Rezervácia</h2>
-                  <p className="text-gray-400 text-sm">Prezrite si vybranú techniku a odošlite dopyt.</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Nezáväzná kalkulácia & Rezervácia</h2>
+                  <p className="text-gray-400 text-xs md:text-sm">Prezrite si vybranú techniku a odošlite dopyt.</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
                 {/* SELECTED EQUIPMENT LIST */}
                 <div className="lg:col-span-5 space-y-4">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
                     <span className="text-xs bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-2.5 py-0.5 rounded-full">
                       {totalItems} ks
                     </span>
                   </h3>
 
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-3">
-                          <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
+                        <div key={item.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-2 md:p-3">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
                             <img
                               src={displayImg}
                               alt={item.name}
@@ -351,7 +389,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1">
+                          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-lg p-1">
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(item.id, -1)}
@@ -359,7 +397,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             >
                               <Minus size={10} />
                             </button>
-                            <span className="w-6 text-center text-white font-medium text-xs">
+                            <span className="w-5 text-center text-white font-medium text-xs">
                               {qty}
                             </span>
                             <button
@@ -405,11 +443,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
 
                 {/* CHECKOUT FORM */}
-                <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-6 md:p-8">
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
+                  <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="firstName" className="text-gray-300 flex items-center gap-1.5">
+                        <Label htmlFor="firstName" className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <User size={14} className="text-[#BD20D3]" /> Meno *
                         </Label>
                         <Input
@@ -418,12 +456,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           placeholder="Ján"
                           value={formData.firstName}
                           onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
+                          className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="lastName" className="text-gray-300 flex items-center gap-1.5">
+                        <Label htmlFor="lastName" className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <User size={14} className="text-[#BD20D3]" /> Priezvisko *
                         </Label>
                         <Input
@@ -432,15 +470,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           placeholder="Novák"
                           value={formData.lastName}
                           onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
+                          className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11"
                           required
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="email" className="text-gray-300 flex items-center gap-1.5">
+                        <Label htmlFor="email" className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <Mail size={14} className="text-[#BD20D3]" /> Email *
                         </Label>
                         <Input
@@ -449,12 +487,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           placeholder="jan@priklad.sk"
                           value={formData.email}
                           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
+                          className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11"
                           required
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="phone" className="text-gray-300 flex items-center gap-1.5">
+                        <Label htmlFor="phone" className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <Phone size={14} className="text-[#BD20D3]" /> Telefón
                         </Label>
                         <Input
@@ -463,15 +501,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           placeholder="+421 900 123 456"
                           value={formData.phone}
                           onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
+                          className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11"
                         />
                       </div>
                     </div>
 
                     {/* DATE PICKERS WITH MINI CALENDAR */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5 relative" ref={fromRef}>
-                        <Label className="text-gray-300 flex items-center gap-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *
                         </Label>
                         <div className="relative">
@@ -484,17 +522,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               setShowFromCalendar(!showFromCalendar);
                               setShowToCalendar(false);
                             }}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 cursor-pointer pr-10"
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
                             required
                           />
                           <Calendar 
-                            size={18} 
+                            size={16} 
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
                           />
                         </div>
                         
                         {showFromCalendar && (
-                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto rounded-xl">
                             <DayPicker
                               mode="single"
                               selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
@@ -509,7 +547,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                       
                       <div className="space-y-1.5 relative" ref={toRef}>
-                        <Label className="text-gray-300 flex items-center gap-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *
                         </Label>
                         <div className="relative">
@@ -522,17 +560,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               setShowToCalendar(!showToCalendar);
                               setShowFromCalendar(false);
                             }}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 cursor-pointer pr-10"
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
                             required
                           />
                           <Calendar 
-                            size={18} 
+                            size={16} 
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
                           />
                         </div>
                         
                         {showToCalendar && (
-                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto rounded-xl">
                             <DayPicker
                               mode="single"
                               selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
@@ -549,7 +587,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5">
+                      <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5 text-sm">
                         <MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke
                       </Label>
                       <Textarea
@@ -557,11 +595,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         placeholder="Napíšte nám podrobnosti..."
                         value={formData.message}
                         onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[80px]"
+                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]"
                       />
                     </div>
 
-                    <Button type="submit" className="w-full btn-cyber h-12 rounded-xl text-base font-bold border-none mt-4">
+                    <Button type="submit" className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4">
                       Odoslať nezáväzný dopyt
                     </Button>
                   </form>
