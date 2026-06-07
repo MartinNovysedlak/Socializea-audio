@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
 import EquipmentDetail from './pages/EquipmentDetail';
@@ -13,7 +13,7 @@ function App() {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route 
@@ -37,7 +37,7 @@ function App() {
         />
         <Route path="/kontakt" element={<Kontakt />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
