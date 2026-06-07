@@ -1,25 +1,23 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
 import FloatingCart from '@/components/FloatingCart';
 import Footer from '@/components/Footer';
-import { EquipmentItem } from '@/lib/supabase';
+import { useEquipment } from '@/hooks/useEquipment';
 
-interface PrenajomProps {
-  quantities: Record<string, number>;
-  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
-  equipment: EquipmentItem[];
-}
+const Prenajom = () => {
+  const { equipment, loading } = useEquipment();
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   return (
     <main className="min-h-screen bg-[#020721]">
       <Navbar />
       <div className="pt-20">
         <EquipmentCatalog 
           equipment={equipment} 
+          loading={loading} 
           quantities={quantities} 
           setQuantities={setQuantities} 
         />
