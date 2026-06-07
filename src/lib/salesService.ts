@@ -18,6 +18,98 @@ const LOCAL_STORAGE_KEY = 'socializea_sales_items';
 
 const initialSales: SalesItem[] = [
   {
+    id: 'sale-3',
+    name: 'Profesionálny výkonný pohyblivý Laserový BAR 65W (červený)',
+    price: 270,
+    condition: 'new',
+    description: 'Profesionálny výkonný pohyblivý Laserový BAR o výkone 65W je ideálnou voľbou pre DJ akcie, kluby, bary, diskotéky, svadby, eventy alebo domáce party. Táto moderná svetelná technika s precíznym laserovým systémom umožňuje vytváranie intenzívnych, ostrých červených laserových efektov, ktoré vo vašich priestoroch navodia nezameniteľnú dynamickú atmosféru. Vďaka kompaktným rozmerom (cca 106 x 8,5 x 18 cm) a robustnému prevedeniu je vhodný do rôznych scenérií.',
+    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&auto=format&fit=crop&q=80'],
+    specs: [
+      'Napájanie: AC 100-240V / 50-60 Hz',
+      'Spotreba: 65W',
+      'Svetelný zdroj: 8x 500mW červený polovodičový laser (TTL)',
+      'Laserová vlnová dĺžka: 638nm',
+      'DMX kanály: 15CH',
+      'Pripojenie: 3-pin XLR vstup/výstup'
+    ],
+    features: [
+      '8x červený laser: Výkonné polovodičové lasery (8x 500mW)',
+      'Pohyblivá hlava: Umožňuje pohyb s uhlom otočenia do 180°',
+      'Rôzne režimy: Automat, Sound active, DMX512, Master-slave',
+      'Jednoduchá montáž: Digitálny displej, flexibilná konštrukcia'
+    ],
+    available_count: 2,
+    available: true
+  },
+  {
+    id: 'sale-4',
+    name: 'Profesionálna otočná a rotujúca RGBW LED hlava 90W',
+    price: 140,
+    condition: 'new',
+    description: 'Profesionálna rotujúca RGBW hlava o výkone 90W je ideálna pre DJ akcie, koncerty, klubové večery a ďalšie podobné udalosti. Táto inovatívna svetelná technika prinesie do vašich vystúpení dynamický a farebný vizuálny efekt. Hlava disponuje robustnou konštrukciou z odolných materiálov, čo zaručuje dlhú životnosť aj pri náročnom používaní.',
+    images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80'],
+    specs: [
+      'Napájanie: 90-240V 50/60 Hz',
+      'Spotreba: 120W',
+      'Svetelný zdroj: 90W RGBW 4v1 LED',
+      'Rozsah pohybu: Horizontálne: 540°, Vertikálne: 180°',
+      'Uhol vyžarovania: 3°',
+      'DMX kanál: 13 / 15 CH',
+      'Hmotnosť: 4 kg'
+    ],
+    features: [
+      'RGBW LED osvetlenie: Miešanie farieb vrátane čistej bielej',
+      'Rotácia a pohyb: Široké smery pre zaujímavé vzory',
+      'Viacero režimov: Zvukový režim, prednastavené programy, manuál'
+    ],
+    available_count: 4,
+    available: true
+  },
+  {
+    id: 'sale-5',
+    name: 'Profesionálny výrobník ohňa – Flame Machine',
+    price: 120,
+    condition: 'new',
+    description: 'Dramatické a nezabudnuteľné efekty na vašich koncertoch a vystúpeniach. Flame Machine dokáže produkovať realistický a bezpečný plameň. Ideálna pre kluby, pódiá a divadlá.\n\nAKCIA:\nCena za 1 kus: 120 €\nZvýhodnená cena za 2 kusy: 200 €',
+    images: ['https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=800&auto=format&fit=crop&q=80'],
+    specs: [
+      'Palivo: Silikónový olej v spreji',
+      'Ovládanie: DMX512',
+      'Inštalácia: Bezpečné ukotvenie o zem'
+    ],
+    features: [
+      'Jednoduché ovládanie: Nastaviteľná dĺžka trvania cez DMX',
+      'Ľahká prenosnosť: Kompaktné rozmery a jednoduchá inštalácia',
+      'Vysoká kvalita: Odolné materiály pre dlhú životnosť',
+      'Jednoduché plnenie: Bežne dostupné náplne'
+    ],
+    available_count: 2,
+    available: true
+  },
+  {
+    id: 'sale-6',
+    name: 'Profesionálna RGBW 4v1 LED BAR svetelná lišta 36W',
+    price: 35,
+    condition: 'new',
+    description: 'Profesionálna RGBW 4v1 LED BAR svetelná lišta o výkone 36W, ideálna pre DJ akcie, kluby, diskotéky, svadby a divadlá. Vytvára bohaté farebné efekty a pridáva vašim podujatiam dynamickú atmosféru. Kompaktný dizajn z plastového puzdra s digitálnym displejom pre jednoduchú obsluhu.',
+    images: ['https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop&q=80'],
+    specs: [
+      'Napájanie: AC 110-240V 50/60 Hz',
+      'Spotreba: 36W',
+      'Svetelný zdroj: 9 x 4W RGBW 4v1 LED',
+      'DMX kanály: 8CH / 4CH',
+      'Ochrana: IP20',
+      'Hmotnosť: cca 2 kg'
+    ],
+    features: [
+      'RGBW LED osvetlenie: 9 kusov 4W LED pre vysokú reprodukciu farieb',
+      'Dynamické efekty: Blikanie, stmievanie, skákanie s nastavením tempa',
+      'Flexibilné ovládanie: Diaľkový ovládač (5m), Sound activated, DMX512'
+    ],
+    available_count: 8,
+    available: true
+  },
+  {
     id: 'sale-1',
     name: 'Pioneer DJ DDJ-FLX4',
     price: 319,
@@ -37,28 +129,6 @@ const initialSales: SalesItem[] = [
       'Kompaktné a ľahké prenosné šasi'
     ],
     available_count: 3,
-    available: true
-  },
-  {
-    id: 'sale-2',
-    name: 'JBL SRX812P (Použité)',
-    price: 950,
-    condition: 'used',
-    description: 'Profesionálny 12" dvojpásmový aktívny reprobox vo vynikajúcom stave. Ponúka nekompromisný zvukový prednes, robustnú drevenú konštrukciu a integrované DSP riadenie.',
-    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'],
-    specs: [
-      'Výkon: 2000 W Peak / 1500 W Continuous',
-      'Reproduktor: 12" basový + 3" neodymový výškový',
-      'Max SPL: 136 dB',
-      'Frekvenčný rozsah: 40 Hz - 21 kHz'
-    ],
-    features: [
-      'Integrované DSP riadenie cez sieťový Ethercon',
-      'Prémiové meniče JBL a zosilňovač Crown DriveCore',
-      'Skriňa z odolnej 18 mm preglejky s lakom Duraflex',
-      'Množstvo závesných bodov M10 pre fixné inštalácie'
-    ],
-    available_count: 1,
     available: true
   }
 ];
