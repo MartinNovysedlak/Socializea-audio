@@ -57,53 +57,52 @@ const Blog = () => {
             {posts.map(post => {
               const displayImg = post.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80";
               return (
-                <Card 
-                  key={post.id} 
-                  className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/40 transition-all duration-300 flex flex-col group h-full"
-                >
-                  <div className="h-48 overflow-hidden relative bg-black/40 border-b border-white/5">
-                    <img 
-                      src={displayImg} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80';
-                      }}
-                    />
-                  </div>
-
-                  <CardHeader className="pt-6">
-                    <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
-                      <span className="flex items-center gap-1">
-                        <User size={12} className="text-[#BD20D3]" />
-                        {post.author}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar size={12} className="text-[#1A4BFF]" />
-                        {new Date(post.published_at).toLocaleDateString('sk-SK')}
-                      </span>
+                <Link to={`/blog/${post.id}`} key={post.id} className="block h-full">
+                  <Card 
+                    className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/40 transition-all duration-300 flex flex-col group h-full cursor-pointer hover:shadow-lg hover:shadow-[#BD20D3]/10 hover:-translate-y-1"
+                  >
+                    <div className="h-48 overflow-hidden relative bg-black/40 border-b border-white/5">
+                      <img 
+                        src={displayImg} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80';
+                        }}
+                      />
                     </div>
 
-                    <CardTitle className="text-xl font-bold text-white group-hover:text-[#BD20D3] transition-colors leading-snug line-clamp-2">
-                      {post.title}
-                    </CardTitle>
-                  </CardHeader>
+                    <CardHeader className="pt-6">
+                      <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
+                        <span className="flex items-center gap-1">
+                          <User size={12} className="text-[#BD20D3]" />
+                          {post.author}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar size={12} className="text-[#1A4BFF]" />
+                          {new Date(post.published_at).toLocaleDateString('sk-SK')}
+                        </span>
+                      </div>
 
-                  <CardContent className="flex-grow">
-                    <p className="text-gray-400 text-sm line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                  </CardContent>
+                      <CardTitle className="text-xl font-bold text-white group-hover:text-[#BD20D3] transition-colors leading-snug line-clamp-2">
+                        {post.title}
+                      </CardTitle>
+                    </CardHeader>
 
-                  <div className="p-6 pt-0 border-t border-white/5 mt-4">
-                    <Link to={`/blog/${post.id}`}>
-                      <Button className="w-full bg-white/5 hover:bg-[#BD20D3]/15 text-white border border-white/10 rounded-xl transition-colors font-bold h-11 flex items-center justify-center gap-1">
-                        <span>Prečítať článok</span>
+                    <CardContent className="flex-grow">
+                      <p className="text-gray-400 text-sm line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    </CardContent>
+
+                    <div className="p-6 pt-0 border-t border-white/5 mt-4">
+                      <Button className="w-full bg-white/5 hover:bg-[#BD20D3]/15 text-white border border-white/10 rounded-xl transition-colors font-bold h-11 flex items-center justify-center gap-1 pointer-events-none">
+                        <span>Prečítať celý článok</span>
                         <ArrowRight size={14} />
                       </Button>
-                    </Link>
-                  </div>
-                </Card>
+                    </div>
+                  </Card>
+                </Link>
               );
             })}
           </div>
