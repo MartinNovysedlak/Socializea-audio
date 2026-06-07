@@ -11,11 +11,11 @@ import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface EquipmentDetailProps {
-  cartQuantity?: number;
-  onAddToCart?: () => void;
+  quantities: Record<string, number>;
+  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
 }
 
-const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps) => {
+const EquipmentDetail = ({ quantities, setQuantities }: EquipmentDetailProps) => {
   const { id } = useParams();
   const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -43,13 +43,20 @@ const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps
   }, [images.length]);
 
   const handleAddToCart = () => {
-    if (onAddToCart) {
-      onAddToCart();
-      toast.success("Produkt bol pridaný do košíka!", {
-        description: `${item?.name} je teraz vo vašom košíku.`,
-      });
-    }
+    if (!item) return;
+    
+    setQuantities((prev) => ({
+      ...prev,
+      [item.id]: (prev[item.id] ?? 0) + 1,
+    }));
+    
+    toast.success("Produkt bol pridaný do košíka!", {
+      description: `${item.name} je teraz vo vašom košíku.`,
+    });
   };
+
+  const cartQuantity = item ? (quantities[item.id] ?? 0) : 0;
+  const isInCart = cartQuantity > 0;
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -96,8 +103,6 @@ const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps
       </main>
     );
   }
-
-  const isInCart = cartQuantity > 0;
 
   return (
     <main className="min-h-screen bg-[#020721]">
@@ -181,7 +186,7 @@ const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps
                         </Link>
                         <Button 
                           onClick={handleAddToCart}
-                          disabled={item.available === 0}
+                          disabled={item.available === 0 || cartQuantity >= item.available}
                           className={`h-12 px-6 font-bold transition-all ${
                             isInCart 
                               ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
