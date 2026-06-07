@@ -42,6 +42,16 @@ function App() {
             />
           } 
         />
+        <Route 
+          path="/equipment/:id" 
+          element={
+            <EquipmentDetail 
+              quantities={quantities} 
+              setQuantities={setQuantities} 
+              equipment={equipment}
+            />
+          } 
+        />
         <Route path="/kontakt" element={<Kontakt />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/blog" element={<Blog />} />
