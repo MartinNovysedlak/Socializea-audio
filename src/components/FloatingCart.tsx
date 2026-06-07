@@ -172,7 +172,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     <>
       <style>{`
         .rdp {
-          --rdp-cell-size: 32px;
+          --rdp-cell-size: 28px;
           --rdp-accent-color: #BD20D3;
           --rdp-background-color: rgba(189, 32, 211, 0.1);
           --rdp-accent-color-dark: #BD20D3;
@@ -188,24 +188,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           background: rgba(10, 13, 31, 0.98);
           border: 1px solid rgba(189, 32, 211, 0.4);
           border-radius: 12px;
-          padding: 8px;
+          padding: 6px;
         }
         .rdp-caption {
           color: white;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
+          padding: 0 0 4px 0;
         }
         .rdp-head_cell {
           color: #9ca3af;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 600;
+          padding: 2px 0;
         }
         .rdp-day {
           color: #e5e7eb;
-          border-radius: 6px;
-          font-size: 12px;
-          width: 32px;
-          height: 32px;
+          border-radius: 4px;
+          font-size: 11px;
+          width: 28px;
+          height: 28px;
+          padding: 0;
         }
         .rdp-day:hover:not(.rdp-day_selected) {
           background: rgba(189, 32, 211, 0.2) !important;
@@ -225,24 +228,24 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
         .rdp-nav_button {
           color: #9ca3af;
-          border-radius: 6px;
-          width: 28px;
-          height: 28px;
+          border-radius: 4px;
+          width: 24px;
+          height: 24px;
         }
         .rdp-nav_button:hover {
           background: rgba(189, 32, 211, 0.2) !important;
           color: white !important;
         }
         .rdp-caption_dropdowns {
-          gap: 4px;
+          gap: 2px;
         }
         .rdp-dropdown {
           background: rgba(189, 32, 211, 0.1);
           border: 1px solid rgba(189, 32, 211, 0.3);
-          border-radius: 6px;
+          border-radius: 4px;
           color: white;
-          font-size: 11px;
-          padding: 2px 4px;
+          font-size: 10px;
+          padding: 1px 3px;
         }
         .rdp-dropdown:focus {
           outline: none;
@@ -251,20 +254,37 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         .rdp-vhidden {
           display: none;
         }
+        .rdp-table {
+          border-collapse: collapse;
+          margin: 0;
+        }
+        .rdp-row {
+          margin: 0;
+        }
+        .rdp-head_row {
+          height: 20px;
+        }
+        .rdp-tbody {
+          border: none;
+        }
         @media (max-width: 640px) {
           .rdp {
-            --rdp-cell-size: 28px;
+            --rdp-cell-size: 24px;
           }
           .rdp-day {
-            width: 28px;
-            height: 28px;
-            font-size: 11px;
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
           }
           .rdp-month {
-            padding: 6px;
+            padding: 4px;
           }
           .rdp-caption {
-            font-size: 12px;
+            font-size: 11px;
+          }
+          .rdp-nav_button {
+            width: 20px;
+            height: 20px;
           }
         }
       `}</style>
@@ -532,7 +552,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         
                         {showFromCalendar && (
-                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto rounded-xl">
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                             <DayPicker
                               mode="single"
                               selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
@@ -570,7 +590,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         
                         {showToCalendar && (
-                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[300px] overflow-y-auto rounded-xl">
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                             <DayPicker
                               mode="single"
                               selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
