@@ -7,25 +7,28 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
-import { 
-  ArrowLeft, 
-  Check, 
-  ShieldCheck, 
-  Phone, 
-  Mail, 
-  ChevronRight, 
-  ShoppingBag, 
-  Info 
+import {
+  ArrowLeft,
+  Check,
+  ShieldCheck,
+  Phone,
+  Mail,
+  ChevronRight,
+  ShoppingBag,
+  Info,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [item, setItem] = useState<SalesItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
+  const [activeIndex, setActiveIndex] = useState(0);
 
   // Form State
   const [inquiryName, setInquiryName] = useState('');
@@ -43,6 +46,7 @@ const ProductDetail = () => {
         if (found) {
           setItem(found);
           setActiveImage(found.images?.[0] || 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800');
+          setActiveIndex(0);
         } else {
           toast.error('Produkt nebol nájdený.');
           navigate('/predaj');
@@ -79,6 +83,22 @@ const ProductDetail = () => {
     }, 1000);
   };
 
+  const imagesList = item?.images && item.images.length > 0
+    ? item.images
+    : ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800'];
+
+  const goToPrev = () => {
+    const newIndex = activeIndex === 0 ? imagesList.length - 1 : activeIndex - 1;
+    setActiveIndex(newIndex);
+    setActiveImage(imagesList[newIndex]);
+  };
+
+  const goToNext = () => {
+    const newIndex = activeIndex === imagesList.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(newIndex);
+    setActiveImage(imagesList[newIndex]);
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
@@ -98,19 +118,15 @@ const ProductDetail = () => {
     return null;
   }
 
-  const imagesList = item.images && item.images.length > 0 
-    ? item.images 
-    : ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800'];
-
   return (
     <main className="min-h-screen bg-[#020721]">
       <Navbar />
-      
+
       <div className="pt-36 pb-24 container mx-auto px-4">
         {/* BACK BUTTON */}
         <div className="max-w-6xl mx-auto mb-8">
-          <Link 
-            to="/predaj" 
+          <Link
+            to="/predaj"
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group text-sm font-semibold"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -120,23 +136,45 @@ const ProductDetail = () => {
 
         {/* PRODUCT LAYOUT */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-          
+
           {/* LEFT: IMAGE GALLERY & SPECIFICATIONS (7 cols) */}
           <div className="lg:col-span-7 space-y-8">
             {/* Main Active Image */}
-            <div className="aspect-video md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40">
-              <img 
-                src={activeImage} 
-                alt={item.name} 
-                className="w-full h-full object-cover"
+            <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
+              <img
+                src={activeImage}
+                alt={item.name}
+                className="w-full h-full object-contain"
               />
-              <span className={`absolute top-4 left-4 px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
-                item.condition === 'new' 
-                  ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400' 
-                  : 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
-              }`}>
-                {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
-              </span>
+
+              {/* Kategória — ľavý dolný roh, plne nepriehľadná */}
+              <div className="absolute bottom-4 left-4">
+                <span className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                  item.condition === 'new'
+                    ? 'bg-cyan-600/90 border border-cyan-400/50 text-white'
+                    : 'bg-amber-600/90 border border-amber-400/50 text-white'
+                }`}>
+                  {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
+                </span>
+              </div>
+
+              {/* Šípky na preklikávanie — zobrazia sa pri hoveri */}
+              {imagesList.length > 1 && (
+                <>
+                  <button
+                    onClick={goToPrev}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={goToNext}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                  >
+                    <ChevronRightIcon size={20} />
+                  </button>
+                </>
+              )}
 
               {!item.available && (
                 <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-sm">
@@ -153,10 +191,13 @@ const ProductDetail = () => {
                 {imagesList.map((imgUrl, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setActiveImage(imgUrl)}
+                    onClick={() => {
+                      setActiveImage(imgUrl);
+                      setActiveIndex(idx);
+                    }}
                     className={`w-20 h-16 rounded-xl overflow-hidden border transition-all ${
-                      activeImage === imgUrl 
-                        ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]' 
+                      activeImage === imgUrl
+                        ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]'
                         : 'border-white/10 opacity-60 hover:opacity-100'
                     }`}
                   >
@@ -235,51 +276,51 @@ const ProductDetail = () => {
               <form onSubmit={handleSendInquiry} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={inquiryName} 
+                  <input
+                    type="text"
+                    required
+                    value={inquiryName}
                     onChange={(e) => setInquiryName(e.target.value)}
-                    placeholder="Napr. Ján Novák" 
+                    placeholder="Napr. Ján Novák"
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs text-gray-400 font-bold uppercase">E-mailová adresa *</label>
-                  <input 
-                    type="email" 
-                    required 
-                    value={inquiryEmail} 
+                  <input
+                    type="email"
+                    required
+                    value={inquiryEmail}
                     onChange={(e) => setInquiryEmail(e.target.value)}
-                    placeholder="jan.novak@email.sk" 
+                    placeholder="jan.novak@email.sk"
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs text-gray-400 font-bold uppercase">Telefónne číslo</label>
-                  <input 
-                    type="tel" 
-                    value={inquiryPhone} 
+                  <input
+                    type="tel"
+                    value={inquiryPhone}
                     onChange={(e) => setInquiryPhone(e.target.value)}
-                    placeholder="+421 ..." 
+                    placeholder="+421 ..."
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs text-gray-400 font-bold uppercase">Poznámka / doplňujúce otázky</label>
-                  <textarea 
-                    value={inquiryMessage} 
+                  <textarea
+                    value={inquiryMessage}
                     onChange={(e) => setInquiryMessage(e.target.value)}
-                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber..." 
+                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={!item.available || sending}
                   className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2"
                 >
