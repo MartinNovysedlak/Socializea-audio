@@ -331,11 +331,11 @@ const ProductDetail = () => {
               <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
                 <div className="flex items-center gap-2">
                   <Phone size={14} className="text-[#BD20D3]" />
-                  <span>Rýchla infolinka: <span className="text-white font-semibold">+421 900 123 456</span></span>
+                  <span>Rýchla infolinka: <span className="text-white font-semibold">+421 948 070 577</span></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail size={14} className="text-[#1A4BFF]" />
-                  <span>E-mail: <span className="text-white font-semibold">info@socializea.sk</span></span>
+                  <span>E-mail: <span className="text-white font-semibold">socializea@socializea.com</span></span>
                 </div>
               </div>
             </div>
