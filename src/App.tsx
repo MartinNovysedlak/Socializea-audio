@@ -7,6 +7,8 @@ import Prenajom from "@/pages/Prenajom";
 import Kontakt from "@/pages/Kontakt";
 import Predaj from "@/pages/Predaj";
 import Admin from "@/pages/Admin";
+import Blog from "@/pages/Blog";
+import BlogPostDetail from "@/pages/BlogPostDetail";
 import EquipmentDetail from "@/pages/EquipmentDetail";
 import NotFound from "@/pages/NotFound";
 
@@ -17,6 +19,8 @@ function App() {
       <Route path="/prenajom" element={<Prenajom />} />
       <Route path="/kontakt" element={<Kontakt />} />
       <Route path="/predaj" element={<Predaj />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<BlogPostDetail />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/equipment/:id" element={<EquipmentDetail />} />
       <Route path="*" element={<NotFound />} />

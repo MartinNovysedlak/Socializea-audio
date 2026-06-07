@@ -15,7 +15,7 @@ import { useEquipment } from '@/hooks/useEquipment';
 import { EquipmentItem } from '@/lib/supabase';
 import { equipmentService } from '@/lib/equipmentService';
 import { salesService, SalesItem } from '@/lib/salesService';
-import { blogService, BlogPost } from '@/lib/blogService';
+import { blogService, BlogPost, BlogBlock } from '@/lib/blogService';
 import { 
   Lock, 
   LogOut, 
@@ -24,15 +24,16 @@ import {
   Edit, 
   Trash2, 
   Volume2, 
-  Lightbulb, 
-  Layers, 
   Save, 
   X,
   GripVertical,
   ShoppingBag,
   BookOpen,
-  User,
-  Heart
+  ArrowUp,
+  ArrowDown,
+  Image as ImageIcon,
+  Heading,
+  Type
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -78,6 +79,8 @@ const Admin = () => {
     description: '',
     images: [] as string[],
     specs: [] as string[],
+    features: [] as string[],
+    available_count: 1,
     available: true
   });
 
@@ -89,10 +92,10 @@ const Admin = () => {
   const [blogFormData, setBlogFormData] = useState({
     title: '',
     excerpt: '',
-    content: '',
     image: '',
     author: 'Admin Team'
   });
+  const [blogBlocks, setBlogBlocks] = useState<BlogBlock[]>([]);
 
   useEffect(() => {
     const authStatus = sessionStorage.getItem('admin_authenticated');
@@ -341,6 +344,8 @@ const Admin = () => {
       description: '',
       images: [],
       specs: [],
+      features: [],
+      available_count: 1,
       available: true
     });
     setIsSalesFormOpen(true);
@@ -355,6 +360,8 @@ const Admin = () => {
       description: item.description,
       images: item.images || [],
       specs: item.specs || [],
+      features: item.features || [],
+      available_count: item.available_count ?? 1,
       available: item.available
     });
     setIsSalesFormOpen(true);
@@ -379,8 +386,13 @@ const Admin = () => {
       return;
     }
 
+    const payload = {
+      ...salesFormData,
+      available: salesFormData.available_count > 0
+    };
+
     if (editingSales) {
-      const updated = await salesService.update(editingSales.id, salesFormData);
+      const updated = await salesService.update(editingSales.id, payload);
       if (updated) {
         toast.success('Produkt na predaj úspešne upravený!');
         setIsSalesFormOpen(false);
@@ -389,7 +401,7 @@ const Admin = () => {
         toast.error('Chyba pri úprave.');
       }
     } else {
-      const created = await salesService.create(salesFormData);
+      const created = await salesService.create(payload);
       if (created) {
         toast.success('Nový produkt na predaj pridaný!');
         setIsSalesFormOpen(false);
@@ -406,10 +418,12 @@ const Admin = () => {
     setBlogFormData({
       title: '',
       excerpt: '',
-      content: '',
       image: '',
       author: 'Admin Team'
     });
+    setBlogBlocks([
+      { type: 'paragraph', value: '' }
+    ]);
     setIsBlogFormOpen(true);
   };
 
@@ -418,10 +432,22 @@ const Admin = () => {
     setBlogFormData({
       title: post.title,
       excerpt: post.excerpt,
-      content: post.content,
       image: post.image,
       author: post.author
     });
+    
+    // Parse JSON block list from database content field
+    try {
+      const parsed = JSON.parse(post.content);
+      if (Array.isArray(parsed)) {
+        setBlogBlocks(parsed);
+      } else {
+        setBlogBlocks([{ type: 'paragraph', value: post.content }]);
+      }
+    } catch (e) {
+      setBlogBlocks([{ type: 'paragraph', value: post.content }]);
+    }
+    
     setIsBlogFormOpen(true);
   };
 
@@ -439,13 +465,24 @@ const Admin = () => {
 
   const handleBlogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!blogFormData.title.trim() || !blogFormData.content.trim()) {
-      toast.error('Vyplňte názov a obsah článku!');
+    if (!blogFormData.title.trim() || !blogFormData.excerpt.trim()) {
+      toast.error('Vyplňte názov a úvod článku!');
       return;
     }
 
+    // Convert block content array to string format
+    const contentPayload = JSON.stringify(blogBlocks.filter(b => b.value.trim() !== ''));
+
+    const payload = {
+      title: blogFormData.title.trim(),
+      excerpt: blogFormData.excerpt.trim(),
+      content: contentPayload,
+      image: blogFormData.image || blogBlocks.find(b => b.type === 'image')?.value || '',
+      author: blogFormData.author.trim()
+    };
+
     if (editingBlog) {
-      const updated = await blogService.update(editingBlog.id, blogFormData);
+      const updated = await blogService.update(editingBlog.id, payload);
       if (updated) {
         toast.success('Článok bol úspešne upravený!');
         setIsBlogFormOpen(false);
@@ -454,7 +491,7 @@ const Admin = () => {
         toast.error('Chyba pri úprave.');
       }
     } else {
-      const created = await blogService.create(blogFormData);
+      const created = await blogService.create(payload);
       if (created) {
         toast.success('Nový článok bol úspešne uverejnený!');
         setIsBlogFormOpen(false);
@@ -462,6 +499,43 @@ const Admin = () => {
       } else {
         toast.error('Chyba pri uverejňovaní.');
       }
+    }
+  };
+
+  // Block management inside blog form
+  const addBlock = (type: 'paragraph' | 'heading' | 'image') => {
+    setBlogBlocks(prev => [...prev, { type, value: '' }]);
+  };
+
+  const removeBlock = (index: number) => {
+    setBlogBlocks(prev => prev.filter((_, idx) => idx !== index));
+  };
+
+  const updateBlockValue = (index: number, val: string) => {
+    setBlogBlocks(prev => prev.map((block, idx) => idx === index ? { ...block, value: val } : block));
+  };
+
+  const moveBlock = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === blogBlocks.length - 1) return;
+
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    const updated = [...blogBlocks];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setBlogBlocks(updated);
+  };
+
+  const handleBlockImageUpload = async (index: number, file: File) => {
+    const toastId = toast.loading('Nahrávam obrázok do bloku...');
+    const url = await equipmentService.uploadImage(file);
+    toast.dismiss(toastId);
+    if (url) {
+      updateBlockValue(index, url);
+      toast.success('Obrázok nahraný.');
+    } else {
+      toast.error('Chyba pri nahrávaní.');
     }
   };
 
@@ -664,6 +738,7 @@ const Admin = () => {
                             <th className="px-6 py-4">Názov</th>
                             <th className="px-6 py-4">Stav</th>
                             <th className="px-6 py-4 text-center">Dostupný</th>
+                            <th className="px-6 py-4 text-center">Kusov na predaj</th>
                             <th className="px-6 py-4 text-center">Predajná cena</th>
                             <th className="px-6 py-4 text-right">Akcie</th>
                           </tr>
@@ -683,10 +758,11 @@ const Admin = () => {
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 text-center">
-                                  <span className={item.available ? "text-emerald-400" : "text-red-400"}>
-                                    {item.available ? "Skladom" : "Vypredané"}
+                                  <span className={item.available_count > 0 ? "text-emerald-400" : "text-red-400"}>
+                                    {item.available_count > 0 ? "Skladom" : "Vypredané"}
                                   </span>
                                 </td>
+                                <td className="px-6 py-4 text-center">{item.available_count} ks</td>
                                 <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{item.price} €</td>
                                 <td className="px-6 py-4 text-right">
                                   <div className="flex items-center justify-end gap-2">
@@ -703,7 +779,7 @@ const Admin = () => {
                           })}
                           {salesItems.length === 0 && (
                             <tr>
-                              <td colSpan={6} className="text-center py-8 text-gray-500 italic">Žiadna technika na predaj.</td>
+                              <td colSpan={7} className="text-center py-8 text-gray-500 italic">Žiadna technika na predaj.</td>
                             </tr>
                           )}
                         </tbody>
@@ -887,12 +963,9 @@ const Admin = () => {
                     <Label className="text-gray-300">Predajná cena (€) *</Label>
                     <Input type="number" min="1" value={salesFormData.price} onChange={(e) => setSalesFormData(p => ({ ...p, price: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                   </div>
-                  <div className="space-y-2 flex flex-col justify-center">
-                    <Label className="text-gray-300 mb-2">Dostupnosť</Label>
-                    <div className="flex items-center gap-3 bg-black/20 p-3 border border-white/5 rounded-xl">
-                      <input type="checkbox" checked={salesFormData.available} onChange={(e) => setSalesFormData(p => ({ ...p, available: e.target.checked }))} className="accent-[#BD20D3] w-5 h-5 rounded" id="sales-avail" />
-                      <Label htmlFor="sales-avail" className="text-white cursor-pointer select-none">Je skladom na okamžitý predaj</Label>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Počet kusov k dispozícii *</Label>
+                    <Input type="number" min="0" value={salesFormData.available_count} onChange={(e) => setSalesFormData(p => ({ ...p, available_count: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                   </div>
                 </div>
 
@@ -905,7 +978,10 @@ const Admin = () => {
                   <ImageManager images={salesFormData.images} onChange={(images) => setSalesFormData(p => ({ ...p, images }))} />
                 </div>
 
-                <DynamicBubbleInput label="Špecifikácie produktu" placeholder="Napr. Príkon: 500W..." items={salesFormData.specs} onChange={(specs) => setSalesFormData(p => ({ ...p, specs }))} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <DynamicBubbleInput label="Technické špecifikácie" placeholder="Napr. Príkon: 500W..." items={salesFormData.specs} onChange={(specs) => setSalesFormData(p => ({ ...p, specs }))} />
+                  <DynamicBubbleInput label="Kľúčové vlastnosti" placeholder="Napr. Záruka 3 roky..." items={salesFormData.features} onChange={(features) => setSalesFormData(p => ({ ...p, features }))} />
+                </div>
 
                 <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
                   <Button type="button" variant="outline" onClick={() => { setIsSalesFormOpen(false); setEditingSales(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
@@ -917,7 +993,7 @@ const Admin = () => {
         </div>
       )}
 
-      {/* --- BLOG POP-UP MODAL --- */}
+      {/* --- BLOG POP-UP MODAL WITH BLOCK-BASED RICH EDITOR --- */}
       {isBlogFormOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
@@ -954,13 +1030,157 @@ const Admin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-gray-300">Hlavný obrázok URL *</Label>
-                  <Input type="text" value={blogFormData.image} onChange={(e) => setBlogFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://images.unsplash.com/..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  <Label className="text-gray-300">Hlavný náhľadový obrázok (URL)</Label>
+                  <Input type="text" value={blogFormData.image} onChange={(e) => setBlogFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://images.unsplash.com/..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-gray-300">Obsah článku * (Umožňuje formátovaný text)</Label>
-                  <Textarea value={blogFormData.content} onChange={(e) => setBlogFormData(p => ({ ...p, content: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[250px]" required />
+                {/* DYNAMIC CONTENT BLOCKS WRAPPER */}
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-gray-300 text-lg font-bold">Obsah článku (Dynamické bloky)</Label>
+                    <span className="text-xs text-gray-500">Pridávajte odseky, nadpisy a nahrávajte fotky priamo medzi text.</span>
+                  </div>
+
+                  <div className="space-y-4 bg-black/30 border border-white/10 p-6 rounded-2xl">
+                    {blogBlocks.map((block, idx) => (
+                      <div key={idx} className="bg-[#020721] border border-white/5 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 group/block">
+                        
+                        {/* Block type identity icon */}
+                        <div className="flex items-center gap-2 md:flex-col md:items-center">
+                          <span className="text-xs font-bold text-[#BD20D3] uppercase tracking-wider md:mb-1">
+                            #{idx + 1}
+                          </span>
+                          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400">
+                            {block.type === 'paragraph' && <Type size={16} />}
+                            {block.type === 'heading' && <Heading size={16} />}
+                            {block.type === 'image' && <ImageIcon size={16} />}
+                          </div>
+                        </div>
+
+                        {/* Editor inputs dependent on type */}
+                        <div className="flex-grow w-full space-y-2">
+                          {block.type === 'heading' && (
+                            <Input 
+                              type="text" 
+                              value={block.value} 
+                              onChange={(e) => updateBlockValue(idx, e.target.value)} 
+                              placeholder="Sem zadajte podnadpis..." 
+                              className="bg-black/40 border-white/5 font-bold text-white rounded-xl"
+                            />
+                          )}
+
+                          {block.type === 'paragraph' && (
+                            <Textarea 
+                              value={block.value} 
+                              onChange={(e) => updateBlockValue(idx, e.target.value)} 
+                              placeholder="Sem napíšte odsek textu..." 
+                              className="bg-black/40 border-white/5 text-gray-300 rounded-xl min-h-[80px]"
+                            />
+                          )}
+
+                          {block.type === 'image' && (
+                            <div className="space-y-3">
+                              <div className="flex gap-2">
+                                <Input 
+                                  type="text" 
+                                  value={block.value} 
+                                  onChange={(e) => updateBlockValue(idx, e.target.value)} 
+                                  placeholder="URL adresa obrázka..." 
+                                  className="bg-black/40 border-white/5 text-white rounded-xl flex-grow text-xs h-10"
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  onClick={() => {
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.accept = 'image/*';
+                                    input.onchange = (e) => {
+                                      const files = (e.target as HTMLInputElement).files;
+                                      if (files && files.length > 0) {
+                                        handleBlockImageUpload(idx, files[0]);
+                                      }
+                                    };
+                                    input.click();
+                                  }}
+                                  className="border-[#BD20D3]/30 hover:bg-[#BD20D3]/10 text-white rounded-xl h-10 text-xs px-3 whitespace-nowrap"
+                                >
+                                  Nahrať fotku
+                                </Button>
+                              </div>
+                              {block.value && (
+                                <div className="aspect-video w-full max-w-[200px] rounded-lg overflow-hidden border border-white/10">
+                                  <img src={block.value} alt="" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Block reorder / actions */}
+                        <div className="flex items-center gap-1.5 md:flex-col md:self-stretch md:justify-between self-end shrink-0">
+                          <div className="flex gap-1 md:flex-col">
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm" 
+                              disabled={idx === 0}
+                              onClick={() => moveBlock(idx, 'up')}
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
+                            >
+                              <ArrowUp size={14} />
+                            </Button>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm" 
+                              disabled={idx === blogBlocks.length - 1}
+                              onClick={() => moveBlock(idx, 'down')}
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
+                            >
+                              <ArrowDown size={14} />
+                            </Button>
+                          </div>
+                          
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => removeBlock(idx)}
+                            className="h-8 w-8 p-0 text-red-400 hover:text-white hover:bg-red-500/20"
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Block Triggers */}
+                  <div className="flex flex-wrap gap-3 justify-center pt-2">
+                    <Button 
+                      type="button" 
+                      onClick={() => addBlock('paragraph')}
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
+                    >
+                      <Type size={14} className="text-[#BD20D3]" /> Pridať odsek textu
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={() => addBlock('heading')}
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
+                    >
+                      <Heading size={14} className="text-[#1A4BFF]" /> Pridať podnadpis
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={() => addBlock('image')}
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
+                    >
+                      <ImageIcon size={14} className="text-emerald-400" /> Vložiť fotku
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
