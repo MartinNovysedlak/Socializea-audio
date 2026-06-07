@@ -97,21 +97,25 @@ const Predaj = () => {
                   <Card 
                     className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative"
                   >
-                    {/* Image banner */}
-                    <div className="h-56 overflow-hidden relative bg-black/40 border-b border-white/5">
+                    {/* Image banner — väčší, bez orezania, kategória v pravom dolnom rohu */}
+                    <div className="h-72 md:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
                       <img 
                         src={mainImg} 
                         alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
                         }}
                       />
-                      <div className="absolute top-4 left-4">
-                        <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest ${
+                      {/* Tmavý gradient pre čitateľnosť textu */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                      
+                      {/* Kategória — pravý dolný roh, plne nepriehľadná */}
+                      <div className="absolute bottom-4 right-4">
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${
                           item.condition === 'new' 
-                            ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400' 
-                            : 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
+                            ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' 
+                            : 'bg-amber-600/90 border border-amber-400/50 text-white'
                         }`}>
                           {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
                         </span>
