@@ -103,18 +103,6 @@ const initialSales: SalesItem[] = [
     ],
     available_count: 8,
     available: true
-  },
-  {
-    id: 'sale-1',
-    name: 'Pioneer DJ DDJ-FLX4',
-    price: 319,
-    condition: 'new',
-    description: '2-kanálový DJ ovládač pre začiatočníkov aj pokročilých.',
-    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600'],
-    specs: ['2 kanály', 'USB-C', 'Podpora rekordbox/Serato'],
-    features: ['Smart Fader', 'Kompaktný dizajn'],
-    available_count: 3,
-    available: true
   }
 ];
 
@@ -128,11 +116,6 @@ export const salesService = {
 
       if (error) throw error;
       
-      // Ak je DB prázdna, vrátime initialSales
-      if (!data || data.length === 0) {
-        throw new Error('Empty database');
-      }
-
       return (data || []).map(item => ({
         ...item,
         specs: Array.isArray(item.specs) ? item.specs : [],
@@ -141,22 +124,39 @@ export const salesService = {
       }));
     } catch (err) {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      let items: SalesItem[] = stored ? JSON.parse(stored) : [...initialSales];
-      
-      // MIGRÁCIA: Skontrolujeme, či v stored nechýbajú nové produkty z initialSales
-      let updated = false;
-      initialSales.forEach(initialItem => {
-        if (!items.find(item => item.id === initialItem.id)) {
-          items.push(initialItem);
-          updated = true;
-        }
-      });
+      return stored ? JSON.parse(stored) : [...initialSales];
+    }
+  },
 
-      if (updated || !stored) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-      }
+  async seedToDatabase(): Promise<boolean> {
+    try {
+      // Najprv skontrolujeme, či už niečo v DB je
+      const { count } = await supabase.from('sales').select('*', { count: 'exact', head: true });
       
-      return items;
+      if (count && count > 0) {
+        console.log('Databáza už obsahuje produkty.');
+        return true;
+      }
+
+      const itemsToInsert = initialSales.map(item => ({
+        name: item.name,
+        price: item.price,
+        condition: item.condition,
+        description: item.description,
+        images: item.images,
+        specs: item.specs,
+        features: item.features,
+        available_count: item.available_count,
+        available: item.available
+      }));
+
+      const { error } = await supabase.from('sales').insert(itemsToInsert);
+      
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('Chyba pri nahrávaní dát do DB:', err);
+      return false;
     }
   },
 
@@ -177,22 +177,17 @@ export const salesService = {
   },
 
   async create(item: Omit<SalesItem, 'id' | 'created_at'>): Promise<SalesItem> {
-    const newItem: SalesItem = {
-      ...item,
-      id: crypto.randomUUID(),
-      created_at: new Date().toISOString()
-    };
-
     try {
       const { data, error } = await supabase
         .from('sales')
-        .insert(newItem)
+        .insert(item)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (err) {
+      const newItem: SalesItem = { ...item, id: crypto.randomUUID() };
       const items = await this.getAll();
       items.unshift(newItem);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));

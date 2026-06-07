@@ -36,7 +36,8 @@ import {
   Type,
   Bold,
   Italic,
-  Upload
+  Upload,
+  Database
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -334,6 +335,18 @@ const Admin = () => {
   };
 
   // --- SALES FUNCTIONS ---
+  const handleSeedSales = async () => {
+    const toastId = toast.loading('Ukladám produkty do databázy...');
+    const success = await salesService.seedToDatabase();
+    toast.dismiss(toastId);
+    if (success) {
+      toast.success('Produkty boli úspešne uložené v online databáze!');
+      loadSalesData();
+    } else {
+      toast.error('Nepodarilo sa uložiť produkty do databázy.');
+    }
+  };
+
   const handleOpenSalesAdd = () => {
     setEditingSales(null);
     setSalesFormData({
@@ -765,11 +778,16 @@ const Admin = () => {
 
               {/* SALES TAB PANEL */}
               <TabsContent value="sales" className="space-y-6">
-                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/2 p-4 rounded-2xl border border-white/5">
                   <span className="text-sm text-gray-400">Správa produktov určených na priamy predaj</span>
-                  <Button onClick={handleOpenSalesAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
-                    <Plus size={16} className="mr-1.5" /> Pridať na predaj
-                  </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button onClick={handleSeedSales} variant="outline" className="flex-1 sm:flex-none border-[#BD20D3]/30 text-[#BD20D3] hover:bg-[#BD20D3]/10 rounded-xl h-10 px-5 transition-all">
+                      <Database size={16} className="mr-1.5" /> Nahrať produkty do DB
+                    </Button>
+                    <Button onClick={handleOpenSalesAdd} className="flex-1 sm:flex-none btn-cyber rounded-xl h-10 px-5 border-none">
+                      <Plus size={16} className="mr-1.5" /> Pridať na predaj
+                    </Button>
+                  </div>
                 </div>
 
                 <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
@@ -825,7 +843,7 @@ const Admin = () => {
                           })}
                           {salesItems.length === 0 && (
                             <tr>
-                              <td colSpan={7} className="text-center py-8 text-gray-500 italic">Žiadna technika na predaj.</td>
+                              <td colSpan={7} className="text-center py-8 text-gray-500 italic">Žiadna technika na predaj. Kliknite na "Nahrať produkty do DB".</td>
                             </tr>
                           )}
                         </tbody>
