@@ -6,6 +6,12 @@ import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
 import EquipmentDetail from './pages/EquipmentDetail';
 import Kontakt from './pages/Kontakt';
+import Admin from './pages/Admin';
+import Blog from './pages/Blog';
+import BlogPostDetail from './pages/BlogPostDetail';
+import Predaj from './pages/Predaj';
+import ProductDetail from './pages/ProductDetail';
+import NotFound from './pages/NotFound';
 import { useEquipment } from './hooks/useEquipment';
 
 function App() {
@@ -37,6 +43,12 @@ function App() {
           } 
         />
         <Route path="/kontakt" element={<Kontakt />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogPostDetail />} />
+        <Route path="/predaj" element={<Predaj />} />
+        <Route path="/predaj/:id" element={<ProductDetail />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
