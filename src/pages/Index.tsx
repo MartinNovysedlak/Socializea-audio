@@ -1,42 +1,16 @@
-"use client";
+// Update this page (the content is just a fallback if you fail to update the page)
 
-import React from 'react';
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import RentalSummary from '@/components/RentalSummary';
-import DJSection from '@/components/DJSection';
-import SalesSummary from '@/components/SalesSummary';
-import ContactForm from '@/components/ContactForm';
-import Footer from '@/components/Footer';
-import ScrollReveal from '@/components/ScrollReveal';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white">
-      <Navbar />
-      <main className="space-y-4">
-        <ScrollReveal delay={0.1}>
-          <Hero />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <RentalSummary />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <DJSection />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <SalesSummary />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <ContactForm />
-        </ScrollReveal>
-      </main>
-      <Footer />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
+        <p className="text-xl text-gray-600">
+          Start building your amazing project here!
+        </p>
+      </div>
       <MadeWithDyad />
     </div>
   );
