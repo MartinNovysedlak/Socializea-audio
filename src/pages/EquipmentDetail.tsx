@@ -102,7 +102,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     return (
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721]">
+        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[020721]">
           <div className="text-white text-center">
             <h1 className="text-2xl font-bold mb-2">Aparatúra nie je nájdená</h1>
             <p className="text-gray-400">Požadovaná položka nebola nájdená v našom katalógu.</p>
@@ -201,7 +201,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                           disabled={item.available === 0}
                           className={`h-12 px-6 font-bold transition-all ${
                             isInCart 
-                              ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
+                              ? "bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white" 
                               : "btn-cyber border-none"
                           }`}
                         >
