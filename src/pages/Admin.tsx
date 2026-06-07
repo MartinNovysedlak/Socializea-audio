@@ -550,18 +550,21 @@ const Admin = () => {
 
             {/* TAB CONTROLLERS */}
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
-              <TabsList className="bg-white/5 border border-white/10 p-1.5 rounded-2xl flex flex-wrap gap-1 max-w-lg">
-                <TabsTrigger value="rentals" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
-                  <Volume2 size={16} />
-                  Prenájom
+              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto">
+                <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <Volume2 size={14} />
+                  <span className="hidden sm:inline">Prenájom</span>
+                  <span className="sm:hidden">Prenájom</span>
                 </TabsTrigger>
-                <TabsTrigger value="sales" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
-                  <ShoppingBag size={16} />
-                  Predaj
+                <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <ShoppingBag size={14} />
+                  <span className="hidden sm:inline">Predaj</span>
+                  <span className="sm:hidden">Predaj</span>
                 </TabsTrigger>
-                <TabsTrigger value="blog" className="flex-1 rounded-xl data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white text-gray-400 font-semibold text-sm h-11 px-5 gap-2">
-                  <BookOpen size={16} />
-                  Blog
+                <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <BookOpen size={14} />
+                  <span className="hidden sm:inline">Blog</span>
+                  <span className="sm:hidden">Blog</span>
                 </TabsTrigger>
               </TabsList>
 
