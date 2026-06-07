@@ -1,12 +1,14 @@
 "use client";
 
 import React from 'react';
+import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const ObchodnePodmienky = () => {
   return (
-    <div className="min-h-screen bg-[#020721] text-white">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <div className="min-h-screen flex flex-col bg-[#020721] text-white">
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
           Obchodné <span className="text-[#BD20D3]">podmienky</span>
         </h1>
@@ -15,7 +17,7 @@ const ObchodnePodmienky = () => {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Všeobecné ustanovenia</h2>
             <p>
-              Tieto obchodné podmienky (ďalej len „Podmienky“) upravujú práva a povinnosti medzi spoločnosťou Socializea-audio (ďalej len „Predávajúci“) a jej zákazníkmi (ďalej len „Kupujúci“) pri nákupe tovaru a služieb prostredníctvom webovej stránky.
+              Tieto obchodné podmienky (ďalej len „Podmienky") upravujú práva a povinnosti medzi spoločnosťou Socializea-audio (ďalej len „Predávajúci") a jej zákazníkmi (ďalej len „Kupujúci") pri nákupe tovaru a služieb prostredníctvom webovej stránky.
             </p>
           </section>
 
@@ -49,7 +51,7 @@ const ObchodnePodmienky = () => {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">5. Dodanie tovaru</h2>
             <p>
-              Dodacia lehota je zvyčajne 3-7 pracovných dní od potvrdenia objednávky. V prípade väčších objednávok alebo špeciálnych produktov sa dodacia lehota môže predĺžiť. O presnom termíne dodania bude Kupujúci informovaný e-mailom.
+              Dodacia lehota je zvyčajne 3-7 pracovných dní od potvrdenia objednávky. V prípade väččích objednávok alebo špeciálnych produktov sa dodacia lehota môže predĺžiť. O presnom termíne dodania bude Kupujúci informovaný e-mailom.
             </p>
           </section>
 
@@ -94,7 +96,7 @@ const ObchodnePodmienky = () => {
             Posledná aktualizácia: Január 2025
           </p>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

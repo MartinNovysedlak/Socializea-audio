@@ -1,12 +1,14 @@
 "use client";
 
 import React from 'react';
+import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const PodmienkyPouzivania = () => {
   return (
-    <div className="min-h-screen bg-[#020721] text-white">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <div className="min-h-screen flex flex-col bg-[#020721] text-white">
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
           Podmienky <span className="text-[#BD20D3]">používania</span>
         </h1>
@@ -15,7 +17,7 @@ const PodmienkyPouzivania = () => {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Všeobecné ustanovenia</h2>
             <p>
-              Tieto podmienky používania (ďalej len „Podmienky“) upravujú pravidlá používania webovej stránky Socializea-audio (ďalej len „Webová stránka“). Používaním Webovej stránky používateľ potvrdzuje, že si tieto Podmienky prečítal, porozumel im a zaväzuje sa ich dodržiavať.
+              Tieto podmienky používania (ďalej len „Podmienky") upravujú pravidlá používania webovej stránky Socializea-audio (ďalej len „Webová stránka"). Používaním Webovej stránky používateľ potvrdzuje, že si tieto Podmienky prečítal, porozumel im a zaväzuje sa ich dodržiavať.
             </p>
           </section>
 
@@ -95,7 +97,7 @@ const PodmienkyPouzivania = () => {
             Posledná aktualizácia: Január 2025
           </p>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
