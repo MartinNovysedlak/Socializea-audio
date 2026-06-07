@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
 import EquipmentDetail from './pages/EquipmentDetail';
-import Contact from './pages/Contact';
+import Kontakt from './pages/Kontakt';
 import { useEquipment } from './hooks/useEquipment';
 
 function App() {
@@ -35,7 +35,7 @@ function App() {
             />
           } 
         />
-        <Route path="/kontakt" element={<Contact />} />
+        <Route path="/kontakt" element={<Kontakt />} />
       </Routes>
     </Router>
   );
