@@ -681,7 +681,11 @@ const Admin = () => {
                                 onDragEnd={handleDragEnd}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDrop={(e) => handleDrop(e, index)}
-                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : 'hover:bg-white/2'}`}
+                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : ''} ${
+                                  isDragOver && dropPosition === 'above' ? 'border-t-2 border-t-[#BD20D3]' : ''
+                                } ${
+                                  isDragOver && dropPosition === 'below' ? 'border-b-2 border-b-[#BD20D3]' : ''
+                                } hover:bg-white/2`}
                               >
                                 <td 
                                   className="px-4 py-4 cursor-grab active:cursor-grabbing text-center"
@@ -1001,7 +1005,7 @@ const Admin = () => {
               <button onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
                 <X size={24} />
               </button>
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+              <div className="flex items-center gap-3 border-b border-[#BD20D3]/10 pb-4 mb-6">
                 <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
                   <BookOpen size={20} />
                 </div>
