@@ -497,7 +497,7 @@ const Admin = () => {
         setIsBlogFormOpen(false);
         loadBlogData();
       } else {
-        toast.error('Chyba pri uverejňovaní.');
+        toast.error('Chyba pri uvereňovaní.');
       }
     }
   };
@@ -673,6 +673,14 @@ const Admin = () => {
                             const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                             const isDragged = draggedIndex === index;
                             const isDragOver = dragOverIndex === index;
+                            const dragBorderClass = isDragOver
+                              ? dropPosition === 'above'
+                                ? 'border-t-2 border-t-[#BD20D3]'
+                                : dropPosition === 'below'
+                                  ? 'border-b-2 border-b-[#BD20D3]'
+                                  : ''
+                              : '';
+
                             return (
                               <tr 
                                 key={item.id}
@@ -681,27 +689,31 @@ const Admin = () => {
                                 onDragEnd={handleDragEnd}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDrop={(e) => handleDrop(e, index)}
-                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : ''} ${
-                                  isDragOver && dropPosition === 'above' ? 'border-t-2 border-t-[#BD20D3]' : ''
-                                } ${
-                                  isDragOver && dropPosition === 'below' ? 'border-b-2 border-b-[#BD20D3]' : ''
-                                } hover:bg-white/2`}
+                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : ''} hover:bg-white/2`}
                               >
                                 <td 
-                                  className="px-4 py-4 cursor-grab active:cursor-grabbing text-center"
+                                  className={`px-4 py-4 cursor-grab active:cursor-grabbing text-center ${dragBorderClass}`}
                                   onMouseDown={() => setCanDrag(true)}
                                   onMouseUp={() => setCanDrag(false)}
                                 >
                                   <GripVertical size={16} className="text-gray-500 mx-auto" />
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className={`px-6 py-4 ${dragBorderClass}`}>
                                   <img src={displayImg} alt="" className="w-10 h-10 rounded-lg object-cover border border-white/10" />
                                 </td>
-                                <td className="px-6 py-4 font-semibold text-white max-w-[240px] truncate">{item.name}</td>
-                                <td className="px-6 py-4 capitalize">{item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}</td>
-                                <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{item.price_per_day} €</td>
-                                <td className="px-6 py-4 text-center">{item.available}</td>
-                                <td className="px-6 py-4 text-right">
+                                <td className={`px-6 py-4 font-semibold text-white max-w-[240px] truncate ${dragBorderClass}`}>
+                                  {item.name}
+                                </td>
+                                <td className={`px-6 py-4 capitalize ${dragBorderClass}`}>
+                                  {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                                </td>
+                                <td className={`px-6 py-4 text-center font-bold text-[#BD20D3] ${dragBorderClass}`}>
+                                  {item.price_per_day} €
+                                </td>
+                                <td className={`px-6 py-4 text-center ${dragBorderClass}`}>
+                                  {item.available}
+                                </td>
+                                <td className={`px-6 py-4 text-right ${dragBorderClass}`}>
                                   <div className="flex items-center justify-end gap-2">
                                     <Button onClick={() => handleOpenRentalEdit(item)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
                                       <Edit size={12} />
