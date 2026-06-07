@@ -8,7 +8,7 @@ const PodmienkyPouzivania = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#020721] text-white">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-16 max-w-4xl">
+      <main className="flex-grow container mx-auto px-4 pt-32 pb-16 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
           Podmienky <span className="text-[#BD20D3]">používania</span>
         </h1>
