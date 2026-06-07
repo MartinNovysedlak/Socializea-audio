@@ -196,27 +196,27 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                             Späť do ponuky
                           </Button>
                         </Link>
-                        <Button 
-                          onClick={handleAddToCart}
-                          disabled={item.available === 0}
-                          className={`h-12 px-6 font-bold transition-all ${
-                            isInCart 
-                              ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
-                              : "btn-cyber border-none"
-                          }`}
-                        >
-                          {isInCart ? (
-                            <>
-                              <Check size={18} className="mr-2" />
-                              V košíku ({cartQuantity})
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingBag size={18} className="mr-2" />
-                              Pridať do košíka
-                            </>
-                          )}
-                        </Button>
+                        {isInCart ? (
+                          <Button 
+                            onClick={handleAddToCart}
+                            disabled={cartQuantity >= item.available}
+                            size="sm"
+                            className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none"
+                          >
+                            <Check size={18} className="mr-2 animate-pulse" />
+                            V košíku ({cartQuantity})
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={handleAddToCart}
+                            disabled={item.available === 0}
+                            size="sm"
+                            className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg"
+                          >
+                            <ShoppingBag size={18} className="mr-2" />
+                            Pridať do košíka
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardFooter>
