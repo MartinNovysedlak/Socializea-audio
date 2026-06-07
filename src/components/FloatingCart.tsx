@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  ShoppingBag, 
-  X, 
-  Calendar, 
-  User, 
-  Mail, 
-  Phone, 
-  MessageSquare, 
-  Plus, 
+import {
+  ShoppingBag,
+  X,
+  Calendar,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+  Plus,
   Minus,
   Clock,
   ChevronRight
@@ -35,10 +35,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const [isHovered, setIsHovered] = useState(false);
   const [showFromCalendar, setShowFromCalendar] = useState(false);
   const [showToCalendar, setShowToCalendar] = useState(false);
-  
+
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -55,10 +55,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const item = equipment.find((e) => e.id === id);
       return { item, qty };
     })
-    .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+  .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
   const totalItems = cartItems.reduce((sum, current) => sum + current.qty, 0);
-  
+
   const calculateDays = () => {
     if (!formData.dateFrom || !formData.dateTo) return 1;
     const start = new Date(formData.dateFrom);
@@ -69,16 +69,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   };
 
   const days = calculateDays();
-  
-  const getSubtotal = () => {
+
+  const getSubtotalPerDay = () => {
     return cartItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
   };
 
-  const subtotalPerDay = getSubtotal();
-  const baseTotal = subtotalPerDay * days;
-  
-  const discount = days >= 3 ? baseTotal * 0.15 : 0;
-  const grandTotal = baseTotal - discount;
+  const subtotalPerDay = getSubtotalPerDay();
+
+  // Nová logika: prvý deň plná cena, každý ďalší deň = 50% z ceny prvého dňa
+  const firstDayTotal = subtotalPerDay;
+  const additionalDaysTotal = days > 1 ? (days - 1) * subtotalPerDay * 0.5 : 0;
+  const grandTotal = firstDayTotal + additionalDaysTotal;
 
   // Close calendar on outside click
   useEffect(() => {
@@ -119,7 +120,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (date) {
       setFormData(prev => ({ ...prev, dateFrom: format(date, "yyyy-MM-dd") }));
       setShowFromCalendar(false);
-      // Auto-clear "To" date if it's before the new "From" date
       if (formData.dateTo && isBefore(new Date(formData.dateTo), date)) {
         setFormData(prev => ({ ...prev, dateTo: "" }));
       }
@@ -290,7 +290,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       `}</style>
 
       {/* FLOATING ACTION BUTTON WITH HOVER PREVIEW */}
-      <div 
+      <div
         className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -301,16 +301,16 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">
               Položky v košíku
             </h4>
-            
+
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
               {cartItems.map(({ item, qty }) => {
                 const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                 return (
                   <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <img 
-                      src={img} 
-                      alt="" 
-                      className="w-8 h-8 rounded object-cover border border-white/10" 
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-8 h-8 rounded object-cover border border-white/10"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                       }}
@@ -327,8 +327,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
               <span className="text-gray-400">Celkom na deň:</span>
               <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setIsOpen(true)}
               className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1"
             >
@@ -355,7 +355,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
             <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-4 md:p-6 lg:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
-              
+
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -447,12 +447,28 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}
                       </span>
                     </div>
-                    {days >= 3 && (
-                      <div className="flex justify-between text-sm text-emerald-400 font-semibold">
-                        <span>Dlhodobá zľava 15%:</span>
-                        <span>- {discount.toFixed(2)} €</span>
+
+                    {/* Rozpis cien podľa nového modelu */}
+                    {days > 1 && (
+                      <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 space-y-1.5 mt-2">
+                        <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
+                        <div className="flex justify-between text-sm text-gray-300">
+                          <span>1. deň (plná cena):</span>
+                          <span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-300">
+                          <span>
+                            {days - 1} {days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50%):
+                          </span>
+                          <span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1">
+                          <span>Zľava za dlhodobý prenájom:</span>
+                          <span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span>
+                        </div>
                       </div>
                     )}
+
                     <div className="border-t border-white/5 pt-3 flex justify-between items-end">
                       <span className="text-white font-bold text-base">Celková suma</span>
                       <span className="text-[#BD20D3] font-extrabold text-2xl">
@@ -545,12 +561,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
                             required
                           />
-                          <Calendar 
-                            size={16} 
+                          <Calendar
+                            size={16}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
                           />
                         </div>
-                        
+
                         {showFromCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                             <DayPicker
@@ -565,7 +581,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="space-y-1.5 relative" ref={toRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm">
                           <Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *
@@ -583,12 +599,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
                             required
                           />
-                          <Calendar 
-                            size={16} 
+                          <Calendar
+                            size={16}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
                           />
                         </div>
-                        
+
                         {showToCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                             <DayPicker
