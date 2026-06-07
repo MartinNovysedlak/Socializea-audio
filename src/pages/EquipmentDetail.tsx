@@ -6,20 +6,25 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import FloatingCart from "@/components/FloatingCart";
 import { useEquipmentItem } from "@/hooks/useEquipment";
+import { EquipmentItem } from "@/lib/supabase";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface EquipmentDetailProps {
-  cartQuantity?: number;
-  onAddToCart?: () => void;
+  quantities: Record<string, number>;
+  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  equipment: EquipmentItem[];
 }
 
-const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps) => {
+const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDetailProps) => {
   const { id } = useParams();
   const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const cartQuantity = id ? (quantities[id] || 0) : 0;
 
   const images = item?.images && item.images.length > 0
     ? item.images
@@ -43,12 +48,24 @@ const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps
   }, [images.length]);
 
   const handleAddToCart = () => {
-    if (onAddToCart) {
-      onAddToCart();
+    if (!item) return;
+
+    setQuantities((prev) => {
+      const currentQty = prev[item.id] || 0;
+      if (currentQty >= item.available) {
+        toast.error(`Nemôžete pridať viac kusov. Maximálne dostupné množstvo je ${item.available}.`);
+        return prev;
+      }
+      
+      const newQty = currentQty + 1;
       toast.success("Produkt bol pridaný do košíka!", {
-        description: `${item?.name} je teraz vo vašom košíku.`,
+        description: `${item.name} je teraz vo vašom košíku (Spolu: ${newQty} ks).`,
       });
-    }
+      return {
+        ...prev,
+        [item.id]: newQty
+      };
+    });
   };
 
   useEffect(() => {
@@ -242,6 +259,14 @@ const EquipmentDetail = ({ cartQuantity = 0, onAddToCart }: EquipmentDetailProps
           </div>
         </div>
       </section>
+      
+      {/* Vykreslenie plávajúceho košíka priamo na detaile aparatúry */}
+      <FloatingCart 
+        quantities={quantities} 
+        setQuantities={setQuantities} 
+        equipment={equipment} 
+      />
+
       <Footer />
 
       {lightboxOpen && (
