@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Instagram, Facebook, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Instagram, Facebook, Youtube, Settings } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -36,9 +37,19 @@ const Footer = () => {
             </a>
           </div>
 
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
-          </p>
+          <div className="flex flex-col items-center md:items-end gap-2">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
+            </p>
+            <Link 
+              to="/admin" 
+              className="text-xs text-gray-600 hover:text-[#BD20D3] transition-colors flex items-center gap-1.5"
+              title="Administrácia"
+            >
+              <Settings size={12} />
+              <span>Administrácia</span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
