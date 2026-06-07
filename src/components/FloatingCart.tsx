@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   ShoppingBag, 
   X, 
@@ -20,6 +20,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { EquipmentItem } from "@/lib/supabase";
 import { toast } from "sonner";
+import { DayPicker } from "react-day-picker";
+import { format, addDays, isBefore, startOfDay } from "date-fns";
+import "react-day-picker/dist/style.css";
 
 interface FloatingCartProps {
   quantities: Record<string, number>;
@@ -30,6 +33,12 @@ interface FloatingCartProps {
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showFromCalendar, setShowFromCalendar] = useState(false);
+  const [showToCalendar, setShowToCalendar] = useState(false);
+  
+  const fromRef = useRef<HTMLDivElement>(null);
+  const toRef = useRef<HTMLDivElement>(null);
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -71,6 +80,21 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const discount = days >= 3 ? baseTotal * 0.15 : 0;
   const grandTotal = baseTotal - discount;
 
+  // Close calendar on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fromRef.current && !fromRef.current.contains(event.target as Node)) {
+        setShowFromCalendar(false);
+      }
+      if (toRef.current && !toRef.current.contains(event.target as Node)) {
+        setShowToCalendar(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -89,6 +113,24 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
       return { ...prev, [id]: newQty };
     });
+  };
+
+  const handleFromSelect = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, dateFrom: format(date, "yyyy-MM-dd") }));
+      setShowFromCalendar(false);
+      // Auto-clear "To" date if it's before the new "From" date
+      if (formData.dateTo && isBefore(new Date(formData.dateTo), date)) {
+        setFormData(prev => ({ ...prev, dateTo: "" }));
+      }
+    }
+  };
+
+  const handleToSelect = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, dateTo: format(date, "yyyy-MM-dd") }));
+      setShowToCalendar(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -128,6 +170,67 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   return (
     <>
+      <style>{`
+        .rdp {
+          --rdp-cell-size: 36px;
+          --rdp-accent-color: #BD20D3;
+          --rdp-background-color: rgba(189, 32, 211, 0.1);
+          --rdp-accent-color-dark: #BD20D3;
+          --rdp-background-color-dark: rgba(189, 32, 211, 0.2);
+          --rdp-outline: 2px solid #BD20D3;
+          --rdp-outline-selected: 2px solid #BD20D3;
+          margin: 0;
+        }
+        .rdp-months {
+          justify-content: center;
+        }
+        .rdp-month {
+          background: rgba(10, 13, 31, 0.95);
+          border: 1px solid rgba(189, 32, 211, 0.3);
+          border-radius: 16px;
+          padding: 12px;
+        }
+        .rdp-caption {
+          color: white;
+          font-weight: 700;
+          font-size: 14px;
+        }
+        .rdp-head_cell {
+          color: #9ca3af;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        .rdp-day {
+          color: #e5e7eb;
+          border-radius: 8px;
+          font-size: 13px;
+        }
+        .rdp-day:hover:not(.rdp-day_selected) {
+          background: rgba(189, 32, 211, 0.2) !important;
+          color: white !important;
+        }
+        .rdp-day_selected {
+          background: #BD20D3 !important;
+          color: white !important;
+          font-weight: 700;
+        }
+        .rdp-day_today {
+          border: 1px solid #BD20D3;
+          font-weight: 700;
+        }
+        .rdp-day_outside {
+          opacity: 0.3;
+        }
+        .rdp-nav_button {
+          color: #9ca3af;
+          border-radius: 8px;
+        }
+        .rdp-nav_button:hover {
+          background: rgba(189, 32, 211, 0.2) !important;
+          color: white !important;
+        }
+      `}</style>
+
       {/* FLOATING ACTION BUTTON WITH HOVER PREVIEW */}
       <div 
         className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
@@ -365,33 +468,83 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     </div>
 
+                    {/* DATE PICKERS WITH MINI CALENDAR */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="dateFrom" className="text-gray-300 flex items-center gap-1.5">
+                      <div className="space-y-1.5 relative" ref={fromRef}>
+                        <Label className="text-gray-300 flex items-center gap-1.5">
                           <Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *
                         </Label>
-                        <Input
-                          id="dateFrom"
-                          type="date"
-                          value={formData.dateFrom}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateFrom: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            readOnly
+                            placeholder="Vyberte dátum"
+                            value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""}
+                            onClick={() => {
+                              setShowFromCalendar(!showFromCalendar);
+                              setShowToCalendar(false);
+                            }}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 cursor-pointer pr-10"
+                            required
+                          />
+                          <Calendar 
+                            size={18} 
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
+                          />
+                        </div>
+                        
+                        {showFromCalendar && (
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <DayPicker
+                              mode="single"
+                              selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
+                              onSelect={handleFromSelect}
+                              disabled={[{ before: startOfDay(new Date()) }]}
+                              weekStartsOn={1}
+                              locale={undefined}
+                              initialFocus={showFromCalendar}
+                            />
+                          </div>
+                        )}
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="dateTo" className="text-gray-300 flex items-center gap-1.5">
+                      
+                      <div className="space-y-1.5 relative" ref={toRef}>
+                        <Label className="text-gray-300 flex items-center gap-1.5">
                           <Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *
                         </Label>
-                        <Input
-                          id="dateTo"
-                          type="date"
-                          min={formData.dateFrom}
-                          value={formData.dateTo}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateTo: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            readOnly
+                            placeholder="Vyberte dátum"
+                            value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""}
+                            onClick={() => {
+                              setShowToCalendar(!showToCalendar);
+                              setShowFromCalendar(false);
+                            }}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 cursor-pointer pr-10"
+                            required
+                          />
+                          <Calendar 
+                            size={18} 
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none"
+                          />
+                        </div>
+                        
+                        {showToCalendar && (
+                          <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <DayPicker
+                              mode="single"
+                              selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
+                              onSelect={handleToSelect}
+                              disabled={[
+                                { before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }
+                              ]}
+                              weekStartsOn={1}
+                              initialFocus={showToCalendar}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 
