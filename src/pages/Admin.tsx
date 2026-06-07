@@ -46,7 +46,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
 
-  // --- 1. RENTAL STATE (Existing) ---
+  // --- 1. RENTAL STATE ---
   const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
   const [isRentalFormOpen, setIsRentalFormOpen] = useState(false);
   const [editingRental, setEditingRental] = useState<EquipmentItem | null>(null);
@@ -67,7 +67,6 @@ const Admin = () => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
-  const tableRef = useRef<HTMLTableElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // --- 2. SALES STATE ---
@@ -111,7 +110,6 @@ const Admin = () => {
     setLocalOrder([...equipment]);
   }, [equipment]);
 
-  // Load Sales and Blog on Auth success
   useEffect(() => {
     if (isAuthenticated) {
       loadSalesData();
@@ -133,7 +131,6 @@ const Admin = () => {
     setLoadingBlog(false);
   };
 
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen) {
       document.body.style.overflow = 'hidden';
@@ -145,7 +142,6 @@ const Admin = () => {
     };
   }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen]);
 
-  // Auto-scroll when dragging near edges
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
     const topTriggerZone = 110;
@@ -439,7 +435,6 @@ const Admin = () => {
       author: post.author
     });
     
-    // Parse JSON block list from database content field
     try {
       const parsed = JSON.parse(post.content);
       if (Array.isArray(parsed)) {
@@ -473,7 +468,6 @@ const Admin = () => {
       return;
     }
 
-    // Convert block content array to string format
     const contentPayload = JSON.stringify(blogBlocks.filter(b => b.value.trim() !== ''));
 
     const payload = {
@@ -505,7 +499,6 @@ const Admin = () => {
     }
   };
 
-  // Block management inside blog form
   const addBlock = (type: 'paragraph' | 'heading' | 'image') => {
     setBlogBlocks(prev => [...prev, { type, value: '' }]);
   };
@@ -542,7 +535,6 @@ const Admin = () => {
     }
   };
 
-  // Direct main blog post image upload
   const handleMainBlogImageUpload = async (file: File) => {
     const toastId = toast.loading('Nahrávam náhľadový obrázok článku...');
     const url = await equipmentService.uploadImage(file);
@@ -555,7 +547,6 @@ const Admin = () => {
     }
   };
 
-  // Context formatting helper (wraps selection with Markdown tags)
   const formatBlockText = (blockIdx: number, style: 'bold' | 'italic') => {
     const el = document.getElementById(`blog-block-field-${blockIdx}`) as HTMLTextAreaElement | HTMLInputElement | null;
     if (!el) return;
@@ -573,7 +564,6 @@ const Admin = () => {
     const newValue = originalText.substring(0, start) + formatted + originalText.substring(end);
     updateBlockValue(blockIdx, newValue);
 
-    // Refocus & reset selection position
     setTimeout(() => {
       el.focus();
       const offset = tag.length;
@@ -643,7 +633,6 @@ const Admin = () => {
           </div>
         ) : (
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* ADMIN NAV/HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#020721]/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
               <div>
                 <div className="flex items-center gap-3">
@@ -667,729 +656,19 @@ const Admin = () => {
               </div>
             </div>
 
-            {/* TAB CONTROLLERS */}
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
               <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto">
                 <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <Volume2 size={14} />
-                  <span className="hidden sm:inline">Prenájom</span>
-                  <span className="sm:hidden">Prenájom</span>
+                  <span>Prenájom</span>
                 </TabsTrigger>
                 <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <ShoppingBag size={14} />
-                  <span className="hidden sm:inline">Predaj</span>
-                  <span className="sm:hidden">Predaj</span>
+                  <span>Predaj</span>
                 </TabsTrigger>
                 <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <BookOpen size={14} />
-                  <span className="hidden sm:inline">Blog</span>
-                  <span className="sm:hidden">Blog</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* RENTALS TAB PANEL */}
-              <TabsContent value="rentals" className="space-y-6">
-                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
-                  <span className="text-sm text-gray-400">Správa inventára pre prenájom aparatúry</span>
-                  <Button onClick={handleOpenRentalAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
-                    <Plus size={16} className="mr-1.5" /> Pridať na prenájom
-                  </Button>
-                </div>
-
-                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
-                  {loadingRentals ? (
-                    <div className="text-center py-12 text-gray-400">Načítavam prenájmy...</div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse" onDragOver={(e) => e.preventDefault()}>
-                        <thead>
-                          <tr className="border-b border<dyad-write path="src/pages/Admin.tsx" description="Dokončenie kompletného súboru administrácie s priamym nahrávaním náhľadového obrázka a formátovacím panelom (Hrubé / Šikmé písmo).">
-"use client";
-
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import DynamicBubbleInput from '@/components/DynamicBubbleInput';
-import ImageManager from '@/components/ImageManager';
-import { useEquipment } from '@/hooks/useEquipment';
-import { EquipmentItem } from '@/lib/supabase';
-import { equipmentService } from '@/lib/equipmentService';
-import { salesService, SalesItem } from '@/lib/salesService';
-import { blogService, BlogPost, BlogBlock } from '@/lib/blogService';
-import { 
-  Lock, 
-  LogOut, 
-  LayoutDashboard, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Volume2, 
-  Save, 
-  X,
-  GripVertical,
-  ShoppingBag,
-  BookOpen,
-  ArrowUp,
-  ArrowDown,
-  Image as ImageIcon,
-  Heading,
-  Type,
-  Bold,
-  Italic,
-  Upload
-} from 'lucide-react';
-import { toast } from 'sonner';
-
-const Admin = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
-
-  // --- 1. RENTAL STATE (Existing) ---
-  const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
-  const [isRentalFormOpen, setIsRentalFormOpen] = useState(false);
-  const [editingRental, setEditingRental] = useState<EquipmentItem | null>(null);
-  const [localOrder, setLocalOrder] = useState<EquipmentItem[]>([]);
-  const [rentalFormData, setRentalFormData] = useState({
-    name: '',
-    category: 'sound' as 'sound' | 'lighting' | 'other',
-    pricePerDay: 10,
-    available: 1,
-    description: '',
-    images: [] as string[],
-    specifications: [] as string[],
-    features: [] as string[]
-  });
-
-  // Drag & Drop state
-  const [canDrag, setCanDrag] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
-  const tableRef = useRef<HTMLTableElement>(null);
-  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // --- 2. SALES STATE ---
-  const [salesItems, setSalesItems] = useState<SalesItem[]>([]);
-  const [loadingSales, setLoadingSales] = useState(true);
-  const [isSalesFormOpen, setIsSalesFormOpen] = useState(false);
-  const [editingSales, setEditingSales] = useState<SalesItem | null>(null);
-  const [salesFormData, setSalesFormData] = useState({
-    name: '',
-    price: 99,
-    condition: 'new' as 'new' | 'used',
-    description: '',
-    images: [] as string[],
-    specs: [] as string[],
-    features: [] as string[],
-    available_count: 1,
-    available: true
-  });
-
-  // --- 3. BLOG STATE ---
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loadingBlog, setLoadingBlog] = useState(true);
-  const [isBlogFormOpen, setIsBlogFormOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
-  const [blogFormData, setBlogFormData] = useState({
-    title: '',
-    excerpt: '',
-    image: '',
-    author: 'Admin Team'
-  });
-  const [blogBlocks, setBlogBlocks] = useState<BlogBlock[]>([]);
-
-  useEffect(() => {
-    const authStatus = sessionStorage.getItem('admin_authenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    setLocalOrder([...equipment]);
-  }, [equipment]);
-
-  // Load Sales and Blog on Auth success
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadSalesData();
-      loadBlogData();
-    }
-  }, [isAuthenticated]);
-
-  const loadSalesData = async () => {
-    setLoadingSales(true);
-    const data = await salesService.getAll();
-    setSalesItems(data);
-    setLoadingSales(false);
-  };
-
-  const loadBlogData = async () => {
-    setLoadingBlog(true);
-    const data = await blogService.getAll();
-    setBlogPosts(data);
-    setLoadingBlog(false);
-  };
-
-  // Prevent background scroll when modal is open
-  useEffect(() => {
-    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen]);
-
-  // Auto-scroll when dragging near edges
-  const checkAndScroll = useCallback((clientY: number) => {
-    const viewportHeight = window.innerHeight;
-    const topTriggerZone = 110;
-    const bottomTriggerZone = viewportHeight - 30;
-    
-    if (clientY < topTriggerZone) {
-      if (!scrollIntervalRef.current) {
-        scrollIntervalRef.current = setInterval(() => {
-          window.scrollBy(0, -15);
-        }, 50);
-      }
-    } else if (clientY > bottomTriggerZone) {
-      if (!scrollIntervalRef.current) {
-        scrollIntervalRef.current = setInterval(() => {
-          window.scrollBy(0, 15);
-        }, 50);
-      }
-    } else {
-      if (scrollIntervalRef.current) {
-        clearInterval(scrollIntervalRef.current);
-        scrollIntervalRef.current = null;
-      }
-    }
-  }, []);
-
-  const stopAutoScroll = useCallback(() => {
-    if (scrollIntervalRef.current) {
-      clearInterval(scrollIntervalRef.current);
-      scrollIntervalRef.current = null;
-    }
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === 'admin_socializea' && password === 'Pondelok-2022') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_authenticated', 'true');
-      toast.success('Prihlásenie úspešné!', {
-        description: 'Vitajte v administrácii Socializea-audio.',
-      });
-    } else {
-      toast.error('Nesprávne údaje!', {
-        description: 'Zadané meno alebo heslo nie je správne.',
-      });
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('admin_authenticated');
-    toast.info('Boli ste odhlásený.');
-  };
-
-  // --- RENTAL FUNCTIONS ---
-  const handleOpenRentalAdd = () => {
-    setEditingRental(null);
-    setRentalFormData({
-      name: '',
-      category: 'sound',
-      pricePerDay: 10,
-      available: 1,
-      description: '',
-      images: [],
-      specifications: [],
-      features: []
-    });
-    setIsRentalFormOpen(true);
-  };
-
-  const handleOpenRentalEdit = (item: EquipmentItem) => {
-    setEditingRental(item);
-    setRentalFormData({
-      name: item.name,
-      category: item.category,
-      pricePerDay: item.price_per_day,
-      available: item.available,
-      description: item.description || '',
-      images: item.images || [],
-      specifications: item.specifications || [],
-      features: item.features || []
-    });
-    setIsRentalFormOpen(true);
-  };
-
-  const handleDeleteRental = async (id: string, name: string) => {
-    if (window.confirm(`Naozaj chcete vymazať produkt na prenájom: "${name}"?`)) {
-      const success = await deleteEquipment(id);
-      if (success) {
-        toast.success('Produkt úspešne vymazaný.');
-      } else {
-        toast.error('Chyba pri mazaní produktu.');
-      }
-    }
-  };
-
-  const handleRentalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!rentalFormData.name.trim() || !rentalFormData.description.trim()) {
-      toast.error('Vyplňte povinné polia!');
-      return;
-    }
-
-    const mainImage = rentalFormData.images[0] || '';
-
-    const itemData = {
-      name: rentalFormData.name.trim(),
-      category: rentalFormData.category,
-      pricePerDay: Number(rentalFormData.pricePerDay),
-      available: Number(rentalFormData.available),
-      description: rentalFormData.description.trim(),
-      mainImage: mainImage,
-      images: rentalFormData.images,
-      specifications: rentalFormData.specifications,
-      features: rentalFormData.features
-    };
-
-    if (editingRental) {
-      const updated = await updateEquipment(editingRental.id, itemData);
-      if (updated) {
-        toast.success('Produkt na prenájom bol upravený!');
-        setIsRentalFormOpen(false);
-        setEditingRental(null);
-      } else {
-        toast.error('Chyba pri úprave produktu.');
-      }
-    } else {
-      const newItem = await addEquipment(itemData);
-      if (newItem) {
-        toast.success('Nový produkt bol úspešne pridaný!');
-        setIsRentalFormOpen(false);
-      } else {
-        toast.error('Chyba pri pridávaní produktu.');
-      }
-    }
-  };
-
-  // Drag & Drop handlers for Rentals
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-    setDropPosition(null);
-    setCanDrag(false);
-    stopAutoScroll();
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== index) {
-      setDragOverIndex(index);
-      const row = (e.target as HTMLElement).closest('tr');
-      if (row) {
-        const rect = row.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-        setDropPosition(e.clientY < midY ? 'above' : 'below');
-      }
-      checkAndScroll(e.clientY);
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    stopAutoScroll();
-    if (draggedIndex === null || draggedIndex === dropIndex) return;
-
-    let finalDropIndex = dropIndex;
-    if (dropPosition === 'below') finalDropIndex = dropIndex + 1;
-    if (draggedIndex < finalDropIndex) finalDropIndex = finalDropIndex - 1;
-
-    const newOrder = [...localOrder];
-    const [draggedItem] = newOrder.splice(draggedIndex, 1);
-    newOrder.splice(finalDropIndex, 0, draggedItem);
-    
-    setLocalOrder(newOrder);
-    setEquipment(newOrder);
-    handleDragEnd();
-
-    const updates = newOrder.map((item, idx) => ({ id: item.id, order_index: idx }));
-    const success = await equipmentService.updateOrder(updates);
-    if (success) {
-      toast.success('Poradie úspešne uložené!');
-    } else {
-      toast.error('Nepodarilo sa uložiť poradie.');
-    }
-  };
-
-  // --- SALES FUNCTIONS ---
-  const handleOpenSalesAdd = () => {
-    setEditingSales(null);
-    setSalesFormData({
-      name: '',
-      price: 100,
-      condition: 'new',
-      description: '',
-      images: [],
-      specs: [],
-      features: [],
-      available_count: 1,
-      available: true
-    });
-    setIsSalesFormOpen(true);
-  };
-
-  const handleOpenSalesEdit = (item: SalesItem) => {
-    setEditingSales(item);
-    setSalesFormData({
-      name: item.name,
-      price: item.price,
-      condition: item.condition,
-      description: item.description,
-      images: item.images || [],
-      specs: item.specs || [],
-      features: item.features || [],
-      available_count: item.available_count ?? 1,
-      available: item.available
-    });
-    setIsSalesFormOpen(true);
-  };
-
-  const handleDeleteSales = async (id: string, name: string) => {
-    if (window.confirm(`Naozaj chcete vymazať produkt na predaj: "${name}"?`)) {
-      const success = await salesService.delete(id);
-      if (success) {
-        toast.success('Produkt na predaj úspešne vymazaný.');
-        loadSalesData();
-      } else {
-        toast.error('Chyba pri mazaní.');
-      }
-    }
-  };
-
-  const handleSalesSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!salesFormData.name.trim() || !salesFormData.description.trim()) {
-      toast.error('Vyplňte názov a popis!');
-      return;
-    }
-
-    const payload = {
-      ...salesFormData,
-      available: salesFormData.available_count > 0
-    };
-
-    if (editingSales) {
-      const updated = await salesService.update(editingSales.id, payload);
-      if (updated) {
-        toast.success('Produkt na predaj úspešne upravený!');
-        setIsSalesFormOpen(false);
-        loadSalesData();
-      } else {
-        toast.error('Chyba pri úprave.');
-      }
-    } else {
-      const created = await salesService.create(payload);
-      if (created) {
-        toast.success('Nový produkt na predaj pridaný!');
-        setIsSalesFormOpen(false);
-        loadSalesData();
-      } else {
-        toast.error('Chyba pri pridávaní.');
-      }
-    }
-  };
-
-  // --- BLOG FUNCTIONS ---
-  const handleOpenBlogAdd = () => {
-    setEditingBlog(null);
-    setBlogFormData({
-      title: '',
-      excerpt: '',
-      image: '',
-      author: 'Admin Team'
-    });
-    setBlogBlocks([
-      { type: 'paragraph', value: '' }
-    ]);
-    setIsBlogFormOpen(true);
-  };
-
-  const handleOpenBlogEdit = (post: BlogPost) => {
-    setEditingBlog(post);
-    setBlogFormData({
-      title: post.title,
-      excerpt: post.excerpt,
-      image: post.image || '',
-      author: post.author
-    });
-    
-    // Parse JSON block list from database content field
-    try {
-      const parsed = JSON.parse(post.content);
-      if (Array.isArray(parsed)) {
-        setBlogBlocks(parsed);
-      } else {
-        setBlogBlocks([{ type: 'paragraph', value: post.content }]);
-      }
-    } catch (e) {
-      setBlogBlocks([{ type: 'paragraph', value: post.content }]);
-    }
-    
-    setIsBlogFormOpen(true);
-  };
-
-  const handleDeleteBlog = async (id: string, title: string) => {
-    if (window.confirm(`Naozaj chcete vymazať článok: "${title}"?`)) {
-      const success = await blogService.delete(id);
-      if (success) {
-        toast.success('Článok bol vymazaný.');
-        loadBlogData();
-      } else {
-        toast.error('Chyba pri mazaní.');
-      }
-    }
-  };
-
-  const handleBlogSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!blogFormData.title.trim() || !blogFormData.excerpt.trim()) {
-      toast.error('Vyplňte názov a úvod článku!');
-      return;
-    }
-
-    // Convert block content array to string format
-    const contentPayload = JSON.stringify(blogBlocks.filter(b => b.value.trim() !== ''));
-
-    const payload = {
-      title: blogFormData.title.trim(),
-      excerpt: blogFormData.excerpt.trim(),
-      content: contentPayload,
-      image: blogFormData.image || blogBlocks.find(b => b.type === 'image')?.value || '',
-      author: blogFormData.author.trim()
-    };
-
-    if (editingBlog) {
-      const updated = await blogService.update(editingBlog.id, payload);
-      if (updated) {
-        toast.success('Článok bol úspešne upravený!');
-        setIsBlogFormOpen(false);
-        loadBlogData();
-      } else {
-        toast.error('Chyba pri úprave.');
-      }
-    } else {
-      const created = await blogService.create(payload);
-      if (created) {
-        toast.success('Nový článok bol úspešne uverejnený!');
-        setIsBlogFormOpen(false);
-        loadBlogData();
-      } else {
-        toast.error('Chyba pri uvereňovaní.');
-      }
-    }
-  };
-
-  // Block management inside blog form
-  const addBlock = (type: 'paragraph' | 'heading' | 'image') => {
-    setBlogBlocks(prev => [...prev, { type, value: '' }]);
-  };
-
-  const removeBlock = (index: number) => {
-    setBlogBlocks(prev => prev.filter((_, idx) => idx !== index));
-  };
-
-  const updateBlockValue = (index: number, val: string) => {
-    setBlogBlocks(prev => prev.map((block, idx) => idx === index ? { ...block, value: val } : block));
-  };
-
-  const moveBlock = (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === blogBlocks.length - 1) return;
-
-    const targetIdx = direction === 'up' ? index - 1 : index + 1;
-    const updated = [...blogBlocks];
-    const temp = updated[index];
-    updated[index] = updated[targetIdx];
-    updated[targetIdx] = temp;
-    setBlogBlocks(updated);
-  };
-
-  const handleBlockImageUpload = async (index: number, file: File) => {
-    const toastId = toast.loading('Nahrávam obrázok do bloku...');
-    const url = await equipmentService.uploadImage(file);
-    toast.dismiss(toastId);
-    if (url) {
-      updateBlockValue(index, url);
-      toast.success('Obrázok nahraný.');
-    } else {
-      toast.error('Chyba pri nahrávaní.');
-    }
-  };
-
-  // Direct main blog post image upload
-  const handleMainBlogImageUpload = async (file: File) => {
-    const toastId = toast.loading('Nahrávam náhľadový obrázok článku...');
-    const url = await equipmentService.uploadImage(file);
-    toast.dismiss(toastId);
-    if (url) {
-      setBlogFormData(prev => ({ ...prev, image: url }));
-      toast.success('Náhľadový obrázok bol úspešne nahraný.');
-    } else {
-      toast.error('Nepodarilo sa nahrať náhľadový obrázok.');
-    }
-  };
-
-  // Context formatting helper (wraps selection with Markdown tags)
-  const formatBlockText = (blockIdx: number, style: 'bold' | 'italic') => {
-    const el = document.getElementById(`blog-block-field-${blockIdx}`) as HTMLTextAreaElement | HTMLInputElement | null;
-    if (!el) return;
-
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    const originalText = el.value;
-    const tag = style === 'bold' ? '**' : '*';
-
-    const selectedText = originalText.substring(start, end);
-    const formatted = selectedText 
-      ? `${tag}${selectedText}${tag}`
-      : `${tag}text${tag}`;
-
-    const newValue = originalText.substring(0, start) + formatted + originalText.substring(end);
-    updateBlockValue(blockIdx, newValue);
-
-    // Refocus & reset selection position
-    setTimeout(() => {
-      el.focus();
-      const offset = tag.length;
-      el.setSelectionRange(
-        start + offset,
-        start + offset + (selectedText ? selectedText.length : 4)
-      );
-    }, 50);
-  };
-
-  return (
-    <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
-      <Navbar />
-
-      <div className="flex-grow pt-40 pb-24 container mx-auto px-4">
-        {!isAuthenticated ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="w-full max-w-md">
-              <Card className="bg-[#020721]/90 border border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/10 rounded-3xl overflow-hidden relative">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]" />
-                
-                <CardHeader className="text-center pt-8">
-                  <div className="w-14 h-14 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center mx-auto mb-4 text-[#BD20D3]">
-                    <Lock size={28} />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-white">Chránená sekcia</CardTitle>
-                  <CardDescription className="text-gray-400 mt-2">
-                    Pre prístup do administrácie sa musíte prihlásiť.
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="pb-8">
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="username" className="text-gray-300">Prihlasovacie meno</Label>
-                      <Input
-                        id="username"
-                        type="text"
-                        placeholder="Zadajte meno"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] focus:border-[#BD20D3]"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-gray-300">Heslo</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] focus:border-[#BD20D3]"
-                        required
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full btn-cyber h-12 rounded-xl text-base font-bold border-none mt-4">
-                      Prihlásiť sa
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        ) : (
-          <div className="max-w-6xl mx-auto space-y-8">
-            {/* ADMIN NAV/HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-[#020721]/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
-              <div>
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard className="text-[#BD20D3]" size={32} />
-                  <h1 className="text-3xl font-extrabold text-white">Administrácia systému</h1>
-                </div>
-                <p className="text-gray-400 mt-1">
-                  Kompletná správa produktov na prenájom, techniky na predaj a firemného blogu.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  onClick={handleLogout} 
-                  variant="outline" 
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-white rounded-xl h-11 px-5 transition-all"
-                >
-                  <LogOut size={18} className="mr-2" />
-                  Odhlásiť sa
-                </Button>
-              </div>
-            </div>
-
-            {/* TAB CONTROLLERS */}
-            <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
-              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto">
-                <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
-                  <Volume2 size={14} />
-                  <span className="hidden sm:inline">Prenájom</span>
-                  <span className="sm:hidden">Prenájom</span>
-                </TabsTrigger>
-                <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
-                  <ShoppingBag size={14} />
-                  <span className="hidden sm:inline">Predaj</span>
-                  <span className="sm:hidden">Predaj</span>
-                </TabsTrigger>
-                <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
-                  <BookOpen size={14} />
-                  <span className="hidden sm:inline">Blog</span>
-                  <span className="sm:hidden">Blog</span>
+                  <span>Blog</span>
                 </TabsTrigger>
               </TabsList>
 
