@@ -43,7 +43,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
 
-  // --- 1. RENTAL STATE (Existing) ---
+  // --- 1. RENTAL STATE ---
   const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
   const [isRentalFormOpen, setIsRentalFormOpen] = useState(false);
   const [editingRental, setEditingRental] = useState<EquipmentItem | null>(null);
@@ -108,7 +108,6 @@ const Admin = () => {
     setLocalOrder([...equipment]);
   }, [equipment]);
 
-  // Load Sales and Blog on Auth success
   useEffect(() => {
     if (isAuthenticated) {
       loadSalesData();
@@ -130,7 +129,6 @@ const Admin = () => {
     setLoadingBlog(false);
   };
 
-  // Prevent background scroll when modal is open
   useEffect(() => {
     if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen) {
       document.body.style.overflow = 'hidden';
@@ -142,7 +140,6 @@ const Admin = () => {
     };
   }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen]);
 
-  // Auto-scroll when dragging near edges
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
     const topTriggerZone = 110;
@@ -421,9 +418,7 @@ const Admin = () => {
       image: '',
       author: 'Admin Team'
     });
-    setBlogBlocks([
-      { type: 'paragraph', value: '' }
-    ]);
+    setBlogBlocks([{ type: 'paragraph', value: '' }]);
     setIsBlogFormOpen(true);
   };
 
@@ -436,7 +431,6 @@ const Admin = () => {
       author: post.author
     });
     
-    // Parse JSON block list from database content field
     try {
       const parsed = JSON.parse(post.content);
       if (Array.isArray(parsed)) {
@@ -470,7 +464,6 @@ const Admin = () => {
       return;
     }
 
-    // Convert block content array to string format
     const contentPayload = JSON.stringify(blogBlocks.filter(b => b.value.trim() !== ''));
 
     const payload = {
@@ -502,7 +495,6 @@ const Admin = () => {
     }
   };
 
-  // Block management inside blog form
   const addBlock = (type: 'paragraph' | 'heading' | 'image') => {
     setBlogBlocks(prev => [...prev, { type, value: '' }]);
   };
@@ -656,7 +648,7 @@ const Admin = () => {
                     <div className="text-center py-12 text-gray-400">Načítavam prenájmy...</div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse" onDragOver={(e) => e.preventDefault()}>
+                      <table className="w-full text-left border-collapse" ref={tableRef} onDragOver={(e) => e.preventDefault()}>
                         <thead>
                           <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
                             <th className="px-4 py-4 w-16 text-center"></th>
@@ -668,11 +660,12 @@ const Admin = () => {
                             <th className="px-6 py-4 text-right">Akcie</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                        <tbody className="text-gray-300 text-sm">
                           {localOrder.map((item, index) => {
                             const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                             const isDragged = draggedIndex === index;
                             const isDragOver = dragOverIndex === index;
+                            
                             return (
                               <tr 
                                 key={item.id}
@@ -681,12 +674,15 @@ const Admin = () => {
                                 onDragEnd={handleDragEnd}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDrop={(e) => handleDrop(e, index)}
-                                className={`row-transition ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : ''} ${
-                                  isDragOver && dropPosition === 'above' ? 'border-t-2 border-t-[#BD20D3]' : ''
-                                } ${
-                                  isDragOver && dropPosition === 'below' ? 'border-b-2 border-b-[#BD20D3]' : ''
-                                } hover:bg-white/2`}
+                                className={`relative transition-all duration-200 ${isDragged ? 'opacity-40 bg-[#BD20D3]/10' : 'hover:bg-white/2'}`}
                               >
+                                {/* Top drop indicator line */}
+                                {isDragOver && dropPosition === 'above' && (
+                                  <td colSpan={7} className="p-0 relative">
+                                    <div className="absolute top-0 left-0 right-0 h-1 bg-[#BD20D3] shadow-[0_0_10px_#BD20D3] z-10" />
+                                  </td>
+                                )}
+                                
                                 <td 
                                   className="px-4 py-4 cursor-grab active:cursor-grabbing text-center"
                                   onMouseDown={() => setCanDrag(true)}
@@ -711,6 +707,13 @@ const Admin = () => {
                                     </Button>
                                   </div>
                                 </td>
+                                
+                                {/* Bottom drop indicator line */}
+                                {isDragOver && dropPosition === 'below' && (
+                                  <td colSpan={7} className="p-0 relative">
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#BD20D3] shadow-[0_0_10px_#BD20D3] z-10" />
+                                  </td>
+                                )}
                               </tr>
                             );
                           })}
@@ -742,8 +745,8 @@ const Admin = () => {
                             <th className="px-6 py-4">Názov</th>
                             <th className="px-6 py-4">Stav</th>
                             <th className="px-6 py-4 text-center">Dostupný</th>
-                            <th className="px-6 py-4 text-center">Kusov na predaj</th>
-                            <th className="px-6 py-4 text-center">Predajná cena</th>
+                            <th className="px-6 py-4 text-center">Kusov</th>
+                            <th className="px-6 py-4 text-center">Cena</th>
                             <th className="px-6 py-4 text-right">Akcie</th>
                           </tr>
                         </thead>
@@ -813,35 +816,33 @@ const Admin = () => {
                             <th className="px-6 py-4">Obrázok</th>
                             <th className="px-6 py-4">Názov článku</th>
                             <th className="px-6 py-4">Autor</th>
-                            <th className="px-6 py-4">Dátum publikovania</th>
+                            <th className="px-6 py-4">Dátum</th>
                             <th className="px-6 py-4 text-right">Akcie</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                          {blogPosts.map((post) => {
-                            return (
-                              <tr key={post.id} className="hover:bg-white/2">
-                                <td className="px-6 py-4">
-                                  <img src={post.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"} alt="" className="w-12 h-10 rounded object-cover border border-white/10" />
-                                </td>
-                                <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">{post.title}</td>
-                                <td className="px-6 py-4 text-gray-400">{post.author}</td>
-                                <td className="px-6 py-4 text-xs text-gray-400">
-                                  {new Date(post.published_at).toLocaleDateString('sk-SK')}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <Button onClick={() => handleOpenBlogEdit(post)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
-                                      <Edit size={12} />
-                                    </Button>
-                                    <Button onClick={() => handleDeleteBlog(post.id, post.title)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
-                                      <Trash2 size={12} />
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {blogPosts.map((post) => (
+                            <tr key={post.id} className="hover:bg-white/2">
+                              <td className="px-6 py-4">
+                                <img src={post.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"} alt="" className="w-12 h-10 rounded object-cover border border-white/10" />
+                              </td>
+                              <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">{post.title}</td>
+                              <td className="px-6 py-4 text-gray-400">{post.author}</td>
+                              <td className="px-6 py-4 text-xs text-gray-400">
+                                {new Date(post.published_at).toLocaleDateString('sk-SK')}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button onClick={() => handleOpenBlogEdit(post)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                    <Edit size={12} />
+                                  </Button>
+                                  <Button onClick={() => handleDeleteBlog(post.id, post.title)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                    <Trash2 size={12} />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
                           {blogPosts.length === 0 && (
                             <tr>
                               <td colSpan={5} className="text-center py-8 text-gray-500 italic">Žiadne články v blogu.</td>
@@ -950,14 +951,14 @@ const Admin = () => {
               <form onSubmit={handleSalesSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Názov produktu na predaj *</Label>
+                    <Label className="text-gray-300">Názov produktu *</Label>
                     <Input type="text" value={salesFormData.name} onChange={(e) => setSalesFormData(p => ({ ...p, name: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-gray-300">Stav produktu</Label>
                     <select value={salesFormData.condition} onChange={(e) => setSalesFormData(p => ({ ...p, condition: e.target.value as any }))} className="w-full bg-black/50 border border-white/10 text-white rounded-xl h-12 px-4 focus:ring-1 focus:ring-[#BD20D3] focus:outline-none">
-                      <option value="new">Nový kus (Ihneď skladom)</option>
-                      <option value="used">B-Stock / Použitý (Rozbalený bazár)</option>
+                      <option value="new">Nový kus</option>
+                      <option value="used">B-Stock / Použitý</option>
                     </select>
                   </div>
                 </div>
@@ -968,13 +969,13 @@ const Admin = () => {
                     <Input type="number" min="1" value={salesFormData.price} onChange={(e) => setSalesFormData(p => ({ ...p, price: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-gray-300">Počet kusov k dispozícii *</Label>
+                    <Label className="text-gray-300">Počet kusov *</Label>
                     <Input type="number" min="0" value={salesFormData.available_count} onChange={(e) => setSalesFormData(p => ({ ...p, available_count: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-gray-300">Detailný popis produktu na predaj *</Label>
+                  <Label className="text-gray-300">Detailný popis *</Label>
                   <Textarea value={salesFormData.description} onChange={(e) => setSalesFormData(p => ({ ...p, description: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[100px]" required />
                 </div>
 
@@ -997,7 +998,7 @@ const Admin = () => {
         </div>
       )}
 
-      {/* --- BLOG POP-UP MODAL WITH BLOCK-BASED RICH EDITOR --- */}
+      {/* --- BLOG POP-UP MODAL --- */}
       {isBlogFormOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
@@ -1029,31 +1030,27 @@ const Admin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-gray-300">Krátky úvod / Excerpt * (Zobrazuje sa v náhľade)</Label>
+                  <Label className="text-gray-300">Krátky úvod / Excerpt *</Label>
                   <Input type="text" value={blogFormData.excerpt} onChange={(e) => setBlogFormData(p => ({ ...p, excerpt: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-gray-300">Hlavný náhľadový obrázok (URL)</Label>
+                  <Label className="text-gray-300">Hlavný obrázok (URL)</Label>
                   <Input type="text" value={blogFormData.image} onChange={(e) => setBlogFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://images.unsplash.com/..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
                 </div>
 
-                {/* DYNAMIC CONTENT BLOCKS WRAPPER */}
+                {/* DYNAMIC CONTENT BLOCKS */}
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <div className="flex justify-between items-center">
                     <Label className="text-gray-300 text-lg font-bold">Obsah článku (Dynamické bloky)</Label>
-                    <span className="text-xs text-gray-500">Pridávajte odseky, nadpisy a nahrávajte fotky priamo medzi text.</span>
+                    <span className="text-xs text-gray-500">Pridávajte odseky, nadpisy a fotky</span>
                   </div>
 
                   <div className="space-y-4 bg-black/30 border border-white/10 p-6 rounded-2xl">
                     {blogBlocks.map((block, idx) => (
-                      <div key={idx} className="bg-[#020721] border border-white/5 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 group/block">
-                        
-                        {/* Block type identity icon */}
+                      <div key={idx} className="bg-[#020721] border border-white/5 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4">
                         <div className="flex items-center gap-2 md:flex-col md:items-center">
-                          <span className="text-xs font-bold text-[#BD20D3] uppercase tracking-wider md:mb-1">
-                            #{idx + 1}
-                          </span>
+                          <span className="text-xs font-bold text-[#BD20D3] uppercase tracking-wider md:mb-1">#{idx + 1}</span>
                           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400">
                             {block.type === 'paragraph' && <Type size={16} />}
                             {block.type === 'heading' && <Heading size={16} />}
@@ -1061,54 +1058,27 @@ const Admin = () => {
                           </div>
                         </div>
 
-                        {/* Editor inputs dependent on type */}
                         <div className="flex-grow w-full space-y-2">
                           {block.type === 'heading' && (
-                            <Input 
-                              type="text" 
-                              value={block.value} 
-                              onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                              placeholder="Sem zadajte podnadpis..." 
-                              className="bg-black/40 border-white/5 font-bold text-white rounded-xl"
-                            />
+                            <Input type="text" value={block.value} onChange={(e) => updateBlockValue(idx, e.target.value)} placeholder="Sem zadajte podnadpis..." className="bg-black/40 border-white/5 font-bold text-white rounded-xl" />
                           )}
-
                           {block.type === 'paragraph' && (
-                            <Textarea 
-                              value={block.value} 
-                              onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                              placeholder="Sem napíšte odsek textu..." 
-                              className="bg-black/40 border-white/5 text-gray-300 rounded-xl min-h-[80px]"
-                            />
+                            <Textarea value={block.value} onChange={(e) => updateBlockValue(idx, e.target.value)} placeholder="Sem napíšte odsek textu..." className="bg-black/40 border-white/5 text-gray-300 rounded-xl min-h-[80px]" />
                           )}
-
                           {block.type === 'image' && (
                             <div className="space-y-3">
                               <div className="flex gap-2">
-                                <Input 
-                                  type="text" 
-                                  value={block.value} 
-                                  onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                                  placeholder="URL adresa obrázka..." 
-                                  className="bg-black/40 border-white/5 text-white rounded-xl flex-grow text-xs h-10"
-                                />
-                                <Button 
-                                  type="button" 
-                                  variant="outline" 
-                                  onClick={() => {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = 'image/*';
-                                    input.onchange = (e) => {
-                                      const files = (e.target as HTMLInputElement).files;
-                                      if (files && files.length > 0) {
-                                        handleBlockImageUpload(idx, files[0]);
-                                      }
-                                    };
-                                    input.click();
-                                  }}
-                                  className="border-[#BD20D3]/30 hover:bg-[#BD20D3]/10 text-white rounded-xl h-10 text-xs px-3 whitespace-nowrap"
-                                >
+                                <Input type="text" value={block.value} onChange={(e) => updateBlockValue(idx, e.target.value)} placeholder="URL adresa obrázka..." className="bg-black/40 border-white/5 text-white rounded-xl flex-grow text-xs h-10" />
+                                <Button type="button" variant="outline" onClick={() => {
+                                  const input = document.createElement('input');
+                                  input.type = 'file';
+                                  input.accept = 'image/*';
+                                  input.onchange = (e) => {
+                                    const files = (e.target as HTMLInputElement).files;
+                                    if (files && files.length > 0) handleBlockImageUpload(idx, files[0]);
+                                  };
+                                  input.click();
+                                }} className="border-[#BD20D3]/30 hover:bg-[#BD20D3]/10 text-white rounded-xl h-10 text-xs px-3 whitespace-nowrap">
                                   Nahrať fotku
                                 </Button>
                               </div>
@@ -1121,67 +1091,31 @@ const Admin = () => {
                           )}
                         </div>
 
-                        {/* Block reorder / actions */}
                         <div className="flex items-center gap-1.5 md:flex-col md:self-stretch md:justify-between self-end shrink-0">
                           <div className="flex gap-1 md:flex-col">
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm" 
-                              disabled={idx === 0}
-                              onClick={() => moveBlock(idx, 'up')}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                            >
+                            <Button type="button" variant="ghost" size="sm" disabled={idx === 0} onClick={() => moveBlock(idx, 'up')} className="h-8 w-8 p-0 text-gray-400 hover:text-white">
                               <ArrowUp size={14} />
                             </Button>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm" 
-                              disabled={idx === blogBlocks.length - 1}
-                              onClick={() => moveBlock(idx, 'down')}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                            >
+                            <Button type="button" variant="ghost" size="sm" disabled={idx === blogBlocks.length - 1} onClick={() => moveBlock(idx, 'down')} className="h-8 w-8 p-0 text-gray-400 hover:text-white">
                               <ArrowDown size={14} />
                             </Button>
                           </div>
-                          
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => removeBlock(idx)}
-                            className="h-8 w-8 p-0 text-red-400 hover:text-white hover:bg-red-500/20"
-                          >
+                          <Button type="button" variant="ghost" size="sm" onClick={() => removeBlock(idx)} className="h-8 w-8 p-0 text-red-400 hover:text-white hover:bg-red-500/20">
                             <Trash2 size={14} />
                           </Button>
                         </div>
-
                       </div>
                     ))}
                   </div>
 
-                  {/* Add Block Triggers */}
                   <div className="flex flex-wrap gap-3 justify-center pt-2">
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('paragraph')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
-                      <Type size={14} className="text-[#BD20D3]" /> Pridať odsek textu
+                    <Button type="button" onClick={() => addBlock('paragraph')} className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10">
+                      <Type size={14} className="text-[#BD20D3]" /> Pridať odsek
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('heading')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
-                      <Heading size={14} className="text-[#1A4BFF]" /> Pridať podnadpis
+                    <Button type="button" onClick={() => addBlock('heading')} className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10">
+                      <Heading size={14} className="text-[#1A4BFF]" /> Pridať nadpis
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('image')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
+                    <Button type="button" onClick={() => addBlock('image')} className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10">
                       <ImageIcon size={14} className="text-emerald-400" /> Vložiť fotku
                     </Button>
                   </div>
