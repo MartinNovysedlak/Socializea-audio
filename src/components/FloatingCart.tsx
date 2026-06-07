@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { EquipmentItem } from "@/lib/supabase";
 import { toast } from "sonner";
+import { DatePicker } from "./DatePicker";
 
 interface FloatingCartProps {
   quantities: Record<string, number>;
@@ -370,27 +371,28 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         <Label htmlFor="dateFrom" className="text-gray-300 flex items-center gap-1.5">
                           <Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *
                         </Label>
-                        <Input
-                          id="dateFrom"
-                          type="date"
-                          value={formData.dateFrom}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateFrom: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
-                          required
+                        <DatePicker
+                          selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
+                          onSelect={(date) => setFormData(prev => ({ 
+                            ...prev, 
+                            dateFrom: date ? date.toISOString().split('T')[0] : "" 
+                          }))}
+                          placeholder="Vyberte dátum od"
+                          fromDate={new Date()}
                         />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="dateTo" className="text-gray-300 flex items-center gap-1.5">
                           <Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *
                         </Label>
-                        <Input
-                          id="dateTo"
-                          type="date"
-                          min={formData.dateFrom}
-                          value={formData.dateTo}
-                          onChange={(e) => setFormData(prev => ({ ...prev, dateTo: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl h-11"
-                          required
+                        <DatePicker
+                          selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
+                          onSelect={(date) => setFormData(prev => ({ 
+                            ...prev, 
+                            dateTo: date ? date.toISOString().split('T')[0] : "" 
+                          }))}
+                          placeholder="Vyberte dátum do"
+                          fromDate={formData.dateFrom ? new Date(formData.dateFrom) : new Date()}
                         />
                       </div>
                     </div>
