@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ScrollReveal from '@/components/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ShoppingBag, ChevronRight, Filter, Check } from 'lucide-react';
@@ -29,13 +30,17 @@ const Predaj = () => {
     : items.filter(item => item.condition === activeFilter);
 
   return (
-    <main className="min-h-screen bg-[#020721]">
+    <main className="min-h-screen bg-[#020721] relative overflow-hidden">
       <Navbar />
+
+      {/* Background Floating Glows */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/10 rounded-full blur-[120px] animate-float-slow pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/5 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
       
-      <div className="pt-32 pb-24 container mx-auto px-4">
+      <div className="pt-32 pb-24 container mx-auto px-4 relative z-10">
         {/* HEADER SECTION */}
-        <div className="max-w-5xl mx-auto text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 text-[#1A4BFF] text-sm font-medium mb-6">
+        <div className="max-w-5xl mx-auto text-center mb-16 animate-fade-slide-up">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 text-[#1A4BFF] text-sm font-medium mb-6 shadow-[0_0_15px_rgba(26,75,255,0.2)]">
             <ShoppingBag size={16} />
             <span>Predaj profesionálnej audio & svetelnej techniky</span>
           </div>
@@ -51,7 +56,7 @@ const Predaj = () => {
         </div>
 
         {/* CONTROLS / FILTERS */}
-        <div className="max-w-5xl mx-auto mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
+        <div className="max-w-5xl mx-auto mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
           <div className="flex items-center gap-2">
             <Filter size={18} className="text-[#BD20D3]" />
             <span className="text-sm text-gray-300 font-semibold">Filtrovať podľa stavu:</span>
@@ -86,96 +91,95 @@ const Predaj = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {filteredItems.map(item => {
+            {filteredItems.map((item, index) => {
               const mainImg = item.images?.[0] || 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
               return (
-                <Link 
-                  to={`/predaj/${item.id}`} 
-                  key={item.id} 
-                  className="block h-full group"
-                >
-                  <Card 
-                    className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative"
+                <ScrollReveal key={item.id} direction="up" delay={index * 0.1}>
+                  <Link 
+                    to={`/predaj/${item.id}`} 
+                    className="block h-full group"
                   >
-                    {/* Image banner — väčší, bez orezania, kategória v pravom dolnom rohu */}
-                    <div className="h-72 md:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
-                      <img 
-                        src={mainImg} 
-                        alt={item.name} 
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
-                        }}
-                      />
-                      {/* Tmavý gradient pre čitateľnosť textu */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                      
-                      {/* Kategória — pravý dolný roh, plne nepriehľadná */}
-                      <div className="absolute bottom-4 right-4">
-                        <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${
-                          item.condition === 'new' 
-                            ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' 
-                            : 'bg-amber-600/90 border border-amber-400/50 text-white'
-                        }`}>
-                          {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
-                        </span>
-                      </div>
-                      
-                      {!item.available && (
-                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm">
-                          <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-widest">
-                            Vypredané
+                    <Card 
+                      className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/50 hover:shadow-[0_0_40px_rgba(189,32,211,0.15)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative"
+                    >
+                      {/* Image banner */}
+                      <div className="h-72 md:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
+                        <img 
+                          src={mainImg} 
+                          alt={item.name} 
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        
+                        {/* Kategória */}
+                        <div className="absolute bottom-4 right-4">
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${
+                            item.condition === 'new' 
+                              ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' 
+                              : 'bg-amber-600/90 border border-amber-400/50 text-white'
+                          }`}>
+                            {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
                           </span>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Body Content */}
-                    <CardHeader className="pt-6">
-                      <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors line-clamp-2">
-                        {item.name}
-                      </CardTitle>
-                      <p className="text-gray-400 text-sm line-clamp-3 mt-2">
-                        {item.description}
-                      </p>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4 flex-grow">
-                      {/* Key features limit to 3 */}
-                      {item.features && item.features.length > 0 && (
-                        <ul className="space-y-2">
-                          {item.features.slice(0, 3).map((f, i) => (
-                            <li key={i} className="flex items-start gap-2.5 text-xs text-gray-300">
-                              <Check size={14} className="text-[#BD20D3] shrink-0 mt-0.5" />
-                              <span className="line-clamp-1">{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </CardContent>
-
-                    <CardFooter className="border-t border-white/5 pt-6 pb-6 flex items-center justify-between mt-auto">
-                      <div>
-                        <span className="text-xs text-gray-400 block uppercase font-bold">Cena s DPH</span>
-                        <span className="text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
+                        
+                        {!item.available && (
+                          <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm">
+                            <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-widest">
+                              Vypredané
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      
-                      <Button 
-                        asChild
-                        className={`h-12 px-6 rounded-xl font-bold transition-all ${
-                          item.available 
-                            ? 'btn-cyber border-none text-white' 
-                            : 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
+
+                      {/* Body Content */}
+                      <CardHeader className="pt-6">
+                        <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors line-clamp-2">
+                          {item.name}
+                        </CardTitle>
+                        <p className="text-gray-400 text-sm line-clamp-3 mt-2">
+                          {item.description}
+                        </p>
+                      </CardHeader>
+
+                      <CardContent className="space-y-4 flex-grow">
+                        {item.features && item.features.length > 0 && (
+                          <ul className="space-y-2">
+                            {item.features.slice(0, 3).map((f, i) => (
+                              <li key={i} className="flex items-start gap-2.5 text-xs text-gray-300">
+                                <Check size={14} className="text-[#BD20D3] shrink-0 mt-0.5" />
+                                <span className="line-clamp-1">{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </CardContent>
+
+                      <CardFooter className="border-t border-white/5 pt-6 pb-6 flex items-center justify-between mt-auto">
                         <div>
-                          Mám záujem
-                          <ChevronRight size={16} className="ml-1" />
+                          <span className="text-xs text-gray-400 block uppercase font-bold">Cena s DPH</span>
+                          <span className="text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
                         </div>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </Link>
+                        
+                        <Button 
+                          asChild
+                          className={`h-12 px-6 rounded-xl font-bold transition-all ${
+                            item.available 
+                              ? 'btn-cyber border-none text-white' 
+                              : 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          <div>
+                            Mám záujem
+                            <ChevronRight size={16} className="ml-1" />
+                          </div>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </Link>
+                </ScrollReveal>
               );
             })}
           </div>
