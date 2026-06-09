@@ -3,6 +3,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
+import InteractiveQuiz from '@/components/InteractiveQuiz';
 import RentalSummary from '@/components/RentalSummary';
 import DJSection from '@/components/DJSection';
 import SalesSummary from '@/components/SalesSummary';
@@ -18,6 +19,11 @@ const Index = () => {
       <main className="space-y-4">
         <ScrollReveal delay={0.1}>
           <Hero />
+        </ScrollReveal>
+        
+        {/* Nový interaktívny sprievodca / kvíz pre rýchly výber */}
+        <ScrollReveal delay={0.15}>
+          <InteractiveQuiz />
         </ScrollReveal>
         
         <ScrollReveal delay={0.2}>
