@@ -76,13 +76,24 @@ const ContactForm = () => {
                         <p className="text-white text-lg">socializea@socializea.com</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] mt-1">
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Kde nás nájdete</p>
-                        <p className="text-white text-lg">Čadca (Sklad) / Žilina (Odber)</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-2">Kde nás nájdete</p>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
+                            <p className="text-white text-lg leading-snug">Čadečka 1924</p>
+                            <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
+                          </div>
+                          <div className="border-t border-white/5 pt-3">
+                            <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto</p>
+                            <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
+                            <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
