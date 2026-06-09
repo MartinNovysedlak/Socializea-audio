@@ -154,7 +154,7 @@ const InteractiveQuiz = () => {
   };
 
   return (
-    <section className="py-12 bg-[#020721] relative">
+    <section className="py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-r from-[#1A4BFF]/20 via-[#0a0d1f] to-[#BD20D3]/20 border border-[#BD20D3]/30 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_0_50px_rgba(189,32,211,0.15)]">
@@ -301,7 +301,7 @@ const InteractiveQuiz = () => {
                             <div className="md:col-span-7 flex flex-col justify-between space-y-4">
                               <div>
                                 <h4 className="text-xl font-bold text-white">{recommendedSet.name}</h4>
-                                <p className="text-[#BD20D3] font-bold text-2xl mt-1">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ deň</span></p>
+                                <p className="text-[#BD20D3] font-bold text-2xl mt-1">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ dňa</span></p>
                                 <p className="text-gray-300 text-xs md:text-sm mt-2 leading-relaxed">{recommendedSet.desc}</p>
                               </div>
                               

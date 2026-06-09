@@ -7,7 +7,7 @@ import { ArrowRight, Music2, Zap, ShieldCheck } from 'lucide-react';
 
 const RentalSummary = () => {
   return (
-    <section className="py-12 bg-[#020721] relative">
+    <section className="py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
