@@ -64,7 +64,7 @@ const ContactForm = () => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Zavolajte nám</p>
-                        <p className="text-white text-lg">+421 900 123 456</p>
+                        <p className="text-white text-lg">+421 948 070 577</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -82,7 +82,7 @@ const ContactForm = () => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Kde nás nájdete</p>
-                        <p className="text-white text-lg">Bratislava, Slovensko</p>
+                        <p className="text-white text-lg">Čadca (Sklad) / Žilina (Odber)</p>
                       </div>
                     </div>
                   </div>
