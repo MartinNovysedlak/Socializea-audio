@@ -8,9 +8,20 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 const Hero = () => {
   return (
     <section className="relative pt-32 pb-12 overflow-hidden bg-[#020721]">
-      {/* Background Floating Glows simulating Parallax & Depth */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/15 rounded-full blur-[120px] animate-float-slow pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/10 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
+      {/* Background Ambient Glow Layer (Blurred Blobs) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Blob 1 - Top Left Purple */}
+        <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-[#BD20D3]/20 blur-[100px] md:blur-[150px] animate-float-slow" />
+        
+        {/* Blob 2 - Bottom Right Blue */}
+        <div className="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-[#1A4BFF]/15 blur-[100px] md:blur-[150px] animate-float-delayed" />
+        
+        {/* Blob 3 - Center Top Blue-Violet */}
+        <div className="absolute top-[10%] right-[15%] w-[250px] h-[250px] md:w-[500px] md:h-[500px] rounded-full bg-[#1A4BFF]/10 blur-[100px] md:blur-[130px] animate-float-slow [animation-delay:4s]" />
+        
+        {/* Blob 4 - Center Left Magenta-Pink */}
+        <div className="absolute bottom-[15%] left-[5%] w-[250px] h-[250px] md:w-[450px] md:h-[450px] rounded-full bg-[#BD20D3]/12 blur-[90px] md:blur-[120px] animate-float-delayed [animation-delay:6s]" />
+      </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto">
