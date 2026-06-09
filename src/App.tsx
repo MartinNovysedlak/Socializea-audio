@@ -1,55 +1,53 @@
 "use client";
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Index from "./pages/Index";
-import Kontakt from "./pages/Kontakt";
-import Admin from "./pages/Admin";
-import Blog from "./pages/Blog";
-import BlogPostDetail from "./pages/BlogPostDetail";
-import Predaj from "./pages/Predaj";
-import ProductDetail from "./pages/ProductDetail";
-import NotFound from "./pages/NotFound";
-import ObchodnePodmienky from "./pages/ObchodnePodmienky";
-import PodmienkyPouzivania from "./pages/PodmienkyPouzivania";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "./components/ui/tooltip";
-import ScrollToTop from "./components/ScrollToTop";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Index from './pages/Index';
+import Prenajom from './pages/Prenajom';
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
+// Jednoduché dočasné podstránky pre správne fungovanie navigácie bez chýb
+const Predaj = () => (
+  <div className="min-h-screen bg-[#0a0d1f] text-white pt-28 pb-16 flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-4">PREDAJ</h1>
+      <p className="text-gray-400">Pripravujeme ponuku profesionálnej audio techniky na predaj.</p>
+    </div>
+  </div>
+);
+
+const Blog = () => (
+  <div className="min-h-screen bg-[#0a0d1f] text-white pt-28 pb-16 flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-4">BLOG</h1>
+      <p className="text-gray-400">Sledujte čoskoro zaujímavé články a novinky zo sveta audio techniky.</p>
+    </div>
+  </div>
+);
+
+const Kontakt = () => (
+  <div className="min-h-screen bg-[#0a0d1f] text-white pt-28 pb-16 flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-4">KONTAKT</h1>
+      <p className="text-gray-400">Napíšte nám na info@socializea.sk alebo zavolajte pre cenovú ponuku.</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/prenajom" element={<Index />} />
-            <Route path="/prenajom/:id" element={<Index />} />
-            <Route path="/equipment/:id" element={<Index />} />
-            <Route path="/kontakt" element={<Kontakt />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/obchodne-podmienky" element={<ObchodnePodmienky />} />
-            <Route path="/podmienky-pouzivania" element={<PodmienkyPouzivania />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogPostDetail />} />
-            <Route path="/predaj" element={<Predaj />} />
-            <Route path="/predaj/:id" element={<ProductDetail />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <Router>
+      <div className="min-h-screen bg-[#0a0d1f]">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/prenajom" element={<Prenajom />} />
+          <Route path="/predaj" element={<Predaj />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/kontakt" element={<Kontakt />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
