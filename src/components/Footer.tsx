@@ -1,8 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Settings } from 'lucide-react';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -23,43 +22,23 @@ const Footer = () => {
           </div>
 
           <div className="flex gap-6">
-            <a href="https://www.instagram.com/socializea_audio/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
+            <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
               <span className="sr-only">Instagram</span>
               <Instagram size={20} />
             </a>
-            <a href="https://www.facebook.com/profile.php?id=61556243854211&locale=sk_SK" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
+            <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
               <span className="sr-only">Facebook</span>
               <Facebook size={20} />
             </a>
+            <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
+              <span className="sr-only">Youtube</span>
+              <Youtube size={20} />
+            </a>
           </div>
 
-          <div className="flex flex-col items-center md:items-end gap-2">
-            <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
-            </p>
-            <div className="flex items-center gap-4">
-              <Link
-                to="/obchodne-podmienky"
-                className="text-xs text-gray-600 hover:text-[#BD20D3] transition-colors"
-              >
-                Obchodné podmienky
-              </Link>
-              <Link
-                to="/podmienky-pouzivania"
-                className="text-xs text-gray-600 hover:text-[#BD20D3] transition-colors"
-              >
-                Podmienky používania
-              </Link>
-              <Link
-                to="/admin"
-                className="text-xs text-gray-600 hover:text-[#BD20D3] transition-colors flex items-center gap-1.5"
-                title="Administrácia"
-              >
-                <Settings size={12} />
-                <span>Administrácia</span>
-              </Link>
-            </div>
-          </div>
+          <p className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
+          </p>
         </div>
       </div>
     </footer>
