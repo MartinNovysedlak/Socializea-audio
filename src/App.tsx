@@ -13,6 +13,7 @@ import Predaj from './pages/Predaj';
 import ProductDetail from './pages/ProductDetail';
 import NotFound from './pages/NotFound';
 import { useEquipment } from './hooks/useEquipment';
+import AmbientBackground from './components/AmbientBackground';
 
 function App() {
   const { equipment } = useEquipment();
@@ -38,46 +39,52 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route 
-          path="/prenajom" 
-          element={
-            <Prenajom 
-              quantities={quantities} 
-              setQuantities={setQuantities} 
-              equipment={equipment} 
-            />
-          } 
-        />
-        <Route 
-          path="/prenajom/:id" 
-          element={
-            <EquipmentDetail 
-              quantities={quantities} 
-              setQuantities={setQuantities} 
-              equipment={equipment}
-            />
-          } 
-        />
-        <Route 
-          path="/equipment/:id" 
-          element={
-            <EquipmentDetail 
-              quantities={quantities} 
-              setQuantities={setQuantities} 
-              equipment={equipment}
-            />
-          } 
-        />
-        <Route path="/kontakt" element={<Kontakt />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:id" element={<BlogPostDetail />} />
-        <Route path="/predaj" element={<Predaj />} />
-        <Route path="/predaj/:id" element={<ProductDetail />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      {/* Globálne podmanivé osvetlenie pódiového charakteru */}
+      <AmbientBackground />
+      
+      {/* Všetky stránky majú relatívny z-index, aby plávali nad svetlami pozadia */}
+      <div className="relative z-10">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route 
+            path="/prenajom" 
+            element={
+              <Prenajom 
+                quantities={quantities} 
+                setQuantities={setQuantities} 
+                equipment={equipment} 
+              />
+            } 
+          />
+          <Route 
+            path="/prenajom/:id" 
+            element={
+              <EquipmentDetail 
+                quantities={quantities} 
+                setQuantities={setQuantities} 
+                equipment={equipment}
+              />
+            } 
+          />
+          <Route 
+            path="/equipment/:id" 
+            element={
+              <EquipmentDetail 
+                quantities={quantities} 
+                setQuantities={setQuantities} 
+                equipment={equipment}
+              />
+            } 
+          />
+          <Route path="/kontakt" element={<Kontakt />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPostDetail />} />
+          <Route path="/predaj" element={<Predaj />} />
+          <Route path="/predaj/:id" element={<ProductDetail />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
