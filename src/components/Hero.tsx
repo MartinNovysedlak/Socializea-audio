@@ -8,24 +8,24 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 const Hero = () => {
   return (
     <section className="relative pt-32 pb-12 overflow-hidden bg-[#020721]">
-      {/* Background Glows */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/5 rounded-full blur-[120px]" />
+      {/* Background Floating Glows simulating Parallax & Depth */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/15 rounded-full blur-[120px] animate-float-slow pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/10 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 lg:p-12 backdrop-blur-xl overflow-hidden relative">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 lg:p-12 backdrop-blur-xl overflow-hidden relative shadow-[0_0_50px_rgba(189,32,211,0.05)] transition-all duration-500 hover:shadow-[0_0_60px_rgba(189,32,211,0.1)]">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-[#BD20D3]/30 text-[#BD20D3] text-sm font-medium mb-8">
-                <Sparkles size={16} />
+            <div className="max-w-4xl mx-auto text-center animate-fade-slide-up">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-[#BD20D3]/30 text-[#BD20D3] text-sm font-medium mb-8 transition-transform duration-300 hover:scale-105 cursor-default">
+                <Sparkles size={16} className="animate-pulse" />
                 <span>Prémiová technika pre vaše podujatia</span>
               </div>
               
               <h1 className="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
                 Profesionálny prenájom <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] animate-pulse duration-10000">
                   zvukovej a svetelnej techniky
                 </span>
               </h1>
@@ -38,17 +38,17 @@ const Hero = () => {
                 <Link to="/prenajom" className="w-full sm:w-auto">
                   <Button 
                     size="lg" 
-                    className="btn-cyber text-lg px-8 py-7 rounded-full w-full group border-none"
+                    className="btn-cyber text-lg px-8 py-7 rounded-full w-full group border-none transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(189,32,211,0.8)]"
                   >
                     Spočítať cenu prenájmu
-                    <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="ml-2 group-hover:translate-x-1.5 transition-transform duration-300" />
                   </Button>
                 </Link>
                 <Link to="/prenajom" className="w-full sm:w-auto">
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="border-[#1A4BFF] text-[#1A4BFF] hover:bg-[#1A4BFF]/10 hover:text-white text-lg px-8 py-7 rounded-full w-full transition-all duration-300"
+                    className="border-[#1A4BFF] text-[#1A4BFF] hover:bg-[#1A4BFF]/10 text-lg px-8 py-7 rounded-full w-full transition-all duration-300 hover:scale-105 active:scale-95 hover:border-[#BD20D3] hover:text-white hover:shadow-[0_0_20px_rgba(189,32,211,0.3)] bg-transparent"
                   >
                     Pozrieť ponuku
                   </Button>

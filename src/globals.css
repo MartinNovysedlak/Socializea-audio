@@ -42,7 +42,7 @@
   }
 
   body {
-    @apply bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white;
+    @apply bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white overflow-x-hidden;
   }
 
   h1, h2, h3 {
@@ -62,4 +62,78 @@
   .border-neon-blue {
     @apply border-[#1A4BFF]/50 shadow-[0_0_10px_rgba(26,75,255,0.2)];
   }
+
+  /* Plynulá animácia podčiarknutia navigácie */
+  .nav-link-underline {
+    @apply relative py-1;
+  }
+
+  .nav-link-underline::after {
+    content: '';
+    @apply absolute w-full h-[2px] bottom-0 left-0 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] transition-transform duration-300 origin-bottom-right scale-x-0;
+  }
+
+  .nav-link-underline:hover::after {
+    @apply scale-x-100 origin-bottom-left;
+  }
+}
+
+/* Animácia jemného vznášania pre svetlá pozadia */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-25px) scale(1.05) rotate(5deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0px) scale(1.08) rotate(0deg);
+  }
+  50% {
+    transform: translateY(25px) scale(1) rotate(-5deg);
+  }
+}
+
+/* Pulzovanie žiary pre akčné tlačidlá */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(189, 32, 211, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(189, 32, 211, 0.8), 0 0 8px rgba(26, 75, 255, 0.4);
+    transform: scale(1.03);
+  }
+}
+
+/* Slide up s fade-in pre úvodné prvky */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Priradenie tried pre animácie */
+.animate-float-slow {
+  animation: float-slow 12s infinite ease-in-out;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 15s infinite ease-in-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
