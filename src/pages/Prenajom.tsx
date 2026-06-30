@@ -213,8 +213,8 @@ const presetPackages: PresetPackage[] = [
       '6x RGBWA UV Led Par svetlá',
       '4x RGBW Led Bar 36W',
       '1x Holografický Laser',
-      '2x Červeno-zelený Laser',
-      '2x Dymostroj ADJ VF 1300',
+      '2x Červeno-zelený Laser (párty efekt)',
+      '2x Dymostroj ADJ VF 1300 (udržiavanie stabilnej hmly)',
       '1x Osvetľovacia konštrukcia'
     ]
   },
@@ -253,10 +253,9 @@ interface PrenajomProps {
   quantities: Record<string, number>;
   setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   equipment: EquipmentItem[];
-  loading: boolean;
 }
 
-const Prenajom = ({ quantities, setQuantities, equipment, loading }: PrenajomProps) => {
+const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [selectedPackage, setSelectedPackage] = useState<PresetPackage | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [includeLights, setIncludeLights] = useState(true);
@@ -468,7 +467,7 @@ const Prenajom = ({ quantities, setQuantities, equipment, loading }: PrenajomPro
 
         <EquipmentCatalog 
           equipment={equipment} 
-          loading={loading} 
+          loading={equipment.length === 0} 
           quantities={quantities} 
           setQuantities={setQuantities} 
         />
