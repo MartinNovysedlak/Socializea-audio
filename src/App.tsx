@@ -16,7 +16,7 @@ import { useEquipment } from './hooks/useEquipment';
 import AmbientBackground from './components/AmbientBackground';
 
 function App() {
-  const { equipment } = useEquipment();
+  const { equipment, loading } = useEquipment();
   
   // Inicializácia stavu košíka priamo z localStorage, aby bol v celej aplikácii identický
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
@@ -53,6 +53,7 @@ function App() {
                 quantities={quantities} 
                 setQuantities={setQuantities} 
                 equipment={equipment} 
+                loading={loading}
               />
             } 
           />
