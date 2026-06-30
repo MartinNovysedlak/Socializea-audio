@@ -8,7 +8,8 @@
   "soundSpecs": [
     "1x Digitálny mixpult Behringer X Air 18",
     "1x Riadiaci procesor the t.rack 4x4 (ideálne rozdelenie pásiem a ochrana reproduktorov pred preťažením)",
-    "2x Reproduktory Behringer B112D",
+    "2x Reproduktory Behringer B112 B112D",
+    "1x Sada 2 mikrofónov the t.bD",
     "1x Sada 2 mikrofónov the t.bone free solo Twin HT",
     "4x Subwoofer The Box Pro DSP 18 Sub (štvorica masívnych basákov)",
     "2x Teleskopická stojanová tyč"
