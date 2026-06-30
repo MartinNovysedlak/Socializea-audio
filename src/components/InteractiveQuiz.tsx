@@ -200,7 +200,7 @@ const InteractiveQuiz = () => {
                       <div className="grid grid-cols-1 gap-4">
                         {[
                           { id: 'up-to-30', label: 'Komorná párty / oslava (do 30 ľudí)', desc: 'Menší priestor, dôraz na čistý zvuk og nízku cenu.' },
-                          { id: 'up-to-100', label: 'Svadba / Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a osvetlenie.' },
+                          { id: 'up-to-100', label: 'Rodinná oslava / Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a osvetlenie.' },
                           { id: 'over-100', label: 'Veľké podujatie / Klub (nad 100 ľudí)', desc: 'Silný zvukový tlak, subwoofery a kompletná svetelná show.' }
                         ].map(opt => (
                           <button
