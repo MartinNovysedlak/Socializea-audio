@@ -43,8 +43,10 @@ interface QuizAnswers {
 interface PackageRecommendation {
   id: string;
   name: string;
-  priceNoLights: number;
-  priceWithLights: number;
+  priceNoLightsWeekday: number;
+  priceWithLightsWeekday: number;
+  priceNoLightsWeekend: number;
+  priceWithLightsWeekend: number;
   image: string;
   desc: string;
   soundSpecs: string[];
@@ -96,8 +98,10 @@ const InteractiveQuiz = () => {
     const pkg1: PackageRecommendation = {
       id: 'kompakt-prezentacia',
       name: 'BALÍK 1: Kompakt Prezentácia',
-      priceNoLights: 100,
-      priceWithLights: 130,
+      priceNoLightsWeekday: 100,
+      priceWithLightsWeekday: 130,
+      priceNoLightsWeekend: 120,
+      priceWithLightsWeekend: 150,
       image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
       desc: 'Zameranie: Firemné prezentácie, prednášky, schôdze do 30-100 ľudí (dôraz na čistú reč a obraz).',
       soundSpecs: [
@@ -116,8 +120,10 @@ const InteractiveQuiz = () => {
     const pkg2: PackageRecommendation = {
       id: 'party-mini',
       name: 'BALÍK 2: Párty MINI (Chata / Oslava)',
-      priceNoLights: 110,
-      priceWithLights: 140,
+      priceNoLightsWeekday: 110,
+      priceWithLightsWeekday: 140,
+      priceNoLightsWeekend: 130,
+      priceWithLightsWeekend: 160,
       image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
       desc: 'Zameranie: Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí, kde sa vyžaduje dynamický basový základ.',
       soundSpecs: [
@@ -138,8 +144,10 @@ const InteractiveQuiz = () => {
     const pkg3: PackageRecommendation = {
       id: 'oslava-mini',
       name: 'BALÍK 3: Oslava MINI',
-      priceNoLights: 140,
-      priceWithLights: 180,
+      priceNoLightsWeekday: 140,
+      priceWithLightsWeekday: 180,
+      priceNoLightsWeekend: 160,
+      priceWithLightsWeekend: 200,
       image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
       desc: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách a sálach, kde netreba prehnaný basový tlak, ale peknú atmosféru.',
       soundSpecs: [
@@ -161,8 +169,10 @@ const InteractiveQuiz = () => {
     const pkg4: PackageRecommendation = {
       id: 'oslava-medium',
       name: 'BALÍK 4: Oslava MEDIUM',
-      priceNoLights: 180,
-      priceWithLights: 270,
+      priceNoLightsWeekday: 180,
+      priceWithLightsWeekday: 270,
+      priceNoLightsWeekend: 200,
+      priceWithLightsWeekend: 300,
       image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
       desc: 'Zameranie: Klasická svadba alebo stredne veľká oslava do 100 ľudí v interiéri. Vyvážený pomer medzi skvelou rečou a plným tanečným parketom.',
       soundSpecs: [
@@ -188,8 +198,10 @@ const InteractiveQuiz = () => {
     const pkg5: PackageRecommendation = {
       id: 'klub-medium',
       name: 'BALÍK 5: Klub MEDIUM',
-      priceNoLights: 220,
-      priceWithLights: 340,
+      priceNoLightsWeekday: 220,
+      priceWithLightsWeekday: 340,
+      priceNoLightsWeekend: 240,
+      priceWithLightsWeekend: 360,
       image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
       desc: 'Zameranie: Klubové noci, stužkové, disko párty pre 100 ľudí. Dôraz na masívne basy a rotujúce dynamické lúče.',
       soundSpecs: [
@@ -215,8 +227,10 @@ const InteractiveQuiz = () => {
     const pkg6: PackageRecommendation = {
       id: 'premium-max',
       name: 'BALÍK 6: PREMIUM MAX',
-      priceNoLights: 250,
-      priceWithLights: 430,
+      priceNoLightsWeekday: 250,
+      priceWithLightsWeekday: 430,
+      priceNoLightsWeekend: 280,
+      priceWithLightsWeekend: 460,
       image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
       desc: 'Zameranie: Luxusné, veľké svadby, firemné eventy a plesy nad 100 ľudí. Dokonalé priestorové ozvučenie bez hluchých miest a komplexná svetelná show.',
       soundSpecs: [
@@ -246,8 +260,10 @@ const InteractiveQuiz = () => {
     const pkg7: PackageRecommendation = {
       id: 'klub-maximal',
       name: 'BALÍK 7: Klub MAXIMAL',
-      priceNoLights: 380,
-      priceWithLights: 520,
+      priceNoLightsWeekday: 380,
+      priceWithLightsWeekday: 520,
+      priceNoLightsWeekend: 420,
+      priceWithLightsWeekend: 550,
       image: 'https://images.unsplash.com/photo-1489641493513-ba4ee84ccee9?w=800',
       desc: 'Zameranie: Veľké diskotéky, stužkové pre viacero tried, festivalové stany nad 100 ľudí v interiéri. Extrémny zvukový tlak a laserová show.',
       soundSpecs: [
@@ -274,8 +290,10 @@ const InteractiveQuiz = () => {
     const pkg8: PackageRecommendation = {
       id: 'open-air-arena',
       name: 'BALÍK 8: Open-Air ARENA',
-      priceNoLights: 480,
-      priceWithLights: 730,
+      priceNoLightsWeekday: 480,
+      priceWithLightsWeekday: 730,
+      priceNoLightsWeekend: 520,
+      priceWithLightsWeekend: 760,
       image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
       desc: 'Zameranie: Vonkajšie festivaly, hody, dni obce, amfiteátre alebo veľké stany. V cene máš dymostroje, plameňomety a snehostroje pre výnimočnú atmosféru.',
       soundSpecs: [
@@ -377,8 +395,9 @@ const InteractiveQuiz = () => {
   };
 
   const recommendedSet = getRecommendation();
-  const activePrice = includeLights ? recommendedSet.priceWithLights : recommendedSet.priceNoLights;
-  const lightsUpgradePrice = recommendedSet.priceWithLights - recommendedSet.priceNoLights;
+  const activePrice = includeLights ? recommendedSet.priceWithLightsWeekday : recommendedSet.priceNoLightsWeekday;
+  const weekendPrice = includeLights ? recommendedSet.priceWithLightsWeekend : recommendedSet.priceNoLightsWeekend;
+  const lightsUpgradePrice = recommendedSet.priceWithLightsWeekday - recommendedSet.priceNoLightsWeekday;
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,7 +406,7 @@ const InteractiveQuiz = () => {
       return;
     }
 
-    const priceText = `${activePrice} € (${includeLights ? 'so svetelnou show' : 'bez svetiel'})`;
+    const priceText = `${activePrice} € (Dňa) / ${weekendPrice} € (Vikendu) (bez dopravy a instalácie)`;
 
     toast.success('Rezervačný dopyt bol úspešne odoslaný!', {
       description: `Zaznamenali sme dopyt pre "${recommendedSet.name}" v cene ${priceText}. Čoskoro vás kontaktujeme.`
@@ -413,7 +432,7 @@ const InteractiveQuiz = () => {
                 Neviete, akú techniku vybrať?
               </h2>
               <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-                Náš interaktívny sprievodca vám na základe 3 jednoduchých otázok odporučí ideálny set zvuku a svetiel presne pre vaše podujatie.
+                Náš interaktívny sprievodca vám na základe 3 jednoduchých otázok odporúčí ideálny set zvuku a svetiel presne pre vaše podujatie.
               </p>
             </div>
 
@@ -443,7 +462,7 @@ const InteractiveQuiz = () => {
                       <div className="grid grid-cols-1 gap-4">
                         {[
                           { id: 'up-to-30', label: 'Komorná akcia (do 30 ľudí)', desc: 'Menší priestor, dôraz na kompaktné ozvučenie a jednoduchý prevoz.' },
-                          { id: 'up-to-100', label: 'Stredný event (do 100 ľudí)', desc: 'Klasické oslavy a stredné sály s vyváženým výkonom a plným zvukom.' },
+                          { id: 'up-to-100', label: 'Stredný event (do 100 ľudí)', desc: 'Klasické oslavy a stredné sály s vyváženým výkom a plným zvukom.' },
                           { id: 'over-100', label: 'Veľké podujatie / Klub (nad 100 ľudí)', desc: 'Masívny zvukový tlak, silné basy a robustná klubová show.' }
                         ].map(opt => (
                           <button
@@ -567,9 +586,9 @@ const InteractiveQuiz = () => {
                                 <span className="text-xs text-gray-400 uppercase font-bold block">Cena za prenájom:</span>
                                 <div className="flex items-baseline gap-2">
                                   <span className="text-[#BD20D3] font-extrabold text-3xl">
-                                    {activePrice} €
+                                    {activePrice} € (Dňa) / {weekendPrice} € (Vikendu)
                                   </span>
-                                  <span className="text-xs text-gray-400">/ deň s DPH</span>
+                                  <span className="text-xs text-gray-400">/ deň s DPH (bez dopravy a instalácie)</span>
                                 </div>
                               </div>
                             </div>
@@ -597,8 +616,8 @@ const InteractiveQuiz = () => {
                               onClick={() => setIncludeLights(!includeLights)}
                               className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
                                 includeLights 
-                                  ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10' 
-                                  : 'bg-white/5 border-white/10 opacity-75 hover:opacity-100 hover:border-white/25'
+                                  ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)]' 
+                                  : 'bg-white/5 border-white/10 opacity-75'
                               }`}
                             >
                               <div>
