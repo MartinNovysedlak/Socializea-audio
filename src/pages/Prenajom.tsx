@@ -33,7 +33,6 @@ import {
   Lightbulb,
   Package,
   ChevronRight,
-  X
 } from 'lucide-react';
 import { EquipmentItem } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -482,20 +481,12 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
       {/* DETAIL MODAL PRE BALÍK */}
       <Dialog open={isDetailOpen} onOpenChange={(open) => { setIsDetailOpen(open); if(!open) setSelectedPackage(null); }}>
         <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh] custom-scrollbar">
-          <div className="flex justify-between items-start mb-4">
-            <DialogHeader className="border-b border-white/5 pb-4 mb-4 flex-1">
-              <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
-                <Package className="text-[#BD20D3]" />
-                Detail balíka
-              </DialogTitle>
-            </DialogHeader>
-            <button
-              onClick={() => { setIsDetailOpen(false); setSelectedPackage(null); }}
-              className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5 z-10 shrink-0 ml-4"
-            >
-              <X size={24} />
-            </button>
-          </div>
+          <DialogHeader className="border-b border-white/5 pb-4 mb-4">
+            <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
+              <Package className="text-[#BD20D3]" />
+              Detail balíka
+            </DialogTitle>
+          </DialogHeader>
 
           {selectedPackage && (
             <div className="space-y-6">
