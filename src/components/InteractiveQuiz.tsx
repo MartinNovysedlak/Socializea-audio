@@ -18,6 +18,8 @@ import {
   MapPin, 
   Music, 
   Check, 
+  Plus,
+  X,
   ArrowRight, 
   ArrowLeft, 
   Volume2, 
@@ -236,7 +238,7 @@ const InteractiveQuiz = () => {
       ],
       otherSpecs: [
         '1x Premietačka Wanbo T6 MAX',
-        '1x Premietacie plátno 110" (na kvízy a svadobné prezentácie)'
+        '1x Premietacie plátno 110" (na kvízy and svadobné prezentácie)'
       ]
     };
 
@@ -591,13 +593,16 @@ const InteractiveQuiz = () => {
                             </div>
 
                             {/* LIGHTING & EFFECTS SPECIAL CARD */}
-                            <div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
-                              includeLights 
-                                ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)]' 
-                                : 'bg-white/5 border-white/10 opacity-75'
-                            }`}>
+                            <div 
+                              onClick={() => setIncludeLights(!includeLights)}
+                              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
+                                includeLights 
+                                  ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10' 
+                                  : 'bg-white/5 border-white/10 opacity-75 hover:opacity-100 hover:border-white/25'
+                              }`}
+                            >
                               <div>
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-3 mb-3">
+                                <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
                                   <div className="flex items-center gap-2">
                                     <Lightbulb className={includeLights ? "text-[#BD20D3]" : "text-gray-400"} size={18} />
                                     <span className="text-xs font-bold text-white uppercase tracking-wider">
@@ -605,24 +610,24 @@ const InteractiveQuiz = () => {
                                     </span>
                                   </div>
                                   
-                                  {/* Selection Action Button directly inside header */}
-                                  <Button
-                                    type="button"
-                                    onClick={() => setIncludeLights(!includeLights)}
-                                    className={`h-8 px-3 rounded-lg text-[11px] font-bold transition-all border ${
-                                      includeLights 
-                                        ? 'bg-transparent border-red-500/30 hover:bg-red-500/10 text-red-400' 
-                                        : 'bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white border-none'
-                                    }`}
-                                  >
-                                    {includeLights ? 'Odobrať' : `Zvoliť aj to (+${lightsUpgradePrice} €)`}
-                                  </Button>
+                                  {/* Custom Circular State Switcher Icon instead of a heavy button */}
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                                    includeLights 
+                                      ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)] group-hover:scale-110' 
+                                      : 'bg-white/10 text-gray-400 border border-white/20 group-hover:scale-110 group-hover:text-white group-hover:border-white/40'
+                                  }`}>
+                                    {includeLights ? (
+                                      <Check size={14} className="stroke-[3]" />
+                                    ) : (
+                                      <Plus size={14} className="stroke-[3]" />
+                                    )}
+                                  </div>
                                 </div>
 
                                 <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
                                   {includeLights 
-                                    ? 'Svetelná show je pridaná a zahŕňa tieto prémiové položky:' 
-                                    : `Chcete pridať aj svetelnú šou? Kliknite na tlačidlo vyššie pre pridanie za +${lightsUpgradePrice} €.`}
+                                    ? 'Svetelná show je aktívna. Kliknutím na túto kartu ju odoberiete zo setu.' 
+                                    : `Kliknutím sem pridáte svetelnú šou a efekty k balíku iba za +${lightsUpgradePrice} €.`}
                                 </p>
 
                                 <ul className="space-y-2">
