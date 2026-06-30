@@ -26,7 +26,8 @@ import {
   Phone,
   Mail,
   User,
-  Calendar
+  Calendar,
+  AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -34,6 +35,18 @@ interface QuizAnswers {
   people: string;
   location: string;
   eventType: string;
+}
+
+interface PackageRecommendation {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  desc: string;
+  soundSpecs: string[];
+  lightSpecs: string[];
+  otherSpecs?: string[];
+  warning?: string;
 }
 
 const InteractiveQuiz = () => {
@@ -67,74 +80,295 @@ const InteractiveQuiz = () => {
     setStep(prev => prev + 1);
   };
 
-  // Simple recommendation engine logic
-  const getRecommendation = () => {
+  // 18-path Decision Tree Recommendation Engine
+  const getRecommendation = (): PackageRecommendation => {
     const { people, location, eventType } = answers;
 
-    if (eventType === 'presentation') {
-      return {
-        id: 'konferencia-s',
-        name: 'Konferenčný Set S',
-        price: 60,
-        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd8a?w=800',
-        components: [
-          '2x Aktívny reproduktor 8"',
-          '2x Profesionálny bezdrôtový mikrofón',
-          'Bluetooth mixpult',
-          'Kompletná kabeláž a stojany'
-        ],
-        desc: 'Ideálne riešenie pre prezentácie, firemné mítingy, prednášky a hovorené slovo.'
-      };
-    }
+    // Package 1: Kompakt Prezentácia
+    const pkg1: PackageRecommendation = {
+      id: 'prezentacia-kompakt',
+      name: 'BALÍK 1: Kompakt Prezentácia',
+      price: 60,
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
+      desc: 'Zameranie: Firemné prezentácie, prednášky, schôdze do 30-100 ľudí (dôraz na čistú reč a obraz).',
+      soundSpecs: [
+        '1x Mixážny pult Behringer Xenyx 802',
+        '2x Reproduktory Behringer B112D (výkon pre hovorené slovo)',
+        '1x Sada 2 bezdrôtových mikrofónov the t.bone free solo Twin HT',
+        '2x Trojnožka na reproduktory',
+        '2x Stojan na mikrofón'
+      ],
+      lightSpecs: [
+        '2x RGBWA UV Led Par svetlá (nastavené na statickú teplú bielu/oranžovú pre rečníka)',
+        '1x Premietačka Wanbo T6 MAX (1080p, vysoký jas pre čitateľné prezentácie)',
+        '1x Premietacie plátno 110"'
+      ]
+    };
 
-    if (people === 'over-100' || (people === 'up-to-100' && location === 'outdoor' && eventType === 'dj')) {
-      return {
-        id: 'club-xl',
-        name: 'Set Párty/DJ (Club Set XL)',
-        price: 240,
-        image: 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=800',
-        components: [
-          '4x Výkonný aktívny reproduktor 15"',
-          '2x Aktívny subwoofer 18"',
-          'Profesionálna DJ konzola Pioneer',
-          'Svetelná show s DMX ovládaním',
-          'Výkonný dymostroj ADJ'
-        ],
-        desc: 'Kompletná nekompromisná klubová aparatúra pre veľké tanečné akcie, festivaly a open-air párty.'
-      };
-    }
-
-    if (people === 'up-to-100' || location === 'outdoor') {
-      return {
-        id: 'wedding-l',
-        name: 'Svadobný Set L (Premium)',
-        price: 150,
-        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800',
-        components: [
-          '2x Aktívny reproduktor 15"',
-          '1x Výkonný aktívny subwoofer 18"',
-          'Svetelná rampa (4x LED PAR) na statíve',
-          'Bezdrôtový mikrofón pre moderátora',
-          'Kompletná kabeláž'
-        ],
-        desc: 'Náš najpopulárnejší balík, ktorý dodá vašej svadbe či oslave kryštálový zvuk a skvelú svetelnú atmosféru.'
-      };
-    }
-
-    // Default or small events
-    return {
-      id: 'party-m',
-      name: 'Párty Set M (Oslava)',
+    // Package 2: Párty MINI (Chata / Oslava)
+    const pkg2: PackageRecommendation = {
+      id: 'party-mini',
+      name: 'BALÍK 2: Párty MINI (Chata / Oslava)',
       price: 80,
       image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
-      components: [
-        '2x Aktívny reproduktor 12"',
-        'Stojany na reproduktory',
-        'Bluetooth prijímač pre mobil/PC',
-        'Kompletná prepojovacia kabeláž'
+      desc: 'Zameranie: Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí, kde sa vyžaduje dynamický basový základ.',
+      soundSpecs: [
+        '1x Mixážny pult Behringer Xenyx X1222 USB',
+        '2x Reproduktory Behringer B112D (ako satelity)',
+        '1x Subwoofer Behringer B1500XP (15" aktívny sub, skvelý transport)',
+        '2x Trojnožka na reproduktory',
+        '1x Mikrofóny a headsety Auna VHF (pre DJa/karaoke)'
       ],
-      desc: 'Skvelá a kompaktná voľba pre menšie rodinné oslavy, chaty a narodeninové párty.'
+      lightSpecs: [
+        '1x Svetelný set BeamZ Party Bar (všetko v jednom na stojane)',
+        '1x Červeno-zelený Laser (retro párty efekt)',
+        '1x Dymostroj ADJ VF 1300 (zvýrazní lúče)'
+      ]
     };
+
+    // Package 3: Oslava MINI
+    const pkg3: PackageRecommendation = {
+      id: 'oslava-mini',
+      name: 'BALÍK 3: Oslava MINI',
+      price: 70,
+      image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
+      desc: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách a sálach s príjemnou atmosférou bez prehnaného tlaku.',
+      soundSpecs: [
+        '1x Mixážny pult Behringer Xenyx X1222 USB',
+        '2x Reproduktory Behringer B112D',
+        '1x Sada 2 mikrofónov the t.bone free solo Twin HT (pre príhovory)',
+        '2x Trojnožka na reproduktory',
+        '1x Stojan na mikrofón'
+      ],
+      lightSpecs: [
+        '4x RGBWA UV Led Par svetlá (ambientné podsvietenie stien sály)',
+        '1x Bublinkostroj (spestrenie programu a zábava pre deti)',
+        '1x Dymostroj ADJ VF 1300'
+      ]
+    };
+
+    // Package 4: Svadba MEDIUM
+    const pkg4: PackageRecommendation = {
+      id: 'svadba-medium',
+      name: 'BALÍK 4: Svadba MEDIUM',
+      price: 150,
+      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
+      desc: 'Zameranie: Klasická svadba alebo stredne veľká oslava do 100 ľudí v interiéri. Vyvážený pomer medzi čistým hovoreným slovom a plným tanečným parketom.',
+      soundSpecs: [
+        '1x Mixážny pult Behringer Xenyx X1222 USB',
+        '2x Reproduktory Behringer B112D (satelity)',
+        '1x Subwoofer The Box Pro DSP 18 Sub (silný 18" bas)',
+        '2x Teleskopická stojanová tyč',
+        '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
+        '1x Mikrofóny a headsety Auna VHF (záložné)'
+      ],
+      lightSpecs: [
+        '6x RGBWA UV Led Par svetlá (ambientné osvetlenie sály)',
+        '4x RGBW Led Bar 36W (nasvietenie steny za DJom / hlavným stolom)',
+        '1x Holografický Laser',
+        '1x Bublinkostroj (pre prvý novomanželský tanec)',
+        '1x Dymostroj ADJ VF 1300',
+        '1x Osvetľovacia konštrukcia na uchytenie svetiel'
+      ]
+    };
+
+    // Package 5: Klub MEDIUM
+    const pkg5: PackageRecommendation = {
+      id: 'klub-medium',
+      name: 'BALÍK 5: Klub MEDIUM',
+      price: 180,
+      image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
+      desc: 'Zameranie: Klubové noci, stužkové, disko párty pre 100 ľudí. Dôraz na masívne basy a rýchle rotujúce svetelné lúče.',
+      soundSpecs: [
+        '1x Mixážny pult Behringer Xenyx X1222 USB',
+        '2x Reproduktory Behringer B112D',
+        '2x Subwoofer The Box Pro DSP 18 Sub (silná dvojica 18" basákov)',
+        '2x Teleskopická stojanová tyč',
+        '1x Mikrofóny a headsety Auna VHF'
+      ],
+      lightSpecs: [
+        '1x Riadiaci DMX pult Light4Me DMX 192',
+        '4x Rotujúca 90W Beam hlava (ostré lúče)',
+        '1x Laserový Bar 65W (červený priestorový vejár)',
+        '4x RGBWA UV Led Par svetlá',
+        '1x Stroboskop',
+        '1x Dymostroj ADJ VF 1300',
+        '1x Osvetľovacia konštrukcia'
+      ]
+    };
+
+    // Package 6: Svadba PREMIUM MAX
+    const pkg6: PackageRecommendation = {
+      id: 'svadba-premium-max',
+      name: 'BALÍK 6: Svadba PREMIUM MAX',
+      price: 320,
+      image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
+      desc: 'Zameranie: Luxusné veľké svadby, plesy a galavečery nad 100 ľudí. Dokonalé priestorové ozvučenie bez hluchých miest a veľkolepá svetelná show.',
+      soundSpecs: [
+        '1x Digitálny mixpult Behringer X Air 18 (ovládateľný bezdrôtovo cez iPad)',
+        '4x Reproduktory Behringer B112D (vyrovnané pokrytie celej sály)',
+        '2x Subwoofer The Box Pro DSP 18 Sub',
+        '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
+        '4x Mikrofóny a headsety Auna VHF (rečníci, kapela, hostia)',
+        '2x Trojnožka na reproduktory',
+        '2x Držiaky na reproduktory (stena/dvojice)'
+      ],
+      lightSpecs: [
+        '1x BeamZ SUSHI-DS (počítačové riadenie zladených scén)',
+        '8x RGBWA UV Led Par svetlá (ambient sály)',
+        '4x RGBW Led Bar 36W',
+        '4x Rotujúca 90W Beam hlava',
+        '2x Samostatné Bodové UV svetlá',
+        '2x Bublinkostroj',
+        '2x Dymostroj ADJ VF 1300',
+        '1x Osvetľovacia konštrukcia'
+      ],
+      otherSpecs: [
+        '1x Premietačka Wanbo T6 MAX',
+        '1x Premietacie plátno 110" (na kvízy a svadobné prezentácie)'
+      ]
+    };
+
+    // Package 7: Klub MAXIMAL
+    const pkg7: PackageRecommendation = {
+      id: 'klub-maximal',
+      name: 'BALÍK 7: Klub MAXIMAL',
+      price: 380,
+      image: 'https://images.unsplash.com/photo-1489641493513-ba4ee84ccee9?w=800',
+      desc: 'Zameranie: Veľké diskotéky, stužkové pre viacero tried, festivalové stany nad 100 ľudí v interiéri. Extrémny zvukový tlak a laserová show.',
+      soundSpecs: [
+        '1x Digitálny mixpult Behringer X Air 18',
+        '1x Riadiaci procesor the t.rack 4x4 (ochrana pred preťažením)',
+        '4x Reproduktory Behringer B112D',
+        '4x Subwoofer The Box Pro DSP 18 Sub (štvorica basákov)',
+        '4x Teleskopická stojanová tyč'
+      ],
+      lightSpecs: [
+        '1x BeamZ SUSHI-DS (počítačové riadenie)',
+        '4x Rotujúca 90W Beam hlava',
+        '1x Laserový Bar 65W (červená laserová stena)',
+        '8x RGBWA UV Led Par svetlá',
+        '4x RGBW Led Bar 36W',
+        '1x Holografický Laser',
+        '1x Stroboskop',
+        '2x Dymostroj ADJ VF 1300 (stabilná hmla)',
+        '2x Výrobníky plameňov Fire Machine (bezpečné pódiové plamene)',
+        '1x Osvetľovacia konštrukcia'
+      ]
+    };
+
+    // Package 8: Open-Air ARENA
+    const pkg8: PackageRecommendation = {
+      id: 'open-air-arena',
+      name: 'BALÍK 8: Open-Air ARENA',
+      price: 490,
+      image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
+      desc: 'Zameranie: Vonkajšie festivaly, hody, dni obce, amfiteátre alebo veľké stany. Navrhnuté tak, aby prekonalo akustické straty v otvorenom exteriéri.',
+      soundSpecs: [
+        '1x Digitálny mixpult Behringer X Air 18',
+        '1x Riadiaci procesor the t.rack 4x4',
+        '4x Reproduktory Behringer B112D',
+        '5x Subwoofer The Box Pro DSP 18 Sub (basová stena z celého skladu)',
+        '4x Teleskopická stojanová tyč'
+      ],
+      lightSpecs: [
+        '1x BeamZ SUSHI-DS',
+        '4x Rotujúca 90W Beam hlava',
+        '1x Laserový Bar 65W',
+        '8x RGBWA UV Led Par svetlá',
+        '4x RGBW Led Bar 36W',
+        '2x Výrobníky plameňov Fire Machine',
+        '2x Snehostroj ADJ Snow Flurry HO (atmosférické sneženie)',
+        '2x Dymostroj ADJ VF 1300',
+        '1x Osvetľovacia konštrukcia'
+      ]
+    };
+
+    // --- DECISION TREE EVALUATION ---
+
+    // 1. Kategória: Komorná akcia (do 30 ľudí)
+    if (people === 'up-to-30') {
+      if (eventType === 'presentation') {
+        return pkg1;
+      }
+      if (eventType === 'dj') {
+        if (location === 'outdoor') {
+          return {
+            ...pkg2,
+            warning: 'Upozornenie: Keďže podujatie prebieha v exteriéri, uistite sa, že technika bude pod pevným prístreškom alebo zastrešením, ktoré ju ochráni pred rosou, slnkom a dažďom!'
+          };
+        }
+        return pkg2;
+      }
+      // Svadba alebo Oslava
+      if (location === 'outdoor') {
+        return {
+          ...pkg3,
+          warning: 'Upozornenie: Pri plánovaní akcie vonku nezabudnite na zastrešenie aparatúry. Chráni citlivú techniku pred priamym slnkom, večernou vlhkosťou a náhlym dažďom!'
+        };
+      }
+      return pkg3;
+    }
+
+    // 2. Kategória: Stredný event (do 100 ľudí)
+    if (people === 'up-to-100') {
+      if (eventType === 'presentation') {
+        if (location === 'outdoor') {
+          return {
+            ...pkg1,
+            warning: 'Odporúčanie: Pre exteriérové prednášky je vhodné pridať statívy a umiestniť reproduktory vyššie, aby sa zvuk v otvorenom priestranstve lepšie niesol.'
+          };
+        }
+        return pkg1;
+      }
+      if (eventType === 'dj') {
+        if (location === 'outdoor') {
+          // Exteriér + DJ párty ➔ BALÍK 8: Open-Air ARENA (basy sa vonku strácajú, potrebný max tlak)
+          return {
+            ...pkg8,
+            warning: 'V exteriéri dochádza k obrovským akustickým stratám v basovom pásme. Pre tanečný parket pre 100 ľudí vonku odporúčame rovno sadu ARENA, aby mal DJ dostatočný zvukový tlak.'
+          };
+        }
+        return pkg5; // Interiér + DJ ➔ BALÍK 5
+      }
+      // Svadba alebo Oslava
+      if (location === 'outdoor') {
+        return {
+          ...pkg4,
+          warning: 'Odporúčanie: V exteriéri odporúčame použiť satelitné reproduktory na dištančných tyčiach nad subwoofermi pre lepší rozptyl zvuku do priestoru.'
+        };
+      }
+      return pkg4;
+    }
+
+    // 3. Kategória: Veľké podujatie / Klub (nad 100 ľudí)
+    if (people === 'over-100') {
+      if (location === 'outdoor') {
+        // Všetky exteriérové akcie nad 100 ľudí smerujú na BALÍK 8: Open-Air ARENA
+        if (eventType === 'presentation') {
+          return {
+            ...pkg8,
+            warning: 'Odporúčanie: V závislosti od rozloženia publika v exteriéri je možné tento set nakonfigurovať so 4x satelitnými (top) reproduktormi pre rovnomernú zrozumiteľnosť prejavu.'
+          };
+        }
+        return pkg8;
+      }
+      // Interiér
+      if (eventType === 'presentation') {
+        return {
+          ...pkg6,
+          desc: 'Zameranie: Prezentácie a schôdze nad 100 ľudí. Využíva sa digitálny mixpult a 4 top reproduktory rozmiestnené v rohoch sály pre dokonalú zrozumiteľnosť bez ozveny.'
+        };
+      }
+      if (eventType === 'dj') {
+        return pkg7;
+      }
+      // Svadba alebo Oslava
+      return pkg6;
+    }
+
+    // Fallback default
+    return pkg3;
   };
 
   const recommendedSet = getRecommendation();
@@ -199,8 +433,8 @@ const InteractiveQuiz = () => {
                       </div>
                       <div className="grid grid-cols-1 gap-4">
                         {[
-                          { id: 'up-to-30', label: 'Komorná párty / oslava (do 30 ľudí)', desc: 'Menší priestor, dôraz na čistý zvuk og nízku cenu.' },
-                          { id: 'up-to-100', label: 'Rodinná oslava / Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a osvetlenie.' },
+                          { id: 'up-to-30', label: 'Komorná akcia (do 30 ľudí)', desc: 'Menší priestor, dôraz na čistý zvuk a kompaktnosť.' },
+                          { id: 'up-to-100', label: 'Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a osvetlenie.' },
                           { id: 'over-100', label: 'Veľké podujatie / Klub (nad 100 ľudí)', desc: 'Silný zvukový tlak, subwoofery a kompletná svetelná show.' }
                         ].map(opt => (
                           <button
@@ -293,6 +527,13 @@ const InteractiveQuiz = () => {
                             <h3 className="text-xl md:text-2xl font-bold text-white">Naše odporúčanie pre vašu akciu:</h3>
                           </div>
 
+                          {recommendedSet.warning && (
+                            <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
+                              <AlertTriangle className="shrink-0 mt-0.5 text-amber-400" size={18} />
+                              <p className="leading-relaxed">{recommendedSet.warning}</p>
+                            </div>
+                          )}
+
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-5">
                             <div className="md:col-span-5 aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900 border border-white/5">
                               <img src={recommendedSet.image} alt={recommendedSet.name} className="w-full h-full object-cover" />
@@ -300,24 +541,46 @@ const InteractiveQuiz = () => {
                             
                             <div className="md:col-span-7 flex flex-col justify-between space-y-4">
                               <div>
-                                <h4 className="text-xl font-bold text-white">{recommendedSet.name}</h4>
-                                <p className="text-[#BD20D3] font-bold text-2xl mt-1">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ dňa</span></p>
+                                <h4 className="text-lg font-bold text-white">{recommendedSet.name}</h4>
+                                <p className="text-[#BD20D3] font-bold text-2xl mt-1">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ dňa s DPH</span></p>
                                 <p className="text-gray-300 text-xs md:text-sm mt-2 leading-relaxed">{recommendedSet.desc}</p>
-                              </div>
-                              
-                              <div className="space-y-1.5">
-                                <p className="text-xs font-bold uppercase text-gray-400">Set obsahuje:</p>
-                                {recommendedSet.components.map((comp, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-300">
-                                    <Check size={12} className="text-[#BD20D3] shrink-0" />
-                                    <span>{comp}</span>
-                                  </div>
-                                ))}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                          {/* Detail specifications inside recommendation card */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/2 border border-white/5 rounded-2xl p-4">
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#BD20D3] block">Zvuková technika</span>
+                              <ul className="space-y-1.5">
+                                {recommendedSet.soundSpecs.map((spec, i) => (
+                                  <li key={i} className="text-xs text-gray-300 flex items-start gap-1.5">
+                                    <Check className="text-emerald-500 shrink-0 mt-0.5" size={12} />
+                                    <span>{spec}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#1A4BFF] block">Svetlá, efekty & ostatné</span>
+                              <ul className="space-y-1.5">
+                                {recommendedSet.lightSpecs.map((spec, i) => (
+                                  <li key={i} className="text-xs text-gray-300 flex items-start gap-1.5">
+                                    <Check className="text-emerald-500 shrink-0 mt-0.5" size={12} />
+                                    <span>{spec}</span>
+                                  </li>
+                                ))}
+                                {recommendedSet.otherSpecs && recommendedSet.otherSpecs.map((spec, i) => (
+                                  <li key={i} className="text-xs text-gray-300 flex items-start gap-1.5">
+                                    <Check className="text-cyan-400 shrink-0 mt-0.5" size={12} />
+                                    <span>{spec}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row gap-3 pt-2">
                             <Button variant="outline" onClick={resetQuiz} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1">
                               Spustiť znova
                             </Button>
