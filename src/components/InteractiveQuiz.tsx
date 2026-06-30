@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { 
   Sparkles, 
   Users, 
@@ -377,6 +376,7 @@ const InteractiveQuiz = () => {
 
   const recommendedSet = getRecommendation();
   const activePrice = includeLights ? recommendedSet.priceWithLights : recommendedSet.priceNoLights;
+  const lightsUpgradePrice = recommendedSet.priceWithLights - recommendedSet.priceNoLights;
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -542,28 +542,6 @@ const InteractiveQuiz = () => {
                             </div>
                           )}
 
-                          {/* DUAL PRICING CONTROLLER (WITH/WITHOUT LIGHTS) */}
-                          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-[#BD20D3]/15 flex items-center justify-center text-[#BD20D3]">
-                                <Lightbulb size={20} />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-white">Svetelná show & Efekty</p>
-                                <p className="text-xs text-gray-400">Zvoľte, či chcete k setu pribaliť balík svetelnej techniky.</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 bg-black/40 border border-white/5 px-4 py-2 rounded-xl">
-                              <span className={`text-xs font-semibold ${!includeLights ? 'text-white' : 'text-gray-500'}`}>S čistým zvukom (bez svetiel)</span>
-                              <Switch 
-                                checked={includeLights} 
-                                onCheckedChange={setIncludeLights} 
-                                className="data-[state=checked]:bg-[#BD20D3]" 
-                              />
-                              <span className={`text-xs font-semibold ${includeLights ? 'text-[#BD20D3]' : 'text-gray-500'}`}>Kompletná show (so svetlami)</span>
-                            </div>
-                          </div>
-
                           {/* HERO HIGHLIGHTS */}
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-3xl overflow-hidden p-5">
                             <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
@@ -585,19 +563,22 @@ const InteractiveQuiz = () => {
 
                               <div className="pt-2 border-t border-white/5">
                                 <span className="text-xs text-gray-400 uppercase font-bold block">Cena za prenájom:</span>
-                                <span className="text-[#BD20D3] font-extrabold text-3xl">
-                                  {activePrice} €
-                                </span>
-                                <span className="text-xs text-gray-400 ml-1.5">/ deň s DPH</span>
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-[#BD20D3] font-extrabold text-3xl">
+                                    {activePrice} €
+                                  </span>
+                                  <span className="text-xs text-gray-400">/ deň s DPH</span>
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* DETAIL SPECIFICATIONS */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/2 border border-white/5 rounded-2xl p-6">
-                            <div className="space-y-3">
-                              <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1">
-                                <Volume2 size={12} /> Zvuková technika
+                          {/* DETAIL SPECIFICATIONS GRID WITH CONTEXTUAL LIGHT CARD */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                            {/* SOUND SPECS */}
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
+                              <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
+                                <Volume2 size={16} /> Zvuková technika
                               </span>
                               <ul className="space-y-2">
                                 {recommendedSet.soundSpecs.map((spec, i) => (
@@ -609,33 +590,58 @@ const InteractiveQuiz = () => {
                               </ul>
                             </div>
 
-                            <div className="space-y-3">
-                              <span className={`text-xs font-bold uppercase tracking-wider block ${includeLights ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>
-                                {includeLights ? 'Svetlá, efekty & vizuál' : 'Svetelný príplatok'}
-                              </span>
-                              <ul className="space-y-2">
-                                {includeLights ? (
-                                  <>
-                                    {recommendedSet.lightSpecs.map((spec, i) => (
-                                      <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                                        <Check className="text-emerald-500 shrink-0 mt-0.5" size={12} />
-                                        <span>{spec}</span>
-                                      </li>
-                                    ))}
-                                    {recommendedSet.otherSpecs && recommendedSet.otherSpecs.map((spec, i) => (
-                                      <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                                        <Check className="text-cyan-400 shrink-0 mt-0.5" size={12} />
-                                        <span>{spec}</span>
-                                      </li>
-                                    ))}
-                                  </>
-                                ) : (
-                                  <li className="text-xs text-gray-500 italic p-3 bg-white/5 border border-white/5 rounded-xl">
-                                    Svetlá a dymové efekty nie sú zvolené. Môžete ich kedykoľvek pridať prepínačom vyššie za doplatok +{(recommendedSet.priceWithLights - recommendedSet.priceNoLights)} €.
-                                  </li>
-                                )}
-                              </ul>
+                            {/* LIGHTING & EFFECTS SPECIAL CARD */}
+                            <div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                              includeLights 
+                                ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)]' 
+                                : 'bg-white/5 border-white/10 opacity-75'
+                            }`}>
+                              <div>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-3 mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <Lightbulb className={includeLights ? "text-[#BD20D3]" : "text-gray-400"} size={18} />
+                                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                                      Svetlá, efekty & show
+                                    </span>
+                                  </div>
+                                  
+                                  {/* Selection Action Button directly inside header */}
+                                  <Button
+                                    type="button"
+                                    onClick={() => setIncludeLights(!includeLights)}
+                                    className={`h-8 px-3 rounded-lg text-[11px] font-bold transition-all border ${
+                                      includeLights 
+                                        ? 'bg-transparent border-red-500/30 hover:bg-red-500/10 text-red-400' 
+                                        : 'bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white border-none'
+                                    }`}
+                                  >
+                                    {includeLights ? 'Odobrať' : `Zvoliť aj to (+${lightsUpgradePrice} €)`}
+                                  </Button>
+                                </div>
+
+                                <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                                  {includeLights 
+                                    ? 'Svetelná show je pridaná a zahŕňa tieto prémiové položky:' 
+                                    : `Chcete pridať aj svetelnú šou? Kliknite na tlačidlo vyššie pre pridanie za +${lightsUpgradePrice} €.`}
+                                </p>
+
+                                <ul className="space-y-2">
+                                  {recommendedSet.lightSpecs.map((spec, i) => (
+                                    <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
+                                      <Check className={includeLights ? 'text-emerald-500 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
+                                      <span>{spec}</span>
+                                    </li>
+                                  ))}
+                                  {recommendedSet.otherSpecs && recommendedSet.otherSpecs.map((spec, i) => (
+                                    <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
+                                      <Check className={includeLights ? 'text-cyan-400 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
+                                      <span>{spec}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
                             </div>
+
                           </div>
 
                           <div className="flex flex-col sm:flex-row gap-3 pt-2">
