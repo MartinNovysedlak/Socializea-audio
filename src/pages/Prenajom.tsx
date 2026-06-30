@@ -212,8 +212,8 @@ const presetPackages: PresetPackage[] = [
       '6x RGBWA UV Led Par svetlá',
       '4x RGBW Led Bar 36W',
       '1x Holografický Laser',
-      '2x Červeno-zelený Laser',
-      '2x Dymostroj ADJ VF 1300',
+      '2x Červeno-zelený Laser (párty efekt)',
+      '2x Dymostroj ADJ VF 1300 (udržiavanie stabilnej hmly)',
       '1x Osvetľovacia konštrukcia'
     ]
   },
