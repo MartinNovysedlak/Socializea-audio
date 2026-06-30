@@ -49,6 +49,7 @@ interface PrenajomProps {
   equipment: EquipmentItem[];
 }
 
+// All 8 packages matching the quiz configuration
 const presetPackages: PresetPackage[] = [
   {
     id: 'kompakt-prezentacia',
@@ -139,7 +140,7 @@ const presetPackages: PresetPackage[] = [
       '3x Subwoofer The Box Pro DSP 18 Sub',
       '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
       '2x Trojnožka na reproduktory',
-      '1x BeamZ SUSHI-DS, 6x RGBWA UV Par, 4x RGBW Led Bar, 1x Holografický Laser, 2x Červeno-zelený Laser, 2x Dymostroj, 1x Osvetľovacia konštrukcia',
+      '1x BeamZ SUSHI-DS, 6x RGBWA UV Par, 4x RGBW Led Bar, 4x Rotujúca Beam hlava, 1x Holografický Laser, 2x Červeno-zelený Laser, 2x Dymostroj, 1x Osvetľovacia konštrukcia',
       '1x Premietačka Wanbo T6 MAX',
       '1x Premietacie plátno 110"'
     ]
@@ -174,7 +175,7 @@ const presetPackages: PresetPackage[] = [
       '5x Subwoofer The Box Pro DSP 18 Sub',
       '2x Teleskopická stojanová tyč',
       '1x BeamZ SUSHI-DS, 4x Rotujúca Beam hlava, 2x Laserový Bar 65W, 6x RGBWA UV Par, 4x RGBW Led Bar, 2x Fire Machine, 2x Snehostroj, 2x Dymostroj, 1x Holografický Laser, 2x Červeno-zelený Laser, 1x Osvetľovacia konštrukcia'
-    }
+    ]
   }
 ];
 
@@ -291,7 +292,130 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         </div>
       </section>
 
-      {/* ... rest of the component ... */}
+      {/* SEKCIA 2: SAMOSTATNÉ POLOŽKY */}
+      <section id="polozky" className="py-16 bg-[#020721]">
+        <div className="container mx-auto px-4 text-center max-w-4xl mb-12">
+          <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 mb-4 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
+            Vlastná konfigurácia
+          </Badge>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+            Potrebujete len konkrétny kus?
+          </h2>
+          <p className="text-gray-400 text-sm md:text-base">
+            Prehliadajte našu kompletnú ponuku a nakombinujte si reproduktory, mikrofóny alebo káble podľa seba.
+          </p>
+        </div>
+
+        <EquipmentCatalog 
+          equipment={equipment} 
+          loading={equipment.length === 0} 
+          quantities={quantities} 
+          setQuantities={setQuantities} 
+        />
+      </section>
+
+      <FloatingCart 
+        quantities={quantities} 
+        setQuantities={setQuantities} 
+        equipment={equipment} 
+      />
+
+      {/* DEDIKOVANÝ MODAL PRE REZERVÁCIU BALÍKA */}
+      <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
+        <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-md rounded-3xl p-6 shadow-2xl shadow-[#BD20D3]/20">
+          <DialogHeader className="border-b border-white/5 pb-3">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <Calendar className="text-[#BD20D3]" />
+              Rezervácia balíka
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedPackage && (
+            <form onSubmit={handleBookingSubmit} className="space-y-4 pt-3">
+              <div className="bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-xl p-4">
+                <span className="text-[10px]-[10px] text-gray-400 font-bold uppercase tracking-wider block">Vybraný balík:</span>
+                <span className="font-bold text-white text-base block mt-0.5">{selectedPackage.name}</span>
+                <span className="text-[#BD20D3] font-bold text-lg mt-1 block">{selectedPackage.price} € / deň s DPH</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="pkg-name" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                  <User size={12} className="text-[#BD20D3]" /> Meno a priezvisko *
+                </Label>
+                <Input
+                  id="pkg-name"
+                  required
+                  placeholder="Ján Novák"
+                  value={bookingForm.name}
+                  onChange={(e) => setBookingForm(p => ({ ...p, name: e.target.value }))}
+                  className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pkg-phone" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                    <Phone size={12} className="text-[#BD20D3]" /> Telefón
+                  </Label>
+                  <Input
+                    id="pkg-phone"
+                    type="tel"
+                    placeholder="+421 900 123 456"
+                    value={bookingForm.phone}
+                    onChange={(e) => setBookingForm(p => ({ ...p => ({ ...p, phone: e.target.value }))}
+                    className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pkg-date" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                    <Calendar size={12} className="text-[#BD20D3]" /> Dátum odberu *
+                  </Label>
+                  <Input
+                    id="pkg-date"
+                    type="date"
+                    required
+                    value={bookingForm.date}
+                    onChange={(e) => setBookingForm(p => ({ ...p, date: e.target.value }))}
+                    className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="pkg-email" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                  <Mail size={12} className="text-[#BD20D3]" /> E-mail *
+                </Label>
+                <Input
+                  id="pkg-email"
+                  type="email"
+                  required
+                  placeholder="jan.novak@example.sk"
+                  value={bookingForm.email}
+                  onChange={(e) => setBookingForm(p => ({ ...p, email: e.target.value }))}
+                  className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="pkg-msg" className="text-gray-300 text-xs font-bold uppercase">Poznámka / Doprava</Label>
+                <Textarea
+                  id="pkg-msg"
+                  placeholder="Mám záujem o dopravu a montáž / špecifické požiadavky..."
+                  value={bookingForm.message}
+                  onChange={(e) => setBookingForm(p => ({ ...p, message: e.target.value }))}
+                  className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] text-sm"
+                />
+              </div>
+
+              <Button type="submit" className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-sm mt-2">
+                Odoslať rezervačný dopyt
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Footer />
     </main>
   );
 };
