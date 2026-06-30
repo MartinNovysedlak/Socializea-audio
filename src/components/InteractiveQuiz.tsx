@@ -254,12 +254,12 @@ const InteractiveQuiz = () => {
       ],
       lightSpecs: [
         '1x BeamZ SUSHI-DS',
-        '4x Rotujúca 90W Beam hlava',
+        '4x Rotujúca 90w Beam hlava',
         '6x RGBWA UV Led Par svetlá',
-        '4x RGBW Led Bar 36W',
+        '4x RGBW Led Bar 36w',
         '1x Holografický Laser',
-        '2x Červeno-zelený Laser',
-        '2x Dymostroj ADJ VF 1300',
+        '2x Červeno-zelený Laser (párty efekt)',
+        '2x Dymostroj ADJ VF 1300 (udržiavanie stabilnej hmly)',
         '1x Osvetľovacia konštrukcia'
       ]
     };

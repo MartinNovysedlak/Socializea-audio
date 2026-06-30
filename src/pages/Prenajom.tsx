@@ -33,6 +33,7 @@ import {
   Lightbulb,
   Package,
   ChevronRight,
+  X
 } from 'lucide-react';
 import { EquipmentItem } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -97,7 +98,7 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 140,
     priceWithLights: 180,
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
-    description: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách a sálach, kde netreba prehnaný basový tlak, ale peknú atmosféru.',
+    description: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách and sálach, kde netreba prehnaný basový tlak, ale peknú atmosféru.',
     soundSpecs: [
       '1x Mixážny pult Behringer Xenyx 802',
       '2x Reproduktory Behringer B112D',
@@ -364,13 +365,13 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
               <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
                 <Card 
                   className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer ${
-                    index === 2 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
+                    index === 6 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
                   }`}
                   onClick={() => handleOpenDetail(pkg)}
                 >
-                  {index === 2 && (
+                  {index === 6 && (
                     <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
-                      Populárne
+                      Maximálny výkon
                     </span>
                   )}
 
