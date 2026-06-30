@@ -217,82 +217,123 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     <main className="min-h-screen bg-[#020721]">
       <Navbar />
       
-      {/* SEKCIA 1: HOTOVÉ SETY */}
+      {/* SEKCIA 1: HERO */}
+      <section className="relative pt-36 pb-16 overflow-hidden bg-gradient-to-b from-[#020721] via-[#05092a] to-[#020721]">
+        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#BD20D3]/10 rounded-full blur-[100px] pointer-events-none animate-float-slow" />
+        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#1A4BFF]/5 rounded-full blur-[100px] pointer-events-none animate-float-delayed" />
+
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl animate-fade-slide-up">
+          <Badge className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white mb-6 px-4 py-1.5 rounded-full text-xs uppercase tracking-widest font-extrabold shadow-[0_0_15px_rgba(189,32,211,0.3)]">
+            Výber techniky
+          </Badge>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
+            Zabezpečte si špičkový zvuk <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
+              a svetlo na akciu
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Chystáte akciu? Vyberte si predpripravený komplet alebo si vyskladajte vlastnú aparatúru.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              onClick={() => handleScrollTo('sety')}
+              className="w-full sm:w-auto btn-cyber rounded-2xl h-14 px-8 text-base font-bold hover:scale-105 border-none shadow-[0_0_20px_rgba(189,32,211,0.4)]"
+            >
+              <Layers className="mr-2 animate-pulse" size={18} />
+              Pozrieť hotové balíky
+            </Button>
+            <Button 
+              onClick={() => handleScrollTo('polozky')}
+              variant="outline"
+              className="w-full sm:w-auto border-white/20 hover:border-[#BD20D3] hover:text-white hover:shadow-[0_0_15px_rgba(189,32,211,0.2)] text-white bg-white/5 rounded-2xl h-14 px-8 text-base font-bold transition-all hover:scale-105"
+            >
+              Vyskladať si aparatúru
+              <ArrowDown className="ml-2 animate-bounce" size={16} />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* SEKCIA 2: ALL PACKAGES */}
       <section id="sety" className="py-20 bg-[#020721]/50 border-y border-white/5 relative">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-[#BD20D3] text-xs font-bold uppercase tracking-widest">
-              <Sparkles size={14} />
+              <Sparkles size={14} className="animate-spin-slow" />
               <span>Bez starostí</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight">
-              Naša ponuka balíkov
-            </h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-white">Naša ponuka balíkov</h2>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
               Vyberte si jeden z našich overených a vyvážených setov, ktoré sme zostavili na základe stoviek úspešných akcií.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {presetPackages.map((pkg, index) => {
-              return (
-                <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
-                  <Card 
-                    className="relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full"
-                    onClick={() => handleOpenBooking(pkg)}
-                  >
-                    {index === 2 && (
-                      <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
-                        Populárne
-                      </span>
-                    )}
-                  
-                    <div className="h-56 overflow-hidden relative">
-                      <img 
-                        src={pkg.image} 
-                        alt={pkg.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {presetPackages.map((pkg, index) => (
+              <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
+                <Card 
+                  className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full ${
+                    index === 2 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
+                  }`}
+                >
+                  {index === 2 && (
+                    <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
+                      Populárne
+                    </span>
+                  )}
+
+                  <div className="h-56 overflow-hidden relative">
+                    <img 
+                      src={pkg.image} 
+                      alt={pkg.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
+                  </div>
+
+                  <CardHeader className="p-6 pb-4">
+                    <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
+                      {pkg.name}
+                    </CardTitle>
+                    <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
+                      {pkg.description}
+                    </p>
+                    <div className="flex items-baseline gap-1.5 pt-4">
+                      <span className="text-3xl font-extrabold text-[#BD20D3]">{pkg.price} €</span>
+                      <span className="text-gray-400 text-xs">/ deň s DPH</span>
                     </div>
-                  
-                    <CardHeader className="p-6 pb-4">
-                      <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
-                        {pkg.name}
-                      </CardTitle>
-                      <p className="text-gray-400 text-sm line-clamp-2 mt-2">
-                        {pkg.description}
-                      </p>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4 px-6 pb-6 pt-0">
-                      <div className="border-t border-white/5 pt-4 space-y-2.5">
-                        <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
-                        {pkg.components.map((comp, i) => (
-                          <li key={i} className="flex items-start gap-2.5 text-xs text-gray-300">
-                            <Check size={14} className="text-[#BD20D3] shrink-0 mt-0.5" />
-                            <span>{comp}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                    
-                    <CardFooter className="p-6 pt-0">
-                      <Button 
-                        onClick={() => handleOpenBooking(pkg)}
-                        className="w-full btn-cyber rounded-xl h-12 border-none font-bold text-sm"
-                      >
-                        Nezáväzne rezervovať set
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </ScrollReveal>
-              ))}
+                  </CardHeader>
+
+                  <CardContent className="px-6 pb-6 pt-0 space-y-4">
+                    <div className="border-t border-white/5 pt-4 space-y-2.5">
+                      <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
+                      {pkg.components.map((comp, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
+                          <Check size={14} className="text-[#BD20D3] shrink-0 mt-0.5" />
+                          <span>{comp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="p-6 pt-0">
+                    <Button 
+                      onClick={() => handleOpenBooking(pkg)}
+                      className="w-full btn-cyber rounded-xl h-12 border-none font-bold text-sm"
+                    >
+                      Nezáväzne rezervovať set
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SEKCIA 2: SAMOSTATNÉ POLOŽKY */}
+      {/* SEKCIA 3: SAMOSTATNÉ POLOŽKY */}
       <section id="polozky" className="py-16 bg-[#020721]">
         <div className="container mx-auto px-4 text-center max-w-4xl mb-12">
           <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 mb-4 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
@@ -333,7 +374,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
           {selectedPackage && (
             <form onSubmit={handleBookingSubmit} className="space-y-4 pt-3">
               <div className="bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-xl p-4">
-                <span className="text-[10px]-[10px] text-gray-400 font-bold uppercase tracking-wider block">Vybraný balík:</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Vybraný balík:</span>
                 <span className="font-bold text-white text-base block mt-0.5">{selectedPackage.name}</span>
                 <span className="text-[#BD20D3] font-bold text-lg mt-1 block">{selectedPackage.price} € / deň s DPH</span>
               </div>
@@ -362,7 +403,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     type="tel"
                     placeholder="+421 900 123 456"
                     value={bookingForm.phone}
-                    onChange={(e) => setBookingForm(p => ({ ...p => ({ ...p, phone: e.target.value }))}
+                    onChange={(e) => setBookingForm(p => ({ ...p, phone: e.target.value }))}
                     className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
                   />
                 </div>
