@@ -26,12 +26,9 @@ import {
   Phone,
   Mail,
   User,
-  Calendar,
-  AlertTriangle,
-  Info
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { packagesData, PackageType } from '@/data/packages';
 
 interface QuizAnswers {
   people: string;
@@ -70,72 +67,73 @@ const InteractiveQuiz = () => {
     setStep(prev => prev + 1);
   };
 
-  // 18-path precise recommendation engine
+  // Simple recommendation engine logic
   const getRecommendation = () => {
     const { people, location, eventType } = answers;
-    let packageId = 'balik-3'; // Default fallback
-    let warning = '';
 
-    // 1. Category: Komorná akcia (do 30 ľudí)
-    if (people === 'up-to-30') {
-      if (eventType === 'wedding') {
-        packageId = 'balik-3';
-        if (location === 'outdoor') {
-          warning = 'Upozornenie na zastrešenie: Aparatúru je v exteriéri nutné chrániť pred nepriaznivým počasím (zastrešenie).';
-        }
-      } else if (eventType === 'dj') {
-        packageId = 'balik-2';
-        if (location === 'outdoor') {
-          warning = 'Upozornenie na zastrešenie: Aparatúru je v exteriéri nutné chrániť pred nepriaznivým počasím (zastrešenie).';
-        }
-      } else if (eventType === 'presentation') {
-        packageId = 'balik-1';
-      }
-    }
-    // 2. Category: Stredný event (do 100 ľudí)
-    else if (people === 'up-to-100') {
-      if (eventType === 'wedding') {
-        packageId = 'balik-4';
-        if (location === 'outdoor') {
-          warning = 'Tip pre exteriér: Pre tento set odporúčame použiť dištančné tyče na satelity pre optimálne šírenie zvuku.';
-        }
-      } else if (eventType === 'dj') {
-        if (location === 'outdoor') {
-          packageId = 'balik-8';
-          warning = 'Poznámka akustiky: V exteriéri sa basy rýchlo strácajú, preto naša inteligencia vybrala rovno maximálny basový tlak.';
-        } else {
-          packageId = 'balik-5';
-        }
-      } else if (eventType === 'presentation') {
-        packageId = 'balik-1';
-        if (location === 'outdoor') {
-          warning = 'Tip pre exteriér: V exteriéri je vhodné pridať robustné statívy pre zvýšenie bezpečnosti a šírenia hlasu.';
-        }
-      }
-    }
-    // 3. Category: Veľké podujatie / Klub (nad 100 ľudí)
-    else if (people === 'over-100') {
-      if (location === 'indoor') {
-        if (eventType === 'wedding') {
-          packageId = 'balik-6';
-        } else if (eventType === 'dj') {
-          packageId = 'balik-7';
-        } else if (eventType === 'presentation') {
-          packageId = 'balik-6';
-          warning = 'Dôležité: Pre optimálnu zrozumiteľnosť reči v celej sále využívame digitálny mixpult a 4 špičkové satelitné reproduktory.';
-        }
-      } else if (location === 'outdoor') {
-        packageId = 'balik-8';
-        if (eventType === 'presentation') {
-          warning = 'Tip: Pre veľké vonkajšie priestranstvo a hovorené slovo odporúčame doplniť konfiguráciu o 4x top reproduktory.';
-        }
-      }
+    if (eventType === 'presentation') {
+      return {
+        id: 'konferencia-s',
+        name: 'Konferenčný Set S',
+        price: 60,
+        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd8a?w=800',
+        components: [
+          '2x Aktívny reproduktor 8"',
+          '2x Profesionálny bezdrôtový mikrofón',
+          'Bluetooth mixpult',
+          'Kompletná kabeláž a stojany'
+        ],
+        desc: 'Ideálne riešenie pre prezentácie, firemné mítingy, prednášky a hovorené slovo.'
+      };
     }
 
-    const pkg = packagesData.find(p => p.id === packageId) || packagesData[0];
+    if (people === 'over-100' || (people === 'up-to-100' && location === 'outdoor' && eventType === 'dj')) {
+      return {
+        id: 'club-xl',
+        name: 'Set Párty/DJ (Club Set XL)',
+        price: 240,
+        image: 'https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=800',
+        components: [
+          '4x Výkonný aktívny reproduktor 15"',
+          '2x Aktívny subwoofer 18"',
+          'Profesionálna DJ konzola Pioneer',
+          'Svetelná show s DMX ovládaním',
+          'Výkonný dymostroj ADJ'
+        ],
+        desc: 'Kompletná nekompromisná klubová aparatúra pre veľké tanečné akcie, festivaly a open-air párty.'
+      };
+    }
+
+    if (people === 'up-to-100' || location === 'outdoor') {
+      return {
+        id: 'wedding-l',
+        name: 'Svadobný Set L (Premium)',
+        price: 150,
+        image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800',
+        components: [
+          '2x Aktívny reproduktor 15"',
+          '1x Výkonný aktívny subwoofer 18"',
+          'Svetelná rampa (4x LED PAR) na statíve',
+          'Bezdrôtový mikrofón pre moderátora',
+          'Kompletná kabeláž'
+        ],
+        desc: 'Náš najpopulárnejší balík, ktorý dodá vašej svadbe či oslave kryštálový zvuk a skvelú svetelnú atmosféru.'
+      };
+    }
+
+    // Default or small events
     return {
-      ...pkg,
-      warning
+      id: 'party-m',
+      name: 'Párty Set M (Oslava)',
+      price: 80,
+      image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
+      components: [
+        '2x Aktívny reproduktor 12"',
+        'Stojany na reproduktory',
+        'Bluetooth prijímač pre mobil/PC',
+        'Kompletná prepojovacia kabeláž'
+      ],
+      desc: 'Skvelá a kompaktná voľba pre menšie rodinné oslavy, chaty a narodeninové párty.'
     };
   };
 
@@ -184,7 +182,7 @@ const InteractiveQuiz = () => {
                     <ArrowRight className="ml-2" size={18} />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh]">
+                <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh]">
                   <DialogHeader className="border-b border-white/5 pb-4 mb-4">
                     <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
                       <Sparkles className="text-[#BD20D3]" />
@@ -201,9 +199,9 @@ const InteractiveQuiz = () => {
                       </div>
                       <div className="grid grid-cols-1 gap-4">
                         {[
-                          { id: 'up-to-30', label: 'Komorná párty / oslava (do 30 ľudí)', desc: 'Menší priestor, dôraz na čistý zvuk a kompaktnosť.' },
-                          { id: 'up-to-100', label: 'Rodinná oslava / Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a kompletné osvetlenie.' },
-                          { id: 'over-100', label: 'Veľké podujatie / Klub (nad 100 ľudí)', desc: 'Silný zvukový tlak, subbasy, pódiové efekty a robustná svetelná show.' }
+                          { id: 'up-to-30', label: 'Komorná párty / oslava (do 30 ľudí)', desc: 'Menší priestor, dôraz na čistý zvuk og nízku cenu.' },
+                          { id: 'up-to-100', label: 'Rodinná oslava / Stredný event (do 100 ľudí)', desc: 'Tanečný parket, vyvážený zvuk s basmi a osvetlenie.' },
+                          { id: 'over-100', label: 'Veľké podujatie / Klub (nad 100 ľudí)', desc: 'Silný zvukový tlak, subwoofery a kompletná svetelná show.' }
                         ].map(opt => (
                           <button
                             key={opt.id}
@@ -259,9 +257,9 @@ const InteractiveQuiz = () => {
                       </div>
                       <div className="grid grid-cols-1 gap-4">
                         {[
-                          { id: 'wedding', label: 'Svadba alebo Oslava', desc: 'Mix príhovorovej a tanečnej hudby, mikrofóny, dekoračné ambientné svetlá a slávnostné efekty.', icon: PartyPopper },
-                          { id: 'dj', label: 'DJ párty / Diskotéka', desc: 'Dôraz na silné basy, rotujúce lúče, lasery a dymové efekty pre nočnú atmosféru.', icon: Music },
-                          { id: 'presentation', label: 'Firemná prezentácia (hovorené slovo)', desc: 'Maximálna zrozumiteľnosť reči bez spätnej väzby, bezdrôtové mikrofóny, projektor a čistý zvuk.', icon: Tv }
+                          { id: 'wedding', label: 'Svadba alebo Oslava', desc: 'Mix podmazovej a tanečnej hudby, mikrofón na príhovory, dekoračné svetlá.', icon: PartyPopper },
+                          { id: 'dj', label: 'DJ párty / Diskotéka', desc: 'Dôraz na silné basy, dynamické svetelné efekty a hmlu pre dokonalú atmosféru.', icon: Music },
+                          { id: 'presentation', label: 'Firemná prezentácia (hovorené slovo)', desc: 'Maximálna zrozumiteľnosť hlasu, bezdrôtové mikrofóny, podmazová hudba.', icon: Tv }
                         ].map(opt => {
                           const Icon = opt.icon;
                           return (
@@ -291,17 +289,9 @@ const InteractiveQuiz = () => {
                       {!showBookingForm ? (
                         <div className="space-y-6">
                           <div className="text-center space-y-2 border-b border-white/5 pb-4">
-                            <span className="text-xs text-emerald-400 font-extrabold uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Konfigurácia úspešne dokončená</span>
+                            <span className="text-xs text-emerald-400 font-extrabold uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Konfigurácia dokončená</span>
                             <h3 className="text-xl md:text-2xl font-bold text-white">Naše odporúčanie pre vašu akciu:</h3>
                           </div>
-
-                          {/* WARNING CARD IF EXISTS */}
-                          {recommendedSet.warning && (
-                            <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-white text-sm">
-                              <AlertTriangle className="text-[#BD20D3] shrink-0 mt-0.5" size={18} />
-                              <p className="font-medium text-xs md:text-sm leading-relaxed">{recommendedSet.warning}</p>
-                            </div>
-                          )}
 
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-5">
                             <div className="md:col-span-5 aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900 border border-white/5">
@@ -310,43 +300,20 @@ const InteractiveQuiz = () => {
                             
                             <div className="md:col-span-7 flex flex-col justify-between space-y-4">
                               <div>
-                                <h4 className="text-xl font-bold text-white text-[#BD20D3]">{recommendedSet.name}</h4>
-                                <p className="text-gray-300 text-xs md:text-sm font-semibold mt-1">{recommendedSet.tagline}</p>
-                                <p className="text-emerald-400 font-bold text-2xl mt-2">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ dňa</span></p>
+                                <h4 className="text-xl font-bold text-white">{recommendedSet.name}</h4>
+                                <p className="text-[#BD20D3] font-bold text-2xl mt-1">{recommendedSet.price} € <span className="text-xs text-gray-400 font-normal">/ dňa</span></p>
                                 <p className="text-gray-300 text-xs md:text-sm mt-2 leading-relaxed">{recommendedSet.desc}</p>
                               </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm">
-                            <div className="bg-white/5 border border-white/5 rounded-xl p-4 space-y-2">
-                              <p className="font-bold text-white uppercase text-xs tracking-wider text-[#BD20D3]">🔊 ZVUKOVÁ TECHNIKA</p>
-                              <ul className="space-y-1 text-gray-300">
-                                {recommendedSet.zvuk.map((item, idx) => (
-                                  <li key={idx} className="flex items-start gap-1.5">
-                                    <Check size={14} className="text-emerald-400 shrink-0 mt-0.5" />
-                                    <span>{item}</span>
-                                  </li>
+                              
+                              <div className="space-y-1.5">
+                                <p className="text-xs font-bold uppercase text-gray-400">Set obsahuje:</p>
+                                {recommendedSet.components.map((comp, idx) => (
+                                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-300">
+                                    <Check size={12} className="text-[#BD20D3] shrink-0" />
+                                    <span>{comp}</span>
+                                  </div>
                                 ))}
-                              </ul>
-                            </div>
-
-                            <div className="bg-white/5 border border-white/5 rounded-xl p-4 space-y-2">
-                              <p className="font-bold text-white uppercase text-xs tracking-wider text-[#BD20D3]">💡 SVETLÁ A EFEKTY</p>
-                              <ul className="space-y-1 text-gray-300">
-                                {recommendedSet.svetlo.map((item, idx) => (
-                                  <li key={idx} className="flex items-start gap-1.5">
-                                    <Check size={14} className="text-[#BD20D3] shrink-0" />
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                                {recommendedSet.ostatne && recommendedSet.ostatne.map((item, idx) => (
-                                  <li key={idx} className="flex items-start gap-1.5">
-                                    <Check size={14} className="text-indigo-400 shrink-0 mt-0.5" />
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              </div>
                             </div>
                           </div>
 
@@ -354,7 +321,7 @@ const InteractiveQuiz = () => {
                             <Button variant="outline" onClick={resetQuiz} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1">
                               Spustiť znova
                             </Button>
-                            <Button onClick={() => setShowBookingForm(true)} className="bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3] text-white hover:opacity-90 rounded-xl h-12 flex-1 border-none font-bold shadow-[0_0_20px_rgba(189,32,211,0.4)]">
+                            <Button onClick={() => setShowBookingForm(true)} className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold">
                               Nezáväzne rezervovať
                             </Button>
                           </div>
@@ -362,7 +329,7 @@ const InteractiveQuiz = () => {
                       ) : (
                         <form onSubmit={handleBookingSubmit} className="space-y-5">
                           <div className="space-y-2 text-center border-b border-white/5 pb-4">
-                            <h3 className="text-lg md:text-xl font-bold text-white text-[#BD20D3]">{recommendedSet.name}</h3>
+                            <h3 className="text-lg md:text-xl font-bold text-white">Rezervácia: {recommendedSet.name}</h3>
                             <p className="text-xs text-gray-400">Ponuku vám vypracujeme a pošleme obratom na e-mail.</p>
                           </div>
 
@@ -377,7 +344,7 @@ const InteractiveQuiz = () => {
                                 placeholder="Ján Novák"
                                 value={bookingData.name}
                                 onChange={(e) => setBookingData(p => ({ ...p, name: e.target.value }))}
-                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm focus:border-[#BD20D3]"
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
                               />
                             </div>
                             <div className="space-y-1.5">
@@ -391,7 +358,7 @@ const InteractiveQuiz = () => {
                                 placeholder="jan.novak@example.sk"
                                 value={bookingData.email}
                                 onChange={(e) => setBookingData(p => ({ ...p, email: e.target.value }))}
-                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm focus:border-[#BD20D3]"
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
                               />
                             </div>
                           </div>
@@ -407,7 +374,7 @@ const InteractiveQuiz = () => {
                                 placeholder="+421 900 123 456"
                                 value={bookingData.phone}
                                 onChange={(e) => setBookingData(p => ({ ...p, phone: e.target.value }))}
-                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm focus:border-[#BD20D3]"
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
                               />
                             </div>
                             <div className="space-y-1.5">
@@ -420,7 +387,7 @@ const InteractiveQuiz = () => {
                                 required
                                 value={bookingData.date}
                                 onChange={(e) => setBookingData(p => ({ ...p, date: e.target.value }))}
-                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm focus:border-[#BD20D3]"
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
                               />
                             </div>
                           </div>
@@ -432,7 +399,7 @@ const InteractiveQuiz = () => {
                               placeholder="Miesto akcie, špecifikácie, doprava..."
                               value={bookingData.message}
                               onChange={(e) => setBookingData(p => ({ ...p, message: e.target.value }))}
-                              className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] text-sm focus:border-[#BD20D3]"
+                              className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] text-sm"
                             />
                           </div>
 
@@ -440,7 +407,7 @@ const InteractiveQuiz = () => {
                             <Button type="button" variant="ghost" onClick={() => setShowBookingForm(false)} className="text-xs text-gray-400 hover:text-white h-11">
                               Späť
                             </Button>
-                            <Button type="submit" className="bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3] text-white hover:opacity-90 rounded-xl h-11 flex-grow border-none font-bold">
+                            <Button type="submit" className="btn-cyber rounded-xl h-11 flex-grow border-none font-bold">
                               Odoslať nezáväzný dopyt
                             </Button>
                           </div>
