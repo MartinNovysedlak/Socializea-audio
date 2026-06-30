@@ -92,7 +92,7 @@ const InteractiveQuiz = () => {
   const getRecommendation = (): PackageRecommendation => {
     const { people, location, eventType } = answers;
 
-    // BALÍK 1: Kompakt Prezentácia (100€ / 130€)
+    // ---------- Packages (priceNoLights / priceWithLights) ----------
     const pkg1: PackageRecommendation = {
       id: 'kompakt-prezentacia',
       name: 'BALÍK 1: Kompakt Prezentácia',
@@ -112,7 +112,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 2: Párty MINI (Chata / Oslava) (110€ / 140€)
     const pkg2: PackageRecommendation = {
       id: 'party-mini',
       name: 'BALÍK 2: Párty MINI (Chata / Oslava)',
@@ -134,7 +133,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 3: Oslava MINI (140€ / 180€)
     const pkg3: PackageRecommendation = {
       id: 'oslava-mini',
       name: 'BALÍK 3: Oslava MINI',
@@ -157,7 +155,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 4: Oslava MEDIUM (180€ / 270€)
     const pkg4: PackageRecommendation = {
       id: 'oslava-medium',
       name: 'BALÍK 4: Oslava MEDIUM',
@@ -184,7 +181,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 5: Klub MEDIUM (220€ / 340€)
     const pkg5: PackageRecommendation = {
       id: 'klub-medium',
       name: 'BALÍK 5: Klub MEDIUM',
@@ -211,7 +207,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 6: PREMIUM MAX (250€ / 430€)
     const pkg6: PackageRecommendation = {
       id: 'premium-max',
       name: 'BALÍK 6: PREMIUM MAX',
@@ -238,11 +233,10 @@ const InteractiveQuiz = () => {
       ],
       otherSpecs: [
         '1x Premietačka Wanbo T6 MAX',
-        '1x Premietacie plátno 110" (na kvízy and svadobné prezentácie)'
+        '1x Premietacie plátno 110" (na kvízy a svadobné prezentácie)'
       ]
     };
 
-    // BALÍK 7: Klub MAXIMAL (380€ / 520€)
     const pkg7: PackageRecommendation = {
       id: 'klub-maximal',
       name: 'BALÍK 7: Klub MAXIMAL',
@@ -270,7 +264,6 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // BALÍK 8: Open-Air ARENA (480€ / 730€)
     const pkg8: PackageRecommendation = {
       id: 'open-air-arena',
       name: 'BALÍK 8: Open-Air ARENA',
@@ -301,83 +294,58 @@ const InteractiveQuiz = () => {
       ]
     };
 
-    // --- DECISION TREE 18-PATH LOGIC ---
-
-    // 1. Kategória: Komorná akcia (do 30 ľudí)
+    // --- DECISION TREE LOGIC ---
     if (people === 'up-to-30') {
       if (location === 'indoor') {
-        if (eventType === 'wedding') return pkg3; // Interiér + Svadba/Oslava -> Oslava MINI
-        if (eventType === 'dj') return pkg2;      // Interiér + DJ -> Párty MINI
-        return pkg1;                              // Interiér + Prezentácia -> Kompakt Prezentácia
+        if (eventType === 'wedding') return pkg3;
+        if (eventType === 'dj') return pkg2;
+        return pkg1;
       } else {
         if (eventType === 'wedding') {
-          return {
-            ...pkg3,
-            warning: 'Upozornenie: Keďže podujatie prebieha v exteriéri, uistite sa, že technika bude chránená pod pevným prístreškom alebo zastrešením pred slnkom, večernou rosou a náhlym dažďom!'
-          };
+          return { ...pkg3, warning: 'Upozornenie: Keďže podujatie prebieha v exteriéri, uistite sa, že technika bude chránená pod pevným prístreškom alebo zastrešením pred slnkom, večernou rosou a náhlym dažďom!' };
         }
         if (eventType === 'dj') {
-          return {
-            ...pkg2,
-            warning: 'Upozornenie: Keďže podujatie prebieha v exteriéri, uistite sa, že technika bude pod pevným prístreškom alebo zastrešením, ktoré ju ochráni pred rosou, slnkom a dažďom!'
-          };
+          return { ...pkg2, warning: 'Upozornenie: Keďže podujatie prebieha v exteriéri, uistite sa, že technika bude pod pevným prístreškom alebo zastrešením, ktoré ju ochráni pred rosou, slnkom a dažďom!' };
         }
-        return pkg1; // Exteriér + Prezentácia -> Kompakt Prezentácia
+        return pkg1;
       }
     }
 
-    // 2. Kategória: Stredný event (do 100 ľudí)
     if (people === 'up-to-100') {
       if (location === 'indoor') {
-        if (eventType === 'wedding') return pkg4; // Interiér + Svadba/Oslava -> Oslava MEDIUM
-        if (eventType === 'dj') return pkg5;      // Interiér + DJ -> Klub MEDIUM
-        return pkg1;                              // Interiér + Prezentácia -> Kompakt Prezentácia
+        if (eventType === 'wedding') return pkg4;
+        if (eventType === 'dj') return pkg5;
+        return pkg1;
       } else {
         if (eventType === 'wedding') {
-          return {
-            ...pkg4,
-            warning: 'Odporúčanie: Pre exteriér k tomuto setu dodávame dištančné stojanové tyče, aby satelity hrali nad úroveň rečníkov a zvuk lepšie pokryl otvorený priestor.'
-          };
+          return { ...pkg4, warning: 'Odporúčanie: Pre exteriér k tomuto setu dodávame dištančné stojanové tyče, aby satelity hrali nad úroveň rečníkov a zvuk lepšie pokryl otvorený priestor.' };
         }
         if (eventType === 'dj') {
-          return {
-            ...pkg8,
-            warning: 'Odporúčanie: Vonku sa akustický basový tlak rýchlo stráca. Preto sme pre exteriérovú DJ disko párty pre 100 ľudí vybrali balík ARENA s maximálnym basovým arzenálom 5x Subwoofer!'
-          };
+          return { ...pkg8, warning: 'Odporúčanie: Vonku sa akustický basový tlak rýchlo stráca. Preto sme pre exteriérovú DJ disko párty pre 100 ľudí vybrali balík ARENA s maximálnym basovým arzenálom 5x Subwoofer!' };
         }
-        return {
-          ...pkg1,
-          warning: 'Odporúčanie: Pre exteriérovú firemnú prezentáciu pre 100 ľudí odporúčame zvýšiť výšku stojanov (trojnožiek) s reproduktormi pre čisté pokrytie zvuku.'
-        };
+        return { ...pkg1, warning: 'Odporúčanie: Pre exteriérovú firemnú prezentáciu pre 100 ľudí odporúčame zvýšiť výšku stojanov (trojnožiek) s reproduktormi pre čisté pokrytie zvuku.' };
       }
     }
 
-    // 3. Kategória: Veľké podujatie / Klub (nad 100 ľudí)
     if (people === 'over-100') {
       if (location === 'indoor') {
-        if (eventType === 'wedding') return pkg6; // Interiér + Svadba/Oslava -> PREMIUM MAX
-        if (eventType === 'dj') return pkg7;      // Interiér + DJ -> Klub MAXIMAL
-        return {
-          ...pkg6,
-          warning: 'Odporúčanie: Pri veľkej vnútornej prezentácii využívame digitálny mixpult a rozmiestnenie 4x reproduktorov Behringer v rohoch sály pre dokonalú zrozumiteľnosť hlasu pre všetkých.'
-        };
+        if (eventType === 'wedding') return pkg6;
+        if (eventType === 'dj') return pkg7;
+        return { ...pkg6, warning: 'Odporúčanie: Pri veľkej vnútornej prezentácii využívame digitálny mixpult a rozmiestnenie 4x reproduktorov Behringer v rohoch sály pre dokonalú zrozumiteľnosť hlasu pre všetkých.' };
       } else {
-        // Všetky exteriéry nad 100 ľudí idú na Open-Air ARENA
         if (eventType === 'presentation') {
-          return {
-            ...pkg8,
-            warning: 'Odporúčanie: Pre veľkú exteriérovú prezentáciu nad 100 ľudí nakonfigurujeme tento set so 4x výškovými satelitmi pre špičkovú zrozumiteľnosť prejavu.'
-          };
+          return { ...pkg8, warning: 'Odporúčanie: Pre veľkú exteriérovú prezentáciu nad 100 ľudí nakonfigurujeme tento set so 4x výškovými satelitmi pre špičkovú zrozumiteľnosť prejavu.' };
         }
         return pkg8;
       }
     }
 
-    return pkg3; // Fallback
+    return pkg3;
   };
 
   const recommendedSet = getRecommendation();
   const activePrice = includeLights ? recommendedSet.priceWithLights : recommendedSet.priceNoLights;
+  const weekendPrice = activePrice * 2; // two‑day weekend total
   const lightsUpgradePrice = recommendedSet.priceWithLights - recommendedSet.priceNoLights;
 
   const handleBookingSubmit = (e: React.FormEvent) => {
@@ -387,7 +355,7 @@ const InteractiveQuiz = () => {
       return;
     }
 
-    const priceText = `${activePrice} € (${includeLights ? 'so svetelnou show' : 'bez svetiel'})`;
+    const priceText = `${weekendPrice} € (${includeLights ? 'so svetelnou show' : 'bez svetiel'})`;
 
     toast.success('Rezervačný dopyt bol úspešne odoslaný!', {
       description: `Zaznamenali sme dopyt pre "${recommendedSet.name}" v cene ${priceText}. Čoskoro vás kontaktujeme.`
@@ -433,7 +401,7 @@ const InteractiveQuiz = () => {
                     </DialogTitle>
                   </DialogHeader>
 
-                  {/* STEP 1: PEOPLE SIZE */}
+                  {/* STEP 1 */}
                   {step === 1 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
@@ -462,7 +430,7 @@ const InteractiveQuiz = () => {
                     </div>
                   )}
 
-                  {/* STEP 2: LOCATION */}
+                  {/* STEP 2 */}
                   {step === 2 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
@@ -491,7 +459,7 @@ const InteractiveQuiz = () => {
                     </div>
                   )}
 
-                  {/* STEP 3: EVENT TYPE */}
+                  {/* STEP 3 */}
                   {step === 3 && (
                     <div className="space-y-6">
                       <div className="space-y-2">
@@ -526,7 +494,7 @@ const InteractiveQuiz = () => {
                     </div>
                   )}
 
-                  {/* RECOMMENDATION RESULT SCREEN */}
+                  {/* RESULT SCREEN */}
                   {step === 4 && (
                     <div className="space-y-6">
                       {!showBookingForm ? (
@@ -536,7 +504,7 @@ const InteractiveQuiz = () => {
                             <h3 className="text-xl md:text-2xl font-bold text-white">Naše odporúčanie pre vašu akciu:</h3>
                           </div>
 
-                          {/* WARNING DISPLAYER */}
+                          {/* WARNING */}
                           {recommendedSet.warning && (
                             <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
                               <AlertTriangle className="shrink-0 mt-0.5 text-amber-400" size={18} />
@@ -544,7 +512,7 @@ const InteractiveQuiz = () => {
                             </div>
                           )}
 
-                          {/* HERO HIGHLIGHTS */}
+                          {/* HERO */}
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-3xl overflow-hidden p-5">
                             <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
                               <img src={recommendedSet.image} alt={recommendedSet.name} className="w-full h-full object-cover" />
@@ -563,21 +531,21 @@ const InteractiveQuiz = () => {
                                 <p className="text-gray-300 text-xs md:text-sm mt-1.5 leading-relaxed">{recommendedSet.desc}</p>
                               </div>
 
+                              {/* WEEKEND PRICE */}
                               <div className="pt-2 border-t border-white/5">
-                                <span className="text-xs text-gray-400 uppercase font-bold block">Cena za prenájom:</span>
+                                <span className="text-xs text-gray-400 uppercase font-bold block">Cena za celý víkend:</span>
                                 <div className="flex items-baseline gap-2">
                                   <span className="text-[#BD20D3] font-extrabold text-3xl">
-                                    {activePrice} €
+                                    {weekendPrice} €
                                   </span>
-                                  <span className="text-xs text-gray-400">/ deň s DPH</span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* DETAIL SPECIFICATIONS GRID WITH CONTEXTUAL LIGHT CARD */}
+                          {/* SPECIFICATIONS */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                            {/* SOUND SPECS */}
+                            {/* SOUND */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
                               <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
                                 <Volume2 size={16} /> Zvuková technika
@@ -592,7 +560,7 @@ const InteractiveQuiz = () => {
                               </ul>
                             </div>
 
-                            {/* LIGHTING & EFFECTS SPECIAL CARD */}
+                            {/* LIGHTS */}
                             <div 
                               onClick={() => setIncludeLights(!includeLights)}
                               className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
@@ -610,11 +578,11 @@ const InteractiveQuiz = () => {
                                     </span>
                                   </div>
                                   
-                                  {/* Custom Circular State Switcher Icon instead of a heavy button */}
+                                  {/* Icon toggle */}
                                   <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                                     includeLights 
-                                      ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)] group-hover:scale-110' 
-                                      : 'bg-white/10 text-gray-400 border border-white/20 group-hover:scale-110 group-hover:text-white group-hover:border-white/40'
+                                      ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)]' 
+                                      : 'bg-white/10 text-gray-400 border border-white/20'
                                   }`}>
                                     {includeLights ? (
                                       <Check size={14} className="stroke-[3]" />
@@ -626,11 +594,11 @@ const InteractiveQuiz = () => {
 
                                 <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
                                   {includeLights 
-                                    ? 'Svetelná show je aktívna. Kliknutím na túto kartu ju odoberiete zo setu.' 
-                                    : `Kliknutím sem pridáte svetelnú šou a efekty k balíku iba za +${lightsUpgradePrice} €.`}
+                                    ? 'Svetelná show je pridaná a zahŕňa tieto položky:' 
+                                    : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} €)`}
                                 </p>
 
-                                <ul className="space-y-2">
+<ul className="space-y-2">
                                   {recommendedSet.lightSpecs.map((spec, i) => (
                                     <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
                                       <Check className={includeLights ? 'text-emerald-500 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
@@ -646,7 +614,6 @@ const InteractiveQuiz = () => {
                                 </ul>
                               </div>
                             </div>
-
                           </div>
 
                           <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -747,7 +714,6 @@ const InteractiveQuiz = () => {
                       )}
                     </div>
                   )}
-
                 </DialogContent>
               </Dialog>
             </div>
