@@ -315,7 +315,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     <CardFooter className="p-6 pt-0">
                       <Button 
                         onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
-                        className="w-full btn-cyber rounded-xl h-12 border-none font-bold text-sm"
+                        className="w-full btn-cyber rounded-xl h-14 border-none font-bold text-sm"
                       >
                         Detail balíka a rezervácia
                         <ChevronRight className="ml-2" size={14} />
