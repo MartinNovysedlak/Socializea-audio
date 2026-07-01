@@ -52,7 +52,7 @@ interface AdditionalProduct {
   id: string;
   label: string;
   quantity: number;
-  pricePerDay: number; // cena za 1 ks za deň
+  pricePerDay: number;
 }
 
 interface RentalItem {
@@ -61,7 +61,7 @@ interface RentalItem {
   image: string;
   category?: string;
   availableCount: number;
-  price: number | null; // cena za deň
+  price: number | null;
 }
 
 const SERVICES: AdditionalService[] = [
@@ -105,13 +105,11 @@ function getUsedInPackageForDbItem(dbItemName: string, packageUsedCounts: Record
   return totalUsed;
 }
 
-// Na získanie ceny produktu z rentalItems podľa ID
 function getItemPriceById(items: RentalItem[], id: string): number {
   const found = items.find(i => i.id === id);
   return found?.price ?? 0;
 }
 
-// Na získanie ceny pre custom (ručne zadanú) položku – placeholder, používateľ by mal zadať sám, ale na začiatok dáme 0
 const CUSTOM_ITEM_DEFAULT_PRICE = 0;
 
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
@@ -258,7 +256,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     if (existingIdx !== -1) {
       const updated = [...additionalProducts];
       const currentQty = updated[existingIdx].quantity;
-      // Cenu berieme z DB (môže sa líšiť od pôvodne uloženej, ak bola zmenená – ale toto je korektné)
       const updatedPrice = itemPrice;
       const newQty = Math.min(maxAvailable, currentQty + itemQuantity);
       updated[existingIdx] = { 
@@ -268,7 +265,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         pricePerDay: updatedPrice 
       };
       setAdditionalProducts(updated);
-      toast.success(`Množstvo zvýšené na ${newQty} ks (${updatedPrice} € / ks / deň)`);
+      toast.success(`Množstvo zvýšené na ${newQty} ks (${updatedPrice} € / ks / víkend)`);
     } else {
       setAdditionalProducts(prev => [...prev, { 
         id: selectedItem.id, 
@@ -276,7 +273,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         quantity: itemQuantity,
         pricePerDay: itemPrice 
       }]);
-      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / deň)`);
+      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend)`);
     }
 
     setSelectedItem(null);
@@ -303,7 +300,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     const totalPrice = activePackagePrice + servicesCost + additionalProductsCost;
 
     toast.success('Dopyt na balík bol odoslaný!', {
-      description: `Váš dopyt pre "${selectedPackage!.name}" bol zaznamenaný. Celková kalkulácia: ${totalPrice} € / deň. Náš tím vás čoskoro osloví.`
+      description: `Váš dopyt pre "${selectedPackage!.name}" bol zaznamenaný. Celková kalkulácia: ${totalPrice} € / víkend. Náš tím vás čoskoro osloví.`
     });
     onOpenChange(false);
   };
@@ -368,7 +365,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend:</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-[#BD20D3] font-extrabold text-3xl">{totalPrice} €</span>
-                      <span className="text-gray-400 text-xs">/ deň</span>
+                      <span className="text-gray-400 text-xs">/ víkend</span>
                     </div>
                     {includeLights && (
                       <p className="text-emerald-400 text-xs mt-1">
@@ -571,7 +568,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                             </div>
                             <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
                             {selectedItem.price != null && (
-                              <span className="text-[10px] text-[#BD20D3] font-bold">{selectedItem.price} € / ks / deň</span>
+                              <span className="text-[10px] text-[#BD20D3] font-bold">{selectedItem.price} € / ks / víkend</span>
                             )}
                           </div>
                           <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/10 rounded-xl p-2">
@@ -598,7 +595,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                             {(() => {
                               const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
                               const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
-                              return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${(selectedItem.price ?? 0) * itemQuantity} € / deň`;
+                              return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${(selectedItem.price ?? 0) * itemQuantity} € / víkend`;
                             })()}
                           </p>
                           <div className="flex gap-2 mt-2">
@@ -636,7 +633,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <span className="text-xs font-bold uppercase tracking-widest text-white pb-1">Súhrn cien</span>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
-                  <span className="text-white font-semibold">{activePackagePrice} € / deň</span>
+                  <span className="text-white font-semibold">{activePackagePrice} € / víkend</span>
                 </div>
                 
                 {additionalProducts.length > 0 && (
@@ -651,13 +648,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                               <Plus size={10} className="text-emerald-400" />
                               <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                             </span>
-                            <span className="text-white font-medium">{itemCost.toFixed(2)} € / deň</span>
+                            <span className="text-white font-medium">{itemCost.toFixed(2)} € / víkend</span>
                           </div>
                         );
                       })}
                       <div className="flex justify-between text-xs text-gray-400 border-t border-white/5 pt-1">
                         <span className="text-emerald-400 font-semibold">Medzisúčet produktov:</span>
-                        <span className="text-emerald-400 font-bold">{additionalProductsCost.toFixed(2)} € / deň</span>
+                        <span className="text-emerald-400 font-bold">{additionalProductsCost.toFixed(2)} € / víkend</span>
                       </div>
                     </div>
                   </>
@@ -675,7 +672,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 )}
                 
                 <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2 mt-2">
-                  <span className="text-white">Celková cena na deň:</span>
+                  <span className="text-white">Celková cena na víkend:</span>
                   <span className="text-[#BD20D3] text-xl">{totalPrice.toFixed(2)} €</span>
                 </div>
               </div>
@@ -690,13 +687,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <div className="space-y-2 text-center border-b border-white/5 pb-4">
                 <h3 className="text-lg md:text-xl font-bold text-white">Rezervácia: {selectedPackage.name}</h3>
                 <p className="text-xs text-gray-400">
-                  Celková cena: {totalPrice.toFixed(2)} € / deň ({includeLights ? 'so svetelnou show' : 'bez svetiel'})
+                  Celková cena: {totalPrice.toFixed(2)} € / víkend ({includeLights ? 'so svetelnou show' : 'bez svetiel'})
                 </p>
                 {selectedServicesList.length > 0 && (
                   <p className="text-xs text-[#1A4BFF]">+ {selectedServicesList.length} doplnková(é) služba(y) ({servicesCost} €)</p>
                 )}
                 {additionalProducts.length > 0 && (
-                  <p className="text-xs text-emerald-400">+ {additionalProducts.reduce((sum, p) => sum + p.quantity, 0)} ks produktov navyše ({additionalProductsCost.toFixed(2)} € / deň)</p>
+                  <p className="text-xs text-emerald-400">+ {additionalProducts.reduce((sum, p) => sum + p.quantity, 0)} ks produktov navyše ({additionalProductsCost.toFixed(2)} € / víkend)</p>
                 )}
                 <p className="text-xs text-gray-400">Ponuku vám vypracujeme a pošleme obratom na e-mail.</p>
               </div>
