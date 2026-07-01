@@ -233,6 +233,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
 
+  // Služby (inštalácia, deinštalácia)
+  const [installSelected, setInstallSelected] = useState(false);
+  const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
+
   const [additionalProducts, setAdditionalProducts] = useState<AdditionalProduct[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [rentalItems, setRentalItems] = useState<RentalItem[]>([]);
@@ -266,6 +270,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setCitySuggestions([]);
       setDeliveryResult(null);
       setDeliverySelected(false);
+      setInstallSelected(false);
+      setInstallUninstallSelected(false);
       setAdditionalProducts([]);
       setSearchTerm('');
       setSelectedItem(null);
@@ -364,12 +370,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setDeliverySelected(false);
   };
 
-  const toggleDelivery = () => {
-    if (deliverySelected) {
-      clearDelivery();
-    }
-  };
-
   const handleCityKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && citySuggestions.length > 0) {
       e.preventDefault();
@@ -459,7 +459,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     const activePackagePrice = includeLights ? selectedPackage!.priceWithLights : selectedPackage!.priceNoLights;
     const additionalProductsCost = additionalProducts.reduce((sum, p) => sum + p.pricePerDay * p.quantity, 0);
     const deliveryCost = deliveryResult?.price ?? 0;
-    const totalPrice = activePackagePrice + additionalProductsCost + deliveryCost;
+    const installCost = installSelected ? 20 : 0;
+    const installUninstallCost = installUninstallSelected ? 40 : 0;
+    const totalPrice = activePackagePrice + additionalProductsCost + deliveryCost + installCost + installUninstallCost;
 
     toast.success('Dopyt na balík bol odoslaný!', {
       description: `Váš dopyt pre "${selectedPackage!.name}" bol zaznamenaný. Celková kalkulácia: ${totalPrice} € / víkend. Náš tím vás čoskoro osloví.`
@@ -475,7 +477,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const lightsUpgradePrice = selectedPackage.priceWithLights - selectedPackage.priceNoLights;
   const additionalProductsCost = additionalProducts.reduce((sum, p) => sum + p.pricePerDay * p.quantity, 0);
   const deliveryCost = deliveryResult?.price ?? 0;
-  const totalPrice = activePackagePrice + additionalProductsCost + deliveryCost;
+  const installCost = installSelected ? 20 : 0;
+  const installUninstallCost = installUninstallSelected ? 40 : 0;
+  const totalServiceCost = installCost + installUninstallCost + deliveryCost;
+  const totalPrice = activePackagePrice + additionalProductsCost + totalServiceCost;
 
   const hasLightSection = selectedPackage.lightSpecs.length > 0 || (selectedPackage.otherSpecs && selectedPackage.otherSpecs.length > 0);
 
@@ -595,107 +600,153 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 )}
               </div>
 
-              {/* DOPRAVA - NOVÁ SEKCIA */}
+              {/* DOPLNKOVÉ SLUŽBY */}
               <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
-                  <Truck size={16} /> Doprava a odber
+                  <Wrench size={16} /> Doplnkové služby
                 </span>
 
-                <div className="relative" ref={cityRef}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20"
+                {/* Inštalácia a deinštalácia - klasické zaškrtávacie položky */}
+                <div className="space-y-2">
+                  <div 
                     onClick={() => {
-                      if (!deliverySelected) {
-                        const input = document.getElementById('city-input') as HTMLInputElement;
-                        input?.focus();
-                      }
+                      setInstallSelected(!installSelected);
+                      if (!installSelected) setInstallUninstallSelected(false);
                     }}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                      installSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'
+                    }`}
                   >
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${
-                      deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'
-                    }`}>
-                      {deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} className="text-gray-500 shrink-0" />
-                        <Input
-                          id="city-input"
-                          type="text"
-                          value={deliveryCity}
-                          onChange={(e) => {
-                            setDeliveryCity(e.target.value);
-                            setDeliverySelected(false);
-                            setDeliveryResult(null);
-                          }}
-                          onKeyDown={handleCityKeyDown}
-                          onFocus={() => { if (deliveryCity.length >= 2) setCityDropdownOpen(true); }}
-                          placeholder="Napíšte názov mesta (SK/CZ)..."
-                          className="bg-transparent border-0 text-white text-xs h-auto p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
-                        />
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                        installSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'
+                      }`}>
+                        {installSelected && <Check size={12} className="text-white stroke-[3]" />}
                       </div>
-                      
-                      {deliveryResult && deliverySelected && (
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            deliveryResult.isFree 
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' 
-                              : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
-                          }`}>
-                            {deliveryResult.isFree ? '✓ Doprava ZDARMA' : `Doprava: ${deliveryResult.price.toFixed(2)} €`}
-                          </span>
-                          {!deliveryResult.isFree && (
-                            <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                              <Navigation size={10} />
-                              {deliveryResult.distance} km od {deliveryResult.nearestPoint}
-                            </span>
-                          )}
-                          {deliveryResult.isKysuce && (
-                            <span className="text-[10px] text-gray-500">(Kysuce – zadarmo)</span>
-                          )}
-                        </div>
-                      )}
+                      <span className="text-xs text-gray-300 font-medium">Inštalácia</span>
                     </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {deliverySelected && (
-                        <button 
-                          type="button" 
-                          onClick={(e) => { e.stopPropagation(); clearDelivery(); }}
-                          className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all"
-                        >
-                          <X size={10} />
-                        </button>
-                      )}
-                      <span className={`text-xs font-bold ${deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>
-                        {deliverySelected ? deliveryCost === 0 ? 'Zdarma' : `+${deliveryCost.toFixed(2)} €` : 'Vybrať'}
-                      </span>
-                    </div>
+                    <span className={`text-xs font-bold ${installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>+20 €</span>
                   </div>
 
-                  {cityDropdownOpen && citySuggestions.length > 0 && !deliverySelected && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
-                      {citySuggestions.map((city, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => selectCity(city.name)}
-                          className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
-                        >
-                          <MapPin size={13} className="text-gray-500 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-white truncate">{city.name}</p>
-                          </div>
-                          <span className="text-[9px] text-gray-500 uppercase">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
-                        </button>
-                      ))}
+                  <div 
+                    onClick={() => {
+                      setInstallUninstallSelected(!installUninstallSelected);
+                      if (!installUninstallSelected) setInstallSelected(false);
+                    }}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                      installUninstallSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                        installUninstallSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'
+                      }`}>
+                        {installUninstallSelected && <Check size={12} className="text-white stroke-[3]" />}
+                      </div>
+                      <span className="text-xs text-gray-300 font-medium">Inštalácia a deinštalácia</span>
                     </div>
-                  )}
+                    <span className={`text-xs font-bold ${installUninstallSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>+40 €</span>
+                  </div>
                 </div>
 
-                <p className="text-[10px] text-gray-500 leading-relaxed">
-                  Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.
-                </p>
+                {/* Deliaca čiara medzi službami a dopravou */}
+                <div className="border-t border-white/[0.06] pt-3 space-y-2">
+                  <div className="relative" ref={cityRef}>
+                    <div className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20"
+                      onClick={() => {
+                        if (!deliverySelected) {
+                          const input = document.getElementById('city-input') as HTMLInputElement;
+                          input?.focus();
+                        }
+                      }}
+                    >
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${
+                        deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'
+                      }`}>
+                        {deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Truck size={14} className="text-gray-500 shrink-0" />
+                          <Input
+                            id="city-input"
+                            type="text"
+                            value={deliveryCity}
+                            onChange={(e) => {
+                              setDeliveryCity(e.target.value);
+                              setDeliverySelected(false);
+                              setDeliveryResult(null);
+                            }}
+                            onKeyDown={handleCityKeyDown}
+                            onFocus={() => { if (deliveryCity.length >= 2) setCityDropdownOpen(true); }}
+                            placeholder="Doprava – napíšte mesto (SK/CZ)..."
+                            className="bg-transparent border-0 text-white text-xs h-auto p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                          />
+                        </div>
+                        
+                        {deliveryResult && deliverySelected && (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              deliveryResult.isFree 
+                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' 
+                                : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
+                            }`}>
+                              {deliveryResult.isFree ? '✓ Doprava ZDARMA' : `Doprava: ${deliveryResult.price.toFixed(2)} €`}
+                            </span>
+                            {!deliveryResult.isFree && (
+                              <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                <Navigation size={10} />
+                                {deliveryResult.distance} km od {deliveryResult.nearestPoint}
+                              </span>
+                            )}
+                            {deliveryResult.isKysuce && (
+                              <span className="text-[10px] text-gray-500">(Kysuce – zadarmo)</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {deliverySelected && (
+                          <button 
+                            type="button" 
+                            onClick={(e) => { e.stopPropagation(); clearDelivery(); }}
+                            className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all"
+                          >
+                            <X size={10} />
+                          </button>
+                        )}
+                        <span className={`text-xs font-bold ${deliverySelected ? (deliveryCost === 0 ? 'text-emerald-400' : 'text-[#1A4BFF]') : 'text-gray-500'}`}>
+                          {deliverySelected ? deliveryCost === 0 ? 'Zadarmo' : `+${deliveryCost.toFixed(2)} €` : 'Vybrať'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {cityDropdownOpen && citySuggestions.length > 0 && !deliverySelected && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                        {citySuggestions.map((city, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => selectCity(city.name)}
+                            className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
+                          >
+                            <MapPin size={13} className="text-gray-500 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-white truncate">{city.name}</p>
+                            </div>
+                            <span className="text-[9px] text-gray-500 uppercase">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.
+                  </p>
+                </div>
               </div>
 
               {/* ĎALŠIE PRODUKTY */}
@@ -873,6 +924,19 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
                   <span className="text-white font-semibold">{activePackagePrice} € / víkend</span>
                 </div>
+
+                {installSelected && (
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Inštalácia:</span>
+                    <span className="text-[#1A4BFF] font-semibold">+20 €</span>
+                  </div>
+                )}
+                {installUninstallSelected && (
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Inštalácia a deinštalácia:</span>
+                    <span className="text-[#1A4BFF] font-semibold">+40 €</span>
+                  </div>
+                )}
                 
                 {deliverySelected && deliveryResult && (
                   <div className="flex justify-between text-xs text-gray-400">
@@ -928,6 +992,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 {deliverySelected && deliveryResult && (
                   <p className="text-xs text-[#1A4BFF]">
                     Doprava do {deliveryCity}: {deliveryResult.isFree ? 'Zdarma' : `${deliveryResult.price.toFixed(2)} €`}
+                  </p>
+                )}
+                {(installSelected || installUninstallSelected) && (
+                  <p className="text-xs text-[#1A4BFF]">
+                    Doplnkové služby: {installSelected ? 'Inštalácia' : ''}{installUninstallSelected ? 'Inštalácia a deinštalácia' : ''} ({totalServiceCost.toFixed(2)} €)
                   </p>
                 )}
                 {additionalProducts.length > 0 && (
