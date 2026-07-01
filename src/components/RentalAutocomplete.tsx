@@ -30,7 +30,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch rental items ONLY from database
+  // Fetch rental items from database (equipment table)
   useEffect(() => {
     const fetchRentalItems = async () => {
       setLoading(true);
@@ -42,7 +42,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
           const mapped: RentalItem[] = data.map((item: any) => ({
             id: item.id,
             name: item.name,
-            image: item.image || '',
+            image: item.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop',
             category: item.category || ''
           }));
           setRentalItems(mapped);
@@ -161,12 +161,12 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
                 setIsOpen(true);
               }}
               onFocus={() => {
-                if (searchTerm.trim()) setIsOpen(true);
+                setIsOpen(true);
               }}
               onKeyDown={handleKeyDown}
-              placeholder={dbError && !loading ? 'Databáza nie je dostupná...' : placeholder}
+              placeholder={loading ? 'Načítavam...' : placeholder}
               className="bg-black/50 border-white/10 text-white rounded-xl h-11 pl-10 flex-1"
-              disabled={loading || dbError}
+              disabled={loading && !dbError}
             />
             {loading && (
               <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] animate-spin" />
@@ -188,65 +188,64 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
           </Button>
         </div>
 
-        {/* Loading state */}
-        {loading && (
-          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
-            <Loader2 size={16} className="mx-auto mb-1.5 text-[#BD20D3] animate-spin" />
-            <p>Načítavam položky z databázy...</p>
-          </div>
-        )}
+        {/* Dropdown content - only visible when isOpen and searchTerm is not empty */}
+        {isOpen && searchTerm.trim() && (
+          <>
+            {/* Loading state */}
+            {loading && (
+              <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
+                <Loader2 size={16} className="mx-auto mb-1.5 text-[#BD20D3] animate-spin" />
+                <p>Načítavam položky z databázy...</p>
+              </div>
+            )}
 
-        {/* Database error state */}
-        {!loading && dbError && (
-          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
-            <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
-            <p>Databáza nie je dostupná alebo neobsahuje žiadne položky na prenájom.</p>
-          </div>
-        )}
+            {/* Database error / empty state */}
+            {!loading && dbError && (
+              <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
+                <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
+                <p>Databáza nie je dostupná alebo neobsahuje žiadne položky na prenájom.</p>
+              </div>
+            )}
 
-        {/* Suggestions dropdown - ONLY from database */}
-        {isOpen && filteredItems.length > 0 && !loading && !dbError && (
-          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
-            {filteredItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelectItem(item)}
-                className="flex items-center gap-3 w-full p-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-b-0"
-              >
-                <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500">
-                      <Package size={14} />
+            {/* Suggestions dropdown - ONLY from database */}
+            {!loading && !dbError && filteredItems.length > 0 && (
+              <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                {filteredItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectItem(item)}
+                    className="flex items-center gap-3 w-full p-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-b-0"
+                  >
+                    <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white truncate">{item.name}</p>
-                  {item.category && (
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{item.category}</p>
-                  )}
-                </div>
-                <div className="w-6 h-6 rounded-full border border-white/20 hover:bg-[#BD20D3]/30 hover:border-[#BD20D3]/50 flex items-center justify-center transition-colors">
-                  <Check size={12} className="text-white" />
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{item.name}</p>
+                      {item.category && (
+                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">{item.category}</p>
+                      )}
+                    </div>
+                    <div className="w-6 h-6 rounded-full border border-white/20 hover:bg-[#BD20D3]/30 hover:border-[#BD20D3]/50 flex items-center justify-center transition-colors">
+                      <Check size={12} className="text-white" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
 
-        {/* Empty search result */}
-        {searchTerm.trim() && filteredItems.length === 0 && !loading && !dbError && (
-          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
-            <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
-            <p>Žiadna položka sa nenašla v databáze. Stlačte Enter pre pridanie vlastnej.</p>
-          </div>
+            {/* Empty search result */}
+            {!loading && !dbError && filteredItems.length === 0 && (
+              <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
+                <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
+                <p>Žiadna položka sa nenašla v databáze. Stlačte Enter pre pridanie vlastnej.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
