@@ -463,8 +463,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
 
               {/* ĎALŠIE PRODUKTY */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5 pb-2 border-b border-white/10">
+              <div className="bg-[#BD20D3]/[0.04] border border-[#BD20D3]/20 rounded-2xl p-5 space-y-3">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-[#BD20D3]/10">
                   <ShoppingBag size={16} /> Ďalšie produkty (voliteľné)
                 </span>
 
@@ -487,7 +487,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           }
                         }}
                         placeholder="Hľadať v databáze alebo napísať vlastnú položku..."
-                        className="bg-black/40 border-white/10 text-white rounded-xl h-10 pl-9 text-xs"
+                        className="bg-black/40 border-[#BD20D3]/20 text-white rounded-xl h-10 pl-9 text-xs placeholder:text-gray-500 focus:border-[#BD20D3]/50"
                       />
                     </div>
                     <Button
@@ -498,7 +498,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         else if (searchTerm.trim()) addCustomProduct();
                       }}
                       disabled={!searchTerm.trim()}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-white rounded-xl h-10 px-3 text-xs disabled:opacity-30"
+                      className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 border border-[#BD20D3]/30 text-white rounded-xl h-10 px-3 text-xs disabled:opacity-30"
                     >
                       <Plus size={14} className="mr-1" /> Pridať
                     </Button>
@@ -508,7 +508,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     <>
                       {loadingItems && (
                         <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-3 text-center z-50">
-                          <Loader2 size={14} className="mx-auto mb-1 text-emerald-400 animate-spin" />
+                          <Loader2 size={14} className="mx-auto mb-1 text-[#BD20D3] animate-spin" />
                           <p className="text-[10px] text-gray-500">Hľadám...</p>
                         </div>
                       )}
@@ -518,7 +518,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       )}
                       {!loadingItems && !dbError && filteredItems.length > 0 && !selectedItem && (
-                        <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                        <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-[#BD20D3]/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
                           {filteredItems.map((item) => {
                             const remaining = getAvailableForItem(item.name, item.availableCount);
                             return (
@@ -533,8 +533,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                                   setSelectedItem(item);
                                   setItemQuantity(1);
                                 }}
-                                className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/5 last:border-b-0 ${
-                                  remaining > 0 ? 'hover:bg-white/5 cursor-pointer' : 'opacity-40 cursor-not-allowed'
+                                className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-[#BD20D3]/10 last:border-b-0 ${
+                                  remaining > 0 ? 'hover:bg-[#BD20D3]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed'
                                 }`}
                               >
                                 <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
@@ -547,13 +547,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                                 {item.price != null && (
                                   <span className="text-[9px] text-[#BD20D3] shrink-0 mr-2">{item.price} €</span>
                                 )}
-                                <div className={`text-[9px] mr-2 shrink-0 ${remaining > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                <div className={`text-[9px] mr-2 shrink-0 ${remaining > 0 ? 'text-[#BD20D3]' : 'text-red-400'}`}>
                                   {remaining > 0 ? `${remaining} ks voľných` : 'Vypredané'}
                                 </div>
                                 <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                  remaining > 0 ? 'border-white/20 hover:bg-emerald-500/30 hover:border-emerald-500/50' : 'border-red-500/30 bg-red-500/10'
+                                  remaining > 0 ? 'border-[#BD20D3]/30 hover:bg-[#BD20D3]/30 hover:border-[#BD20D3]/50' : 'border-red-500/30 bg-red-500/10'
                                 }`}>
-                                  <Plus size={10} className={remaining > 0 ? "text-white" : "text-red-400"} />
+                                  <Plus size={10} className={remaining > 0 ? "text-[#BD20D3]" : "text-red-400"} />
                                 </div>
                               </button>
                             );
@@ -561,7 +561,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       )}
                       {!loadingItems && !dbError && selectedItem && (
-                        <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-emerald-500/30 rounded-xl p-3 shadow-2xl z-50">
+                        <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-[#BD20D3]/30 rounded-xl p-3 shadow-2xl z-50">
                           <div className="flex items-center gap-2.5 mb-2">
                             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
                               <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
@@ -571,10 +571,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                               <span className="text-[10px] text-[#BD20D3] font-bold">{selectedItem.price} € / ks / víkend</span>
                             )}
                           </div>
-                          <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/10 rounded-xl p-2">
+                          <div className="flex items-center justify-between gap-3 bg-black/40 border border-[#BD20D3]/20 rounded-xl p-2">
                             <span className="text-[10px] text-gray-400 uppercase shrink-0">Počet:</span>
                             <div className="flex items-center gap-1.5">
-                              <button type="button" onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))} className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white">
+                              <button type="button" onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))} className="w-7 h-7 rounded-lg bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#BD20D3]/20">
                                 <Minus size={12} />
                               </button>
                               <span className="w-8 text-center text-white font-bold text-sm">{itemQuantity}</span>
@@ -585,7 +585,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                                   setItemQuantity(Math.min(maxAvailable, itemQuantity + 1));
                                 }}
                                 disabled={itemQuantity >= getAvailableForItem(selectedItem.name, selectedItem.availableCount)}
-                                className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white disabled:opacity-30"
+                                className="w-7 h-7 rounded-lg bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#BD20D3]/20 disabled:opacity-30"
                               >
                                 <Plus size={12} />
                               </button>
@@ -600,7 +600,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           </p>
                           <div className="flex gap-2 mt-2">
                             <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedItem(null); setItemQuantity(1); }} className="text-[10px] text-gray-400 hover:text-white h-8 flex-1">Zrušiť</Button>
-                            <Button type="button" size="sm" onClick={confirmRentalItem} className="bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-white rounded-lg h-8 flex-1 text-[10px] font-semibold">
+                            <Button type="button" size="sm" onClick={confirmRentalItem} className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 border border-[#BD20D3]/30 text-white rounded-lg h-8 flex-1 text-[10px] font-semibold">
                               <ShoppingBag size={12} className="mr-1" />
                               Pridať {itemQuantity} ks
                             </Button>
@@ -614,7 +614,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 {additionalProducts.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-2">
                     {additionalProducts.map(product => (
-                      <div key={product.id} className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full pl-3 pr-1.5 py-1">
+                      <div key={product.id} className="flex items-center gap-1.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full pl-3 pr-1.5 py-1">
                         <span className="text-[11px] text-white truncate max-w-[180px]">{product.label}</span>
                         {product.pricePerDay > 0 && (
                           <span className="text-[9px] text-[#BD20D3] font-bold">({product.pricePerDay} €/ks)</span>
@@ -629,8 +629,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
 
               {/* ============ SÚHRN CIEN ============ */}
-              <div className="bg-black/30 border border-white/10 rounded-2xl p-5 space-y-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-white pb-1">Súhrn cien</span>
+              <div className="bg-[#BD20D3]/[0.06] border border-[#BD20D3]/20 rounded-2xl p-5 space-y-2 shadow-[inset_0_0_30px_rgba(189,32,211,0.03)]">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] pb-1">Súhrn cien</span>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
                   <span className="text-white font-semibold">{activePackagePrice} € / víkend</span>
@@ -638,23 +638,23 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 
                 {additionalProducts.length > 0 && (
                   <>
-                    <div className="border-t border-white/5 pt-2 mt-2 space-y-1.5">
-                      <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Pridané produkty:</p>
+                    <div className="border-t border-[#BD20D3]/10 pt-2 mt-2 space-y-1.5">
+                      <p className="text-[10px] text-[#BD20D3]/60 uppercase tracking-wider font-bold">Pridané produkty:</p>
                       {additionalProducts.map(p => {
                         const itemCost = p.pricePerDay * p.quantity;
                         return (
                           <div key={p.id} className="flex justify-between text-[11px] text-gray-400">
                             <span className="flex items-center gap-1">
-                              <Plus size={10} className="text-emerald-400" />
+                              <Plus size={10} className="text-[#BD20D3]" />
                               <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                             </span>
                             <span className="text-white font-medium">{itemCost.toFixed(2)} € / víkend</span>
                           </div>
                         );
                       })}
-                      <div className="flex justify-between text-xs text-gray-400 border-t border-white/5 pt-1">
-                        <span className="text-emerald-400 font-semibold">Medzisúčet produktov:</span>
-                        <span className="text-emerald-400 font-bold">{additionalProductsCost.toFixed(2)} € / víkend</span>
+                      <div className="flex justify-between text-xs text-gray-400 border-t border-[#BD20D3]/10 pt-1">
+                        <span className="text-[#BD20D3] font-semibold">Medzisúčet produktov:</span>
+                        <span className="text-[#BD20D3] font-bold">{additionalProductsCost.toFixed(2)} € / víkend</span>
                       </div>
                     </div>
                   </>
@@ -671,7 +671,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </>
                 )}
                 
-                <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2 mt-2">
+                <div className="flex justify-between text-sm font-bold border-t border-[#BD20D3]/20 pt-2 mt-2">
                   <span className="text-white">Celková cena na víkend:</span>
                   <span className="text-[#BD20D3] text-xl">{totalPrice.toFixed(2)} €</span>
                 </div>
@@ -693,7 +693,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   <p className="text-xs text-[#1A4BFF]">+ {selectedServicesList.length} doplnková(é) služba(y) ({servicesCost} €)</p>
                 )}
                 {additionalProducts.length > 0 && (
-                  <p className="text-xs text-emerald-400">+ {additionalProducts.reduce((sum, p) => sum + p.quantity, 0)} ks produktov navyše ({additionalProductsCost.toFixed(2)} € / víkend)</p>
+                  <p className="text-xs text-[#BD20D3]">+ {additionalProducts.reduce((sum, p) => sum + p.quantity, 0)} ks produktov navyše ({additionalProductsCost.toFixed(2)} € / víkend)</p>
                 )}
                 <p className="text-xs text-gray-400">Ponuku vám vypracujeme a pošleme obratom na e-mail.</p>
               </div>
