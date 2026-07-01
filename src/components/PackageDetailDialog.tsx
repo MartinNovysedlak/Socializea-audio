@@ -537,15 +537,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
         <div className="space-y-6">
           <div className="space-y-6">
-            <div className="text-center space-y-2 border-b border-white/5 pb-4">
-              <h3 className="text-xl md:text-2xl font-bold text-white">
-                {selectedPackage.name}
-              </h3>
-              <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-                {selectedPackage.description}
-              </p>
-            </div>
-
+            {/* Warning – zachovávam */}
             {selectedPackage.warning && (
               <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
                 <HelpCircle className="shrink-0 mt-0.5 text-amber-400" size={18} />
@@ -578,6 +570,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       {includeLights ? 'SO SVETLAMI' : 'BEZ SVETIEL'}
                     </span>
                   </div>
+                  {/* POPIS pod názvom */}
+                  <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-2">
+                    {selectedPackage.description}
+                  </p>
                 </div>
                 <div className="pt-2 border-t border-white/5">
                   <span className="text-xs text-gray-400 uppercase font-bold block">
