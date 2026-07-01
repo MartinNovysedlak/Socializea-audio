@@ -102,6 +102,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
   }, []);
 
+  // FIX: compute total items directly from quantities object and package items,
+  // so the cart button appears even when equipment data hasn't loaded yet.
+  const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+  const totalItems = totalEquipmentQty + packageItems.length;
+
   const cartItems = Object.entries(quantities)
     .filter(([_, qty]) => qty > 0)
     .map(([id, qty]) => {
@@ -109,8 +114,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       return { item, qty };
     })
     .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
-
-  const totalItems = cartItems.reduce((sum, current) => sum + current.qty, 0) + packageItems.length;
 
   const calculateDays = () => {
     if (!formData.dateFrom || !formData.dateTo) return 1;

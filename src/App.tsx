@@ -12,13 +12,13 @@ import BlogPostDetail from './pages/BlogPostDetail';
 import Predaj from './pages/Predaj';
 import ProductDetail from './pages/ProductDetail';
 import NotFound from './pages/NotFound';
+import FloatingCart from './components/FloatingCart';
 import { useEquipment } from './hooks/useEquipment';
 import AmbientBackground from './components/AmbientBackground';
 
 function App() {
   const { equipment } = useEquipment();
   
-  // Inicializácia stavu košíka priamo z localStorage, aby bol v celej aplikácii identický
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     try {
       const saved = localStorage.getItem("cyber_cart_quantities");
@@ -28,7 +28,6 @@ function App() {
     }
   });
 
-  // Uloženie stavu do localStorage pri každej zmene
   useEffect(() => {
     try {
       localStorage.setItem("cyber_cart_quantities", JSON.stringify(quantities));
@@ -39,10 +38,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Globálne podmanivé osvetlenie pódiového charakteru */}
       <AmbientBackground />
       
-      {/* Všetky stránky majú relatívny z-index, aby plávali nad svetlami pozadia */}
       <div className="relative z-10">
         <Routes>
           <Route path="/" element={<Index />} />
@@ -85,6 +82,13 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
+
+      {/* Globálny plávajúci košík – zobrazí sa na všetkých stránkach, ak má položky */}
+      <FloatingCart 
+        quantities={quantities} 
+        setQuantities={setQuantities} 
+        equipment={equipment} 
+      />
     </BrowserRouter>
   );
 }
