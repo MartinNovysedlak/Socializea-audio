@@ -12,14 +12,7 @@ import {
   Plus,
   Minus,
   Clock,
-  ChevronRight,
-  Package,
-  Wrench,
-  MapPin,
-  Lightbulb,
-  Check,
-  Trash2,
-  Volume2,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,17 +23,14 @@ import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
-import { CartItem } from "@/types/cart";
 
 interface FloatingCartProps {
   quantities: Record<string, number>;
   setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   equipment: EquipmentItem[];
-  cartItems: CartItem[];
-  onRemoveCartItem: (id: string) => void;
 }
 
-const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemoveCartItem }: FloatingCartProps) => {
+const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showFromCalendar, setShowFromCalendar] = useState(false);
@@ -59,15 +49,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
     message: ""
   });
 
-  const productItems = Object.entries(quantities)
+  const cartItems = Object.entries(quantities)
     .filter(([_, qty]) => qty > 0)
     .map(([id, qty]) => {
       const item = equipment.find((e) => e.id === id);
       return { item, qty };
     })
-    .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+  .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
-  const totalItems = productItems.reduce((sum, current) => sum + current.qty, 0) + cartItems.length;
+  const totalItems = cartItems.reduce((sum, current) => sum + current.qty, 0);
 
   const calculateDays = () => {
     if (!formData.dateFrom || !formData.dateTo) return 1;
@@ -81,20 +71,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
   const days = calculateDays();
 
   const getSubtotalPerDay = () => {
-    let sub = 0;
-    // products
-    sub += productItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
-    // packages – each package is counted as one item per day, but the price already includes all services per weekend
-    // For the daily breakdown, we treat package price as "per day" (since the pricing model is per weekend)
-    sub += cartItems
-      .filter((ci): ci is any => ci.type === 'package')
-      .reduce((sum, pkg) => sum + pkg.price, 0);
-    return sub;
+    return cartItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
   };
 
   const subtotalPerDay = getSubtotalPerDay();
 
-  // First-day pricing logic (same as before for products)
+  // Nová logika: prvý deň plná cena, každý ďalší deň = 50% z ceny prvého dňa
   const firstDayTotal = subtotalPerDay;
   const additionalDaysTotal = days > 1 ? (days - 1) * subtotalPerDay * 0.5 : 0;
   const grandTotal = firstDayTotal + additionalDaysTotal;
@@ -181,8 +163,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
       dateTo: "",
       message: ""
     });
-    // Clear cart items
-    cartItems.forEach(item => onRemoveCartItem(item.id));
     setIsOpen(false);
   };
 
@@ -323,7 +303,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
             </h4>
 
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-              {productItems.map(({ item, qty }) => {
+              {cartItems.map(({ item, qty }) => {
                 const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                 return (
                   <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
@@ -341,24 +321,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
                   </div>
                 );
               })}
-
-              {cartItems.map((ci) => (
-                <div key={ci.id} className="flex items-center gap-2 text-sm text-gray-300 border-t border-white/5 pt-1 first:border-t-0 first:pt-0">
-                  {ci.type === 'package' ? (
-                    <>
-                      <div className="w-8 h-8 rounded overflow-hidden bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center shrink-0">
-                        {ci.image ? (
-                          <img src={ci.image} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <Package size={14} className="text-[#BD20D3]" />
-                        )}
-                      </div>
-                      <span className="truncate flex-grow font-semibold text-[#BD20D3]">{ci.packageName}</span>
-                      <span className="text-white text-xs font-semibold shrink-0">{ci.price.toFixed(2)} €</span>
-                    </>
-                  ) : null}
-                </div>
-              ))}
             </div>
 
             <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
@@ -418,13 +380,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
                     <span className="text-xs bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-2.5 py-0.5 rounded-full">
-                      {totalItems} {totalItems === 1 ? 'položka' : totalItems < 5 ? 'položky' : 'položiek'}
+                      {totalItems} ks
                     </span>
                   </h3>
 
                   <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                    {/* Products */}
-                    {productItems.map(({ item, qty }) => {
+                    {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
                         <div key={item.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-2 md:p-3">
@@ -471,80 +432,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
                         </div>
                       );
                     })}
-
-                    {/* Package items */}
-                    {cartItems.map((ci) => {
-                      if (ci.type === 'package') {
-                        const pkg = ci;
-                        return (
-                          <div key={pkg.id} className="bg-gradient-to-br from-[#BD20D3]/5 to-[#1A4BFF]/5 border border-[#BD20D3]/20 rounded-xl p-3 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-black/40 border border-white/10">
-                                  {pkg.image ? (
-                                    <img src={pkg.image} alt="" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[#BD20D3]">
-                                      <Package size={16} />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="min-w-0">
-                                  <h4 className="text-sm font-bold text-white truncate">{pkg.packageName}</h4>
-                                  <span className="text-[10px] text-gray-400">
-                                    Balík {pkg.includeLights ? 'so svetlami' : 'bez svetiel'}
-                                  </span>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => onRemoveCartItem(pkg.id)}
-                                className="w-6 h-6 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center shrink-0 transition-all"
-                              >
-                                <Trash2 size={11} className="text-gray-400 hover:text-white" />
-                              </button>
-                            </div>
-
-                            {/* Show package details */}
-                            <div className="space-y-1 text-[11px] text-gray-400">
-                              {(pkg.installSelected || pkg.installUninstallSelected) && (
-                                <div className="flex items-center gap-1.5">
-                                  <Wrench size={12} className="text-[#1A4BFF]" />
-                                  <span className="text-gray-300">
-                                    {pkg.installUninstallSelected ? 'Inštalácia a deinštalácia' : 'Inštalácia'}
-                                  </span>
-                                </div>
-                              )}
-                              {pkg.deliverySelected && pkg.deliveryCity && (
-                                <div className="flex items-center gap-1.5">
-                                  <MapPin size={12} className="text-[#1A4BFF]" />
-                                  <span className="text-gray-300">
-                                    Doprava: {pkg.deliveryCity}
-                                    {pkg.deliveryResult && !pkg.deliveryResult.isFree && ` (+${pkg.deliveryResult.price.toFixed(2)} €)`}
-                                    {pkg.deliveryResult?.isFree && ' (zdarma)'}
-                                  </span>
-                                </div>
-                              )}
-                              {pkg.additionalProducts.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {pkg.additionalProducts.map((ap) => (
-                                    <span key={ap.id} className="text-[10px] bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 rounded-full px-2 py-0.5 text-gray-300">
-                                      {ap.label}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="border-t border-white/5 pt-2 flex justify-between items-center">
-                              <span className="text-[10px] text-gray-500">Cena na víkend:</span>
-                              <span className="text-[#BD20D3] font-bold text-sm">{pkg.price.toFixed(2)} €</span>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
                   </div>
 
                   {/* SUMMARY SECTION */}
@@ -561,6 +448,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment, cartItems, onRemov
                       </span>
                     </div>
 
+                    {/* Rozpis cien podľa nového modelu */}
                     {days > 1 && (
                       <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 space-y-1.5 mt-2">
                         <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
