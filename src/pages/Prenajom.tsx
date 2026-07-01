@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
 import FloatingCart from '@/components/FloatingCart';
@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { EquipmentItem } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { packagesService, PackageData } from '@/lib/packagesService';
+import { format } from 'date-fns';
 
 interface PresetPackage {
   id: string;
@@ -52,25 +54,16 @@ interface PresetPackage {
   warning?: string;
 }
 
-// All 8 packages matching the quiz configuration
-const presetPackages: PresetPackage[] = [
+const PRESET_FALLBACK: PresetPackage[] = [
   {
     id: 'kompakt-prezentacia',
     name: 'BALÍK 1: Kompakt Prezentácia',
     priceNoLights: 100,
     priceWithLights: 130,
     image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
-    description: 'Zameranie: Firemné prezentácie, prednášky, schôdze do 30-100 ľudí (dôraz na čistú reč a obraz).',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802 (kompaktný, jednoduchý na obsluhu)',
-      '2x Reproduktory Behringer B112D (dostatok výkonu na hovorené slovo)',
-      '1x Sada 2 bezdrôtových mikrofónov the t.bone free solo Twin HT',
-      '2x Trojnožka na reproduktory',
-      '2x Stojan na mikrofón'
-    ],
-    lightSpecs: [
-      '4x RGBWA UV Led Par svetlá (nastavené na statickú teplú bielu/oranžovú farbu pre rečníka alebo do pozadia)'
-    ]
+    description: 'Firemné prezentácie, prednášky, schôdze do 30-100 ľudí.',
+    soundSpecs: ['2x Behringer B112D', '1x Mix Xenyx 802', '2x bezdrôt mikrofón'],
+    lightSpecs: ['4x RGBWA UV Par']
   },
   {
     id: 'party-mini',
@@ -78,19 +71,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 110,
     priceWithLights: 140,
     image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
-    description: 'Zameranie: Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí, kde sa vyžaduje dynamický basový základ.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802',
-      '1x Reproduktory Behringer B112D',
-      '1x Subwoofer Behringer B1500XP (15" aktívny sub, ktorý ľahko prevezieš aj v kufri auta)',
-      '1x Teleskopická tyč na reproduktory',
-      '1x Samostatný káblový mikrofón'
-    ],
-    lightSpecs: [
-      '1x Svetelný set BeamZ Party Bar (všetko v jednom na stojane, jednoduchá montáž)',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300 (zvýrazní svetelné lúče v priestore)'
-    ]
+    description: 'Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí.',
+    soundSpecs: ['1x Behringer B112D', '1x Sub B1500XP', '1x mikrofón'],
+    lightSpecs: ['BeamZ Party Bar', '2x Laser', 'Dymostroj']
   },
   {
     id: 'oslava-mini',
@@ -98,20 +81,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 140,
     priceWithLights: 180,
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
-    description: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách and sálach, kde netreba prehnaný basový tlak, ale peknú atmosféru.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802',
-      '2x Reproduktory Behringer B112D',
-      '1x Subwoofer Behringer B1500XP (15" aktívny sub, ktorý ľahko prevezieš aj v kufri auta)',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT (pre príhovory a moderovanie)',
-      '2x Trojnožka na reproduktory',
-      '1x Stojan na mikrofón'
-    ],
-    lightSpecs: [
-      '1x Svetelný set BeamZ Party Bar (všetko v jednom na stojane, jednoduchá montáž)',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300'
-    ]
+    description: 'Rodinné oslavy, komorné svadby do 30 ľudí.',
+    soundSpecs: ['2x Behringer B112D', '1x Sub B1500XP', '2x mikrofón'],
+    lightSpecs: ['BeamZ Party Bar', '2x Laser', 'Dymostroj']
   },
   {
     id: 'oslava-medium',
@@ -119,24 +91,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 180,
     priceWithLights: 270,
     image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
-    description: 'Zameranie: Klasická svadba alebo stredne veľká oslava do 100 ľudí v interiéri. Vyvážený pomer medzi skvelou rečou a plným tanečným parketom.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx X1222 USB',
-      '2x Reproduktory Behringer B112D (hlavné satelity)',
-      '1x Subwoofer The Box Pro DSP 18 Sub (poriadny 18" bas, ktorý roztancuje sálu)',
-      '1x Teleskopická stojanová tyč (umiestnenie satelitov priamo na subwoofer)',
-      '1x Trojnožka na reproduktory',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT'
-    ],
-    lightSpecs: [
-      '6x RGBWA UV Led Par svetlá',
-      '2x Rotujúca 90W Beam hlava',
-      '1x BeamZ SUSHI-DS (riadiaci pult pre svetlá)',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na uchytenie svetiel'
-    ]
+    description: 'Klasická svadba alebo stredne veľká oslava do 100 ľudí.',
+    soundSpecs: ['2x Behringer B112D', '1x Sub 18" DSP', '2x mikrofón'],
+    lightSpecs: ['6x RGBWA Par', '2x Rotujúca hlava', 'Holografický Laser', 'Dymostroj']
   },
   {
     id: 'klub-medium',
@@ -144,24 +101,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 220,
     priceWithLights: 340,
     image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
-    description: 'Zameranie: Klubové noci, stužkové, disko párty pre 100 ľudí. Dôraz na masívne basy a rotujúce dynamické lúče.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx X1222 USB',
-      '2x Reproduktory Behringer B112D',
-      '2x Subwoofer The Box Pro DSP 18 Sub (silná dvojica 18" basákov)',
-      '2x Teleskopická stojanová tyč',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS (ovládanie svetelnej show)',
-      '4x Rotujúca 90W Beam hlava (rýchle a ostré lúče krížom cez parket)',
-      '6x RGBWA UV Led Par svetlá',
-      '2x RGBW Led Bar 36W',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na uchytenie všetkých svetiel'
-    ]
+    description: 'Klubové noci, stužkové, disko párty pre 100 ľudí.',
+    soundSpecs: ['2x Behringer B112D', '2x Sub 18" DSP', '2x mikrofón'],
+    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', 'Holografický Laser', '2x Dymostroj']
   },
   {
     id: 'premium-max',
@@ -169,28 +111,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 250,
     priceWithLights: 430,
     image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
-    description: 'Zameranie: Luxusné, veľké svadby, firemné eventy a plesy nad 100 ľudí. Dokonalé priestorové ozvučenie bez hluchých miest a komplexná svetelná show.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18 (ovládateľný bezdrôtovo cez iPad z akéhokoľvek miesta v sále)',
-      '2x Reproduktory Behringer B112D (rozmiestnené v rohoch sály pre vyrovnanú hlasitosť)',
-      '3x Subwoofer The Box Pro DSP 18 Sub',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '2x Trojnožka na reproduktory'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS (počítačové ovládanie zladených svetelných scén)',
-      '6x RGBWA UV Led Par svetlá (vytvoria jednotnú farebnú tému v celej sále)',
-      '4x RGBW Led Bar 36W (nasvietenie tanečného parketu a dekorácií)',
-      '4x Rotujúca 90W Beam hlava (elegantné pomalé pohyby počas obradu, dynamické na párty)',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na zavesenie techniky'
-    ],
-    otherSpecs: [
-      '1x Premietačka Wanbo T6 MAX',
-      '1x Premietacie plátno 110" (na kvízy a svadobné prezentácie)'
-    ]
+    description: 'Luxusné svadby, firemné eventy nad 100 ľudí.',
+    soundSpecs: ['2x Behringer B112D', '3x Sub 18" DSP', 'digitálny mixpult'],
+    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', 'Holografický Laser', '2x Dymostroj']
   },
   {
     id: 'klub-maximal',
@@ -198,25 +121,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 380,
     priceWithLights: 520,
     image: 'https://images.unsplash.com/photo-1489641493513-ba4ee84ccee9?w=800',
-    description: 'Zameranie: Veľké diskotéky, stužkové pre viacero tried, festivalové stany nad 100 ľudí v interiéri. Extrémny zvukový tlak a laserová show.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18',
-      '1x Riadiaci procesor the t.rack 4x4 (ideálne rozdelenie pásiem a ochrana reproduktorov pred preťažením)',
-      '2x Reproduktory Behringer B112D',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '4x Subwoofer The Box Pro DSP 18 Sub (štvorica masívnych basákov)',
-      '2x Teleskopická stojanová tyč'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS',
-      '4x Rotujúca 90W Beam hlava',
-      '6x RGBWA UV Led Par svetlá',
-      '4x RGBW Led Bar 36W',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300 (udržiavanie stabilnej hmly)',
-      '1x Osvetľovacia konštrukcia'
-    ]
+    description: 'Veľké diskotéky, festivalové stany nad 100 ľudí.',
+    soundSpecs: ['4x Sub 18" DSP', 'digitálny mixpult', 'procesor'],
+    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', '2x Dymostroj']
   },
   {
     id: 'open-air-arena',
@@ -224,28 +131,9 @@ const presetPackages: PresetPackage[] = [
     priceNoLights: 480,
     priceWithLights: 730,
     image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
-    description: 'Zameranie: Vonkajšie festivaly, hody, dni obce, amfiteátre alebo veľké stany. V cene máš dymostroje, plameňomety a snehostroje pre výnimočnú atmosféru.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18',
-      '1x Riadiaci procesor the t.rack 4x4',
-      '4x Reproduktory Behringer B112D',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '5x Subwoofer The Box Pro DSP 18 Sub (využitie celého tvojho basového arzenálu na vytvorenie basovej steny)',
-      '2x Teleskopická stojanová tyč'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS',
-      '4x Rotujúca 90W Beam hlava',
-      '2x Laserový Bar 65W',
-      '6x RGBWA UV Led Par svetlá',
-      '4x RGBW Led Bar 36W',
-      '2x Výrobníky plameňov Fire Machine (vizuálne mimoriadne atraktívne po zotmení)',
-      '2x Snehostroj ADJ Snow Flurry HO (špeciálny atmosférický efekt sneženia)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '1x Osvetľovacia konštrukcia'
-    ]
+    description: 'Vonkajšie festivaly, hody, dni obce.',
+    soundSpecs: ['4x Behringer B112D', '5x Sub 18" DSP', 'digitálny mixpult'],
+    lightSpecs: ['4x Rotujúca hlava', '2x Laser BAR', '2x Plameňomet', '2x Dymostroj']
   }
 ];
 
@@ -264,9 +152,46 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     name: '',
     phone: '',
     email: '',
+
     date: '',
     message: ''
   });
+
+  const [loadedPackages, setLoadedPackages] = useState<PresetPackage[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoadingPackages(true);
+      try {
+        const dbPackages = await packagesService.getAll();
+        if (dbPackages.length > 0) {
+          const mapped: PresetPackage[] = dbPackages.map((pkg: PackageData) => ({
+            id: pkg.id,
+            name: pkg.name,
+            priceNoLights: pkg.price_no_lights,
+            priceWithLights: pkg.price_with_lights,
+            image: pkg.image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
+            description: pkg.description,
+            soundSpecs: pkg.sound_specs || [],
+            lightSpecs: pkg.light_specs || [],
+            otherSpecs: pkg.other_specs || [],
+            warning: pkg.warning || undefined
+          }));
+          setLoadedPackages(mapped);
+        } else {
+          setLoadedPackages(PRESET_FALLBACK);
+        }
+      } catch {
+        setLoadedPackages(PRESET_FALLBACK);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+    fetchPackages();
+  }, []);
+
+  const presetPackages = loadedPackages;
 
   const handleScrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -360,94 +285,98 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {presetPackages.map((pkg, index) => (
-              <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
-                <Card 
-                  className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer ${
-                    index === 6 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
-                  }`}
-                  onClick={() => handleOpenDetail(pkg)}
-                >
-                  {index === 6 && (
-                    <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
-                      Maximálny výkon
-                    </span>
-                  )}
+          {loadingPackages ? (
+            <div className="text-center py-12 text-gray-400">Načítavam balíky...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {presetPackages.map((pkg, index) => (
+                <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
+                  <Card 
+                    className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer ${
+                      index === 6 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
+                    }`}
+                    onClick={() => handleOpenDetail(pkg)}
+                  >
+                    {index === 6 && (
+                      <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
+                        Maximálny výkon
+                      </span>
+                    )}
 
-                  <div className="h-56 overflow-hidden relative">
-                    <img 
-                      src={pkg.image} 
-                      alt={pkg.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
-                  </div>
-
-                  <CardHeader className="p-6 pb-4">
-                    <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
-                      {pkg.name}
-                    </CardTitle>
-                    <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
-                      {pkg.description}
-                    </p>
-                    <div className="flex items-baseline gap-1.5 pt-4">
-                      <span className="text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
-                      <span className="text-gray-400 text-xs">/ deň bez svetiel</span>
+                    <div className="h-56 overflow-hidden relative">
+                      <img 
+                        src={pkg.image} 
+                        alt={pkg.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
                     </div>
-                    <div className="flex items-baseline gap-1.5 text-sm">
-                      <span className="text-xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
-                      <span className="text-gray-400 text-xs">/ deň so svetlami</span>
-                    </div>
-                  </CardHeader>
 
-                  <CardContent className="px-6 pb-6 pt-0 space-y-4">
-                    <div className="border-t border-white/5 pt-4 space-y-2.5">
-                      <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
-                      {pkg.soundSpecs.slice(0, 3).map((comp, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
-                          <Check size={12} className="text-[#BD20D3] shrink-0 mt-0.5" />
-                          <span>{comp}</span>
-                        </div>
-                      ))}
-                      {pkg.soundSpecs.length > 3 && (
-                        <div className="text-xs text-gray-500 italic">
-                          + {pkg.soundSpecs.length - 3} ďalších položiek zvuku...
-                        </div>
-                      )}
-                      {pkg.lightSpecs.length > 0 && (
-                        <div className="flex items-start gap-2.5 text-xs text-gray-300 mt-2 pt-2 border-t border-white/5">
-                          <Lightbulb size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
-                          <span className="font-medium text-white">Svetlá & efekty:</span>
-                        </div>
-                      )}
-                      {pkg.lightSpecs.slice(0, 2).map((comp, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300 ml-5">
-                          <Check size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
-                          <span>{comp}</span>
-                        </div>
-                      ))}
-                      {pkg.lightSpecs.length > 2 && (
-                        <div className="text-xs text-gray-500 italic ml-5">
-                          + {pkg.lightSpecs.length - 2} ďalších položiek svetiel...
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
+                    <CardHeader className="p-6 pb-4">
+                      <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
+                        {pkg.name}
+                      </CardTitle>
+                      <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
+                        {pkg.description}
+                      </p>
+                      <div className="flex items-baseline gap-1.5 pt-4">
+                        <span className="text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
+                        <span className="text-gray-400 text-xs">/ deň bez svetiel</span>
+                      </div>
+                      <div className="flex items-baseline gap-1.5 text-sm">
+                        <span className="text-xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
+                        <span className="text-gray-400 text-xs">/ deň so svetlami</span>
+                      </div>
+                    </CardHeader>
 
-                  <CardFooter className="p-6 pt-0">
-                    <Button 
-                      onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
-                      className="w-full btn-cyber rounded-xl h-12 border-none font-bold text-sm"
-                    >
-                      Detail balíka a rezervácia
-                      <ChevronRight className="ml-2" size={14} />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </ScrollReveal>
-            ))}
-          </div>
+                    <CardContent className="px-6 pb-6 pt-0 space-y-4">
+                      <div className="border-t border-white/5 pt-4 space-y-2.5">
+                        <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
+                        {pkg.soundSpecs.slice(0, 3).map((comp, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
+                            <Check size={12} className="text-[#BD20D3] shrink-0 mt-0.5" />
+                            <span>{comp}</span>
+                          </div>
+                        ))}
+                        {pkg.soundSpecs.length > 3 && (
+                          <div className="text-xs text-gray-500 italic">
+                            + {pkg.soundSpecs.length - 3} ďalších položiek zvuku...
+                          </div>
+                        )}
+                        {pkg.lightSpecs.length > 0 && (
+                          <div className="flex items-start gap-2.5 text-xs text-gray-300 mt-2 pt-2 border-t border-white/5">
+                            <Lightbulb size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
+                            <span className="font-medium text-white">Svetlá & efekty:</span>
+                          </div>
+                        )}
+                        {pkg.lightSpecs.slice(0, 2).map((comp, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300 ml-5">
+                            <Check size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
+                            <span>{comp}</span>
+                          </div>
+                        ))}
+                        {pkg.lightSpecs.length > 2 && (
+                          <div className="text-xs text-gray-500 italic ml-5">
+                            + {pkg.lightSpecs.length - 2} ďalších položiek svetiel...
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+
+                    <CardFooter className="p-6 pt-0">
+                      <Button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
+                        className="w-full btn-cyber rounded-xl h-12 border-none font-bold text-sm"
+                      >
+                        Detail balíka a rezervácia
+                        <ChevronRight className="ml-2" size={14} />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </ScrollReveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -498,7 +427,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     <p className="text-gray-300 text-xs md:text-sm leading-relaxed">{selectedPackage.description}</p>
                   </div>
 
-                  {/* WARNING */}
                   {selectedPackage.warning && (
                     <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
                       <HelpCircle className="shrink-0 mt-0.5 text-amber-400" size={18} />
@@ -506,7 +434,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     </div>
                   )}
 
-                  {/* HERO IMAGE & PRICE */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-3xl overflow-hidden p-5">
                     <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
                       <img src={selectedPackage.image} alt={selectedPackage.name} className="w-full h-full object-cover" />
@@ -524,7 +451,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                         </div>
                       </div>
 
-                      {/* PRICE */}
                       <div className="pt-2 border-t border-white/5">
                         <span className="text-xs text-gray-400 uppercase font-bold block">Cena za deň s DPH:</span>
                         <div className="flex items-baseline gap-2">
@@ -542,9 +468,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     </div>
                   </div>
 
-                  {/* SPECIFICATIONS */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    {/* SOUND */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
                         <Volume2 size={16} /> Zvuková technika
@@ -559,7 +483,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </ul>
                     </div>
 
-                    {/* LIGHTS TOGGLE */}
                     <div 
                       onClick={() => setIncludeLights(!includeLights)}
                       className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
@@ -577,7 +500,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                             </span>
                           </div>
                           
-                          {/* Toggle indicator */}
                           <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                             includeLights 
                               ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)]' 
@@ -604,7 +526,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                               <span>{spec}</span>
                             </li>
                           ))}
-                          {selectedPackage.otherSpecs && selectedPackage.otherSpecs.map((spec, i) => (
+                          {selectedPackage.otherSpecs?.map((spec, i) => (
                             <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
                               <Check className={includeLights ? 'text-cyan-400 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
                               <span>{spec}</span>
