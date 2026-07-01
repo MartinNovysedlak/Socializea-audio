@@ -595,17 +595,17 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             </div>
 
-            {/* ZVUK A SVETLÁ */}
+            {/* ZVUK A SVETLÁ - zväčšené karty */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
-                  <Volume2 size={16} /> Zvuková technika
+              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-6 md:p-7 space-y-4">
+                <span className="text-sm font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-3 border-b border-white/[0.08]">
+                  <Volume2 size={18} /> Zvuková technika
                 </span>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {selectedPackage.soundSpecs.map((spec, i) => (
-                    <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                      <Check className="text-emerald-500 shrink-0 mt-0.5" size={14} />
-                      <span>{spec}</span>
+                    <li key={i} className="text-sm text-gray-200 flex items-start gap-2.5">
+                      <Check className="text-emerald-500 shrink-0 mt-0.5" size={16} />
+                      <span className="leading-relaxed">{spec}</span>
                     </li>
                   ))}
                 </ul>
@@ -614,49 +614,49 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               {hasLightSection && (
                 <div
                   onClick={() => setIncludeLights(!includeLights)}
-                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
+                  className={`p-6 md:p-7 rounded-2xl border-2 transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
                     includeLights
-                      ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10'
-                      : 'bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] opacity-80 hover:opacity-100'
+                      ? 'bg-[#BD20D3]/8 border-[#BD20D3]/40 shadow-[0_0_25px_rgba(189,32,211,0.08)] hover:bg-[#BD20D3]/12'
+                      : 'bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] opacity-80 hover:opacity-100'
                   }`}
                 >
                   <div>
-                    <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 mb-3">
-                      <div className="flex items-center gap-2">
+                    <div className="flex justify-between items-center border-b border-white/[0.08] pb-3 mb-4">
+                      <div className="flex items-center gap-2.5">
                         <Lightbulb
                           className={includeLights ? 'text-[#BD20D3]' : 'text-gray-400'}
-                          size={18}
+                          size={20}
                         />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        <span className="text-sm font-bold text-white uppercase tracking-wider">
                           Svetlá, efekty & show
                         </span>
                       </div>
                       <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                           includeLights
-                            ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)]'
+                            ? 'bg-[#BD20D3] text-white shadow-[0_0_12px_rgba(189,32,211,0.6)]'
                             : 'bg-white/10 text-gray-400 border border-white/20'
                         }`}
                       >
                         {includeLights ? (
-                          <Check size={14} className="stroke-[3]" />
+                          <Check size={16} className="stroke-[3]" />
                         ) : (
-                          <Plus size={14} className="stroke-[3]" />
+                          <Plus size={16} className="stroke-[3]" />
                         )}
                       </div>
                     </div>
-                    <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                    <p className="text-sm text-gray-400 mb-4 leading-relaxed">
                       {includeLights
                         ? 'Svetelná show je pridaná a zahŕňa tieto položky:'
                         : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} €)`}
                     </p>
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {selectedPackage.lightSpecs.map((spec, i) => (
                         <li
                           key={i}
-                          className={`text-xs flex items-start gap-2 ${
+                          className={`text-sm flex items-start gap-2.5 ${
                             includeLights
-                              ? 'text-gray-300'
+                              ? 'text-gray-200'
                               : 'text-gray-500 line-through opacity-50'
                           }`}
                         >
@@ -666,17 +666,17 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                                 ? 'text-emerald-500 shrink-0 mt-0.5'
                                 : 'text-gray-600 shrink-0 mt-0.5'
                             }
-                            size={12}
+                            size={14}
                           />
-                          <span>{spec}</span>
+                          <span className="leading-relaxed">{spec}</span>
                         </li>
                       ))}
                       {selectedPackage.otherSpecs?.map((spec, i) => (
                         <li
                           key={i}
-                          className={`text-xs flex items-start gap-2 ${
+                          className={`text-sm flex items-start gap-2.5 ${
                             includeLights
-                              ? 'text-gray-300'
+                              ? 'text-gray-200'
                               : 'text-gray-500 line-through opacity-50'
                           }`}
                         >
@@ -686,9 +686,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                                 ? 'text-cyan-400 shrink-0 mt-0.5'
                                 : 'text-gray-600 shrink-0 mt-0.5'
                             }
-                            size={12}
+                            size={14}
                           />
-                          <span>{spec}</span>
+                          <span className="leading-relaxed">{spec}</span>
                         </li>
                       ))}
                     </ul>
