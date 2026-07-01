@@ -76,6 +76,34 @@ interface PackageDetailDialogProps {
   selectedPackage: PackageOption | null;
 }
 
+// Helper: z reťazca "2x Behringer B112D" extrahuje { name, count }
+function extractBaseNameAndCount(spec: string): { name: string; count: number } {
+  const match = spec.match(/^(\d+)x\s+/);
+  if (match) {
+    return { name: spec.replace(match[0], '').trim(), count: parseInt(match[1], 10) };
+  }
+  return { name: spec.trim(), count: 1 };
+}
+
+// Helper: pre balík vráti mapu { normalizedName: usedCount }
+function getPackageUsedCounts(pkg: PackageOption): Record<string, number> {
+  const map: Record<string, number> = {};
+  
+  const allSpecs = [
+    ...pkg.soundSpecs,
+    ...pkg.lightSpecs,
+    ...(pkg.otherSpecs || [])
+  ];
+
+  for (const spec of allSpecs) {
+    const { name, count } = extractBaseNameAndCount(spec);
+    const normalized = name.toLowerCase().trim();
+    map[normalized] = (map[normalized] || 0) + count;
+  }
+
+  return map;
+}
+
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
   const [includeLights, setIncludeLights] = useState(true);
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -105,7 +133,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     message: ''
   });
 
-  // Reset state when dialog opens/closes or package changes
+  // Map of used counts from the package (vypočítaná raz pri otvorení)
+  const [packageUsedCounts, setPackageUsedCounts] = useState<Record<string, number>>({});
+
+  // Reset and compute package used counts when dialog opens
   React.useEffect(() => {
     if (open && selectedPackage) {
       setIncludeLights(true);
@@ -116,6 +147,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSearchTerm('');
       setSelectedItem(null);
       setItemQuantity(1);
+      setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
     }
   }, [open, selectedPackage]);
 
@@ -191,13 +223,34 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setSearchOpen(false);
   };
 
+  const getAvailableForItem = (itemName: string, dbAvailable: number): number => {
+    // Zistíme, koľko kusov je už použitých v balíku
+    const normalized = itemName.toLowerCase().trim();
+    const usedInPackage = packageUsedCounts[normalized] || 0;
+    
+    // Zistíme, koľko kusov už používateľ pridal navyše
+    const alreadyAdded = additionalProducts
+      .filter(p => p.id && p.label.toLowerCase().includes(normalized))
+      .reduce((sum, p) => sum + p.quantity, 0);
+    
+    const remaining = dbAvailable - usedInPackage - alreadyAdded;
+    return Math.max(0, remaining);
+  };
+
   const confirmRentalItem = useCallback(() => {
     if (!selectedItem) return;
+    
+    const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+    if (itemQuantity > maxAvailable) {
+      toast.error(`Môžete pridať maximálne ${maxAvailable} ks. ${selectedItem.availableCount} ks skladom, ${packageUsedCounts[selectedItem.name.toLowerCase().trim()] || 0} ks už je v balíku.`);
+      return;
+    }
+
     const existingIdx = additionalProducts.findIndex(p => p.id === selectedItem.id);
     if (existingIdx !== -1) {
-      // Ak už je pridaný, zvýšime množstvo
       const updated = [...additionalProducts];
-      const newQty = Math.min(selectedItem.availableCount, updated[existingIdx].quantity + itemQuantity);
+      const currentQty = updated[existingIdx].quantity;
+      const newQty = Math.min(maxAvailable, currentQty + itemQuantity);
       updated[existingIdx] = { ...updated[existingIdx], quantity: newQty, label: `${newQty} x ${selectedItem.name}` };
       setAdditionalProducts(updated);
       toast.success(`Množstvo zvýšené na ${newQty} ks`);
@@ -209,7 +262,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setFilteredItems([]);
     setItemQuantity(1);
     searchInputRef.current?.focus();
-  }, [selectedItem, itemQuantity, additionalProducts]);
+  }, [selectedItem, itemQuantity, additionalProducts, packageUsedCounts]);
 
   const removeAdditionalProduct = (id: string) => {
     setAdditionalProducts(prev => prev.filter(p => p.id !== id));
@@ -246,6 +299,16 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const totalPrice = activePrice + servicesCost;
 
   const hasLightSection = selectedPackage.lightSpecs.length > 0 || (selectedPackage.otherSpecs && selectedPackage.otherSpecs.length > 0);
+
+  // Pre každú položku v zozname výsledkov vypočítame reálne dostupné množstvo
+  const getFilteredItemsWithAvailability = () => {
+    return filteredItems.map(item => {
+      const maxAvailable = getAvailableForItem(item.name, item.availableCount);
+      return { ...item, remainingForOrder: maxAvailable };
+    });
+  };
+
+  const itemsWithAvailability = getFilteredItemsWithAvailability();
 
   return (
     <Dialog open={open} onOpenChange={(newOpen) => {
@@ -482,35 +545,52 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       )}
 
-                      {!loadingItems && !dbError && filteredItems.length > 0 && !selectedItem && (
+                      {!loadingItems && !dbError && itemsWithAvailability.length > 0 && !selectedItem && (
                         <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
-                          {filteredItems.map((item) => (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedItem(item);
-                                setItemQuantity(1);
-                              }}
-                              className="flex items-center gap-2.5 w-full p-2.5 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-b-0"
-                            >
-                              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs text-white truncate">{item.name}</p>
-                                {item.category && (
-                                  <p className="text-[9px] text-gray-500 uppercase tracking-wider">{item.category}</p>
-                                )}
-                              </div>
-                              <div className="text-[9px] text-gray-500 mr-2 shrink-0">
-                                {item.availableCount > 0 ? `${item.availableCount} ks` : 'Nedostupné'}
-                              </div>
-                              <div className="w-5 h-5 rounded-full border border-white/20 hover:bg-emerald-500/30 hover:border-emerald-500/50 flex items-center justify-center">
-                                <Plus size={10} className="text-white" />
-                              </div>
-                            </button>
-                          ))}
+                          {itemsWithAvailability.map((item) => {
+                            const remaining = item.remainingForOrder;
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => {
+                                  if (remaining <= 0) {
+                                    toast.error(`Pre položku "${item.name}" nie sú k dispozícii ďalšie kusy (všetky sú už v balíku).`);
+                                    return;
+                                  }
+                                  setSelectedItem(item);
+                                  setItemQuantity(1);
+                                }}
+                                className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/5 last:border-b-0 ${
+                                  remaining > 0 
+                                    ? 'hover:bg-white/5 cursor-pointer' 
+                                    : 'opacity-40 cursor-not-allowed'
+                                }`}
+                              >
+                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
+                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-white truncate">{item.name}</p>
+                                  {item.category && (
+                                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">{item.category}</p>
+                                  )}
+                                </div>
+                                <div className={`text-[9px] mr-2 shrink-0 ${
+                                  remaining > 0 ? 'text-emerald-400' : 'text-red-400'
+                                }`}>
+                                  {remaining > 0 ? `${remaining} ks voľných` : 'Vypredané'}
+                                </div>
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                                  remaining > 0 
+                                    ? 'border-white/20 hover:bg-emerald-500/30 hover:border-emerald-500/50' 
+                                    : 'border-red-500/30 bg-red-500/10'
+                                }`}>
+                                  <Plus size={10} className={remaining > 0 ? "text-white" : "text-red-400"} />
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
 
@@ -536,8 +616,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                               <span className="w-8 text-center text-white font-bold text-sm">{itemQuantity}</span>
                               <button
                                 type="button"
-                                onClick={() => setItemQuantity(Math.min(selectedItem.availableCount, itemQuantity + 1))}
-                                disabled={itemQuantity >= selectedItem.availableCount}
+                                onClick={() => {
+                                  const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+                                  setItemQuantity(Math.min(maxAvailable, itemQuantity + 1));
+                                }}
+                                disabled={itemQuantity >= getAvailableForItem(selectedItem.name, selectedItem.availableCount)}
                                 className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white disabled:opacity-30"
                               >
                                 <Plus size={12} />
@@ -545,7 +628,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                             </div>
                           </div>
                           <p className="text-[9px] text-gray-500 mt-1">
-                            Maximálne {selectedItem.availableCount} ks skladom
+                            {(() => {
+                              const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+                              return `Maximálne ${maxAvailable} ks na objednanie (${packageUsedCounts[selectedItem.name.toLowerCase().trim()] || 0} ks už v balíku)`;
+                            })()}
                           </p>
 
                           <div className="flex gap-2 mt-2">
@@ -581,7 +667,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 )}
               </div>
 
-              {/* ============ SÚHRN CIEN (VŽDY VIDITEĽNÝ) ============ */}
+              {/* ============ SÚHRN CIEN ============ */}
               <div className="bg-black/30 border border-white/10 rounded-2xl p-5 space-y-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-white pb-1">Súhrn cien</span>
                 <div className="flex justify-between text-xs text-gray-400">
