@@ -16,7 +16,7 @@ export const rentalService = {
     const { data, error } = await supabase
       .from('equipment')
       .select('id, name, main_image, category, description, price_per_day, available')
-      .eq('available', true)  // Supabase column is 'available', type number
+      .gte('available', 1)  // Supabase column 'available' is number, NOT boolean
       .order('name');
 
     if (error) {
@@ -24,7 +24,8 @@ export const rentalService = {
       throw error;
     }
 
-    // Map to RentalItemData format
+    console.log('✅ Raw data from DB:', data);
+
     const mapped: RentalItemData[] = (data || []).map((item: any) => ({
       id: item.id,
       name: item.name,
@@ -35,7 +36,7 @@ export const rentalService = {
       available: item.available > 0
     }));
 
-    console.log('✅ Found rental items:', mapped.length);
+    console.log('✅ Mapped rental items:', mapped.length);
     return mapped;
   },
 
@@ -44,7 +45,7 @@ export const rentalService = {
     const { data, error } = await supabase
       .from('equipment')
       .select('id, name, main_image, category, description, price_per_day, available')
-      .eq('available', true)
+      .gte('available', 1)
       .ilike('name', `%${query}%`)
       .order('name');
 
