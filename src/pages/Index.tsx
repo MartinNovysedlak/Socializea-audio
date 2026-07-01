@@ -1,49 +1,40 @@
-"use client";
-
-import React from 'react';
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import InteractiveQuiz from '@/components/InteractiveQuiz';
-import RentalSummary from '@/components/RentalSummary';
-import DJSection from '@/components/DJSection';
-import SalesSummary from '@/components/SalesSummary';
-import ContactForm from '@/components/ContactForm';
-import Footer from '@/components/Footer';
-import ScrollReveal from '@/components/ScrollReveal';
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import React, { useState } from 'react';
+import FloatingCart from '@/components/FloatingCart';
+import PackageDetailDialog from '@/components/PackageDetailDialog';
+import type { CartItem } from '@/types/cart';
 
 const Index = () => {
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [equipment, setEquipment] = useState<any[]>([]);
+  const [packageDialogOpen, setPackageDialogOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const handleAddToCart = (item: CartItem) => {
+    setCartItems(prev => [...prev, item]);
+  };
+
+  const handleRemoveCartItem = (id: string) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Váš existujúci JSX – upravte podľa potreby
   return (
-    <div className="min-h-screen bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white">
-      <Navbar />
-      <main className="space-y-4">
-        <ScrollReveal delay={0.1}>
-          <Hero />
-        </ScrollReveal>
-        
-        {/* Nový interaktívny sprievodca / kvíz pre rýchly výber */}
-        <ScrollReveal delay={0.15}>
-          <InteractiveQuiz />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <RentalSummary />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <DJSection />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <SalesSummary />
-        </ScrollReveal>
-        
-        <ScrollReveal delay={0.2}>
-          <ContactForm />
-        </ScrollReveal>
-      </main>
-      <Footer />
-      <MadeWithDyad />
+    <div>
+      {/* ... */}
+      <PackageDetailDialog
+        open={packageDialogOpen}
+        onOpenChange={setPackageDialogOpen}
+        selectedPackage={selectedPackage}
+        onAddToCart={handleAddToCart}
+      />
+      <FloatingCart
+        quantities={quantities}
+        setQuantities={setQuantities}
+        equipment={equipment}
+        cartItems={cartItems}
+        onRemoveCartItem={handleRemoveCartItem}
+      />
     </div>
   );
 };
