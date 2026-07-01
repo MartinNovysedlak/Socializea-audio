@@ -241,17 +241,9 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                 return (
                 <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
                   <Card 
-                    className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer ${
-                      index === 6 ? 'ring-1 ring-[#BD20D3] shadow-[0_0_30px_rgba(189,32,211,0.15)]' : ''
-                    }`}
+                    className="relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer"
                     onClick={() => handleOpenDetail(pkg)}
                   >
-                    {index === 6 && (
-                      <span className="absolute top-4 right-4 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full z-10 shadow-lg">
-                        Maximálny výkon
-                      </span>
-                    )}
-
                     <div className="h-56 overflow-hidden relative shrink-0">
                       <img 
                         src={pkg.image} 
