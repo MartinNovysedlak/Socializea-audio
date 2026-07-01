@@ -19,7 +19,6 @@ import {
   Music, 
   Check, 
   Plus,
-  X,
   ArrowRight, 
   ArrowLeft, 
   Volume2, 
@@ -63,10 +62,7 @@ const InteractiveQuiz = () => {
     eventType: ''
   });
 
-  // Controls whether the user views the package with or without lights
   const [includeLights, setIncludeLights] = useState(true);
-
-  // Booking states inside recommendation
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [bookingData, setBookingData] = useState({
     name: '',
@@ -76,7 +72,6 @@ const InteractiveQuiz = () => {
     message: ''
   });
 
-  // Loaded packages from database
   const [loadedPackages, setLoadedPackages] = useState<PackageRecommendation[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
 
@@ -124,30 +119,22 @@ const InteractiveQuiz = () => {
     setStep(prev => prev + 1);
   };
 
-  // Helper to find a package by its name prefix (matching the decision tree IDs)
   const findPackage = (idPrefix: string): PackageRecommendation | null => {
     if (loadedPackages.length === 0) return null;
     
-    // Try to find by exact ID match first
     const exactMatch = loadedPackages.find(p => p.id === idPrefix);
     if (exactMatch) return exactMatch;
     
-    // Fallback: find by name containing the prefix
     const nameMatch = loadedPackages.find(p => p.name.toLowerCase().includes(idPrefix.toLowerCase()));
     if (nameMatch) return nameMatch;
     
-    // Last resort: return first package
     return loadedPackages[0];
   };
 
-  // 18-path Decision Tree Recommendation Engine (matching updated 8 packages)
   const getRecommendation = (): PackageRecommendation | null => {
     const { people, location, eventType } = answers;
-
-    // If no packages loaded, return null
     if (loadedPackages.length === 0) return null;
 
-    // --- DECISION TREE LOGIC ---
     if (people === 'up-to-30') {
       if (location === 'indoor') {
         if (eventType === 'wedding') {
@@ -392,7 +379,6 @@ const InteractiveQuiz = () => {
                             <h3 className="text-xl md:text-2xl font-bold text-white">Naše odporúčanie pre vašu akciu:</h3>
                           </div>
 
-                          {/* WARNING */}
                           {recommendedSet.warning && (
                             <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
                               <AlertTriangle className="shrink-0 mt-0.5 text-amber-400" size={18} />
@@ -400,7 +386,6 @@ const InteractiveQuiz = () => {
                             </div>
                           )}
 
-                          {/* HERO */}
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-3xl overflow-hidden p-5">
                             <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
                               <img src={recommendedSet.image} alt={recommendedSet.name} className="w-full h-full object-cover" />
@@ -419,7 +404,6 @@ const InteractiveQuiz = () => {
                                 <p className="text-gray-300 text-xs md:text-sm mt-1.5 leading-relaxed">{recommendedSet.desc}</p>
                               </div>
 
-                              {/* WEEKEND PRICE */}
                               <div className="pt-2 border-t border-white/5">
                                 <span className="text-xs text-gray-400 uppercase font-bold block">Cena na celý víkend:</span>
                                 <div className="flex items-baseline gap-2">
@@ -431,179 +415,177 @@ const InteractiveQuiz = () => {
                             </div>
                           </div>
 
-                          {/* SPECIFICATIONS */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                            {/* SOUND */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-                              <span className="text-xs font-bold uppercase tracking<dyad-write path="src/components/InteractiveQuiz.tsx" description="Complete the file with database-loaded packages">
-                          <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
-                            <Volume2 size={16} /> Zvuková technika
-                          </span>
-                          <ul className="space-y-2">
-                            {recommendedSet.soundSpecs.map((spec, i) => (
-                              <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                                <Check className="text-emerald-500 shrink-0 mt-0.5" size={14} />
-                                <span>{spec}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* LIGHTS */}
-                        <div 
-                          onClick={() => setIncludeLights(!includeLights)}
-                          className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
-                            includeLights 
-                              ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10' 
-                              : 'bg-white/5 border-white/10 opacity-75 hover:opacity-100 hover:border-white/25'
-                          }`}
-                        >
-                          <div>
-                            <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
-                              <div className="flex items-center gap-2">
-                                <Lightbulb className={includeLights ? "text-[#BD20D3]" : "text-gray-400"} size={18} />
-                                <span className="text-xs font-bold text-white uppercase tracking-wider">
-                                  Svetlá, efekty & show
-                                </span>
-                              </div>
-                              
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                                includeLights 
-                                  ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)]' 
-                                  : 'bg-white/10 text-gray-400 border border-white/20'
-                              }`}>
-                                {includeLights ? (
-                                  <Check size={14} className="stroke-[3]" />
-                                ) : (
-                                  <Plus size={14} className="stroke-[3]" />
-                                )}
-                              </div>
+                              <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
+                                <Volume2 size={16} /> Zvuková technika
+                              </span>
+                              <ul className="space-y-2">
+                                {recommendedSet.soundSpecs.map((spec, i) => (
+                                  <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
+                                    <Check className="text-emerald-500 shrink-0 mt-0.5" size={14} />
+                                    <span>{spec}</span>
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
 
-                            <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
-                              {includeLights 
-                                ? 'Svetelná show je pridaná a zahŕňa tieto položky:' 
-                                : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} €)`}
-                            </p>
+                            <div 
+                              onClick={() => setIncludeLights(!includeLights)}
+                              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
+                                includeLights 
+                                  ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10' 
+                                  : 'bg-white/5 border-white/10 opacity-75 hover:opacity-100 hover:border-white/25'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <Lightbulb className={includeLights ? "text-[#BD20D3]" : "text-gray-400"} size={18} />
+                                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                                      Svetlá, efekty & show
+                                    </span>
+                                  </div>
+                                  
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                                    includeLights 
+                                      ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.5)]' 
+                                      : 'bg-white/10 text-gray-400 border border-white/20'
+                                  }`}>
+                                    {includeLights ? (
+                                      <Check size={14} className="stroke-[3]" />
+                                    ) : (
+                                      <Plus size={14} className="stroke-[3]" />
+                                    )}
+                                  </div>
+                                </div>
 
-                            <ul className="space-y-2">
-                              {recommendedSet.lightSpecs.map((spec, i) => (
-                                <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
-                                  <Check className={includeLights ? 'text-emerald-500 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
-                                  <span>{spec}</span>
-                                </li>
-                              ))}
-                              {recommendedSet.otherSpecs && recommendedSet.otherSpecs.map((spec, i) => (
-                                <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
-                                  <Check className={includeLights ? 'text-cyan-400 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
-                                  <span>{spec}</span>
-                                </li>
-                              ))}
-                            </ul>
+                                <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                                  {includeLights 
+                                    ? 'Svetelná show je pridaná a zahŕňa tieto položky:' 
+                                    : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} €)`}
+                                </p>
+
+                                <ul className="space-y-2">
+                                  {recommendedSet.lightSpecs.map((spec, i) => (
+                                    <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
+                                      <Check className={includeLights ? 'text-emerald-500 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
+                                      <span>{spec}</span>
+                                    </li>
+                                  ))}
+                                  {recommendedSet.otherSpecs && recommendedSet.otherSpecs.map((spec, i) => (
+                                    <li key={i} className={`text-xs flex items-start gap-2 ${includeLights ? 'text-gray-300' : 'text-gray-500 line-through opacity-50'}`}>
+                                      <Check className={includeLights ? 'text-cyan-400 shrink-0 mt-0.5' : 'text-gray-600 shrink-0 mt-0.5'} size={12} />
+                                      <span>{spec}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <Button variant="outline" onClick={resetQuiz} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1">
+                              Spustiť znova
+                            </Button>
+                            <Button onClick={() => setShowBookingForm(true)} className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold">
+                              Nezáväzne rezervovať
+                            </Button>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <form onSubmit={handleBookingSubmit} className="space-y-5">
+                          <div className="space-y-2 text-center border-b border-white/5 pb-4">
+                            <h3 className="text-lg md:text-xl font-bold text-white">Rezervácia: {recommendedSet.name}</h3>
+                            <p className="text-xs text-gray-400">Ponuku vám vypracujeme a pošleme obratom na e-mail.</p>
+                          </div>
 
-                      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <Button variant="outline" onClick={resetQuiz} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1">
-                          Spustiť znova
-                        </Button>
-                        <Button onClick={() => setShowBookingForm(true)} className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold">
-                          Nezáväzne rezervovať
-                        </Button>
-                      </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <Label htmlFor="quiz-name" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                                <User size={12} className="text-[#BD20D3]" /> Meno a priezvisko *
+                              </Label>
+                              <Input
+                                id="quiz-name"
+                                required
+                                placeholder="Ján Novák"
+                                value={bookingData.name}
+                                onChange={(e) => setBookingData(p => ({ ...p, name: e.target.value }))}
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label htmlFor="quiz-email" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                                <Mail size={12} className="text-[#BD20D3]" /> E-mail *
+                              </Label>
+                              <Input
+                                id="quiz-email"
+                                type="email"
+                                required
+                                placeholder="jan.novak@example.sk"
+                                value={bookingData.email}
+                                onChange={(e) => setBookingData(p => ({ ...p, email: e.target.value }))}
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <Label htmlFor="quiz-phone" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                                <Phone size={12} className="text-[#BD20D3]" /> Telefón
+                              </Label>
+                              <Input
+                                id="quiz-phone"
+                                type="tel"
+                                placeholder="+421 900 123 456"
+                                value={bookingData.phone}
+                                onChange={(e) => setBookingData(p => ({ ...p, phone: e.target.value }))}
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label htmlFor="quiz-date" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                                <Calendar size={12} className="text-[#BD20D3]" /> Predbežný dátum *
+                              </Label>
+                              <Input
+                                id="quiz-date"
+                                type="date"
+                                required
+                                value={bookingData.date}
+                                onChange={(e) => setBookingData(p => ({ ...p, date: e.target.value }))}
+                                className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label htmlFor="quiz-msg" className="text-gray-300 text-xs font-bold uppercase">Poznámka k objednávke</Label>
+                            <Textarea
+                              id="quiz-msg"
+                              placeholder="Miesto akcie, špecifikácie, doprava..."
+                              value={bookingData.message}
+                              onChange={(e) => setBookingData(p => ({ ...p, message: e.target.value }))}
+                              className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] text-sm"
+                            />
+                          </div>
+
+                          <div className="flex gap-3 pt-2">
+                            <Button type="button" variant="ghost" onClick={() => setShowBookingForm(false)} className="text-xs text-gray-400 hover:text-white h-11">
+                              Späť
+                            </Button>
+                            <Button type="submit" className="btn-cyber rounded-xl h-11 flex-grow border-none font-bold">
+                              Odoslať nezáväzný dopyt
+                            </Button>
+                          </div>
+                        </form>
+                      )}
                     </div>
-                  ) : (
-                    <form onSubmit={handleBookingSubmit} className="space-y-5">
-                      <div className="space-y-2 text-center border-b border-white/5 pb-4">
-                        <h3 className="text-lg md:text-xl font-bold text-white">Rezervácia: {recommendedSet.name}</h3>
-                        <p className="text-xs text-gray-400">Ponuku vám vypracujeme a pošleme obratom na e-mail.</p>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="quiz-name" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
-                            <User size={12} className="text-[#BD20D3]" /> Meno a priezvisko *
-                          </Label>
-                          <Input
-                            id="quiz-name"
-                            required
-                            placeholder="Ján Novák"
-                            value={bookingData.name}
-                            onChange={(e) => setBookingData(p => ({ ...p, name: e.target.value }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="quiz-email" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
-                            <Mail size={12} className="text-[#BD20D3]" /> E-mail *
-                          </Label>
-                          <Input
-                            id="quiz-email"
-                            type="email"
-                            required
-                            placeholder="jan.novak@example.sk"
-                            value={bookingData.email}
-                            onChange={(e) => setBookingData(p => ({ ...p, email: e.target.value }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="quiz-phone" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
-                            <Phone size={12} className="text-[#BD20D3]" /> Telefón
-                          </Label>
-                          <Input
-                            id="quiz-phone"
-                            type="tel"
-                            placeholder="+421 900 123 456"
-                            value={bookingData.phone}
-                            onChange={(e) => setBookingData(p => ({ ...p, phone: e.target.value }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="quiz-date" className="text-gray-300 text-xs font-bold uppercase flex items-center gap-1.5">
-                            <Calendar size={12} className="text-[#BD20D3]" /> Predbežný dátum *
-                          </Label>
-                          <Input
-                            id="quiz-date"
-                            type="date"
-                            required
-                            value={bookingData.date}
-                            onChange={(e) => setBookingData(p => ({ ...p, date: e.target.value }))}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-11 text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <Label htmlFor="quiz-msg" className="text-gray-300 text-xs font-bold uppercase">Poznámka k objednávke</Label>
-                        <Textarea
-                          id="quiz-msg"
-                          placeholder="Miesto akcie, špecifikácie, doprava..."
-                          value={bookingData.message}
-                          onChange={(e) => setBookingData(p => ({ ...p, message: e.target.value }))}
-                          className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] text-sm"
-                        />
-                      </div>
-
-                      <div className="flex gap-3 pt-2">
-                        <Button type="button" variant="ghost" onClick={() => setShowBookingForm(false)} className="text-xs text-gray-400 hover:text-white h-11">
-                          Späť
-                        </Button>
-                        <Button type="submit" className="btn-cyber rounded-xl h-11 flex-grow border-none font-bold">
-                          Odoslať nezáväzný dopyt
-                        </Button>
-                      </div>
-                    </form>
                   )}
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
         </div>
       </div>
     </section>
