@@ -24,39 +24,35 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [rentalItems, setRentalItems] = useState<RentalItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dbError, setDbError] = useState(false);
   const [filteredItems, setFilteredItems] = useState<RentalItem[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch rental items for autocomplete
+  // Fetch rental items ONLY from database
   useEffect(() => {
     const fetchRentalItems = async () => {
       setLoading(true);
+      setDbError(false);
       try {
         const { rentalService } = await import('@/lib/rentalService');
         const data = await rentalService.getAll();
-        if (data && Array.isArray(data)) {
+        if (data && Array.isArray(data) && data.length > 0) {
           const mapped: RentalItem[] = data.map((item: any) => ({
             id: item.id,
             name: item.name,
-            image: item.image || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop',
+            image: item.image || '',
             category: item.category || ''
           }));
           setRentalItems(mapped);
+        } else {
+          setRentalItems([]);
+          setDbError(true);
         }
       } catch {
-        // fallback items if DB isn't available
-        setRentalItems([
-          { id: '1', name: 'RGB LED pás 5m', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '2', name: 'RGB par 64 (4ks)', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '3', name: 'LED koule RGB (2ks)', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '4', name: 'Behringer B212D aktívny reproduktor', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '5', name: 'Bezdrôtový mikrofón Shure', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '6', name: 'Subwoofer 18" aktívny', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '7', name: 'Hmlovník 1500W', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' },
-          { id: '8', name: 'Stroboskop LED', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop' }
-        ]);
+        setRentalItems([]);
+        setDbError(true);
       } finally {
         setLoading(false);
       }
@@ -66,7 +62,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
 
   // Filter items based on search term
   useEffect(() => {
-    if (!searchTerm.trim()) {
+    if (!searchTerm.trim() || rentalItems.length === 0) {
       setFilteredItems([]);
       return;
     }
@@ -77,7 +73,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
         (item.name.toLowerCase().includes(lower) ||
          (item.category && item.category.toLowerCase().includes(lower)))
     );
-    setFilteredItems(filtered.slice(0, 8)); // max 8 results
+    setFilteredItems(filtered.slice(0, 8));
   }, [searchTerm, rentalItems, items]);
 
   // Click outside to close dropdown
@@ -168,8 +164,9 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
                 if (searchTerm.trim()) setIsOpen(true);
               }}
               onKeyDown={handleKeyDown}
-              placeholder={placeholder}
+              placeholder={dbError && !loading ? 'Databáza nie je dostupná...' : placeholder}
               className="bg-black/50 border-white/10 text-white rounded-xl h-11 pl-10 flex-1"
+              disabled={loading || dbError}
             />
             {loading && (
               <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] animate-spin" />
@@ -184,15 +181,31 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
                 setSearchTerm('');
               }
             }}
-            disabled={!searchTerm.trim()}
+            disabled={!searchTerm.trim() || dbError}
             className="bg-[#BD20D3]/20 border border-[#BD20D3]/40 hover:bg-[#BD20D3]/40 text-white rounded-xl h-11 px-4 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             <Plus size={18} />
           </Button>
         </div>
 
-        {/* Suggestions dropdown */}
-        {isOpen && filteredItems.length > 0 && (
+        {/* Loading state */}
+        {loading && (
+          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
+            <Loader2 size={16} className="mx-auto mb-1.5 text-[#BD20D3] animate-spin" />
+            <p>Načítavam položky z databázy...</p>
+          </div>
+        )}
+
+        {/* Database error state */}
+        {!loading && dbError && (
+          <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
+            <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
+            <p>Databáza nie je dostupná alebo neobsahuje žiadne položky na prenájom.</p>
+          </div>
+        )}
+
+        {/* Suggestions dropdown - ONLY from database */}
+        {isOpen && filteredItems.length > 0 && !loading && !dbError && (
           <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
             {filteredItems.map((item) => (
               <button
@@ -202,11 +215,17 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
                 className="flex items-center gap-3 w-full p-3 hover:bg-white/5 transition-colors text-left border-b border-white/5 last:border-b-0"
               >
                 <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500">
+                      <Package size={14} />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-white truncate">{item.name}</p>
@@ -222,11 +241,11 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
           </div>
         )}
 
-        {/* Empty state */}
-        {searchTerm.trim() && filteredItems.length === 0 && !loading && (
+        {/* Empty search result */}
+        {searchTerm.trim() && filteredItems.length === 0 && !loading && !dbError && (
           <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
             <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
-            <p>Žiadna položka sa nenašla. Stlačte Enter pre pridanie vlastnej.</p>
+            <p>Žiadna položka sa nenašla v databáze. Stlačte Enter pre pridanie vlastnej.</p>
           </div>
         )}
       </div>
