@@ -234,7 +234,11 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             <div className="text-center py-12 text-gray-400">Načítavam balíky...</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {presetPackages.map((pkg, index) => (
+              {presetPackages.map((pkg, index) => {
+                const remainingSound = pkg.soundSpecs.length - 3;
+                const remainingLights = pkg.lightSpecs.length - 2;
+
+                return (
                 <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
                   <Card 
                     className={`relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer ${
@@ -283,9 +287,9 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                             <span>{comp}</span>
                           </div>
                         ))}
-                        {pkg.soundSpecs.length > 3 && (
+                        {remainingSound > 0 && (
                           <div className="text-xs text-gray-500 italic">
-                            + {pkg.soundSpecs.length - 3} ďalších položiek zvuku...
+                            + {remainingSound} {remainingSound === 1 ? 'produkt' : 'produkty'} z kategórie zvuk
                           </div>
                         )}
                         {pkg.lightSpecs.length > 0 && (
@@ -300,9 +304,9 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                             <span>{comp}</span>
                           </div>
                         ))}
-                        {pkg.lightSpecs.length > 2 && (
+                        {remainingLights > 0 && (
                           <div className="text-xs text-gray-500 italic ml-5">
-                            + {pkg.lightSpecs.length - 2} ďalších položiek svetiel...
+                            + {remainingLights} {remainingLights === 1 ? 'produkt' : 'produkty'} z kategórie svetlá a efekty
                           </div>
                         )}
                       </div>
@@ -319,7 +323,8 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                     </CardFooter>
                   </Card>
                 </ScrollReveal>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
