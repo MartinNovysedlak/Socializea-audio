@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Search, Loader2, Check, Package } from 'lucide-react';
+import { Plus, X, Search, Loader2, Check, Package, Minus, ShoppingBag } from 'lucide-react';
 
 interface RentalItem {
   id: string;
@@ -27,8 +27,13 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState(false);
   const [filteredItems, setFilteredItems] = useState<RentalItem[]>([]);
+
+  // Quantity selection state
+  const [selectedItem, setSelectedItem] = useState<RentalItem | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const quantityRef = useRef<HTMLDivElement>(null);
 
   // Fetch rental items from database (equipment table)
   useEffect(() => {
@@ -76,25 +81,35 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
     setFilteredItems(filtered.slice(0, 8));
   }, [searchTerm, rentalItems, items]);
 
-  // Click outside to close dropdown
+  // Click outside to close all dropdowns
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+        setSelectedItem(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelectItem = useCallback((item: RentalItem) => {
-    if (!items.includes(item.name)) {
-      onChange([...items, item.name]);
+  const confirmQuantity = useCallback(() => {
+    if (!selectedItem) return;
+    const formatted = `${quantity} x ${selectedItem.name}`;
+    if (!items.includes(formatted)) {
+      onChange([...items, formatted]);
     }
+    setSelectedItem(null);
     setSearchTerm('');
     setFilteredItems([]);
+    setQuantity(1);
     inputRef.current?.focus();
-  }, [items, onChange]);
+  }, [selectedItem, quantity, items, onChange]);
+
+  const handleSelectItem = useCallback((item: RentalItem) => {
+    setSelectedItem(item);
+    setQuantity(1);
+  }, []);
 
   const handleRemoveItem = useCallback((index: number) => {
     onChange(items.filter((_, i) => i !== index));
@@ -103,7 +118,9 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredItems.length > 0) {
+      if (selectedItem) {
+        confirmQuantity();
+      } else if (filteredItems.length > 0) {
         handleSelectItem(filteredItems[0]);
       } else {
         const trimmed = searchTerm.trim();
@@ -159,6 +176,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setIsOpen(true);
+                setSelectedItem(null);
               }}
               onFocus={() => {
                 setIsOpen(true);
@@ -188,7 +206,7 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
           </Button>
         </div>
 
-        {/* Dropdown content - only visible when isOpen and searchTerm is not empty */}
+        {/* Dropdown content */}
         {isOpen && searchTerm.trim() && (
           <>
             {/* Loading state */}
@@ -207,8 +225,8 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
               </div>
             )}
 
-            {/* Suggestions dropdown - ONLY from database */}
-            {!loading && !dbError && filteredItems.length > 0 && (
+            {/* Suggestions dropdown */}
+            {!loading && !dbError && filteredItems.length > 0 && !selectedItem && (
               <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
                 {filteredItems.map((item) => (
                   <button
@@ -231,15 +249,84 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
                       )}
                     </div>
                     <div className="w-6 h-6 rounded-full border border-white/20 hover:bg-[#BD20D3]/30 hover:border-[#BD20D3]/50 flex items-center justify-center transition-colors">
-                      <Check size={12} className="text-white" />
+                      <Plus size={12} className="text-white" />
                     </div>
                   </button>
                 ))}
               </div>
             )}
 
+            {/* Quantity selector for selected item */}
+            {!loading && !dbError && selectedItem && (
+              <div
+                ref={quantityRef}
+                className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-[#BD20D3]/40 rounded-xl p-4 shadow-2xl shadow-black/50 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
+                    <img
+                      src={selectedItem.image}
+                      alt={selectedItem.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{selectedItem.name}</p>
+                    {selectedItem.category && (
+                      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{selectedItem.category}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 bg-black/40 border border-white/10 rounded-xl p-2">
+                  <span className="text-xs text-gray-400 font-semibold uppercase shrink-0">Počet kusov:</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-10 text-center text-white font-bold text-lg">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                      className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedItem(null);
+                      setQuantity(1);
+                    }}
+                    className="text-xs text-gray-400 hover:text-white h-9 flex-1"
+                  >
+                    Zrušiť
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={confirmQuantity}
+                    className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 border border-[#BD20D3]/40 text-white rounded-lg h-9 flex-1 text-xs font-semibold"
+                  >
+                    <ShoppingBag size={14} className="mr-1.5" />
+                    Pridať {quantity} ks
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Empty search result */}
-            {!loading && !dbError && filteredItems.length === 0 && (
+            {!loading && !dbError && filteredItems.length === 0 && !selectedItem && (
               <div className="absolute top-full left-0 right-20 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-4 text-center text-xs text-gray-500 z-50">
                 <Package size={16} className="mx-auto mb-1.5 text-gray-600" />
                 <p>Žiadna položka sa nenašla v databáze. Stlačte Enter pre pridanie vlastnej.</p>
