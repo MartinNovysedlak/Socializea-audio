@@ -333,7 +333,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             return true;
           });
           setCitySuggestions(unique);
-          setCityDropdownOpen(unique.length > 0);
+          setCityDropdownOpen(true);
         } else {
           setCitySuggestions([]);
           setCityDropdownOpen(false);
@@ -368,14 +368,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setDeliveryCity(cityName);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
-    const result = calculateDelivery({ lat, lng }, cityName);
-    setDeliveryResult(result);
-    if (result) {
-      if (result.isFree) {
+    setDeliveryResult(calculateDelivery({ lat, lng }, cityName));
+    if (deliveryResult) {
+      if (deliveryResult.isFree) {
         toast.success(`Doprava do ${cityName} je zadarmo!`);
       } else {
         toast.info(
-          `Doprava do ${cityName}: ${result.price.toFixed(2)} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
+          `Doprava do ${cityName}: ${deliveryResult.price.toFixed(2)} € (vzdialenosť ${deliveryResult.distance} km od ${deliveryResult.nearestPoint})`
         );
       }
     }
@@ -804,7 +803,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         }}
                         onKeyDown={handleCityKeyDown}
                         onFocus={() => {
-                          if (deliveryCity.length >= 2 && deliverySelected) setCityDropdownOpen(true);
+                          if (deliveryCity.length >= 2 && deliverySelected && citySuggestions.length > 0) setCityDropdownOpen(true);
                         }}
                         placeholder="Mesto odberu (SK/CZ)..."
                         readOnly={!deliverySelected}
