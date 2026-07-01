@@ -25,8 +25,7 @@ import {
   ShoppingBag,
   Search,
   Loader2,
-  Minus,
-  Bug
+  Minus
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -79,12 +78,10 @@ interface PackageDetailDialogProps {
 
 // Helper: z reťazca "2x Behringer B112D" extrahuje { name, count }
 function extractBaseNameAndCount(spec: string): { name: string; count: number } {
-  // Skúsime "2x ", "2 ks ", "2ks " a podobne
   const match = spec.match(/^(\d+)\s*(x|ks|kus)\s+/i);
   if (match) {
     return { name: spec.replace(match[0], '').trim(), count: parseInt(match[1], 10) };
   }
-  // Fallback: ak začína číslom bez jednotky, berieme len prvé slovo ako množstvo
   const simpleMatch = spec.match(/^(\d+)\s+/);
   if (simpleMatch) {
     return { name: spec.replace(simpleMatch[0], '').trim(), count: parseInt(simpleMatch[1], 10) };
@@ -102,23 +99,36 @@ function getPackageUsedCounts(pkg: PackageOption): Record<string, number> {
     ...(pkg.otherSpecs || [])
   ];
 
-  console.log('📦 Package specs for counting:', allSpecs);
-
   for (const spec of allSpecs) {
     const { name, count } = extractBaseNameAndCount(spec);
-    const normalized = name.toLowerCase().trim();
-    console.log(`  → extracted: "${name}" (normalized: "${normalized}") → count: ${count}`);
-    map[normalized] = (map[normalized] || 0) + count;
+    // Uložíme pôvodný extrahovaný názov (nie normalizovaný na lowercase)
+    const key = name.trim();
+    map[key] = (map[key] || 0) + count;
   }
 
-  console.log('📦 Package used counts map:', JSON.stringify(map, null, 2));
   return map;
+}
+
+// Nová funkcia: zistí, koľko kusov z balíka sa používa pre daný názov z DB
+// Používa includes() namiesto presnej zhody
+function getUsedInPackageForDbItem(dbItemName: string, packageUsedCounts: Record<string, number>): number {
+  const dbLower = dbItemName.toLowerCase().trim();
+  let totalUsed = 0;
+  
+  for (const [pkgItemName, count] of Object.entries(packageUsedCounts)) {
+    const pkgLower = pkgItemName.toLowerCase().trim();
+    // Skontrolujeme, či názov z DB obsahuje extrahovaný názov z balíka
+    if (dbLower.includes(pkgLower) || pkgLower.includes(dbLower)) {
+      totalUsed += count;
+    }
+  }
+  
+  return totalUsed;
 }
 
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
   const [includeLights, setIncludeLights] = useState(true);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
 
   // Services
   const [services, setServices] = useState<AdditionalService[]>(SERVICES.map(s => ({ ...s, selected: false })));
@@ -151,19 +161,15 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   // Reset and compute package used counts when dialog opens
   React.useEffect(() => {
     if (open && selectedPackage) {
-      console.log('📦 Dialog opened with package:', selectedPackage.name);
       setIncludeLights(true);
       setShowBookingForm(false);
-      setShowDebug(false);
       setBookingForm({ name: '', phone: '', email: '', date: '', message: '' });
       setServices(SERVICES.map(s => ({ ...s, selected: false })));
       setAdditionalProducts([]);
       setSearchTerm('');
       setSelectedItem(null);
       setItemQuantity(1);
-      const counts = getPackageUsedCounts(selectedPackage);
-      setPackageUsedCounts(counts);
-      console.log('📦 Package used counts set:', counts);
+      setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
     }
   }, [open, selectedPackage]);
 
@@ -177,7 +183,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         const { rentalService } = await import('@/lib/rentalService');
         const data = await rentalService.getAll();
         if (data && Array.isArray(data) && data.length > 0) {
-          console.log('📦 Rental items from DB:', data.map(d => ({ name: d.name, available: d.availableCount })));
           const mapped: RentalItem[] = data.map((item: any) => ({
             id: item.id,
             name: item.name,
@@ -187,12 +192,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           }));
           setRentalItems(mapped);
         } else {
-          console.log('📦 No rental items from DB');
           setRentalItems([]);
           setDbError(true);
         }
-      } catch (err) {
-        console.error('📦 Error loading rental items:', err);
+      } catch {
         setRentalItems([]);
         setDbError(true);
       } finally {
@@ -201,21 +204,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     };
     fetchItems();
   }, [open]);
-
-  // Log when rentalItems and packageUsedCounts change
-  useEffect(() => {
-    if (rentalItems.length > 0 && Object.keys(packageUsedCounts).length > 0) {
-      console.log('📦 DEBUG: Checking available counts');
-      console.log('  Package used counts:', packageUsedCounts);
-      console.log('  Rental items:');
-      rentalItems.forEach(item => {
-        const normalized = item.name.toLowerCase().trim();
-        const used = packageUsedCounts[normalized] || 0;
-        const remaining = item.availableCount - used;
-        console.log(`    "${item.name}" → normalized: "${normalized}" → available: ${item.availableCount}, used in pkg: ${used}, remaining: ${remaining}`);
-      });
-    }
-  }, [rentalItems, packageUsedCounts]);
 
   // Filter items based on search term
   useEffect(() => {
@@ -256,16 +244,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setSearchOpen(false);
   };
 
-  const getAvailableForItem = (itemName: string, dbAvailable: number): number => {
-    const normalized = itemName.toLowerCase().trim();
-    const usedInPackage = packageUsedCounts[normalized] || 0;
+  const getAvailableForItem = (dbItemName: string, dbAvailable: number): number => {
+    const usedInPackage = getUsedInPackageForDbItem(dbItemName, packageUsedCounts);
     
     const alreadyAdded = additionalProducts
-      .filter(p => p.id && p.label.toLowerCase().includes(normalized))
+      .filter(p => {
+        const labelLower = p.label.toLowerCase();
+        const dbLower = dbItemName.toLowerCase();
+        return labelLower.includes(dbLower) || dbLower.includes(labelLower);
+      })
       .reduce((sum, p) => sum + p.quantity, 0);
     
     const remaining = dbAvailable - usedInPackage - alreadyAdded;
-    console.log(`  getAvailableForItem("${itemName}"): db=${dbAvailable}, usedInPkg=${usedInPackage}, alreadyAdded=${alreadyAdded}, remaining=${remaining}`);
     return Math.max(0, remaining);
   };
 
@@ -273,8 +263,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     if (!selectedItem) return;
     
     const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+    const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
+    
     if (itemQuantity > maxAvailable) {
-      toast.error(`Môžete pridať maximálne ${maxAvailable} ks. ${selectedItem.availableCount} ks skladom, ${packageUsedCounts[selectedItem.name.toLowerCase().trim()] || 0} ks už je v balíku.`);
+      toast.error(`Môžete pridať maximálne ${maxAvailable} ks. ${selectedItem.availableCount} ks skladom, ${usedInPkg} ks už je v balíku.`);
       return;
     }
 
@@ -354,46 +346,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
             <Package className="text-[#BD20D3]" />
             Detail balíka
-            <button
-              type="button"
-              onClick={() => setShowDebug(!showDebug)}
-              className="ml-auto w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10"
-              title="Debug info"
-            >
-              <Bug size={12} className="text-gray-400" />
-            </button>
           </DialogTitle>
         </DialogHeader>
-
-        {/* Debug panel */}
-        {showDebug && (
-          <div className="bg-black/40 border border-amber-500/30 rounded-xl p-4 text-[10px] font-mono space-y-1 max-h-40 overflow-y-auto">
-            <p className="text-amber-400 font-bold mb-1">🔍 DEBUG: Package used counts</p>
-            {Object.keys(packageUsedCounts).length > 0 ? (
-              Object.entries(packageUsedCounts).map(([name, count]) => (
-                <p key={name} className="text-gray-300">
-                  <span className="text-emerald-400">"{name}"</span> → <span className="text-white">{count} ks</span>
-                </p>
-              ))
-            ) : (
-              <p className="text-red-400">Žiadne položky extrahované z balíka!</p>
-            )}
-            <p className="text-amber-400 font-bold mt-2 mb-1">🔍 DB Items (first 5):</p>
-            {rentalItems.slice(0, 5).map(item => {
-              const normalized = item.name.toLowerCase().trim();
-              const used = packageUsedCounts[normalized] || 0;
-              const match = used > 0 ? '✓' : '✗';
-              return (
-                <p key={item.id} className="text-gray-300">
-                  <span className={match === '✓' ? 'text-emerald-400' : 'text-red-400'}>{match}</span>{' '}
-                  "<span className="text-cyan-400">{item.name}</span>" → 
-                  norm: "<span className="text-yellow-300">{normalized}</span>" → 
-                  skladom: {item.availableCount}ks, v balíku: {used}ks, voľné: {item.availableCount - used}ks
-                </p>
-              );
-            })}
-          </div>
-        )}
 
         <div className="space-y-6">
           {!showBookingForm ? (
@@ -700,7 +654,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           <p className="text-[9px] text-gray-500 mt-1">
                             {(() => {
                               const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
-                              return `Maximálne ${maxAvailable} ks na objednanie (${packageUsedCounts[selectedItem.name.toLowerCase().trim()] || 0} ks už v balíku)`;
+                              const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
+                              return `Maximálne ${maxAvailable} ks na objednanie (${usedInPkg} ks už v balíku)`;
                             })()}
                           </p>
 
