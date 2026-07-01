@@ -13,6 +13,7 @@ import Predaj from './pages/Predaj';
 import ProductDetail from './pages/ProductDetail';
 import NotFound from './pages/NotFound';
 import FloatingCart from './components/FloatingCart';
+import ScrollToTop from './components/ScrollToTop';
 import { useEquipment } from './hooks/useEquipment';
 import AmbientBackground from './components/AmbientBackground';
 
@@ -38,6 +39,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AmbientBackground />
       
       <div className="relative z-10">
