@@ -101,8 +101,8 @@ const Blog = () => {
                         </p>
                       </CardContent>
 
-                      <div className="p-6 pt-0 border-t border-white/5 mt-4">
-                        <Button className="w-full bg-white/5 hover:bg-[#BD20D3]/15 text-white border border-white/10 rounded-xl transition-all font-bold h-11 flex items-center justify-center gap-1 pointer-events-none group-hover:border-[#BD20D3]/40">
+                      <div className="p-6 pt-0">
+                        <Button className="w-full btn-cyber rounded-xl h-11 border-none font-bold text-sm flex items-center justify-center gap-1 pointer-events-none">
                           <span>Prečítať celý článok</span>
                           <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
                         </Button>
