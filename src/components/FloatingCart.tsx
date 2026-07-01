@@ -35,8 +35,11 @@ interface PackageCartItem {
   name: string;
   price: number;
   hasLights: boolean;
+  image: string;
   arrival: { name: string } | null;
   install: 'none' | 'install' | 'install_uninstall';
+  installPrice: number;
+  deliveryPrice: number;
   extras: { id: string; label: string; quantity: number; pricePerDay: number }[];
 }
 
@@ -69,7 +72,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
-      const pkg = e.detail;
+      const pkg = e.detail as PackageCartItem;
       setPackageItems(prev => [...prev, pkg]);
       toast.success(`Balík "${pkg.name}" pridaný do košíka`);
     };
@@ -201,11 +204,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const getPackageTotal = (pkg: PackageCartItem) => {
     let total = pkg.price;
-    if (pkg.install === 'install') total += 20;
-    if (pkg.install === 'install_uninstall') total += 40;
-    if (pkg.arrival) {
-      total += 0; // zadarmo alebo spoplatnené – momentálne len info
-    }
+    total += pkg.installPrice;
+    total += pkg.deliveryPrice;
     const extrasSum = pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
     total += extrasSum;
     return total;
@@ -369,9 +369,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
               {packageItems.map((pkg) => (
                 <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
-                  <div className="w-8 h-8 rounded bg-[#BD20D3]/10 border border-[#BD20D3]/30 flex items-center justify-center text-[#BD20D3]">
-                    <Package size={14} />
-                  </div>
+                  <img
+                    src={pkg.image}
+                    alt={pkg.name}
+                    className="w-8 h-8 rounded object-cover border border-white/10"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
+                    }}
+                  />
                   <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
                   <span className="truncate flex-grow">{pkg.name}</span>
                   <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
@@ -499,11 +504,21 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         >
                           <X size={10} />
                         </button>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-[#BD20D3]/10 flex items-center justify-center text-[#BD20D3]">
-                          <Package size={24} />
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
+                          <img
+                            src={pkg.image}
+                            alt={pkg.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
+                            }}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-semibold text-white">{pkg.name}</h4>
+                          <p className="text-[#BD20D3] font-bold text-xs mt-0.5">
+                            {getPackageTotal(pkg)} € / víkend
+                          </p>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {pkg.hasLights && (
                               <span className="text-[9px] px-1.5 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded text-[#BD20D3] flex items-center gap-1">
@@ -512,36 +527,35 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             )}
                             {pkg.install === 'install' && (
                               <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
-                                <Wrench size={10} /> Inštalácia
+                                <Wrench size={10} /> Inštalácia (+{pkg.installPrice} €)
                               </span>
                             )}
                             {pkg.install === 'install_uninstall' && (
                               <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
-                                <Wrench size={10} /> Inšt.+Deinšt.
+                                <Wrench size={10} /> Inšt.+Deinšt. (+{pkg.installPrice} €)
                               </span>
                             )}
                             {pkg.arrival && (
                               <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 flex items-center gap-1">
                                 <MapPin size={10} /> {pkg.arrival.name}
+                                {pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice.toFixed(2)} €)` : ' (Zdarma)'}
                               </span>
                             )}
                           </div>
                           {pkg.extras.length > 0 && (
                             <div className="text-[10px] text-gray-400 mt-1 space-y-0.5">
+                              <p className="text-[10px] font-semibold text-gray-500 mb-0.5">Doplnkové produkty:</p>
                               {pkg.extras.map((e, i) => (
                                 <div key={i} className="flex items-center gap-1">
                                   <Plus size={8} />
                                   <span>{e.label}</span>
-                                  <span className="text-gray-500">
-                                    ({e.quantity}×{e.pricePerDay} €)
+                                  <span className="text-[#BD20D3]">
+                                    {(e.quantity * e.pricePerDay).toFixed(2)} €
                                   </span>
                                 </div>
                               ))}
                             </div>
                           )}
-                          <p className="text-[#BD20D3] font-bold text-xs mt-2">
-                            {getPackageTotal(pkg)} € / víkend
-                          </p>
                         </div>
                       </div>
                     ))}

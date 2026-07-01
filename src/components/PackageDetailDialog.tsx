@@ -464,13 +464,21 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       ? selectedPackage.priceWithLights
       : selectedPackage.priceNoLights;
 
+    const installCost = installSelected ? 20 : 0;
+    const installUninstallCost = installUninstallSelected ? 40 : 0;
+    const installPrice = installCost + installUninstallCost;
+    const deliveryPrice = deliveryResult?.price ?? 0;
+
     const pkg = {
       id: crypto.randomUUID(),
       name: selectedPackage.name,
       price: activePackagePrice,
       hasLights: includeLights,
+      image: selectedPackage.image,
       arrival: deliverySelected && deliveryCity ? { name: deliveryCity } : null,
       install: getInstallType(installSelected, installUninstallSelected),
+      installPrice,
+      deliveryPrice,
       extras: additionalProducts.map(p => ({
         id: p.id,
         label: p.label,
