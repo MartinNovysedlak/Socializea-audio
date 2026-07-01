@@ -336,14 +336,27 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   }, []);
 
   useEffect(() => {
-    if (deliveryCity.length >= 2) {
+    if (deliveryCity.length >= 2 && deliverySelected) {
       setCitySuggestions(searchCities(deliveryCity));
       setCityDropdownOpen(true);
     } else {
       setCitySuggestions([]);
       setCityDropdownOpen(false);
     }
-  }, [deliveryCity]);
+  }, [deliveryCity, deliverySelected]);
+
+  const toggleDelivery = () => {
+    if (deliverySelected) {
+      clearDelivery();
+    } else {
+      setDeliverySelected(true);
+      // focus the input after state update
+      requestAnimationFrame(() => {
+        const input = document.getElementById('city-input');
+        if (input) input.focus();
+      });
+    }
+  };
 
   const selectCity = (cityName: string) => {
     setDeliveryCity(cityName);
@@ -351,7 +364,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setCitySuggestions([]);
     const result = calculateDelivery(cityName);
     setDeliveryResult(result);
-    setDeliverySelected(true);
     if (result) {
       if (result.isFree) {
         toast.success(`Doprava do ${cityName} je zadarmo!`);
@@ -489,15 +501,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const hasLightSection =
     selectedPackage.lightSpecs.length > 0 ||
     (selectedPackage.otherSpecs && selectedPackage.otherSpecs.length > 0);
-
-  const showDeliveryValue =
-    deliverySelected && deliveryResult ? (deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`) : '';
-
-  const showDeliveryDetail =
-    deliverySelected &&
-    deliveryResult &&
-    !deliveryResult.isFree &&
-    (deliveryResult.distance > 0);
 
   return (
     <Dialog
@@ -758,20 +761,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <div className="border-t border-white/[0.06] pt-3 space-y-2">
                   {/* Doprava */}
                   <div className="relative" ref={cityRef}>
-                    <div className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20">
+                    <div
+                      onClick={toggleDelivery}
+                      className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20"
+                    >
                       <div
                         className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${
                           deliverySelected
                             ? 'bg-[#1A4BFF] border-[#1A4BFF]'
                             : 'border-gray-500'
                         }`}
-                        onClick={() => {
-                          if (deliverySelected) clearDelivery();
-                        }}
                       >
-                        {deliverySelected && (
-                          <Check size={12} className="text-white stroke-[3]" />
-                        )}
+                        {deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
                       </div>
 
                       <MapPin
@@ -788,15 +789,15 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           value={deliveryCity}
                           onChange={(e) => {
                             setDeliveryCity(e.target.value);
-                            setDeliverySelected(false);
                             setDeliveryResult(null);
                           }}
                           onKeyDown={handleCityKeyDown}
                           onFocus={() => {
-                            if (deliveryCity.length >= 2) setCityDropdownOpen(true);
+                            if (deliveryCity.length >= 2 && deliverySelected) setCityDropdownOpen(true);
                           }}
                           placeholder="Mesto odberu (SK/CZ)..."
-                          className="bg-transparent border-0 text-white text-xs h-auto p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                          readOnly={!deliverySelected}
+                          className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
                         />
                       </div>
 
@@ -830,7 +831,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       )}
                     </div>
 
-                    {cityDropdownOpen && citySuggestions.length > 0 && !deliverySelected && (
+                    {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && (
                       <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
                         {citySuggestions.map((city, i) => (
                           <button
