@@ -65,8 +65,8 @@ interface RentalItem {
 }
 
 const SERVICES: AdditionalService[] = [
-  { id: 'install', label: 'Inštalácia techniky', price: 20, selected: false },
-  { id: 'install-uninstall', label: 'Inštalácia a deinštalácia techniky', price: 40, selected: false },
+  { id: 'install', label: 'Inštalácia', price: 20, selected: false },
+  { id: 'install-uninstall', label: 'Inštalácia a deinštalácia', price: 40, selected: false },
   { id: 'delivery-outside', label: 'Dovoz mimo okresov Žilina/Kysucké Nové Mesto/Čadca', price: 50, selected: false },
 ];
 
@@ -95,12 +95,16 @@ function getPackageUsedCounts(pkg: PackageOption): Record<string, number> {
     ...(pkg.otherSpecs || [])
   ];
 
+  console.log('📦 Package specs for counting:', allSpecs);
+
   for (const spec of allSpecs) {
     const { name, count } = extractBaseNameAndCount(spec);
     const normalized = name.toLowerCase().trim();
+    console.log(`  → extracted: "${name}" (normalized: "${normalized}") → count: ${count}`);
     map[normalized] = (map[normalized] || 0) + count;
   }
 
+  console.log('📦 Package used counts map:', JSON.stringify(map, null, 2));
   return map;
 }
 
@@ -139,6 +143,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   // Reset and compute package used counts when dialog opens
   React.useEffect(() => {
     if (open && selectedPackage) {
+      console.log('📦 Dialog opened with package:', selectedPackage.name);
       setIncludeLights(true);
       setShowBookingForm(false);
       setBookingForm({ name: '', phone: '', email: '', date: '', message: '' });
@@ -147,7 +152,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSearchTerm('');
       setSelectedItem(null);
       setItemQuantity(1);
-      setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
+      const counts = getPackageUsedCounts(selectedPackage);
+      setPackageUsedCounts(counts);
+      console.log('📦 Package used counts set:', counts);
     }
   }, [open, selectedPackage]);
 
@@ -161,6 +168,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         const { rentalService } = await import('@/lib/rentalService');
         const data = await rentalService.getAll();
         if (data && Array.isArray(data) && data.length > 0) {
+          console.log('📦 Rental items from DB:', data.map(d => ({ name: d.name, available: d.availableCount })));
           const mapped: RentalItem[] = data.map((item: any) => ({
             id: item.id,
             name: item.name,
@@ -170,10 +178,12 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           }));
           setRentalItems(mapped);
         } else {
+          console.log('📦 No rental items from DB');
           setRentalItems([]);
           setDbError(true);
         }
-      } catch {
+      } catch (err) {
+        console.error('📦 Error loading rental items:', err);
         setRentalItems([]);
         setDbError(true);
       } finally {
@@ -182,6 +192,21 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     };
     fetchItems();
   }, [open]);
+
+  // Log when rentalItems and packageUsedCounts change
+  useEffect(() => {
+    if (rentalItems.length > 0 && Object.keys(packageUsedCounts).length > 0) {
+      console.log('📦 DEBUG: Checking available counts');
+      console.log('  Package used counts:', packageUsedCounts);
+      console.log('  Rental items:');
+      rentalItems.forEach(item => {
+        const normalized = item.name.toLowerCase().trim();
+        const used = packageUsedCounts[normalized] || 0;
+        const remaining = item.availableCount - used;
+        console.log(`    "${item.name}" → available: ${item.availableCount}, used in pkg: ${used}, remaining: ${remaining}`);
+      });
+    }
+  }, [rentalItems, packageUsedCounts]);
 
   // Filter items based on search term
   useEffect(() => {
@@ -192,12 +217,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     const lower = searchTerm.toLowerCase();
     const filtered = rentalItems.filter(
       item =>
-        !additionalProducts.find(p => p.id === item.id) &&
-        (item.name.toLowerCase().includes(lower) ||
-         (item.category && item.category.toLowerCase().includes(lower)))
+        item.name.toLowerCase().includes(lower) ||
+        (item.category && item.category.toLowerCase().includes(lower))
     );
     setFilteredItems(filtered.slice(0, 8));
-  }, [searchTerm, rentalItems, additionalProducts]);
+  }, [searchTerm, rentalItems]);
 
   // Click outside to close search dropdown
   useEffect(() => {
@@ -224,16 +248,15 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   };
 
   const getAvailableForItem = (itemName: string, dbAvailable: number): number => {
-    // Zistíme, koľko kusov je už použitých v balíku
     const normalized = itemName.toLowerCase().trim();
     const usedInPackage = packageUsedCounts[normalized] || 0;
     
-    // Zistíme, koľko kusov už používateľ pridal navyše
     const alreadyAdded = additionalProducts
       .filter(p => p.id && p.label.toLowerCase().includes(normalized))
       .reduce((sum, p) => sum + p.quantity, 0);
     
     const remaining = dbAvailable - usedInPackage - alreadyAdded;
+    console.log(`  getAvailableForItem("${itemName}"): db=${dbAvailable}, usedInPkg=${usedInPackage}, alreadyAdded=${alreadyAdded}, remaining=${remaining}`);
     return Math.max(0, remaining);
   };
 
