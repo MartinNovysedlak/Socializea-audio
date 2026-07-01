@@ -252,7 +252,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </span>
                     )}
 
-                    <div className="h-56 overflow-hidden relative">
+                    <div className="h-56 overflow-hidden relative shrink-0">
                       <img 
                         src={pkg.image} 
                         alt={pkg.name} 
@@ -261,7 +261,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
                     </div>
 
-                    <CardHeader className="p-6 pb-4">
+                    <CardHeader className="p-6 pb-4 shrink-0">
                       <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
                         {pkg.name}
                       </CardTitle>
@@ -278,8 +278,8 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </div>
                     </CardHeader>
 
-                    <CardContent className="px-6 pb-6 pt-0 space-y-4">
-                      <div className="border-t border-white/5 pt-4 space-y-2.5">
+                    <CardContent className="px-6 pb-6 pt-0 flex-1 flex flex-col">
+                      <div className="border-t border-white/5 pt-4 space-y-2.5 flex-1">
                         <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
                         {pkg.soundSpecs.slice(0, 3).map((comp, idx) => (
                           <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
@@ -312,7 +312,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </div>
                     </CardContent>
 
-                    <CardFooter className="p-6 pt-0">
+                    <CardFooter className="p-6 pt-0 shrink-0">
                       <Button 
                         onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
                         className="w-full btn-cyber rounded-xl h-14 border-none font-bold text-sm"
