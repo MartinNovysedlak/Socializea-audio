@@ -49,6 +49,8 @@ interface FloatingCartProps {
   equipment: EquipmentItem[];
 }
 
+const PACKAGE_STORAGE_KEY = "cyber_cart_packages";
+
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -68,12 +70,32 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     message: ""
   });
 
-  const [packageItems, setPackageItems] = useState<PackageCartItem[]>([]);
+  // Load package items from localStorage on mount
+  const [packageItems, setPackageItems] = useState<PackageCartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(PACKAGE_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist package items to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems));
+    } catch {
+      console.error("Nedá sa uložiť balíky do localStorage:", packageItems);
+    }
+  }, [packageItems]);
 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const pkg = e.detail as PackageCartItem;
-      setPackageItems(prev => [...prev, pkg]);
+      setPackageItems(prev => {
+        const updated = [...prev, pkg];
+        return updated;
+      });
       toast.success(`Balík "${pkg.name}" pridaný do košíka`);
     };
     window.addEventListener('add-package-to-cart', handler as EventListener);

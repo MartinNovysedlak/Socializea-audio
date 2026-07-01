@@ -197,6 +197,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [searchingCities, setSearchingCities] = useState(false);
+  // Flag that prevents search after a city has been selected
+  const [cityLocked, setCityLocked] = useState(false);
 
   const debouncedCitySearch = useDebounce(deliveryCity, 400);
 
@@ -225,6 +227,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setCitySuggestions([]);
       setDeliveryResult(null);
       setDeliverySelected(false);
+      setCityLocked(false);
       setAdditionalProducts([]);
       setSearchTerm('');
       setSelectedItem(null);
@@ -293,9 +296,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Online city search via Nominatim
+  // Online city search via Nominatim – skip if city is locked (already selected)
   useEffect(() => {
-    if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2) {
+    if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
       setCitySuggestions([]);
       setCityDropdownOpen(false);
       setSearchingCities(false);
@@ -333,7 +336,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             return true;
           });
           setCitySuggestions(unique);
-          setCityDropdownOpen(true);
+          setCityDropdownOpen(unique.length > 0);
         } else {
           setCitySuggestions([]);
           setCityDropdownOpen(false);
@@ -349,7 +352,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     };
     search();
     return () => { cancelled = true; };
-  }, [debouncedCitySearch, deliverySelected]);
+  }, [debouncedCitySearch, deliverySelected, cityLocked]);
 
   const toggleDelivery = () => {
     if (deliverySelected) {
@@ -366,15 +369,17 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const selectCity = (cityName: string, lat: number, lng: number) => {
     setDeliveryCity(cityName);
+    setCityLocked(true);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
-    setDeliveryResult(calculateDelivery({ lat, lng }, cityName));
-    if (deliveryResult) {
-      if (deliveryResult.isFree) {
+    const result = calculateDelivery({ lat, lng }, cityName);
+    setDeliveryResult(result);
+    if (result) {
+      if (result.isFree) {
         toast.success(`Doprava do ${cityName} je zadarmo!`);
       } else {
         toast.info(
-          `Doprava do ${cityName}: ${deliveryResult.price.toFixed(2)} € (vzdialenosť ${deliveryResult.distance} km od ${deliveryResult.nearestPoint})`
+          `Doprava do ${cityName}: ${result.price.toFixed(2)} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
         );
       }
     }
@@ -384,6 +389,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setDeliveryCity('');
     setDeliveryResult(null);
     setDeliverySelected(false);
+    setCityLocked(false);
     setCitySuggestions([]);
     setCityDropdownOpen(false);
   };
@@ -800,10 +806,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         onChange={(e) => {
                           setDeliveryCity(e.target.value);
                           setDeliveryResult(null);
+                          setCityLocked(false);
                         }}
                         onKeyDown={handleCityKeyDown}
                         onFocus={() => {
-                          if (deliveryCity.length >= 2 && deliverySelected && citySuggestions.length > 0) setCityDropdownOpen(true);
+                          if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true);
                         }}
                         placeholder="Mesto odberu (SK/CZ)..."
                         readOnly={!deliverySelected}
@@ -841,7 +848,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     )}
                   </div>
 
-                  {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && (
+                  {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && !cityLocked && (
                     <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-60 overflow-y-auto">
                       {searchingCities && (
                         <div className="flex items-center justify-center gap-2 p-3 border-b border-white/[0.06] text-gray-500">
