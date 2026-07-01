@@ -231,6 +231,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+  const [citySelected, setCitySelected] = useState(false);
 
   const [additionalProducts, setAdditionalProducts] = useState<AdditionalProduct[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -267,6 +268,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setCitySuggestions([]);
       setDeliveryResult(null);
       setDeliverySelected(false);
+      setCitySelected(false);
       setAdditionalProducts([]);
       setSearchTerm('');
       setSelectedItem(null);
@@ -336,14 +338,14 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   }, []);
 
   useEffect(() => {
-    if (deliveryCity.length >= 2 && deliverySelected) {
+    if (deliveryCity.length >= 2 && deliverySelected && !citySelected) {
       setCitySuggestions(searchCities(deliveryCity));
       setCityDropdownOpen(true);
     } else {
       setCitySuggestions([]);
       setCityDropdownOpen(false);
     }
-  }, [deliveryCity, deliverySelected]);
+  }, [deliveryCity, deliverySelected, citySelected]);
 
   const toggleDelivery = () => {
     if (deliverySelected) {
@@ -362,6 +364,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setDeliveryCity(cityName);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
+    setCitySelected(true);
     const result = calculateDelivery(cityName);
     setDeliveryResult(result);
     if (result) {
@@ -381,6 +384,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setDeliverySelected(false);
     setCitySuggestions([]);
     setCityDropdownOpen(false);
+    setCitySelected(false);
   };
 
   const handleCityKeyDown = (e: React.KeyboardEvent) => {
@@ -790,10 +794,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           onChange={(e) => {
                             setDeliveryCity(e.target.value);
                             setDeliveryResult(null);
+                            setCitySelected(false);
                           }}
                           onKeyDown={handleCityKeyDown}
                           onFocus={() => {
-                            if (deliveryCity.length >= 2 && deliverySelected) setCityDropdownOpen(true);
+                            if (deliveryCity.length >= 2 && deliverySelected && !citySelected) setCityDropdownOpen(true);
                           }}
                           placeholder="Mesto odberu (SK/CZ)..."
                           readOnly={!deliverySelected}
@@ -831,7 +836,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       )}
                     </div>
 
-                    {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && (
+                    {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && !citySelected && (
                       <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
                         {citySuggestions.map((city, i) => (
                           <button
