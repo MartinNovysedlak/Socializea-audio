@@ -59,6 +59,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
+  // ref, ktorý zabráni hover preview po prvom zobrazení (300ms)
+  const hoverReadyRef = useRef(false);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -101,6 +104,21 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     window.addEventListener('add-package-to-cart', handler as EventListener);
     return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
   }, []);
+
+  // Reset hover state a spust timer kazdy krat ked sa kosik zviditelni
+  useEffect(() => {
+    if (totalItems > 0) {
+      setIsHovered(false);
+      hoverReadyRef.current = false;
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = setTimeout(() => {
+        hoverReadyRef.current = true;
+      }, 300);
+    }
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, [Object.keys(quantities).length > 0 ? 0 : 1, packageItems.length > 0 ? 0 : 1]);
 
   // FIX: compute total items directly from quantities object and package items,
   // so the cart button appears even when equipment data hasn't loaded yet.
@@ -236,6 +254,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return total;
   };
 
+  const handleMouseEnter = () => {
+    if (!hoverReadyRef.current) return;
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   if (totalItems === 0) return null;
 
   return (
@@ -362,8 +389,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       {/* FLOATING ACTION BUTTON WITH HOVER PREVIEW */}
       <div
         className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* HOVER PREVIEW CONTAINER */}
         {isHovered && !isOpen && (
