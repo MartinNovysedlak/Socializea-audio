@@ -346,7 +346,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/5 border border-white/10 rounded-3xl overflow-hidden p-5">
+              {/* ========= HLAVNÁ KARTA S OBRÁZKOM A CENOU ========= */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-3xl overflow-hidden p-5">
                 <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
                   <img src={selectedPackage.image} alt={selectedPackage.name} className="w-full h-full object-cover" />
                 </div>
@@ -377,8 +378,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/10">
+                {/* ========= ZVUKOVÁ TECHNIKA ========= */}
+                <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
                     <Volume2 size={16} /> Zvuková technika
                   </span>
                   <ul className="space-y-2">
@@ -397,11 +399,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     className={`p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
                       includeLights 
                         ? 'bg-[#BD20D3]/5 border-[#BD20D3]/30 shadow-[0_0_20px_rgba(189,32,211,0.05)] hover:bg-[#BD20D3]/10' 
-                        : 'bg-white/5 border-white/10 opacity-75 hover:opacity-100 hover:border-white/25'
+                        : 'bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] opacity-80 hover:opacity-100'
                     }`}
                   >
                     <div>
-                      <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
+                      <div className="flex justify-between items-center border-b border-white/[0.06] pb-3 mb-3">
                         <div className="flex items-center gap-2">
                           <Lightbulb className={includeLights ? "text-[#BD20D3]" : "text-gray-400"} size={18} />
                           <span className="text-xs font-bold text-white uppercase tracking-wider">Svetlá, efekty & show</span>
@@ -435,8 +437,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
 
               {/* DOPLNKOVÉ SLUŽBY */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/10">
+              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
                   <Wrench size={16} /> Doplnkové služby
                 </span>
                 <div className="space-y-2">
