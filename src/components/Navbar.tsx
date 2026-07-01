@@ -38,7 +38,7 @@ const Navbar = () => {
           </div>
           <Link to="/kontakt">
             <Button className="hidden sm:flex btn-cyber rounded-full px-6 border-none animate-pulse-glow hover:scale-105 active:scale-95 duration-300">
-              Rezervovať
+              Napíšte nám
             </Button>
           </Link>
         </div>
