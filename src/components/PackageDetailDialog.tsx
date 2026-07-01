@@ -228,7 +228,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     const totalPrice = activePrice + servicesCost;
 
     toast.success('Dopyt na balík bol odoslaný!', {
-      description: `Váš dopyt pre "${selectedPackage!.name}" bol zaznamenaný. Celková kalkulácia: ${totalPrice} €/deň + doplnkové produkty. Náš tím vás čoskoro osloví.`
+      description: `Váš dopyt pre "${selectedPackage!.name}" bol zaznamenaný. Celková kalkulácia: ${totalPrice} € + doplnkové produkty. Náš tím vás čoskoro osloví.`
     });
     onOpenChange(false);
   };
@@ -295,12 +295,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
 
                   <div className="pt-2 border-t border-white/5">
-                    <span className="text-xs text-gray-400 uppercase font-bold block">Cena za deň s DPH:</span>
+                    <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend:</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-[#BD20D3] font-extrabold text-3xl">
-                        {activePrice} €
+                        {totalPrice} €
                       </span>
-                      <span className="text-gray-400">/ deň</span>
                     </div>
                     {includeLights && (
                       <p className="text-emerald-400 text-xs mt-1">
@@ -360,7 +359,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
                         {includeLights 
                           ? 'Svetelná show je pridaná a zahŕňa tieto položky:' 
-                          : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} € / deň)`}
+                          : `Pridať svetelnú show a efekty? (+${lightsUpgradePrice} €)`}
                       </p>
 
                       <ul className="space-y-2">
@@ -587,7 +586,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <span className="text-xs font-bold uppercase tracking-widest text-white pb-1">Súhrn cien</span>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>Základná cena balíka:</span>
-                  <span className="text-white font-semibold">{activePrice} € / deň</span>
+                  <span className="text-white font-semibold">{activePrice} €</span>
                 </div>
                 {selectedServices.length > 0 && (
                   <>
@@ -606,7 +605,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2 mt-1">
-                  <span className="text-white">Celková kalkulácia / deň:</span>
+                  <span className="text-white">Celková kalkulácia:</span>
                   <span className="text-[#BD20D3]">{totalPrice} €</span>
                 </div>
               </div>
@@ -625,7 +624,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <div className="space-y-2 text-center border-b border-white/5 pb-4">
                 <h3 className="text-lg md:text-xl font-bold text-white">Rezervácia: {selectedPackage.name}</h3>
                 <p className="text-xs text-gray-400">
-                  Cena: {activePrice} €/deň ({includeLights ? 'so svetelnou show' : 'bez svetiel'})
+                  Cena: {totalPrice} € ({includeLights ? 'so svetelnou show' : 'bez svetiel'})
                 </p>
                 {selectedServices.length > 0 && (
                   <p className="text-xs text-[#1A4BFF]">
