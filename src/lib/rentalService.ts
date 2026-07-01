@@ -8,6 +8,8 @@ export interface RentalItemData {
   description: string | null;
   price: number | null;
   available: boolean;
+  /** Počet kusov skladom (numerická hodnota z DB) */
+  availableCount: number;
 }
 
 export const rentalService = {
@@ -33,7 +35,8 @@ export const rentalService = {
       category: item.category || null,
       description: item.description || null,
       price: item.price_per_day || null,
-      available: item.available > 0
+      available: item.available > 0,
+      availableCount: item.available ?? 0
     }));
 
     console.log('✅ Mapped rental items:', mapped.length);
@@ -61,7 +64,8 @@ export const rentalService = {
       category: item.category || null,
       description: item.description || null,
       price: item.price_per_day || null,
-      available: item.available > 0
+      available: item.available > 0,
+      availableCount: item.available ?? 0
     }));
 
     return mapped;
