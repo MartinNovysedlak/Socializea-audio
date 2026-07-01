@@ -36,18 +36,15 @@ import {
   Type,
   Bold,
   Italic,
-  Upload,
-  Package
+  Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog' | 'packages'>('rentals');
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
 
   // --- 1. RENTAL STATE ---
   const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
@@ -577,10 +574,6 @@ const Admin = () => {
     }, 50);
   };
 
-  const handlePackagesClick = () => {
-    navigate('/admin/packages');
-  };
-
   return (
     <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
       <Navbar />
@@ -676,10 +669,6 @@ const Admin = () => {
                 <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <BookOpen size={14} />
                   <span>Blog</span>
-                </TabsTrigger>
-                <TabsTrigger value="packages" onClick={handlePackagesClick} className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
-                  <Package size={14} />
-                  <span>Balíky</span>
                 </TabsTrigger>
               </TabsList>
 
