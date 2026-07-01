@@ -53,6 +53,18 @@ interface PackageRecommendation {
   warning?: string;
 }
 
+// Mapovanie decision tree ID na názvy balíkov, ktoré sú v databáze
+const PACKAGE_NAME_MAPPING: Record<string, string> = {
+  'oslava-mini': 'Oslava MINI',
+  'party-mini': 'Párty MINI',
+  'kompakt-prezentacia': 'Kompakt Prezentácia',
+  'oslava-medium': 'Oslava MEDIUM',
+  'klub-medium': 'Klub MEDIUM',
+  'premium-max': 'PREMIUM MAX',
+  'klub-maximal': 'Klub MAXIMAL',
+  'open-air-arena': 'Open-Air ARENA',
+};
+
 const InteractiveQuiz = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
@@ -122,12 +134,24 @@ const InteractiveQuiz = () => {
   const findPackage = (idPrefix: string): PackageRecommendation | null => {
     if (loadedPackages.length === 0) return null;
     
+    // 1. Skús nájsť podľa ID (ak by sa zhodovalo s databázovým ID)
     const exactMatch = loadedPackages.find(p => p.id === idPrefix);
     if (exactMatch) return exactMatch;
     
-    const nameMatch = loadedPackages.find(p => p.name.toLowerCase().includes(idPrefix.toLowerCase()));
-    if (nameMatch) return nameMatch;
+    // 2. Skús nájsť podľa mapovania názvu
+    const mappedName = PACKAGE_NAME_MAPPING[idPrefix];
+    if (mappedName) {
+      const nameMatch = loadedPackages.find(p => p.name.includes(mappedName));
+      if (nameMatch) return nameMatch;
+    }
     
+    // 3. Skús nájsť podľa názvu (fallback pre prípad, že mapovanie neobsahuje daný prefix)
+    const nameFallback = loadedPackages.find(p => 
+      p.name.toLowerCase().includes(idPrefix.replace(/-/g, ' ').toLowerCase())
+    );
+    if (nameFallback) return nameFallback;
+    
+    // 4. Posledná záchrana: vráť prvý balík
     return loadedPackages[0];
   };
 
