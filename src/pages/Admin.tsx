@@ -36,7 +36,8 @@ import {
   Type,
   Bold,
   Italic,
-  Upload
+  Upload,
+  Package
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,7 +45,7 @@ const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog'>('rentals');
+  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog' | 'packages'>('rentals');
 
   // --- 1. RENTAL STATE ---
   const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
@@ -657,7 +658,7 @@ const Admin = () => {
             </div>
 
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
-              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto">
+              <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto flex-wrap">
                 <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <Volume2 size={14} />
                   <span>Prenájom</span>
@@ -665,6 +666,10 @@ const Admin = () => {
                 <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <ShoppingBag size={14} />
                   <span>Predaj</span>
+                </TabsTrigger>
+                <TabsTrigger value="packages" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <Package size={14} />
+                  <span>Balíky</span>
                 </TabsTrigger>
                 <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <BookOpen size={14} />
@@ -832,6 +837,22 @@ const Admin = () => {
                       </table>
                     </div>
                   )}
+                </Card>
+              </TabsContent>
+
+              {/* PACKAGES TAB PANEL */}
+              <TabsContent value="packages" className="space-y-6">
+                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <span className="text-sm text-gray-400">Správa balíkov a setov</span>
+                  <Button disabled className="btn-cyber rounded-xl h-10 px-5 border-none opacity-50 cursor-not-allowed">
+                    <Plus size={16} className="mr-1.5" /> Pridať balík
+                  </Button>
+                </div>
+
+                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
+                  <div className="text-center py-12 text-gray-500 italic">
+                    Zatiaľ tu nie sú žiadne balíky.
+                  </div>
                 </Card>
               </TabsContent>
 
