@@ -16,6 +16,7 @@ import { EquipmentItem } from '@/lib/supabase';
 import { equipmentService } from '@/lib/equipmentService';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { blogService, BlogPost, BlogBlock } from '@/lib/blogService';
+import { packagesService, PackageData } from '@/lib/packagesService';
 import { 
   Lock, 
   LogOut, 
@@ -42,215 +43,6 @@ import {
   Check
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface PresetPackage {
-  id: string;
-  name: string;
-  priceNoLights: number;
-  priceWithLights: number;
-  image: string;
-  description: string;
-  soundSpecs: string[];
-  lightSpecs: string[];
-  otherSpecs?: string[];
-  warning?: string;
-}
-
-const presetPackages: PresetPackage[] = [
-  {
-    id: 'kompakt-prezentacia',
-    name: 'BALÍK 1: Kompakt Prezentácia',
-    priceNoLights: 100,
-    priceWithLights: 130,
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
-    description: 'Zameranie: Firemné prezentácie, prednášky, schôdze do 30-100 ľudí (dôraz na čistú reč a obraz).',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802 (kompaktný, jednoduchý na obsluhu)',
-      '2x Reproduktory Behringer B112D (dostatok výkonu na hovorené slovo)',
-      '1x Sada 2 bezdrôtových mikrofónov the t.bone free solo Twin HT',
-      '2x Trojnožka na reproduktory',
-      '2x Stojan na mikrofón'
-    ],
-    lightSpecs: [
-      '4x RGBWA UV Led Par svetlá (nastavené na statickú teplú bielu/oranžovú farbu pre rečníka alebo do pozadia)'
-    ]
-  },
-  {
-    id: 'party-mini',
-    name: 'BALÍK 2: Párty MINI (Chata / Oslava)',
-    priceNoLights: 110,
-    priceWithLights: 140,
-    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
-    description: 'Zameranie: Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí, kde sa vyžaduje dynamický basový základ.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802',
-      '1x Reproduktory Behringer B112D',
-      '1x Subwoofer Behringer B1500XP (15" aktívny sub, ktorý ľahko prevezieš aj v kufri auta)',
-      '1x Teleskopická tyč na reproduktory',
-      '1x Samostatný káblový mikrofón'
-    ],
-    lightSpecs: [
-      '1x Svetelný set BeamZ Party Bar (všetko v jednom na stojane, jednoduchá montáž)',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300 (zvýrazní svetelné lúče v priestore)'
-    ]
-  },
-  {
-    id: 'oslava-mini',
-    name: 'BALÍK 3: Oslava MINI',
-    priceNoLights: 140,
-    priceWithLights: 180,
-    image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
-    description: 'Zameranie: Rodinné oslavy, posedenia, komorné svadby do 30 ľudí v reštauráciách a sálach, kde netreba prehnaný basový tlak, ale peknú atmosféru.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx 802',
-      '2x Reproduktory Behringer B112D',
-      '1x Subwoofer Behringer B1500XP (15" aktívny sub, ktorý ľahko prevezieš aj v kufri auta)',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT (pre príhovory a moderovanie)',
-      '2x Trojnožka na reproduktory',
-      '1x Stojan na mikrofón'
-    ],
-    lightSpecs: [
-      '1x Svetelný set BeamZ Party Bar (všetko v jednom na stojane, jednoduchá montáž)',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300'
-    ]
-  },
-  {
-    id: 'oslava-medium',
-    name: 'BALÍK 4: Oslava MEDIUM',
-    priceNoLights: 180,
-    priceWithLights: 270,
-    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
-    description: 'Zameranie: Klasická svadba alebo stredne veľká oslava do 100 ľudí v interiéri. Vyvážený pomer medzi skvelou rečou a plným tanečným parketom.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx X1222 USB',
-      '2x Reproduktory Behringer B112D (hlavné satelity)',
-      '1x Subwoofer The Box Pro DSP 18 Sub (poriadny 18" bas, ktorý roztancuje sálu)',
-      '1x Teleskopická stojanová tyč (umiestnenie satelitov priamo na subwoofer)',
-      '1x Trojnožka na reproduktory',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT'
-    ],
-    lightSpecs: [
-      '6x RGBWA UV Led Par svetlá',
-      '2x Rotujúca 90W Beam hlava',
-      '1x BeamZ SUSHI-DS (riadiaci pult pre svetlá)',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (klasický retro párty efekt)',
-      '1x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na uchytenie svetiel'
-    ]
-  },
-  {
-    id: 'klub-medium',
-    name: 'BALÍK 5: Klub MEDIUM',
-    priceNoLights: 220,
-    priceWithLights: 340,
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
-    description: 'Zameranie: Klubové noci, stužkové, disko párty pre 100 ľudí. Dôraz na masívne basy a rotujúce dynamické lúče.',
-    soundSpecs: [
-      '1x Mixážny pult Behringer Xenyx X1222 USB',
-      '2x Reproduktory Behringer B112D',
-      '2x Subwoofer The Box Pro DSP 18 Sub (silná dvojica 18" basákov)',
-      '2x Teleskopická stojanová tyč',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS (ovládanie svetelnej show)',
-      '4x Rotujúca 90W Beam hlava (rýchle a ostré lúče krížom cez parket)',
-      '6x RGBWA UV Led Par svetlá',
-      '2x RGBW Led Bar 36W',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na uchytenie všetkých svetiel'
-    ]
-  },
-  {
-    id: 'premium-max',
-    name: 'BALÍK 6: PREMIUM MAX',
-    priceNoLights: 250,
-    priceWithLights: 430,
-    image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
-    description: 'Zameranie: Luxusné, veľké svadby, firemné eventy a plesy nad 100 ľudí. Dokonalé priestorové ozvučenie bez hluchých miest a komplexná svetelná show.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18 (ovládateľný bezdrôtovo cez iPad z akéhokoľvek miesta v sále)',
-      '2x Reproduktory Behringer B112D (rozmiestnené v rohoch sály pre vyrovnanú hlasitosť)',
-      '3x Subwoofer The Box Pro DSP 18 Sub',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '2x Trojnožka na reproduktory'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS (počítačové ovládanie zladených svetelných scén)',
-      '6x RGBWA UV Led Par svetlá (vytvoria jednotnú farebnú tému v celej sále)',
-      '4x RGBW Led Bar 36W (nasvietenie tanečného parketu a dekorácií)',
-      '4x Rotujúca 90W Beam hlava (elegantné pomalé pohyby počas obradu, dynamické na párty)',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Osvetľovacia konštrukcia na zavesenie techniky'
-    ],
-    otherSpecs: [
-      '1x Premietačka Wanbo T6 MAX',
-      '1x Premietacie plátno 110" (na kvízy a svadobné prezentácie)'
-    ]
-  },
-  {
-    id: 'klub-maximal',
-    name: 'BALÍK 7: Klub MAXIMAL',
-    priceNoLights: 380,
-    priceWithLights: 520,
-    image: 'https://images.unsplash.com/photo-1489641493513-ba4ee84ccee9?w=800',
-    description: 'Zameranie: Veľké diskotéky, stužkové pre viacero tried, festivalové stany nad 100 ľudí v interiéri. Extrémny zvukový tlak a laserová show.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18',
-      '1x Riadiaci procesor the t.rack 4x4 (ideálne rozdelenie pásiem a ochrana reproduktorov pred preťažením)',
-      '2x Reproduktory Behringer B112D',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '4x Subwoofer The Box Pro DSP 18 Sub (štvorica masívnych basákov)',
-      '2x Teleskopická stojanová tyč'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS',
-      '4x Rotujúca 90W Beam hlava',
-      '6x RGBWA UV Led Par svetlá',
-      '4x RGBW Led Bar 36W',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '2x Dymostroj ADJ VF 1300 (udržiavanie stabilnej hmly)',
-      '1x Osvetľovacia konštrukcia'
-    ]
-  },
-  {
-    id: 'open-air-arena',
-    name: 'BALÍK 8: Open-Air ARENA',
-    priceNoLights: 480,
-    priceWithLights: 730,
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
-    description: 'Zameranie: Vonkajšie festivaly, hody, dni obce, amfiteátre alebo veľké stany. V cene máš dymostroje, plameňomety a snehostroje pre výnimočnú atmosféru.',
-    soundSpecs: [
-      '1x Digitálny mixpult Behringer X Air 18',
-      '1x Riadiaci procesor the t.rack 4x4',
-      '4x Reproduktory Behringer B112D',
-      '1x Sada 2 mikrofónov the t.bone free solo Twin HT',
-      '5x Subwoofer The Box Pro DSP 18 Sub (využitie celého tvojho basového arzenálu na vytvorenie basovej steny)',
-      '2x Teleskopická stojanová tyč'
-    ],
-    lightSpecs: [
-      '1x BeamZ SUSHI-DS',
-      '4x Rotujúca 90W Beam hlava',
-      '2x Laserový Bar 65W',
-      '6x RGBWA UV Led Par svetlá',
-      '4x RGBW Led Bar 36W',
-      '2x Výrobníky plameňov Fire Machine (vizuálne mimoriadne atraktívne po zotmení)',
-      '2x Snehostroj ADJ Snow Flurry HO (špeciálny atmosférický efekt sneženia)',
-      '2x Dymostroj ADJ VF 1300',
-      '1x Holografický Laser',
-      '2x Červeno-zelený Laser (párty efekt)',
-      '1x Osvetľovacia konštrukcia'
-    ]
-  }
-];
 
 const Admin = () => {
   const [username, setUsername] = useState('');
@@ -311,6 +103,23 @@ const Admin = () => {
   });
   const [blogBlocks, setBlogBlocks] = useState<BlogBlock[]>([]);
 
+  // --- 4. PACKAGES STATE ---
+  const [packageItems, setPackageItems] = useState<PackageData[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [isPackageFormOpen, setIsPackageFormOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<PackageData | null>(null);
+  const [packageFormData, setPackageFormData] = useState({
+    name: '',
+    price_no_lights: 100,
+    price_with_lights: 130,
+    image: '',
+    description: '',
+    sound_specs: [] as string[],
+    light_specs: [] as string[],
+    other_specs: [] as string[],
+    warning: ''
+  });
+
   useEffect(() => {
     const authStatus = sessionStorage.getItem('admin_authenticated');
     if (authStatus === 'true') {
@@ -326,6 +135,7 @@ const Admin = () => {
     if (isAuthenticated) {
       loadSalesData();
       loadBlogData();
+      loadPackages();
     }
   }, [isAuthenticated]);
 
@@ -343,8 +153,15 @@ const Admin = () => {
     setLoadingBlog(false);
   };
 
+  const loadPackages = async () => {
+    setLoadingPackages(true);
+    const data = await packagesService.getAll();
+    setPackageItems(data);
+    setLoadingPackages(false);
+  };
+
   useEffect(() => {
-    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen) {
+    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen || isPackageFormOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -352,7 +169,7 @@ const Admin = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen]);
+  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen, isPackageFormOpen]);
 
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
@@ -786,6 +603,92 @@ const Admin = () => {
     }, 50);
   };
 
+  // --- PACKAGE FUNCTIONS ---
+  const handleOpenPackageAdd = () => {
+    setEditingPackage(null);
+    setPackageFormData({
+      name: '',
+      price_no_lights: 100,
+      price_with_lights: 130,
+      image: '',
+      description: '',
+      sound_specs: [],
+      light_specs: [],
+      other_specs: [],
+      warning: ''
+    });
+    setIsPackageFormOpen(true);
+  };
+
+  const handleOpenPackageEdit = (pkg: PackageData) => {
+    setEditingPackage(pkg);
+    setPackageFormData({
+      name: pkg.name,
+      price_no_lights: pkg.price_no_lights,
+      price_with_lights: pkg.price_with_lights,
+      image: pkg.image,
+      description: pkg.description,
+      sound_specs: pkg.sound_specs || [],
+      light_specs: pkg.light_specs || [],
+      other_specs: pkg.other_specs || [],
+      warning: pkg.warning || ''
+    });
+    setIsPackageFormOpen(true);
+  };
+
+  const handleDeletePackage = async (id: string, name: string) => {
+    if (window.confirm(`Naozaj chcete vymazať balík: "${name}"?`)) {
+      const success = await packagesService.delete(id);
+      if (success) {
+        toast.success('Balík úspešne vymazaný.');
+        loadPackages();
+      } else {
+        toast.error('Chyba pri mazaní balíka.');
+      }
+    }
+  };
+
+  const handlePackageSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!packageFormData.name.trim()) {
+      toast.error('Vyplňte názov balíka!');
+      return;
+    }
+
+    const payload = {
+      name: packageFormData.name.trim(),
+      price_no_lights: Number(packageFormData.price_no_lights),
+      price_with_lights: Number(packageFormData.price_with_lights),
+      image: packageFormData.image.trim(),
+      description: packageFormData.description.trim(),
+      sound_specs: packageFormData.sound_specs,
+      light_specs: packageFormData.light_specs,
+      other_specs: packageFormData.other_specs,
+      warning: packageFormData.warning.trim()
+    };
+
+    if (editingPackage) {
+      const updated = await packagesService.update(editingPackage.id, payload);
+      if (updated) {
+        toast.success('Balík úspešne upravený!');
+        setIsPackageFormOpen(false);
+        setEditingPackage(null);
+        loadPackages();
+      } else {
+        toast.error('Chyba pri úprave balíka.');
+      }
+    } else {
+      const created = await packagesService.create(payload);
+      if (created) {
+        toast.success('Nový balík pridaný!');
+        setIsPackageFormOpen(false);
+        loadPackages();
+      } else {
+        toast.error('Chyba pri pridávaní balíka.');
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
       <Navbar />
@@ -852,7 +755,7 @@ const Admin = () => {
                   <h1 className="text-3xl font-extrabold text-white">Administrácia systému</h1>
                 </div>
                 <p className="text-gray-400 mt-1">
-                  Kompletná správa produktov na prenájom, techniky na predaj a firemného blogu.
+                  Kompletná správa produktov na prenájom, techniky na predaj, firemného blogu a balíkov.
                 </p>
               </div>
 
@@ -1055,49 +958,55 @@ const Admin = () => {
               <TabsContent value="packages" className="space-y-6">
                 <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
                   <span className="text-sm text-gray-400">Správa balíkov a setov</span>
-                  <Button disabled className="btn-cyber rounded-xl h-10 px-5 border-none opacity-50 cursor-not-allowed">
+                  <Button onClick={handleOpenPackageAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
                     <Plus size={16} className="mr-1.5" /> Pridať balík
                   </Button>
                 </div>
 
                 <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
-                          <th className="px-6 py-4">Obrázok</th>
-                          <th className="px-6 py-4">Názov balíka</th>
-                          <th className="px-6 py-4 text-center">Cena bez svetiel</th>
-                          <th className="px-6 py-4 text-center">Cena so svetlami</th>
-                          <th className="px-6 py-4 text-right">Akcie</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
-                        {presetPackages.map((pkg) => {
-                          return (
-                            <tr key={pkg.id} className="hover:bg-white/2">
-                              <td className="px-6 py-4">
-                                <img src={pkg.image} alt={pkg.name} className="w-12 h-10 rounded-lg object-cover border border-white/10" />
-                              </td>
-                              <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">{pkg.name}</td>
-                              <td className="px-6 py-4 text-center font-bold text-gray-400">{pkg.priceNoLights} €</td>
-                              <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{pkg.priceWithLights} €</td>
-                              <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
-                                    <Edit size={12} />
-                                  </Button>
-                                  <Button size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
-                                    <Trash2 size={12} />
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  {loadingPackages ? (
+                    <div className="text-center py-12 text-gray-400">Načítavam balíky...</div>
+                  ) : packageItems.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 italic">Zatiaľ tu nie sú žiadne balíky.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                            <th className="px-6 py-4">Obrázok</th>
+                            <th className="px-6 py-4">Názov balíka</th>
+                            <th className="px-6 py-4 text-center">Cena bez svetiel</th>
+                            <th className="px-6 py-4 text-center">Cena so svetlami</th>
+                            <th className="px-6 py-4 text-right">Akcie</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                          {packageItems.map((pkg) => {
+                            return (
+                              <tr key={pkg.id} className="hover:bg-white/2">
+                                <td className="px-6 py-4">
+                                  <img src={pkg.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"} alt={pkg.name} className="w-12 h-10 rounded-lg object-cover border border-white/10" />
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">{pkg.name}</td>
+                                <td className="px-6 py-4 text-center font-bold text-gray-400">{pkg.price_no_lights} €</td>
+                                <td className="px-6 py-4 text-center font-bold text-[#BD20D3]">{pkg.price_with_lights} €</td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button onClick={() => handleOpenPackageEdit(pkg)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                      <Edit size={12} />
+                                    </Button>
+                                    <Button onClick={() => handleDeletePackage(pkg.id, pkg.name)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </Card>
               </TabsContent>
 
@@ -1298,6 +1207,74 @@ const Admin = () => {
                 <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
                   <Button type="button" variant="outline" onClick={() => { setIsSalesFormOpen(false); setEditingSales(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
                   <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uložiť produkt</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* --- PACKAGES POP-UP MODAL --- */}
+      {isPackageFormOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+            <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button onClick={() => { setIsPackageFormOpen(false); setEditingPackage(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                  {editingPackage ? <Edit size={20} /> : <Plus size={20} />}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingPackage ? 'Upraviť balík' : 'Pridať nový balík'}
+                  </h2>
+                </div>
+              </div>
+
+              <form onSubmit={handlePackageSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Názov balíka *</Label>
+                    <Input type="text" value={packageFormData.name} onChange={(e) => setPackageFormData(p => ({ ...p, name: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">URL obrázka</Label>
+                    <Input type="text" value={packageFormData.image} onChange={(e) => setPackageFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cena bez svetiel (€) *</Label>
+                    <Input type="number" min="0" value={packageFormData.price_no_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_no_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Cena so svetlami (€) *</Label>
+                    <Input type="number" min="0" value={packageFormData.price_with_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_with_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Popis balíka</Label>
+                  <Textarea value={packageFormData.description} onChange={(e) => setPackageFormData(p => ({ ...p, description: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[80px]" />
+                </div>
+
+                <DynamicBubbleInput label="Zvuková technika (položky)" placeholder="Pridať položku..." items={packageFormData.sound_specs} onChange={(sound_specs) => setPackageFormData(p => ({ ...p, sound_specs }))} />
+
+                <DynamicBubbleInput label="Svetlá a efekty (položky)" placeholder="Pridať položku..." items={packageFormData.light_specs} onChange={(light_specs) => setPackageFormData(p => ({ ...p, light_specs }))} />
+
+                <DynamicBubbleInput label="Ostatné (napr. projekcia)" placeholder="Pridať položku..." items={packageFormData.other_specs} onChange={(other_specs) => setPackageFormData(p => ({ ...p, other_specs }))} />
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Upozornenie (nepovinné)</Label>
+                  <Input type="text" value={packageFormData.warning} onChange={(e) => setPackageFormData(p => ({ ...p, warning: e.target.value }))} placeholder="Napr. Upozornenie k balíku..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
+                </div>
+
+                <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                  <Button type="button" variant="outline" onClick={() => { setIsPackageFormOpen(false); setEditingPackage(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
+                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uložiť balík</Button>
                 </div>
               </form>
             </Card>
