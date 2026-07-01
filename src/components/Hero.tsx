@@ -20,7 +20,7 @@ const Hero = () => {
               </div>
               
               <h1 className="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
-                Profesionálny prenájom <br />
+                Profesionálny prenájom a predaj <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] animate-pulse duration-10000">
                   zvukovej a svetelnej techniky
                 </span>
@@ -40,13 +40,13 @@ const Hero = () => {
                     <ChevronRight className="ml-2 group-hover:translate-x-1.5 transition-transform duration-300" />
                   </Button>
                 </Link>
-                <Link to="/prenajom" className="w-full sm:w-auto">
+                <Link to="/predaj" className="w-full sm:w-auto">
                   <Button 
                     variant="outline" 
                     size="lg" 
                     className="border-[#1A4BFF] text-[#1A4BFF] hover:bg-[#1A4BFF]/10 text-lg px-8 py-7 rounded-full w-full transition-all duration-300 hover:scale-105 active:scale-95 hover:border-[#BD20D3] hover:text-white hover:shadow-[0_0_20px_rgba(189,32,211,0.3)] bg-transparent"
                   >
-                    Pozrieť ponuku
+                    Pozrieť ponuku na predaj
                   </Button>
                 </Link>
               </div>
