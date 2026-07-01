@@ -25,7 +25,8 @@ import {
   ShoppingBag,
   Search,
   Loader2,
-  Minus
+  Minus,
+  Bug
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -78,9 +79,15 @@ interface PackageDetailDialogProps {
 
 // Helper: z reťazca "2x Behringer B112D" extrahuje { name, count }
 function extractBaseNameAndCount(spec: string): { name: string; count: number } {
-  const match = spec.match(/^(\d+)x\s+/);
+  // Skúsime "2x ", "2 ks ", "2ks " a podobne
+  const match = spec.match(/^(\d+)\s*(x|ks|kus)\s+/i);
   if (match) {
     return { name: spec.replace(match[0], '').trim(), count: parseInt(match[1], 10) };
+  }
+  // Fallback: ak začína číslom bez jednotky, berieme len prvé slovo ako množstvo
+  const simpleMatch = spec.match(/^(\d+)\s+/);
+  if (simpleMatch) {
+    return { name: spec.replace(simpleMatch[0], '').trim(), count: parseInt(simpleMatch[1], 10) };
   }
   return { name: spec.trim(), count: 1 };
 }
@@ -111,6 +118,7 @@ function getPackageUsedCounts(pkg: PackageOption): Record<string, number> {
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
   const [includeLights, setIncludeLights] = useState(true);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
   // Services
   const [services, setServices] = useState<AdditionalService[]>(SERVICES.map(s => ({ ...s, selected: false })));
@@ -146,6 +154,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       console.log('📦 Dialog opened with package:', selectedPackage.name);
       setIncludeLights(true);
       setShowBookingForm(false);
+      setShowDebug(false);
       setBookingForm({ name: '', phone: '', email: '', date: '', message: '' });
       setServices(SERVICES.map(s => ({ ...s, selected: false })));
       setAdditionalProducts([]);
@@ -203,7 +212,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         const normalized = item.name.toLowerCase().trim();
         const used = packageUsedCounts[normalized] || 0;
         const remaining = item.availableCount - used;
-        console.log(`    "${item.name}" → available: ${item.availableCount}, used in pkg: ${used}, remaining: ${remaining}`);
+        console.log(`    "${item.name}" → normalized: "${normalized}" → available: ${item.availableCount}, used in pkg: ${used}, remaining: ${remaining}`);
       });
     }
   }, [rentalItems, packageUsedCounts]);
@@ -345,8 +354,46 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
             <Package className="text-[#BD20D3]" />
             Detail balíka
+            <button
+              type="button"
+              onClick={() => setShowDebug(!showDebug)}
+              className="ml-auto w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10"
+              title="Debug info"
+            >
+              <Bug size={12} className="text-gray-400" />
+            </button>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Debug panel */}
+        {showDebug && (
+          <div className="bg-black/40 border border-amber-500/30 rounded-xl p-4 text-[10px] font-mono space-y-1 max-h-40 overflow-y-auto">
+            <p className="text-amber-400 font-bold mb-1">🔍 DEBUG: Package used counts</p>
+            {Object.keys(packageUsedCounts).length > 0 ? (
+              Object.entries(packageUsedCounts).map(([name, count]) => (
+                <p key={name} className="text-gray-300">
+                  <span className="text-emerald-400">"{name}"</span> → <span className="text-white">{count} ks</span>
+                </p>
+              ))
+            ) : (
+              <p className="text-red-400">Žiadne položky extrahované z balíka!</p>
+            )}
+            <p className="text-amber-400 font-bold mt-2 mb-1">🔍 DB Items (first 5):</p>
+            {rentalItems.slice(0, 5).map(item => {
+              const normalized = item.name.toLowerCase().trim();
+              const used = packageUsedCounts[normalized] || 0;
+              const match = used > 0 ? '✓' : '✗';
+              return (
+                <p key={item.id} className="text-gray-300">
+                  <span className={match === '✓' ? 'text-emerald-400' : 'text-red-400'}>{match}</span>{' '}
+                  "<span className="text-cyan-400">{item.name}</span>" → 
+                  norm: "<span className="text-yellow-300">{normalized}</span>" → 
+                  skladom: {item.availableCount}ks, v balíku: {used}ks, voľné: {item.availableCount - used}ks
+                </p>
+              );
+            })}
+          </div>
+        )}
 
         <div className="space-y-6">
           {!showBookingForm ? (
