@@ -14,11 +14,8 @@ import {
   Clock,
   ChevronRight,
   Wrench,
-  Truck,
   Lightbulb,
-  Euro,
   MapPin,
-  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,7 +67,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     message: ""
   });
 
-  // Load package items from localStorage on mount
   const [packageItems, setPackageItems] = useState<PackageCartItem[]>(() => {
     try {
       const saved = localStorage.getItem(PACKAGE_STORAGE_KEY);
@@ -80,7 +76,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     }
   });
 
-  // Persist package items to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems));
@@ -92,20 +87,23 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const pkg = e.detail as PackageCartItem;
-      setPackageItems(prev => {
-        const updated = [...prev, pkg];
-        return updated;
-      });
+      setPackageItems(prev => [...prev, pkg]);
       toast.success(`Balík "${pkg.name}" pridaný do košíka`);
     };
     window.addEventListener('add-package-to-cart', handler as EventListener);
     return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
   }, []);
 
-  // FIX: compute total items directly from quantities object and package items,
-  // so the cart button appears even when equipment data hasn't loaded yet.
   const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalItems = totalEquipmentQty + packageItems.length;
+
+  // KED sa kosik uplne vyprázdni (napr. vymazanie poslednej polozky), zavri modál a odomkni scroll
+  useEffect(() => {
+    if (totalItems === 0 && isOpen) {
+      setIsOpen(false);
+      document.body.style.overflow = "unset";
+    }
+  }, [totalItems, isOpen]);
 
   const cartItems = Object.entries(quantities)
     .filter(([_, qty]) => qty > 0)
@@ -131,8 +129,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   };
 
   const subtotalPerDay = getSubtotalPerDay();
-
-  // Nová logika: prvý deň plná cena, každý ďalší deň = 50% z ceny prvého dňa
   const firstDayTotal = subtotalPerDay;
   const additionalDaysTotal = days > 1 ? (days - 1) * subtotalPerDay * 0.5 : 0;
   const grandTotal = firstDayTotal + additionalDaysTotal;
@@ -152,6 +148,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -236,8 +233,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return total;
   };
 
-  if (totalItems === 0) return null;
-
   return (
     <>
       <style>{`
@@ -251,9 +246,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           --rdp-outline-selected: 2px solid #BD20D3;
           margin: 0;
         }
-        .rdp-months {
-          justify-content: center;
-        }
+        .rdp-months { justify-content: center; }
         .rdp-month {
           background: rgba(10, 13, 31, 0.98);
           border: 1px solid rgba(189, 32, 211, 0.4);
@@ -289,13 +282,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           color: white !important;
           font-weight: 700;
         }
-        .rdp-day_today {
-          border: 1px solid #BD20D3;
-          font-weight: 700;
-        }
-        .rdp-day_outside {
-          opacity: 0.3;
-        }
+        .rdp-day_today { border: 1px solid #BD20D3; font-weight: 700; }
+        .rdp-day_outside { opacity: 0.3; }
         .rdp-nav_button {
           color: #9ca3af;
           border-radius: 4px;
@@ -306,9 +294,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           background: rgba(189, 32, 211, 0.2) !important;
           color: white !important;
         }
-        .rdp-caption_dropdowns {
-          gap: 2px;
-        }
+        .rdp-caption_dropdowns { gap: 2px; }
         .rdp-dropdown {
           background: rgba(189, 32, 211, 0.1);
           border: 1px solid rgba(189, 32, 211, 0.3);
@@ -317,127 +303,102 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           font-size: 10px;
           padding: 1px 3px;
         }
-        .rdp-dropdown:focus {
-          outline: none;
-          border-color: #BD20D3;
-        }
-        .rdp-vhidden {
-          display: none;
-        }
-        .rdp-table {
-          border-collapse: collapse;
-          margin: 0;
-        }
-        .rdp-row {
-          margin: 0;
-        }
-        .rdp-head_row {
-          height: 20px;
-        }
-        .rdp-tbody {
-          border: none;
-        }
+        .rdp-dropdown:focus { outline: none; border-color: #BD20D3; }
+        .rdp-vhidden { display: none; }
+        .rdp-table { border-collapse: collapse; margin: 0; }
+        .rdp-row { margin: 0; }
+        .rdp-head_row { height: 20px; }
+        .rdp-tbody { border: none; }
         @media (max-width: 640px) {
-          .rdp {
-            --rdp-cell-size: 24px;
-          }
-          .rdp-day {
-            width: 24px;
-            height: 24px;
-            font-size: 10px;
-          }
-          .rdp-month {
-            padding: 4px;
-          }
-          .rdp-caption {
-            font-size: 11px;
-          }
-          .rdp-nav_button {
-            width: 20px;
-            height: 20px;
-          }
+          .rdp { --rdp-cell-size: 24px; }
+          .rdp-day { width: 24px; height: 24px; font-size: 10px; }
+          .rdp-month { padding: 4px; }
+          .rdp-caption { font-size: 11px; }
+          .rdp-nav_button { width: 20px; height: 20px; }
         }
       `}</style>
 
-      {/* FLOATING ACTION BUTTON WITH HOVER PREVIEW */}
-      <div
-        className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* HOVER PREVIEW CONTAINER */}
-        {isHovered && !isOpen && (
-          <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">
-              Položky v košíku
-            </h4>
+      {/* FLOATING ACTION BUTTON – zobrazí sa len keď sú položky v košíku */}
+      {totalItems > 0 && (
+        <div
+          className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* HOVER PREVIEW */}
+          {isHovered && !isOpen && (
+            <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">
+                Položky v košíku
+              </h4>
 
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-              {cartItems.map(({ item, qty }) => {
-                const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
-                return (
-                  <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                {cartItems.map(({ item, qty }) => {
+                  const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
+                  return (
+                    <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
+                      <img
+                        src={img}
+                        alt=""
+                        className="w-8 h-8 rounded object-cover border border-white/10"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
+                        }}
+                      />
+                      <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
+                      <span className="truncate flex-grow">{item.name}</span>
+                      <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
+                    </div>
+                  );
+                })}
+
+                {packageItems.map((pkg) => (
+                  <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
                     <img
-                      src={img}
-                      alt=""
+                      src={pkg.image}
+                      alt={pkg.name}
                       className="w-8 h-8 rounded object-cover border border-white/10"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                       }}
                     />
-                    <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
-                    <span className="truncate flex-grow">{item.name}</span>
-                    <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
+                    <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
+                    <span className="truncate flex-grow">{pkg.name}</span>
+                    <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
 
-              {packageItems.map((pkg) => (
-                <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
-                  <img
-                    src={pkg.image}
-                    alt={pkg.name}
-                    className="w-8 h-8 rounded object-cover border border-white/10"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
-                    }}
-                  />
-                  <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
-                  <span className="truncate flex-grow">{pkg.name}</span>
-                  <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
-                </div>
-              ))}
+              <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
+                <span className="text-gray-400">Celkom na deň:</span>
+                <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
+              </div>
+
+              <button
+                onClick={() => setIsOpen(true)}
+                className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1"
+              >
+                <span>Otvoriť rezerváciu</span>
+                <ChevronRight size={14} />
+              </button>
             </div>
+          )}
 
-            <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
-              <span className="text-gray-400">Celkom na deň:</span>
-              <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
-            </div>
+          {/* CART TRIGGER BUTTON */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative flex items-center justify-center w-16 h-16 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none"
+          >
+            <ShoppingBag size={28} className="text-white group-hover:rotate-12 transition-transform" />
+            <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
+              {totalItems}
+            </span>
+          </button>
+        </div>
+      )}
 
-            <button
-              onClick={() => setIsOpen(true)}
-              className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1"
-            >
-              <span>Otvoriť rezerváciu</span>
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        )}
-
-        {/* CART TRIGGER BUTTON */}
-        <button
-          onClick={() => setIsOpen(true)}
-          className="relative flex items-center justify-center w-16 h-16 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none"
-        >
-          <ShoppingBag size={28} className="text-white group-hover:rotate-12 transition-transform" />
-          <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">
-            {totalItems}
-          </span>
-        </button>
-      </div>
-
-      {/* POP-UP MODAL */}
-      {isOpen && (
+      {/* POP-UP MODAL – zobrazí sa len keď je otvorený a má položky */}
+      {isOpen && totalItems > 0 && (
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
             <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-4 md:p-6 lg:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
@@ -600,7 +561,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </span>
                     </div>
 
-                    {/* Rozpis cien podľa nového modelu */}
                     {days > 1 && (
                       <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 space-y-2 mt-2">
                         <p className="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
@@ -706,7 +666,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     </div>
 
-                    {/* DATE PICKERS WITH MINI CALENDAR */}
+                    {/* DATE PICKERS */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5 relative" ref={fromRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm">
@@ -739,7 +699,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               onSelect={handleFromSelect}
                               disabled={[{ before: startOfDay(new Date()) }]}
                               weekStartsOn={1}
-                              locale={undefined}
                               initialFocus={showFromCalendar}
                             />
                           </div>
@@ -810,6 +769,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           </div>
         </div>
       )}
+
     </>
   );
 };
