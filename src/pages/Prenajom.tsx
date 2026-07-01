@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
-import FloatingCart from '@/components/FloatingCart';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -347,12 +346,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
           setQuantities={setQuantities} 
         />
       </section>
-
-      <FloatingCart 
-        quantities={quantities} 
-        setQuantities={setQuantities} 
-        equipment={equipment} 
-      />
 
       {/* DETAIL BALÍKA – zdieľaný komponent */}
       <PackageDetailDialog

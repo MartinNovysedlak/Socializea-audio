@@ -6,7 +6,6 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FloatingCart from "@/components/FloatingCart";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
@@ -260,13 +259,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         </div>
       </section>
       
-      {/* Vykreslenie plávajúceho košíka priamo na detaile aparatúry */}
-      <FloatingCart 
-        quantities={quantities} 
-        setQuantities={setQuantities} 
-        equipment={equipment} 
-      />
-
       <Footer />
 
       {lightboxOpen && (
