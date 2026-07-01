@@ -12,7 +12,13 @@ import {
   Plus,
   Minus,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Wrench,
+  Truck,
+  Lightbulb,
+  Euro,
+  MapPin,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +29,16 @@ import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
+
+interface PackageCartItem {
+  id: string;
+  name: string;
+  price: number;
+  hasLights: boolean;
+  arrival: { name: string } | null;
+  install: 'none' | 'install' | 'install_uninstall';
+  extras: { id: string; label: string; quantity: number; pricePerDay: number }[];
+}
 
 interface FloatingCartProps {
   quantities: Record<string, number>;
@@ -49,15 +65,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     message: ""
   });
 
+  const [packageItems, setPackageItems] = useState<PackageCartItem[]>([]);
+
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const pkg = e.detail;
+      setPackageItems(prev => [...prev, pkg]);
+      toast.success(`Balík "${pkg.name}" pridaný do košíka`);
+    };
+    window.addEventListener('add-package-to-cart', handler as EventListener);
+    return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
+  }, []);
+
   const cartItems = Object.entries(quantities)
     .filter(([_, qty]) => qty > 0)
     .map(([id, qty]) => {
       const item = equipment.find((e) => e.id === id);
       return { item, qty };
     })
-  .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+    .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
-  const totalItems = cartItems.reduce((sum, current) => sum + current.qty, 0);
+  const totalItems = cartItems.reduce((sum, current) => sum + current.qty, 0) + packageItems.length;
 
   const calculateDays = () => {
     if (!formData.dateFrom || !formData.dateTo) return 1;
@@ -154,6 +182,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     });
 
     setQuantities({});
+    setPackageItems([]);
     setFormData({
       firstName: "",
       lastName: "",
@@ -164,6 +193,22 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       message: ""
     });
     setIsOpen(false);
+  };
+
+  const removePackage = (id: string) => {
+    setPackageItems(prev => prev.filter(p => p.id !== id));
+  };
+
+  const getPackageTotal = (pkg: PackageCartItem) => {
+    let total = pkg.price;
+    if (pkg.install === 'install') total += 20;
+    if (pkg.install === 'install_uninstall') total += 40;
+    if (pkg.arrival) {
+      total += 0; // zadarmo alebo spoplatnené – momentálne len info
+    }
+    const extrasSum = pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
+    total += extrasSum;
+    return total;
   };
 
   if (totalItems === 0) return null;
@@ -321,6 +366,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 );
               })}
+
+              {packageItems.map((pkg) => (
+                <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
+                  <div className="w-8 h-8 rounded bg-[#BD20D3]/10 border border-[#BD20D3]/30 flex items-center justify-center text-[#BD20D3]">
+                    <Package size={14} />
+                  </div>
+                  <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
+                  <span className="truncate flex-grow">{pkg.name}</span>
+                  <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
+                </div>
+              ))}
             </div>
 
             <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
@@ -432,6 +488,63 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                       );
                     })}
+
+                    {/* PACKAGES */}
+                    {packageItems.map((pkg) => (
+                      <div key={pkg.id} className="flex items-start gap-3 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-2 md:p-3 relative">
+                        <button
+                          type="button"
+                          onClick={() => removePackage(pkg.id)}
+                          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white"
+                        >
+                          <X size={10} />
+                        </button>
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-[#BD20D3]/10 flex items-center justify-center text-[#BD20D3]">
+                          <Package size={24} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-white">{pkg.name}</h4>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {pkg.hasLights && (
+                              <span className="text-[9px] px-1.5 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded text-[#BD20D3] flex items-center gap-1">
+                                <Lightbulb size={10} /> So svetlami
+                              </span>
+                            )}
+                            {pkg.install === 'install' && (
+                              <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
+                                <Wrench size={10} /> Inštalácia
+                              </span>
+                            )}
+                            {pkg.install === 'install_uninstall' && (
+                              <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
+                                <Wrench size={10} /> Inšt.+Deinšt.
+                              </span>
+                            )}
+                            {pkg.arrival && (
+                              <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 flex items-center gap-1">
+                                <MapPin size={10} /> {pkg.arrival.name}
+                              </span>
+                            )}
+                          </div>
+                          {pkg.extras.length > 0 && (
+                            <div className="text-[10px] text-gray-400 mt-1 space-y-0.5">
+                              {pkg.extras.map((e, i) => (
+                                <div key={i} className="flex items-center gap-1">
+                                  <Plus size={8} />
+                                  <span>{e.label}</span>
+                                  <span className="text-gray-500">
+                                    ({e.quantity}×{e.pricePerDay} €)
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-[#BD20D3] font-bold text-xs mt-2">
+                            {getPackageTotal(pkg)} € / víkend
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* SUMMARY SECTION */}
@@ -469,10 +582,22 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
+                    {packageItems.length > 0 && (
+                      <div className="border-t border-white/5 pt-3 space-y-1.5">
+                        <p className="text-xs text-gray-400 font-bold uppercase">Balíky:</p>
+                        {packageItems.map((pkg) => (
+                          <div key={pkg.id} className="flex justify-between text-sm">
+                            <span className="text-gray-300 truncate">{pkg.name}</span>
+                            <span className="text-[#BD20D3] font-semibold">{getPackageTotal(pkg)} €</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="border-t border-white/5 pt-3 flex justify-between items-end">
                       <span className="text-white font-bold text-base">Celková suma</span>
                       <span className="text-[#BD20D3] font-extrabold text-2xl">
-                        {grandTotal.toFixed(2)} €
+                        {(grandTotal + packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0)).toFixed(2)} €
                       </span>
                     </div>
                   </div>
