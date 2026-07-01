@@ -131,10 +131,12 @@ const InteractiveQuiz = () => {
     return loadedPackages[0];
   };
 
+  // ROZHODOVACÍ PAVÚK: všetkých 18 ciest s presnými varovnými hláškami
   const getRecommendation = (): PackageRecommendation | null => {
     const { people, location, eventType } = answers;
     if (loadedPackages.length === 0) return null;
 
+    // 1. Kategória: Komorná akcia (do 30 ľudí)
     if (people === 'up-to-30') {
       if (location === 'indoor') {
         if (eventType === 'wedding') {
@@ -161,6 +163,7 @@ const InteractiveQuiz = () => {
       }
     }
 
+    // 2. Kategória: Stredný event (do 100 ľudí)
     if (people === 'up-to-100') {
       if (location === 'indoor') {
         if (eventType === 'wedding') {
@@ -176,17 +179,18 @@ const InteractiveQuiz = () => {
       } else {
         if (eventType === 'wedding') {
           const pkg = findPackage('oslava-medium');
-          return pkg ? { ...pkg, warning: 'Odporúčanie: Pre exteriér k tomuto setu dodávame dištančné stojanové tyče, aby satelity hrali nad úroveň rečníkov a zvuk lepšie pokryl otvorený priestor.' } : null;
+          return pkg ? { ...pkg, warning: 'Odporúčanie: Pre exteriér k tomuto setu odporúčame pridať dištančné stojanové tyče, aby satelity hrali nad úroveň rečníkov a zvuk lepšie pokryl otvorený priestor. Ideálne s dištančnými tyčami.' } : null;
         }
         if (eventType === 'dj') {
           const pkg = findPackage('open-air-arena');
           return pkg ? { ...pkg, warning: 'Odporúčanie: Vonku sa akustický basový tlak rýchlo stráca. Preto sme pre exteriérovú DJ disko párty pre 100 ľudí vybrali balík ARENA s maximálnym basovým arzenálom 5x Subwoofer!' } : null;
         }
         const pkg = findPackage('kompakt-prezentacia');
-        return pkg ? { ...pkg, warning: 'Odporúčanie: Pre exteriérovú firemnú prezentáciu pre 100 ľudí odporúčame zvýšiť výšku stojanov (trojnožiek) s reproduktormi pre čisté pokrytie zvuku.' } : null;
+        return pkg ? { ...pkg, warning: 'Odporúčanie: Pre exteriérovú firemnú prezentáciu pre 100 ľudí odporúčame zvýšiť výšku stojanov (trojnožiek) s reproduktormi pre čisté pokrytie zvuku. Vhodné pridať statívy.' } : null;
       }
     }
 
+    // 3. Kategória: Veľké podujatie / Klub (nad 100 ľudí)
     if (people === 'over-100') {
       if (location === 'indoor') {
         if (eventType === 'wedding') {
@@ -198,14 +202,18 @@ const InteractiveQuiz = () => {
           return pkg ? { ...pkg } : null;
         }
         const pkg = findPackage('premium-max');
-        return pkg ? { ...pkg, warning: 'Odporúčanie: Pri veľkej vnútornej prezentácii využívame digitálny mixpult a rozmiestnenie 4x reproduktorov Behringer v rohoch sály pre dokonalú zrozumiteľnosť hlasu pre všetkých.' } : null;
+        return pkg ? { ...pkg, warning: 'Odporúčanie: Pri veľkej vnútornej prezentácii využívame digitálny mixpult a 4 topy (reproduktory) kvôli zrozumiteľnosti v celej sále.' } : null;
       } else {
-        if (eventType === 'presentation') {
+        if (eventType === 'wedding') {
           const pkg = findPackage('open-air-arena');
-          return pkg ? { ...pkg, warning: 'Odporúčanie: Pre veľkú exteriérovú prezentáciu nad 100 ľudí nakonfigurujeme tento set so 4x výškovými satelitmi pre špičkovú zrozumiteľnosť prejavu.' } : null;
+          return pkg ? { ...pkg } : null;
+        }
+        if (eventType === 'dj') {
+          const pkg = findPackage('open-air-arena');
+          return pkg ? { ...pkg } : null;
         }
         const pkg = findPackage('open-air-arena');
-        return pkg ? { ...pkg } : null;
+        return pkg ? { ...pkg, warning: 'Odporúčanie: Pre veľkú exteriérovú prezentáciu nad 100 ľudí odporúčame konfiguráciu so 4x top reproduktormi pre špičkovú zrozumiteľnosť prejavu.' } : null;
       }
     }
 
