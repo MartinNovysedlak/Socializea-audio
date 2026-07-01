@@ -72,41 +72,6 @@ const KYSUCE_BOUNDS = [
   { lat: 49.280, lng: 18.600 },
 ];
 
-const CITIES: { name: string; country: 'sk' | 'cz'; lat: number; lng: number }[] = [
-  { name: 'Bratislava', country: 'sk', lat: 48.1486, lng: 17.1077 },
-  { name: 'Košice', country: 'sk', lat: 48.7170, lng: 21.2497 },
-  { name: 'Prešov', country: 'sk', lat: 48.9980, lng: 21.2393 },
-  { name: 'Banská Bystrica', country: 'sk', lat: 48.7395, lng: 19.1530 },
-  { name: 'Nitra', country: 'sk', lat: 48.3069, lng: 18.0864 },
-  { name: 'Trnava', country: 'sk', lat: 48.3774, lng: 17.5883 },
-  { name: 'Martin', country: 'sk', lat: 49.0639, lng: 18.9229 },
-  { name: 'Trenčín', country: 'sk', lat: 48.8945, lng: 18.0441 },
-  { name: 'Poprad', country: 'sk', lat: 49.0505, lng: 20.2973 },
-  { name: 'Prievidza', country: 'sk', lat: 48.7742, lng: 18.6245 },
-  { name: 'Zvolen', country: 'sk', lat: 48.5750, lng: 19.1283 },
-  { name: 'Liptovský Mikuláš', country: 'sk', lat: 49.0813, lng: 19.6185 },
-  { name: 'Michalovce', country: 'sk', lat: 48.7557, lng: 21.9184 },
-  { name: 'Spišská Nová Ves', country: 'sk', lat: 48.9446, lng: 20.5613 },
-  { name: 'Ružomberok', country: 'sk', lat: 49.0746, lng: 19.3076 },
-  { name: 'Považská Bystrica', country: 'sk', lat: 49.1158, lng: 18.4465 },
-  { name: 'Kysucké Nové Mesto', country: 'sk', lat: 49.3015, lng: 18.7859 },
-  { name: 'Turzovka', country: 'sk', lat: 49.4043, lng: 18.6226 },
-  { name: 'Krásno nad Kysucou', country: 'sk', lat: 49.3958, lng: 18.8340 },
-  { name: 'Bytča', country: 'sk', lat: 49.2237, lng: 18.5585 },
-  { name: 'Žilina', country: 'sk', lat: 49.2235, lng: 18.7394 },
-  { name: 'Čadca', country: 'sk', lat: 49.4358, lng: 18.7889 },
-  { name: 'Ostrava', country: 'cz', lat: 49.8209, lng: 18.2625 },
-  { name: 'Praha', country: 'cz', lat: 50.0755, lng: 14.4378 },
-  { name: 'Brno', country: 'cz', lat: 49.1951, lng: 16.6068 },
-  { name: 'Olomouc', country: 'cz', lat: 49.5938, lng: 17.2509 },
-  { name: 'Zlín', country: 'cz', lat: 49.2266, lng: 17.6668 },
-  { name: 'Frýdek-Místek', country: 'cz', lat: 49.6819, lng: 18.3673 },
-  { name: 'Havířov', country: 'cz', lat: 49.7801, lng: 18.4372 },
-  { name: 'Opava', country: 'cz', lat: 49.9407, lng: 17.8946 },
-  { name: 'Třinec', country: 'cz', lat: 49.6776, lng: 18.6706 },
-  { name: 'Český Těšín', country: 'cz', lat: 49.7460, lng: 18.6261 },
-];
-
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -133,32 +98,17 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
 interface CityMatch {
   name: string;
   country: string;
+  lat: number;
+  lng: number;
 }
 
-function searchCities(query: string): CityMatch[] {
-  if (!query.trim() || query.trim().length < 2) return [];
-  const lower = query.toLowerCase().trim();
-  return CITIES
-    .filter(c => c.name.toLowerCase().includes(lower))
-    .slice(0, 6)
-    .map(c => ({ name: c.name, country: c.country }));
-}
-
-function getCityCoords(cityName: string): { lat: number; lng: number } | null {
-  const city = CITIES.find(c => c.name.toLowerCase() === cityName.toLowerCase());
-  return city ? { lat: city.lat, lng: city.lng } : null;
-}
-
-function calculateDelivery(cityName: string): {
+function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
   distance: number;
   nearestPoint: string;
   isKysuce: boolean;
   isFree: boolean;
   price: number;
 } | null {
-  const coords = getCityCoords(cityName);
-  if (!coords) return null;
-
   const isKysuce = isPointInPolygon(coords, KYSUCE_BOUNDS);
   if (isKysuce) {
     return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
@@ -223,6 +173,16 @@ function getInstallType(installSelected: boolean, installUninstallSelected: bool
   return 'none';
 }
 
+// Debounce helper
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
   const [includeLights, setIncludeLights] = useState(true);
 
@@ -236,6 +196,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+  const [searchingCities, setSearchingCities] = useState(false);
+
+  const debouncedCitySearch = useDebounce(deliveryCity, 400);
 
   const [additionalProducts, setAdditionalProducts] = useState<AdditionalProduct[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -330,15 +293,63 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Online city search via Nominatim
   useEffect(() => {
-    if (deliveryCity.length >= 2 && deliverySelected) {
-      setCitySuggestions(searchCities(deliveryCity));
-      setCityDropdownOpen(true);
-    } else {
+    if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2) {
       setCitySuggestions([]);
       setCityDropdownOpen(false);
+      setSearchingCities(false);
+      return;
     }
-  }, [deliveryCity, deliverySelected]);
+
+    let cancelled = false;
+    const search = async () => {
+      setSearchingCities(true);
+      try {
+        const query = encodeURIComponent(debouncedCitySearch.trim());
+        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`;
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'DjPartyRental/1.0 (djparty@example.com)',
+          },
+        });
+        if (cancelled) return;
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data && Array.isArray(data)) {
+          const mapped: CityMatch[] = data.map((item: any) => ({
+            name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
+            country: item.country_code === 'cz' ? 'cz' : 'sk',
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon),
+          }));
+          // Deduplicate by name
+          const seen = new Set<string>();
+          const unique = mapped.filter(c => {
+            const key = c.name.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setCitySuggestions(unique);
+          setCityDropdownOpen(unique.length > 0);
+        } else {
+          setCitySuggestions([]);
+          setCityDropdownOpen(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setCitySuggestions([]);
+          setCityDropdownOpen(false);
+        }
+      } finally {
+        if (!cancelled) setSearchingCities(false);
+      }
+    };
+    search();
+    return () => { cancelled = true; };
+  }, [debouncedCitySearch, deliverySelected]);
 
   const toggleDelivery = () => {
     if (deliverySelected) {
@@ -353,11 +364,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     }
   };
 
-  const selectCity = (cityName: string) => {
+  const selectCity = (cityName: string, lat: number, lng: number) => {
     setDeliveryCity(cityName);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
-    const result = calculateDelivery(cityName);
+    const result = calculateDelivery({ lat, lng }, cityName);
     setDeliveryResult(result);
     if (result) {
       if (result.isFree) {
@@ -381,7 +392,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const handleCityKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && citySuggestions.length > 0) {
       e.preventDefault();
-      selectCity(citySuggestions[0].name);
+      selectCity(citySuggestions[0].name, citySuggestions[0].lat, citySuggestions[0].lng);
     }
     if (e.key === 'Escape') {
       setCityDropdownOpen(false);
@@ -832,12 +843,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
 
                   {cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && (
-                    <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                    <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-60 overflow-y-auto">
+                      {searchingCities && (
+                        <div className="flex items-center justify-center gap-2 p-3 border-b border-white/[0.06] text-gray-500">
+                          <Loader2 size={14} className="animate-spin" />
+                          <span className="text-xs">Vyhľadávam...</span>
+                        </div>
+                      )}
                       {citySuggestions.map((city, i) => (
                         <button
                           key={i}
                           type="button"
-                          onClick={() => selectCity(city.name)}
+                          onClick={() => selectCity(city.name, city.lat, city.lng)}
                           className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
                         >
                           <MapPin size={13} className="text-gray-500 shrink-0" />
