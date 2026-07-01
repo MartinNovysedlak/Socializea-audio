@@ -1,91 +1,72 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Index from './pages/Index';
-import Prenajom from './pages/Prenajom';
-import EquipmentDetail from './pages/EquipmentDetail';
-import Kontakt from './pages/Kontakt';
-import Admin from './pages/Admin';
-import Blog from './pages/Blog';
-import BlogPostDetail from './pages/BlogPostDetail';
-import Predaj from './pages/Predaj';
-import ProductDetail from './pages/ProductDetail';
-import NotFound from './pages/NotFound';
-import { useEquipment } from './hooks/useEquipment';
-import AmbientBackground from './components/AmbientBackground';
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Prenajom from "./pages/Prenajom";
+import Predaj from "./pages/Predaj";
+import ONas from "./pages/ONas";
+import Kontakt from "./pages/Kontakt";
+import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import { Toaster } from "sonner";
+import { EquipmentItem } from "@/lib/supabase";
+import FloatingCart from "./components/FloatingCart";
+
+const CART_STORAGE_KEY = "cyber_cart_quantities";
 
 function App() {
-  const { equipment } = useEquipment();
-  
-  // Inicializácia stavu košíka priamo z localStorage, aby bol v celej aplikácii identický
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     try {
-      const saved = localStorage.getItem("cyber_cart_quantities");
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
       return saved ? JSON.parse(saved) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   });
 
-  // Uloženie stavu do localStorage pri každej zmene
+  const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
+
   useEffect(() => {
     try {
-      localStorage.setItem("cyber_cart_quantities", JSON.stringify(quantities));
-    } catch (e) {
-      console.error("Nedá sa uložiť košík do localStorage:", e);
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(quantities));
+    } catch {
+      console.error("Nedá sa uložiť do localStorage:", quantities);
     }
   }, [quantities]);
 
   return (
-    <BrowserRouter>
-      {/* Globálne podmanivé osvetlenie pódiového charakteru */}
-      <AmbientBackground />
-      
-      {/* Všetky stránky majú relatívny z-index, aby plávali nad svetlami pozadia */}
-      <div className="relative z-10">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route 
-            path="/prenajom" 
-            element={
-              <Prenajom 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
-                equipment={equipment} 
-              />
-            } 
-          />
-          <Route 
-            path="/prenajom/:id" 
-            element={
-              <EquipmentDetail 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
-                equipment={equipment}
-              />
-            } 
-          />
-          <Route 
-            path="/equipment/:id" 
-            element={
-              <EquipmentDetail 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
-                equipment={equipment}
-              />
-            } 
-          />
-          <Route path="/kontakt" element={<Kontakt />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogPostDetail />} />
-          <Route path="/predaj" element={<Predaj />} />
-          <Route path="/predaj/:id" element={<ProductDetail />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+    <Router>
+      <div className="flex flex-col min-h-screen bg-[#020721] font-montserrat overflow-x-hidden">
+        <Navbar />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/prenajom" element={<Prenajom quantities={quantities} setQuantities={setQuantities} equipment={equipment} setEquipment={setEquipment} />} />
+            <Route path="/predaj" element={<Predaj />} />
+            <Route path="/o-nas" element={<ONas />} />
+            <Route path="/kontakt" element={<Kontakt />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+          </Routes>
+        </main>
+        <Footer />
+        <FloatingCart quantities={quantities} setQuantities={setQuantities} equipment={equipment} />
+
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: "#0a0d1f",
+              border: "1px solid rgba(189, 32, 211, 0.3)",
+              color: "white",
+            },
+          }}
+        />
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
