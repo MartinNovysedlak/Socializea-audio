@@ -440,17 +440,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 <div className="lg:col-span-5 space-y-4">
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
-                    <span className="text-xs bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-2.5 py-0.5 rounded-full">
+                    <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">
                       {totalItems} ks
                     </span>
                   </h3>
 
-                  <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-2 md:p-3">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
+                        <div key={item.id} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-3 md:p-4">
+                          <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
                             <img
                               src={displayImg}
                               alt={item.name}
@@ -462,32 +462,32 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-semibold text-white truncate" title={item.name}>
+                            <h4 className="text-base font-semibold text-white truncate" title={item.name}>
                               {item.name}
                             </h4>
-                            <p className="text-[#BD20D3] font-bold text-xs mt-0.5">
+                            <p className="text-[#BD20D3] font-bold text-sm mt-1">
                               {item.price_per_day} € / deň
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-lg p-1">
+                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5">
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(item.id, -1)}
-                              className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                              className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                             >
-                              <Minus size={10} />
+                              <Minus size={12} />
                             </button>
-                            <span className="w-5 text-center text-white font-medium text-xs">
+                            <span className="w-6 text-center text-white font-semibold text-sm">
                               {qty}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(item.id, 1)}
                               disabled={qty >= item.available}
-                              className="w-6 h-6 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"
+                              className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"
                             >
-                              <Plus size={10} />
+                              <Plus size={12} />
                             </button>
                           </div>
                         </div>
@@ -496,15 +496,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
                     {/* PACKAGES */}
                     {packageItems.map((pkg) => (
-                      <div key={pkg.id} className="flex items-start gap-3 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-2 md:p-3 relative">
+                      <div key={pkg.id} className="flex items-start gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 md:p-4 relative">
                         <button
                           type="button"
                           onClick={() => removePackage(pkg.id)}
-                          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white"
+                          className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white"
                         >
-                          <X size={10} />
+                          <X size={12} />
                         </button>
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
                           <img
                             src={pkg.image}
                             alt={pkg.name}
@@ -515,41 +515,41 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold text-white">{pkg.name}</h4>
-                          <p className="text-[#BD20D3] font-bold text-xs mt-0.5">
+                          <h4 className="text-base font-bold text-white mb-1">{pkg.name}</h4>
+                          <p className="text-[#BD20D3] font-bold text-base mt-0.5 mb-2">
                             {getPackageTotal(pkg)} € / víkend
                           </p>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <div className="flex flex-wrap gap-1.5 mt-2">
                             {pkg.hasLights && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded text-[#BD20D3] flex items-center gap-1">
-                                <Lightbulb size={10} /> So svetlami
+                              <span className="text-xs px-2 py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1.5 font-medium">
+                                <Lightbulb size={12} /> So svetlami
                               </span>
                             )}
                             {pkg.install === 'install' && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
-                                <Wrench size={10} /> Inštalácia (+{pkg.installPrice} €)
+                              <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium">
+                                <Wrench size={12} /> Inštalácia (+{pkg.installPrice} €)
                               </span>
                             )}
                             {pkg.install === 'install_uninstall' && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded text-[#1A4BFF] flex items-center gap-1">
-                                <Wrench size={10} /> Inšt.+Deinšt. (+{pkg.installPrice} €)
+                              <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium">
+                                <Wrench size={12} /> Inšt.+Deinšt. (+{pkg.installPrice} €)
                               </span>
                             )}
                             {pkg.arrival && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-emerald-400 flex items-center gap-1">
-                                <MapPin size={10} /> {pkg.arrival.name}
+                              <span className="text-xs px-2 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1.5 font-medium">
+                                <MapPin size={12} /> {pkg.arrival.name}
                                 {pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice.toFixed(2)} €)` : ' (Zdarma)'}
                               </span>
                             )}
                           </div>
                           {pkg.extras.length > 0 && (
-                            <div className="text-[10px] text-gray-400 mt-1 space-y-0.5">
-                              <p className="text-[10px] font-semibold text-gray-500 mb-0.5">Doplnkové produkty:</p>
+                            <div className="text-xs text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
+                              <p className="text-xs font-semibold text-gray-300 mb-1.5">Doplnkové produkty:</p>
                               {pkg.extras.map((e, i) => (
-                                <div key={i} className="flex items-center gap-1">
-                                  <Plus size={8} />
+                                <div key={i} className="flex items-center gap-1.5">
+                                  <Plus size={10} />
                                   <span>{e.label}</span>
-                                  <span className="text-[#BD20D3]">
+                                  <span className="text-[#BD20D3] font-semibold ml-auto">
                                     {(e.quantity * e.pricePerDay).toFixed(2)} €
                                   </span>
                                 </div>
@@ -563,33 +563,33 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
                   {/* SUMMARY SECTION */}
                   <div className="border-t border-white/10 pt-4 space-y-2">
-                    <div className="flex justify-between text-sm text-gray-400">
+                    <div className="flex justify-between text-base text-gray-400">
                       <span>Aparatúra na deň:</span>
-                      <span>{subtotalPerDay.toFixed(2)} €</span>
+                      <span className="font-semibold text-white">{subtotalPerDay.toFixed(2)} €</span>
                     </div>
-                    <div className="flex justify-between text-sm text-gray-400">
+                    <div className="flex justify-between text-base text-gray-400">
                       <span>Počet dní prenájmu:</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} className="text-gray-500" />
+                      <span className="flex items-center gap-1.5 font-semibold text-white">
+                        <Clock size={14} className="text-gray-500" />
                         {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}
                       </span>
                     </div>
 
                     {/* Rozpis cien podľa nového modelu */}
                     {days > 1 && (
-                      <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 space-y-1.5 mt-2">
-                        <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
-                        <div className="flex justify-between text-sm text-gray-300">
+                      <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 space-y-2 mt-2">
+                        <p className="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
+                        <div className="flex justify-between text-base text-gray-300">
                           <span>1. deň (plná cena):</span>
                           <span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span>
                         </div>
-                        <div className="flex justify-between text-sm text-gray-300">
+                        <div className="flex justify-between text-base text-gray-300">
                           <span>
                             {days - 1} {days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50%):
                           </span>
                           <span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span>
                         </div>
-                        <div className="flex justify-between text-sm text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1">
+                        <div className="flex justify-between text-base text-emerald-400 font-semibold border-t border-emerald-500/20 pt-2 mt-1">
                           <span>Zľava za dlhodobý prenájom:</span>
                           <span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span>
                         </div>
@@ -597,20 +597,20 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     )}
 
                     {packageItems.length > 0 && (
-                      <div className="border-t border-white/5 pt-3 space-y-1.5">
-                        <p className="text-xs text-gray-400 font-bold uppercase">Balíky:</p>
+                      <div className="border-t border-white/5 pt-3 space-y-2">
+                        <p className="text-sm text-gray-400 font-bold uppercase">Balíky:</p>
                         {packageItems.map((pkg) => (
-                          <div key={pkg.id} className="flex justify-between text-sm">
+                          <div key={pkg.id} className="flex justify-between text-base">
                             <span className="text-gray-300 truncate">{pkg.name}</span>
-                            <span className="text-[#BD20D3] font-semibold">{getPackageTotal(pkg)} €</span>
+                            <span className="text-[#BD20D3] font-bold">{getPackageTotal(pkg)} €</span>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    <div className="border-t border-white/5 pt-3 flex justify-between items-end">
-                      <span className="text-white font-bold text-base">Celková suma</span>
-                      <span className="text-[#BD20D3] font-extrabold text-2xl">
+                    <div className="border-t border-white/5 pt-4 flex justify-between items-end">
+                      <span className="text-white font-bold text-lg">Celková suma</span>
+                      <span className="text-[#BD20D3] font-extrabold text-3xl">
                         {(grandTotal + packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0)).toFixed(2)} €
                       </span>
                     </div>
