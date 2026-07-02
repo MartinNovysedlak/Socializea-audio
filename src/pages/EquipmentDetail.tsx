@@ -158,9 +158,17 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <section className="py-16 md:py-24">
+        <section className="pt-32 pb-16 md:pt-40 md:pb-24">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group"
+              >
+                <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform duration-200" />
+                <span className="text-sm">Späť na ponuku prenájmu</span>
+              </button>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                 <div>
                   <Card className="bg-white/5 border-white/10 rounded-xl p-6">
