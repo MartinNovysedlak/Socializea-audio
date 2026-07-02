@@ -63,10 +63,10 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobilné menu – pevné nepriehľadné pozadie */}
+      {/* Mobile menu overlay - vylepšené pre telefóny */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40" style={{ backgroundColor: '#020721' }}>
-          <div className="flex flex-col items-stretch gap-4 p-6 pt-8 max-w-md mx-auto">
+        <div className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f]/95 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col items-stretch gap-3 py-6 px-4 max-w-sm mx-auto">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -75,28 +75,28 @@ const Navbar = () => {
                   key={link.name}
                   to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-5 px-6 py-5 rounded-2xl text-lg font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-4 px-5 py-4 rounded-xl text-base font-semibold transition-all duration-200 ${
                     active
-                      ? 'bg-[#BD20D3]/20 border-2 border-[#BD20D3]/60 text-white shadow-[0_0_20px_rgba(189,32,211,0.15)]'
-                      : 'bg-[#1a1d2e] border-2 border-white/20 text-white hover:bg-[#25283a] hover:border-white/40'
+                      ? 'bg-[#BD20D3]/15 border border-[#BD20D3]/40 text-white shadow-[0_0_15px_rgba(189,32,211,0.2)]'
+                      : 'bg-white/5 border border-white/10 text-gray-200 hover:bg-white/10 hover:border-white/20 active:bg-white/15'
                   }`}
                 >
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                    active ? 'bg-[#BD20D3]/30' : 'bg-white/10'
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                    active ? 'bg-[#BD20D3]/20' : 'bg-white/10'
                   }`}>
-                    <Icon size={22} className={active ? 'text-[#BD20D3]' : 'text-gray-300'} />
+                    <Icon size={18} className={active ? 'text-[#BD20D3]' : 'text-gray-400'} />
                   </div>
                   <span className="flex-1">{link.name}</span>
                   {active && (
-                    <div className="w-3 h-3 rounded-full bg-[#BD20D3] shadow-[0_0_12px_rgba(189,32,211,0.8)]" />
+                    <div className="w-2 h-2 rounded-full bg-[#BD20D3] shadow-[0_0_8px_rgba(189,32,211,0.6)]" />
                   )}
                 </Link>
               );
             })}
-            <div className="mt-4 pt-4 border-t-2 border-white/10">
+            <div className="pt-2 border-t border-white/5 mt-1">
               <Link to="/kontakt" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="btn-cyber rounded-2xl w-full border-none h-14 text-lg font-bold shadow-[0_0_25px_rgba(189,32,211,0.4)]">
-                  <Phone size={22} className="mr-3" />
+                <Button className="btn-cyber rounded-xl w-full border-none h-12 text-base font-bold shadow-[0_0_20px_rgba(189,32,211,0.3)]">
+                  <Phone size={18} className="mr-2" />
                   Napíšte nám
                 </Button>
               </Link>
