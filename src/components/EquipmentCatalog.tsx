@@ -124,7 +124,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                         <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
                           <img
                             src={displayImage}
-                            alt={`${item.name} – prenájom v Žiline a Čadci`}
+                            alt={item.name}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";

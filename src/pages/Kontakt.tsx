@@ -5,14 +5,8 @@ import Navbar from '@/components/Navbar';
 import ContactForm from '@/components/ContactForm';
 import ContactMap from '@/components/ContactMap';
 import Footer from '@/components/Footer';
-import { usePageMeta } from '@/hooks/usePageMeta';
 
 const Kontakt = () => {
-  usePageMeta(
-    'Kontakt – Socializea-audio | Prenájom aparatúry Žilina, Čadca',
-    'Kontaktujte nás pre prenájom zvukovej a svetelnej techniky v Žiline, Čadci a Kysuciach. Telefón, email, adresa. Nezáväzná cenová ponuka.'
-  );
-
   return (
     <main className="min-h-screen bg-[#020721] relative overflow-hidden">
       <Navbar />

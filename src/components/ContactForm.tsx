@@ -51,7 +51,7 @@ const ContactForm = () => {
               
                 <div className="space-y-10">
                   <div>
-                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín v Žiline alebo Čadci</h1>
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín v Žiline alebo Čadci</h2>
                     <p className="text-gray-300 text-lg leading-relaxed">
                       Máte otázky ohľadom prenájmu aparatúry v Čadci alebo v Žiline? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru. Pôsobíme v celom Kysuckom regióne. Zavolajte alebo napíšte a my sa vám ozveme.
                     </p>

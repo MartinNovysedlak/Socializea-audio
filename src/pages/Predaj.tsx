@@ -9,14 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { ShoppingBag, ChevronRight, Filter, Check } from 'lucide-react';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { Link } from 'react-router-dom';
-import { usePageMeta } from '@/hooks/usePageMeta';
 
 const Predaj = () => {
-  usePageMeta(
-    'Predaj techniky – Socializea-audio | Žilina, Čadca, Kysuce',
-    'Kúpte si profesionálnu zvukovú a svetelnú techniku v Žiline a Čadci. Nové kusy aj overený B-Stock. Osobný odber, faktúra, záruka. Prezrite si ponuku!'
-  );
-
   const [items, setItems] = useState<SalesItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'new' | 'used'>('all');

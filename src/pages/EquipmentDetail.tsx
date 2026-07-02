@@ -9,7 +9,6 @@ import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
 import { generateEquipmentSeo, generateEquipmentAlt } from "@/utils/seo";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,13 +29,14 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   // SEO metadáta
   const seo = item ? generateEquipmentSeo(item.name, item.category, item.price_per_day) : null;
 
-  // Use the hook for title and meta description
-  usePageMeta(
-    seo?.title || 'Socializea-audio | Prenájom aparatúry Žilina, Čadca, Kysuce',
-    seo?.description
-  );
-
-  // Remove the old useEffect that only set document.title, it's now handled by usePageMeta
+  // Nastavenie title tagu
+  useEffect(() => {
+    if (seo) {
+      document.title = seo.title;
+    } else {
+      document.title = "Socializea-audio | Prenájom aparatúry Žilina, Čadca, Kysuce";
+    }
+  }, [seo]);
 
   const images = item?.images && item.images.length > 0
     ? item.images
@@ -259,7 +259,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
               <div className="space-y-6">
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Technické parametre</h2>
+                  <h3 className="text-2xl font-bold text-white mb-6">Technické parametre</h3>
                   {item.specifications && item.specifications.length > 0 ? (
                     <ul className="space-y-3 text-gray-300">
                       {item.specifications.map((spec, idx) => (
@@ -274,7 +274,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   )}
                 </Card>
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h2>
+                  <h3 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
                   {item.features && item.features.length > 0 ? (
                     <ul className="space-y-2 text-gray-300">
                       {item.features.map((feature, idx) => (
