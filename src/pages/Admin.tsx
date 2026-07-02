@@ -17,6 +17,7 @@ import { equipmentService } from '@/lib/equipmentService';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { blogService, BlogPost, BlogBlock } from '@/lib/blogService';
 import { packagesService, PackageData } from '@/lib/packagesService';
+import { faqService, FAQItem } from '@/lib/faqService';
 import { 
   Lock, 
   LogOut, 
@@ -38,7 +39,8 @@ import {
   Bold,
   Italic,
   Upload,
-  Package
+  Package,
+  HelpCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -46,7 +48,7 @@ const Admin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog' | 'packages'>('rentals');
+  const [activeTab, setActiveTab] = useState<'rentals' | 'sales' | 'blog' | 'packages' | 'faqs'>('rentals');
 
   // --- 1. RENTAL STATE ---
   const { equipment, loading: loadingRentals, addEquipment, updateEquipment, deleteEquipment, setEquipment, refetch } = useEquipment();
@@ -118,6 +120,16 @@ const Admin = () => {
     warning: ''
   });
 
+  // --- 5. FAQ STATE ---
+  const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
+  const [loadingFaqs, setLoadingFaqs] = useState(true);
+  const [isFaqFormOpen, setIsFaqFormOpen] = useState(false);
+  const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
+  const [faqFormData, setFaqFormData] = useState({
+    question: '',
+    answer: ''
+  });
+
   useEffect(() => {
     const authStatus = sessionStorage.getItem('admin_authenticated');
     if (authStatus === 'true') {
@@ -134,6 +146,7 @@ const Admin = () => {
       loadSalesData();
       loadBlogData();
       loadPackages();
+      loadFaqs();
     }
   }, [isAuthenticated]);
 
@@ -158,8 +171,15 @@ const Admin = () => {
     setLoadingPackages(false);
   };
 
+  const loadFaqs = async () => {
+    setLoadingFaqs(true);
+    const data = await faqService.getAll();
+    setFaqItems(data);
+    setLoadingFaqs(false);
+  };
+
   useEffect(() => {
-    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen || isPackageFormOpen) {
+    if (isRentalFormOpen || isSalesFormOpen || isBlogFormOpen || isPackageFormOpen || isFaqFormOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -167,7 +187,7 @@ const Admin = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen, isPackageFormOpen]);
+  }, [isRentalFormOpen, isSalesFormOpen, isBlogFormOpen, isPackageFormOpen, isFaqFormOpen]);
 
   const checkAndScroll = useCallback((clientY: number) => {
     const viewportHeight = window.innerHeight;
@@ -687,6 +707,73 @@ const Admin = () => {
     }
   };
 
+  // --- FAQ FUNCTIONS ---
+  const handleOpenFaqAdd = () => {
+    setEditingFaq(null);
+    setFaqFormData({
+      question: '',
+      answer: ''
+    });
+    setIsFaqFormOpen(true);
+  };
+
+  const handleOpenFaqEdit = (faq: FAQItem) => {
+    setEditingFaq(faq);
+    setFaqFormData({
+      question: faq.question,
+      answer: faq.answer
+    });
+    setIsFaqFormOpen(true);
+  };
+
+  const handleDeleteFaq = async (id: string, question: string) => {
+    if (window.confirm(`Naozaj chcete vymazať otázku: "${question}"?`)) {
+      const success = await faqService.delete(id);
+      if (success) {
+        toast.success('FAQ otázka úspešne vymazaná.');
+        loadFaqs();
+      } else {
+        toast.error('Chyba pri mazaní FAQ.');
+      }
+    }
+  };
+
+  const handleFaqSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!faqFormData.question.trim() || !faqFormData.answer.trim()) {
+      toast.error('Vyplňte otázku aj odpoveď!');
+      return;
+    }
+
+    if (editingFaq) {
+      const updated = await faqService.update(editingFaq.id, {
+        question: faqFormData.question.trim(),
+        answer: faqFormData.answer.trim()
+      });
+      if (updated) {
+        toast.success('FAQ otázka úspešne upravená!');
+        setIsFaqFormOpen(false);
+        setEditingFaq(null);
+        loadFaqs();
+      } else {
+        toast.error('Chyba pri úprave FAQ.');
+      }
+    } else {
+      const newOrderIndex = faqItems.length;
+      const created = await faqService.create({
+        question: faqFormData.question.trim(),
+        answer: faqFormData.answer.trim()
+      }, newOrderIndex);
+      if (created) {
+        toast.success('Nová FAQ otázka pridaná!');
+        setIsFaqFormOpen(false);
+        loadFaqs();
+      } else {
+        toast.error('Chyba pri pridávaní FAQ.');
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
       <Navbar />
@@ -753,7 +840,7 @@ const Admin = () => {
                   <h1 className="text-3xl font-extrabold text-white">Administrácia systému</h1>
                 </div>
                 <p className="text-gray-400 mt-1">
-                  Kompletná správa produktov na prenájom, techniky na predaj, firemného blogu a balíkov.
+                  Kompletná správa produktov na prenájom, techniky na predaj, firemného blogu, balíkov a FAQ.
                 </p>
               </div>
 
@@ -786,6 +873,10 @@ const Admin = () => {
                 <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
                   <BookOpen size={14} />
                   <span>Blog</span>
+                </TabsTrigger>
+                <TabsTrigger value="faqs" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <HelpCircle size={14} />
+                  <span>FAQ</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -1068,6 +1159,69 @@ const Admin = () => {
                   )}
                 </Card>
               </TabsContent>
+
+              {/* FAQ TAB PANEL */}
+              <TabsContent value="faqs" className="space-y-6">
+                <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
+                  <span className="text-sm text-gray-400">Správa často kladených otázok (FAQ)</span>
+                  <Button onClick={handleOpenFaqAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
+                    <Plus size={16} className="mr-1.5" /> Pridať otázku
+                  </Button>
+                </div>
+
+                <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
+                  {loadingFaqs ? (
+                    <div className="text-center py-12 text-gray-400">Načítavam FAQ...</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider bg-white/2">
+                            <th className="px-6 py-4 w-8 text-center">#</th>
+                            <th className="px-6 py-4">Otázka</th>
+                            <th className="px-6 py-4">Odpoveď (náhľad)</th>
+                            <th className="px-6 py-4 text-right">Akcie</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300 text-sm">
+                          {faqItems.map((faq, index) => {
+                            return (
+                              <tr key={faq.id} className="hover:bg-white/2">
+                                <td className="px-6 py-4 text-center text-gray-500 font-bold text-xs">
+                                  {index + 1}
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-white max-w-[320px] truncate">
+                                  {faq.question}
+                                </td>
+                                <td className="px-6 py-4 text-gray-400 max-w-[400px] truncate">
+                                  {faq.answer}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button onClick={() => handleOpenFaqEdit(faq)} size="sm" className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-lg h-8 px-2.5">
+                                      <Edit size={12} />
+                                    </Button>
+                                    <Button onClick={() => handleDeleteFaq(faq.id, faq.question)} size="sm" variant="outline" className="border-white/10 hover:border-red-500 text-red-400 rounded-lg h-8 w-8 p-0">
+                                      <Trash2 size={12} />
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {faqItems.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="text-center py-8 text-gray-500 italic">
+                                Zatiaľ tu nie sú žiadne FAQ otázky. Pridajte prvú.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
             </Tabs>
           </div>
         )}
@@ -1280,273 +1434,65 @@ const Admin = () => {
         </div>
       )}
 
-      {/* --- BLOG POP-UP MODAL WITH BLOCK-BASED RICH EDITOR --- */}
-      {isBlogFormOpen && (
+      {/* --- FAQ POP-UP MODAL --- */}
+      {isFaqFormOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
             <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
-              <button onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+              <button onClick={() => { setIsFaqFormOpen(false); setEditingFaq(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
                 <X size={24} />
               </button>
-              <div className="flex items-center gap-3 border-b border-[#BD20D3]/10 pb-4 mb-6">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
                 <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
-                  <BookOpen size={20} />
+                  <HelpCircle size={20} />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-white">
-                    {editingBlog ? 'Upraviť článok' : 'Pridať nový článok'}
+                    {editingFaq ? 'Upraviť FAQ otázku' : 'Pridať novú FAQ otázku'}
                   </h2>
                 </div>
               </div>
 
-              <form onSubmit={handleBlogSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Titulok článku *</Label>
-                    <Input type="text" value={blogFormData.title} onChange={(e) => setBlogFormData(p => ({ ...p, title: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Autor článku *</Label>
-                    <Input type="text" value={blogFormData.author} onChange={(e) => setBlogFormData(p => ({ ...p, author: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
-                  </div>
+              <form onSubmit={handleFaqSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Otázka *</Label>
+                  <Input 
+                    type="text" 
+                    value={faqFormData.question} 
+                    onChange={(e) => setFaqFormData(p => ({ ...p, question: e.target.value }))} 
+                    placeholder="Napr. Ako dlho trvá montáž?" 
+                    className="bg-black/50 border-white/10 text-white rounded-xl h-12"
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-gray-300">Krátky úvod / Excerpt * (Zobrazuje sa v náhľade)</Label>
-                  <Input type="text" value={blogFormData.excerpt} onChange={(e) => setBlogFormData(p => ({ ...p, excerpt: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-gray-300">Hlavný náhľadový obrázok</Label>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Input 
-                      type="text" 
-                      value={blogFormData.image} 
-                      onChange={(e) => setBlogFormData(p => ({ ...p, image: e.target.value }))} 
-                      placeholder="https://images.unsplash.com/... alebo nahrajte súbor" 
-                      className="bg-black/50 border-white/10 text-white rounded-xl h-12 flex-grow" 
-                    />
-                    <Button 
-                      type="button" 
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.onchange = (e) => {
-                          const files = (e.target as HTMLInputElement).files;
-                          if (files && files.length > 0) {
-                            handleMainBlogImageUpload(files[0]);
-                          }
-                        };
-                        input.click();
-                      }}
-                      className="bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white border border-[#BD20D3]/40 rounded-xl h-12 px-4 gap-2 shrink-0 transition-colors"
-                    >
-                      <Upload size={16} />
-                      Nahrať súbor
-                    </Button>
-                  </div>
-                  {blogFormData.image && (
-                    <div className="mt-2 aspect-[21/9] w-full max-w-[320px] rounded-xl overflow-hidden border border-white/10 bg-black/20">
-                      <img src={blogFormData.image} alt="Náhľad hlavného obrázka" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
-
-                {/* DYNAMIC CONTENT BLOCKS WRAPPER */}
-                <div className="space-y-4 pt-4 border-t border-white/5">
-                  <div className="flex justify-between items-center">
-                    <Label className="text-gray-300 text-lg font-bold">Obsah článku (Dynamické bloky)</Label>
-                    <span className="text-xs text-gray-500">Pridávajte odseky, nadpisy a nahrávajte fotky priamo medzi text.</span>
-                  </div>
-
-                  <div className="space-y-4 bg-black/30 border border-white/10 p-6 rounded-2xl">
-                    {blogBlocks.map((block, idx) => (
-                      <div key={idx} className="bg-[#020721] border border-white/5 rounded-xl p-4 flex flex-col md:flex-row items-start gap-4 group/block">
-                        
-                        <div className="flex items-center gap-2 md:flex-col md:items-center">
-                          <span className="text-xs font-bold text-[#BD20D3] uppercase tracking-wider md:mb-1">
-                            #{idx + 1}
-                          </span>
-                          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400">
-                            {block.type === 'paragraph' && <Type size={16} />}
-                            {block.type === 'heading' && <Heading size={16} />}
-                            {block.type === 'image' && <ImageIcon size={16} />}
-                          </div>
-                        </div>
-
-                        <div className="flex-grow w-full space-y-2">
-                          {block.type === 'heading' && (
-                            <div className="space-y-2">
-                              <div className="flex gap-1.5 items-center pb-1">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => formatBlockText(idx, 'bold')}
-                                  className="h-7 px-2.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 flex gap-1 items-center"
-                                >
-                                  <Bold size={12} className="text-[#BD20D3]" /> Hrubé
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => formatBlockText(idx, 'italic')}
-                                  className="h-7 px-2.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 flex gap-1 items-center"
-                                >
-                                  <Italic size={12} className="text-[#1A4BFF]" /> Šikmé
-                                </Button>
-                              </div>
-                              <Input 
-                                id={`blog-block-field-${idx}`}
-                                type="text" 
-                                value={block.value} 
-                                onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                                placeholder="Sem zadajte podnadpis..." 
-                                className="bg-black/40 border-white/5 font-bold text-white rounded-xl"
-                              />
-                            </div>
-                          )}
-
-                          {block.type === 'paragraph' && (
-                            <div className="space-y-2">
-                              <div className="flex gap-1.5 items-center pb-1">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => formatBlockText(idx, 'bold')}
-                                  className="h-7 px-2.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 flex gap-1 items-center"
-                                >
-                                  <Bold size={12} className="text-[#BD20D3]" /> Hrubé
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => formatBlockText(idx, 'italic')}
-                                  className="h-7 px-2.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 flex gap-1 items-center"
-                                >
-                                  <Italic size={12} className="text-[#1A4BFF]" /> Šikmé
-                                </Button>
-                              </div>
-                              <Textarea 
-                                id={`blog-block-field-${idx}`}
-                                value={block.value} 
-                                onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                                placeholder="Sem napíšte odsek textu..." 
-                                className="bg-black/40 border-white/5 text-gray-300 rounded-xl min-h-[100px] leading-relaxed"
-                              />
-                            </div>
-                          )}
-
-                          {block.type === 'image' && (
-                            <div className="space-y-3">
-                              <div className="flex gap-2">
-                                <Input 
-                                  type="text" 
-                                  value={block.value} 
-                                  onChange={(e) => updateBlockValue(idx, e.target.value)} 
-                                  placeholder="URL adresa obrázka..." 
-                                  className="bg-black/40 border-white/5 text-white rounded-xl flex-grow text-xs h-10"
-                                />
-                                <Button 
-                                  type="button" 
-                                  variant="outline" 
-                                  onClick={() => {
-                                    const input = document.createElement('input');
-                                    input.type = 'file';
-                                    input.accept = 'image/*';
-                                    input.onchange = (e) => {
-                                      const files = (e.target as HTMLInputElement).files;
-                                      if (files && files.length > 0) {
-                                        handleBlockImageUpload(idx, files[0]);
-                                      }
-                                    };
-                                    input.click();
-                                  }}
-                                  className="border-[#BD20D3]/30 hover:bg-[#BD20D3]/10 text-white rounded-xl h-10 text-xs px-3 whitespace-nowrap"
-                                >
-                                  Nahrať fotku
-                                </Button>
-                              </div>
-                              {block.value && (
-                                <div className="aspect-video w-full max-w-[200px] rounded-lg overflow-hidden border border-white/10">
-                                  <img src={block.value} alt="" className="w-full h-full object-cover" />
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-1.5 md:flex-col md:self-stretch md:justify-between self-end shrink-0">
-                          <div className="flex gap-1 md:flex-col">
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm" 
-                              disabled={idx === 0}
-                              onClick={() => moveBlock(idx, 'up')}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                            >
-                              <ArrowUp size={14} />
-                            </Button>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm" 
-                              disabled={idx === blogBlocks.length - 1}
-                              onClick={() => moveBlock(idx, 'down')}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                            >
-                              <ArrowDown size={14} />
-                            </Button>
-                          </div>
-                          
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => removeBlock(idx)}
-                            className="h-8 w-8 p-0 text-red-400 hover:text-white hover:bg-red-500/20"
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
-
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-3 justify-center pt-2">
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('paragraph')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
-                      <Type size={14} className="text-[#BD20D3]" /> Pridať odsek textu
-                    </Button>
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('heading')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
-                      <Heading size={14} className="text-[#1A4BFF]" /> Pridať podnadpis
-                    </Button>
-                    <Button 
-                      type="button" 
-                      onClick={() => addBlock('image')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-4 py-2 text-xs font-semibold gap-1.5 h-10"
-                    >
-                      <ImageIcon size={14} className="text-emerald-400" /> Vložiť fotku
-                    </Button>
-                  </div>
+                  <Label className="text-gray-300">Odpoveď *</Label>
+                  <Textarea 
+                    value={faqFormData.answer} 
+                    onChange={(e) => setFaqFormData(p => ({ ...p, answer: e.target.value }))} 
+                    placeholder="Sem napíšte podrobnú odpoveď na otázku..."
+                    className="bg-black/50 border-white/10 text-white rounded-xl min-h-[120px]"
+                    required 
+                  />
                 </div>
 
                 <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
-                  <Button type="button" variant="outline" onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
-                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none"><Save size={18} className="mr-2" /> Uverejniť článok</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => { setIsFaqFormOpen(false); setEditingFaq(null); }} 
+                    className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6"
+                  >
+                    Zrušiť
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="btn-cyber rounded-xl h-12 px-8 border-none"
+                  >
+                    <Save size={18} className="mr-2" /> 
+                    {editingFaq ? 'Uložiť zmeny' : 'Pridať otázku'}
+                  </Button>
                 </div>
               </form>
             </Card>
