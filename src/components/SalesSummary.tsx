@@ -7,67 +7,67 @@ import { ShoppingBag, CheckCircle2 } from 'lucide-react';
 
 const SalesSummary = () => {
   return (
-    <section className="py-12 bg-transparent relative">
+    <section className="py-8 md:py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
-            <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
-              <div className="w-full lg:w-1/2 space-y-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 text-[#1A4BFF] text-xs font-bold uppercase tracking-widest">
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-8 md:gap-16">
+              <div className="w-full lg:w-1/2 space-y-6 md:space-y-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 text-[#1A4BFF] text-[10px] md:text-xs font-bold uppercase tracking-widest">
                   Predaj techniky v Žiline a Čadci
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
                   Vybavte sa <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">profesionálne – kúpa zvukovej a svetelnej techniky v Žiline a Čadci</span>
                 </h2>
-                <p className="text-gray-300 text-lg leading-relaxed">
+                <p className="text-gray-300 text-sm md:text-lg leading-relaxed">
                   Okrem prenájmu ponúkame aj predaj špičkovej techniky pre profesionálov aj nadšencov. 
                   Získajte vybavenie, ktoré vydrží a posunie vašu produkciu na novú úroveň. Osobný odber v Čadci alebo v Žiline.
                 </p>
 
-                <ul className="space-y-4">
+                <ul className="space-y-3 md:space-y-4">
                   {[
                     "Autorizovaný predajca svetových značiek",
                     "Odborné poradenstvo pri výbere",
                     "Záručný a pozáručný servis",
                     "Možnosť vyskúšania techniky na mieste"
                   ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-gray-300">
-                      <CheckCircle2 className="text-[#1A4BFF]" size={20} />
+                    <li key={i} className="flex items-center gap-3 text-gray-300 text-sm md:text-base">
+                      <CheckCircle2 className="text-[#1A4BFF]" size={16} />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Link to="/predaj" className="inline-block">
-                  <Button className="btn-cyber h-14 px-8 rounded-xl text-lg group border-none">
-                    <ShoppingBag className="mr-2 w-5 h-5" />
+                  <Button className="btn-cyber h-12 md:h-14 px-6 md:px-8 rounded-xl md:rounded-xl text-sm md:text-lg group border-none">
+                    <ShoppingBag className="mr-2 w-4 h-4 md:w-5 md:h-5" />
                     Prejsť do ponuky predaja v Žiline a Čadci
                   </Button>
                 </Link>
               </div>
               
               <div className="w-full lg:w-1/2">
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-7 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                <div className="grid grid-cols-12 gap-2 md:gap-4">
+                  <div className="col-span-7 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                     <img 
                       src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800" 
                       alt="Audio technika na predaj v Kysuciach" 
-                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 aspect-[4/3]"
                     />
                   </div>
-                  <div className="col-span-5 space-y-4">
-                    <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                  <div className="col-span-5 space-y-2 md:space-y-4">
+                    <div className="aspect-square rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                       <img 
                         src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=600" 
                         alt="Svetelná technika na predaj v Žiline" 
                         className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
                       />
                     </div>
-                    <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#1A4BFF] to-[#BD20D3] p-6 flex items-center justify-center text-center">
-                      <p className="text-white font-bold text-lg leading-tight">
+                    <div className="aspect-square rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#1A4BFF] to-[#BD20D3] p-3 md:p-6 flex items-center justify-center text-center">
+                      <p className="text-white font-bold text-xs md:text-lg leading-tight">
                         Nová <br /> technika <br /> skladom
                       </p>
                     </div>

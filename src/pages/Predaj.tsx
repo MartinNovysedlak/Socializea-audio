@@ -10,6 +10,7 @@ import { ShoppingBag, ChevronRight, Filter, Check } from 'lucide-react';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { Link } from 'react-router-dom';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { cn } from '@/lib/utils';
 
 const Predaj = () => {
   usePageMeta(
@@ -39,35 +40,32 @@ const Predaj = () => {
     <main className="min-h-screen bg-[#020721] relative overflow-hidden">
       <Navbar />
 
-      {/* Background Floating Glows */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/10 rounded-full blur-[120px] animate-float-slow pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/5 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
       
-      <div className="pt-32 pb-24 container mx-auto px-4 relative z-10">
-        {/* HEADER SECTION */}
-        <div className="max-w-5xl mx-auto text-center mb-16 animate-fade-slide-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 text-[#1A4BFF] text-sm font-medium mb-6 shadow-[0_0_15px_rgba(26,75,255,0.2)]">
-            <ShoppingBag size={16} />
+      <div className="pt-24 md:pt-32 pb-16 md:pb-24 container mx-auto px-4 relative z-10">
+        <div className="max-w-5xl mx-auto text-center mb-10 md:mb-16 animate-fade-slide-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 text-[#1A4BFF] text-xs md:text-sm font-medium mb-4 md:mb-6 shadow-[0_0_15px_rgba(26,75,255,0.2)]">
+            <ShoppingBag size={14} />
             <span>Predaj profesionálnej audio & svetelnej techniky v Žiline a Čadci</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
-            Profesionálne vybavenie priamo pre vaše potreby – <br />
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold text-white leading-tight mb-4">
+            Profesionálne vybavenie priamo pre vaše potreby – <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">
               predaj techniky v Žiline, Čadci a Kysuciach
             </span>
           </h1>
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-400 text-sm md:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed px-2">
             Vyberte si zo širokej ponuky úplne nových kusov od svetových značiek alebo prevereného B-Stock bazáru so zárukou.
           </p>
         </div>
 
-        {/* CONTROLS / FILTERS */}
-        <div className="max-w-5xl mx-auto mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
+        <div className="max-w-5xl mx-auto mb-8 md:mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-white/10 p-3 md:p-4 rounded-xl md:rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
           <div className="flex items-center gap-2">
-            <Filter size={18} className="text-[#BD20D3]" />
-            <span className="text-sm text-gray-300 font-semibold">Filtrovať podľa stavu – nové produkty alebo B-Stock bazár:</span>
+            <Filter size={16} className="text-[#BD20D3]" />
+            <span className="text-xs md:text-sm text-gray-300 font-semibold">Filtrovať podľa stavu:</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 md:gap-2 overflow-x-auto w-full sm:w-auto">
             {[
               { id: 'all', label: 'Všetko' },
               { id: 'new', label: 'Nové produkty' },
@@ -76,7 +74,10 @@ const Predaj = () => {
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id as any)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeFilter === f.id ? 'bg-[#BD20D3] text-white shadow-[0_0_15px_rgba(189,32,211,0.5)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                className={cn(
+                  "px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[11px] md:text-sm font-semibold transition-all whitespace-nowrap",
+                  activeFilter === f.id ? 'bg-[#BD20D3] text-white shadow-[0_0_15px_rgba(189,32,211,0.5)]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                )}
               >
                 {f.label}
               </button>
@@ -84,7 +85,6 @@ const Predaj = () => {
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
         {loading ? (
           <div className="text-center text-gray-400 py-16">Načítavam produkty pre vás...</div>
         ) : filteredItems.length === 0 ? (
@@ -92,7 +92,7 @@ const Predaj = () => {
             Žiadne produkty nezodpovedajú zvolenému filtru.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
             {filteredItems.map((item, index) => {
               const mainImg = item.images?.[0] || 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
               return (
@@ -102,10 +102,9 @@ const Predaj = () => {
                     className="block h-full group"
                   >
                     <Card 
-                      className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/50 hover:shadow-[0_0_40px_rgba(189,32,211,0.15)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative"
+                      className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden hover:border-[#BD20D3]/50 hover:shadow-[0_0_40px_rgba(189,32,211,0.15)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative"
                     >
-                      {/* Image banner */}
-                      <div className="h-72 md:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
+                      <div className="h-52 md:h-72 lg:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
                         <img 
                           src={mainImg} 
                           alt={item.name} 
@@ -116,38 +115,41 @@ const Predaj = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                         
-                        {/* Kategória */}
-                        <div className="absolute bottom-4 right-4">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${item.condition === 'new' ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' : 'bg-amber-600/90 border border-amber-400/50 text-white'}`}>
+                        <div className="absolute bottom-3 md:bottom-4 right-3 md:right-4">
+                          <span className={cn(
+                            "px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm",
+                            item.condition === 'new' 
+                              ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' 
+                              : 'bg-amber-600/90 border border-amber-400/50 text-white'
+                          )}>
                             {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
                           </span>
                         </div>
                         
                         {!item.available && (
                           <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm">
-                            <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-widest">
+                            <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-4 py-2 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-widest">
                               Vypredané
                             </span>
                           </div>
                         )}
                       </div>
 
-                      {/* Body Content */}
-                      <CardHeader className="pt-6">
-                        <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors line-clamp-2">
+                      <CardHeader className="pt-4 md:pt-6 px-4 md:px-6">
+                        <CardTitle className="text-lg md:text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors line-clamp-2">
                           {item.name}
                         </CardTitle>
-                        <p className="text-gray-400 text-sm line-clamp-3 mt-2">
+                        <p className="text-gray-400 text-xs md:text-sm line-clamp-2 md:line-clamp-3 mt-2">
                           {item.description}
                         </p>
                       </CardHeader>
 
-                      <CardContent className="space-y-4 flex-grow">
+                      <CardContent className="px-4 md:px-6 space-y-3 flex-grow">
                         {item.features && item.features.length > 0 && (
-                          <ul className="space-y-2">
+                          <ul className="space-y-1.5 md:space-y-2">
                             {item.features.slice(0, 3).map((f, i) => (
-                              <li key={i} className="flex items-start gap-2.5 text-xs text-gray-300">
-                                <Check size={14} className="text-[#BD20D3] shrink-0 mt-0.5" />
+                              <li key={i} className="flex items-start gap-2 text-[11px] md:text-xs text-gray-300">
+                                <Check size={12} className="text-[#BD20D3] shrink-0 mt-0.5" />
                                 <span className="line-clamp-1">{f}</span>
                               </li>
                             ))}
@@ -155,23 +157,24 @@ const Predaj = () => {
                         )}
                       </CardContent>
 
-                      <CardFooter className="border-t border-white/5 pt-6 pb-6 flex items-center justify-between mt-auto">
+                      <CardFooter className="border-t border-white/5 pt-4 md:pt-6 pb-4 md:pb-6 px-4 md:px-6 flex items-center justify-between mt-auto">
                         <div>
-                          <span className="text-xs text-gray-400 block uppercase font-bold">Cena s DPH</span>
-                          <span className="text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
+                          <span className="text-[10px] md:text-xs text-gray-400 block uppercase font-bold">Cena s DPH</span>
+                          <span className="text-2xl md:text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
                         </div>
                         
                         <Button 
                           asChild
-                          className={`h-12 px-6 rounded-xl font-bold transition-all ${
+                          className={cn(
+                            "h-10 md:h-12 px-4 md:px-6 rounded-lg md:rounded-xl font-bold text-xs md:text-sm transition-all",
                             item.available 
                               ? 'btn-cyber border-none text-white' 
                               : 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
-                          }`}
+                          )}
                         >
                           <div>
                             Mám záujem
-                            <ChevronRight size={16} className="ml-1" />
+                            <ChevronRight size={14} className="ml-1" />
                           </div>
                         </Button>
                       </CardFooter>
