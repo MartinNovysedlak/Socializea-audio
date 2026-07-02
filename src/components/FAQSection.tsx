@@ -26,9 +26,9 @@ const FAQSection = () => {
 
   if (loading) {
     return (
-      <section className="py-12 bg-transparent relative">
+      <section className="py-8 sm:py-12 bg-transparent relative">
         <div className="container mx-auto px-4">
-          <div className="text-center text-gray-400 flex items-center justify-center gap-2">
+          <div className="text-center text-gray-400 flex items-center justify-center gap-2 text-sm">
             <Loader2 size={16} className="animate-spin text-[#BD20D3]" />
             Načítavam časté otázky...
           </div>
@@ -40,35 +40,35 @@ const FAQSection = () => {
   if (faqs.length === 0) return null;
 
   return (
-    <section className="py-12 bg-transparent relative">
+    <section className="py-8 sm:py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-[#BD20D3] text-xs font-bold uppercase tracking-widest mb-4">
+              <div className="text-center mb-6 sm:mb-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-[#BD20D3] text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4">
                   <HelpCircle size={14} />
                   <span>Pomocník</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Často kladené otázky</h2>
-                <p className="text-gray-400 text-sm mt-2 max-w-xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Často kladené otázky</h2>
+                <p className="text-gray-400 text-xs sm:text-sm mt-2 max-w-xl mx-auto">
                   Rýchle odpovede na najčastejšie otázky o prenájme techniky.
                 </p>
               </div>
 
-              <Accordion type="single" collapsible className="space-y-3">
+              <Accordion type="single" collapsible className="space-y-2 sm:space-y-3">
                 {faqs.map((faq) => (
                   <AccordionItem
                     key={faq.id}
                     value={faq.id}
-                    className="bg-white/5 border border-white/10 rounded-2xl px-6 transition-all data-[state=open]:border-[#BD20D3]/30 data-[state=open]:bg-[#BD20D3]/5"
+                    className="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 transition-all data-[state=open]:border-[#BD20D3]/30 data-[state=open]:bg-[#BD20D3]/5"
                   >
-                    <AccordionTrigger className="text-white font-semibold text-left hover:text-[#BD20D3] transition-colors py-5 [&[data-state=open]>svg]:rotate-180">
-                      <span className="pr-8">{faq.question}</span>
+                    <AccordionTrigger className="text-white font-semibold text-left hover:text-[#BD20D3] transition-colors py-4 sm:py-5 [&[data-state=open]>svg]:rotate-180 text-sm sm:text-base">
+                      <span className="pr-6 sm:pr-8">{faq.question}</span>
                     </AccordionTrigger>
-                    <AccordionContent className="text-gray-300 leading-relaxed pb-5 text-sm">
+                    <AccordionContent className="text-gray-300 leading-relaxed pb-4 sm:pb-5 text-xs sm:text-sm">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>

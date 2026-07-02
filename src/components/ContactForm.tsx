@@ -40,58 +40,58 @@ const ContactForm = () => {
   }
 
   return (
-    <section id="kontakt" className="py-12 bg-transparent relative">
+    <section id="kontakt" className="py-8 sm:py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
+          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16">
               
-                <div className="space-y-10">
+                <div className="space-y-6 sm:space-y-10">
                   <div>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
-                    <p className="text-gray-300 text-lg leading-relaxed">
+                    <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 sm:mb-6">Rezervujte si termín</h2>
+                    <p className="text-gray-300 text-base sm:text-lg leading-relaxed">
                       Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
                     </p>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
-                        <Phone size={20} />
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] shrink-0">
+                        <Phone size={18} />
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Zavolajte nám</p>
-                        <p className="text-white text-lg">+421 948 070 577</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
-                        <Mail size={20} />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
-                        <p className="text-white text-lg">socializea@socializea.com</p>
+                      <div className="min-w-0">
+                        <p className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider font-bold">Zavolajte nám</p>
+                        <p className="text-white text-base sm:text-lg">+421 948 070 577</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] mt-1">
-                        <MapPin size={20} />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] shrink-0">
+                        <Mail size={18} />
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-2">Kde nás nájdete</p>
-                        <div className="space-y-3">
+                      <div className="min-w-0">
+                        <p className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider font-bold">Napíšte nám</p>
+                        <p className="text-white text-base sm:text-lg truncate">socializea@socializea.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] shrink-0 mt-1">
+                        <MapPin size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider font-bold mb-1 sm:mb-2">Kde nás nájdete</p>
+                        <div className="space-y-2 sm:space-y-3">
                           <div>
-                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
-                            <p className="text-white text-lg leading-snug">Čadečka 1924</p>
-                            <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
+                            <p className="text-[#BD20D3] font-bold text-[10px] sm:text-sm uppercase tracking-wider mb-0.5 sm:mb-1">Hlavný sklad a sídlo</p>
+                            <p className="text-white text-sm sm:text-lg leading-snug">Čadečka 1924</p>
+                            <p className="text-gray-400 text-xs sm:text-sm">022 01 Čadca, Slovensko</p>
                           </div>
-                          <div className="border-t border-white/5 pt-3">
-                            <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto</p>
-                            <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
-                            <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
+                          <div className="border-t border-white/5 pt-2 sm:pt-3">
+                            <p className="text-[#1A4BFF] font-bold text-[10px] sm:text-sm uppercase tracking-wider mb-0.5 sm:mb-1">Odberné miesto</p>
+                            <p className="text-white text-sm sm:text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
+                            <p className="text-gray-400 text-xs sm:text-sm">010 01 Žilina, Slovensko</p>
                           </div>
                         </div>
                       </div>
@@ -99,20 +99,20 @@ const ContactForm = () => {
                   </div>
                 </div>
 
-                <div className="bg-black/20 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-sm">
+                <div className="bg-black/20 border border-white/10 p-5 sm:p-6 md:p-8 md:p-10 rounded-2xl sm:rounded-3xl backdrop-blur-sm">
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <FormField
                           control={form.control}
                           name="name"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
+                            <FormItem className="space-y-1.5 sm:space-y-2">
+                              <FormLabel className="text-gray-300 text-sm">Meno a priezvisko</FormLabel>
                               <FormControl>
-                                <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-10 sm:h-12 rounded-xl focus:ring-[#BD20D3]" />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-xs" />
                             </FormItem>
                           )}
                         />
@@ -120,27 +120,27 @@ const ContactForm = () => {
                           control={form.control}
                           name="email"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Email</FormLabel>
+                            <FormItem className="space-y-1.5 sm:space-y-2">
+                              <FormLabel className="text-gray-300 text-sm">Email</FormLabel>
                               <FormControl>
-                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-10 sm:h-12 rounded-xl focus:ring-[#BD20D3]" />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-xs" />
                             </FormItem>
                           )}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <FormField
                           control={form.control}
                           name="phone"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Telefón</FormLabel>
+                            <FormItem className="space-y-1.5 sm:space-y-2">
+                              <FormLabel className="text-gray-300 text-sm">Telefón</FormLabel>
                               <FormControl>
-                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-10 sm:h-12 rounded-xl focus:ring-[#BD20D3]" />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-xs" />
                             </FormItem>
                           )}
                         />
@@ -148,12 +148,12 @@ const ContactForm = () => {
                           control={form.control}
                           name="date"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Dátum podujatia</FormLabel>
+                            <FormItem className="space-y-1.5 sm:space-y-2">
+                              <FormLabel className="text-gray-300 text-sm">Dátum podujatia</FormLabel>
                               <FormControl>
-                                <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-10 sm:h-12 rounded-xl focus:ring-[#BD20D3]" />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-xs" />
                             </FormItem>
                           )}
                         />
@@ -162,22 +162,22 @@ const ContactForm = () => {
                         control={form.control}
                         name="message"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Vaša správa</FormLabel>
+                          <FormItem className="space-y-1.5 sm:space-y-2">
+                            <FormLabel className="text-gray-300 text-sm">Vaša správa</FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="Napíšte nám viac o vašom podujatí..." 
-                                className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
+                                className="bg-black/50 border-white/10 text-white min-h-[100px] sm:min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
                                 {...field} 
                               />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="text-xs" />
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full btn-cyber h-14 rounded-xl text-lg font-bold group border-none">
+                      <Button type="submit" className="w-full btn-cyber h-11 sm:h-14 rounded-xl text-base sm:text-lg font-bold group border-none">
                         Odoslať nezáväzný dopyt
-                        <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform shrink-0" />
                       </Button>
                     </form>
                   </Form>
