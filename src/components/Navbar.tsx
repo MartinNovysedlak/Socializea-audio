@@ -22,7 +22,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f]/80 backdrop-blur-md border-b border-white/10 transition-all duration-300">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f] border-b border-white/10 transition-all duration-300">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300 relative z-[60]">
@@ -34,7 +34,7 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* DESKTOP NAV - EXACTLY AS BEFORE FOR PC (hidden below lg) */}
+        {/* DESKTOP NAV */}
         <div className="hidden lg:flex items-center gap-8">
           <div className="flex items-center gap-8">
             {navLinks.map((link) => (
@@ -54,7 +54,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* MOBILE BURGER TOGGLE (visible below lg) */}
+        {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3 relative z-[60]">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -66,7 +66,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE FULL-SCREEN OVERLAY MENU (visible below lg) */}
+      {/* MOBILE FULL-SCREEN OVERLAY MENU */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-[#020721]/98 backdrop-blur-xl flex flex-col justify-between p-6 pt-28 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="space-y-6 my-auto max-w-sm mx-auto w-full text-center">
