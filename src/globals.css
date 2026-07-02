@@ -43,16 +43,10 @@
 
   body {
     @apply bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white overflow-x-hidden;
-    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3 {
     @apply tracking-tight;
-  }
-
-  /* Prevent text overflow on small screens */
-  h1, h2, h3, p {
-    @apply break-words;
   }
 }
 
@@ -82,34 +76,49 @@
   .nav-link-underline:hover::after {
     @apply scale-x-100 origin-bottom-left;
   }
-
-  /* Responsive padding helper */
-  .section-padding {
-    @apply py-12 md:py-16 lg:py-20;
-  }
 }
 
 /* Animácia jemného vznášania pre svetlá pozadia */
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0px) scale(1) rotate(0deg); }
-  50% { transform: translateY(-25px) scale(1.05) rotate(5deg); }
+  0%, 100% {
+    transform: translateY(0px) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-25px) scale(1.05) rotate(5deg);
+  }
 }
 
 @keyframes float-delayed {
-  0%, 100% { transform: translateY(0px) scale(1.08) rotate(0deg); }
-  50% { transform: translateY(25px) scale(1) rotate(-5deg); }
+  0%, 100% {
+    transform: translateY(0px) scale(1.08) rotate(0deg);
+  }
+  50% {
+    transform: translateY(25px) scale(1) rotate(-5deg);
+  }
 }
 
 /* Pulzovanie žiary pre akčné tlačidlá */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 12px rgba(189, 32, 211, 0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 25px rgba(189, 32, 211, 0.8), 0 0 8px rgba(26, 75, 255, 0.4); transform: scale(1.03); }
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(189, 32, 211, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(189, 32, 211, 0.8), 0 0 8px rgba(26, 75, 255, 0.4);
+    transform: scale(1.03);
+  }
 }
 
 /* Slide up s fade-in pre úvodné prvky */
 @keyframes fade-slide-up {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Priradenie tried pre animácie */
@@ -127,19 +136,4 @@
 
 .animate-fade-slide-up {
   animation: fade-slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(189, 32, 211, 0.3);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(189, 32, 211, 0.6);
 }

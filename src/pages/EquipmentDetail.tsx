@@ -8,8 +8,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { generateEquipmentSeo, generateEquipmentAlt } from "@/utils/seo";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,15 +24,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
-
-  // SEO metadáta
-  const seo = item ? generateEquipmentSeo(item.name, item.category, item.price_per_day) : null;
-
-  // Use the hook for title and meta description
-  usePageMeta(
-    seo?.title || 'Socializea-audio | Prenájom aparatúry Žilina, Čadca, Kysuce',
-    seo?.description
-  );
 
   const images = item?.images && item.images.length > 0
     ? item.images
@@ -132,20 +121,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            {/* Breadcrumb / back link */}
-            <Link to="/prenajom" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-8 group">
-              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Späť na ponuku prenájmu v Žiline a Čadci</span>
-            </Link>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
-                <Card className="bg-white/5 border-white/10 rounded-xl p-4 sm:p-6">
-                  <CardHeader className="pb-4 px-0">
-                    {/* H1 nadpis */}
-                    <h1 className="text-3xl font-bold text-white">{seo?.h1 || item.name}</h1>
-                    {/* H2 podnadpis */}
-                    <p className="text-base text-gray-300 mt-2">{seo?.h2}</p>
+                <Card className="bg-white/5 border-white/10 rounded-xl p-6">
+                  <CardHeader className="pb-4">
+                    <h2 className="text-3xl font-bold text-white">{item.name}</h2>
                     <span className="text-xl text-[#BD20D3] uppercase">
                       {item.category === "sound"
                         ? "Zvuk"
@@ -154,23 +134,17 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                           : "Ostatné"}
                     </span>
                   </CardHeader>
-
-                  {/* Meta description (skrytý pre SEO, viditeľný len pre vyhľadávače) */}
-                  <div className="sr-only" aria-hidden="true">
-                    {seo?.description}
-                  </div>
-
-                  <CardContent className="space-y-6 px-0">
+                  <CardContent className="space-y-6">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
-                    {/* Main image */}
+                    {/* Hlavný obrázok — celý produkt viditeľný */}
                     <div
                       className="aspect-[4/3] rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
                       onClick={() => openLightbox(0)}
                     >
                       <img
                         src={images[0]}
-                        alt={generateEquipmentAlt(item.name)}
+                        alt={item.name}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
@@ -183,7 +157,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                       </div>
                     </div>
 
-                    {/* Thumbnails */}
+                    {/* Náhľady — tiež object-contain */}
                     {images.length > 1 && (
                       <div className="grid grid-cols-3 gap-3">
                         {images.slice(1).map((img, idx) => (
@@ -194,7 +168,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                           >
                             <img
                               src={img}
-                              alt={`${generateEquipmentAlt(item.name)} – fotka ${idx + 2}`}
+                              alt={`${item.name} - fotka ${idx + 2}`}
                               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
@@ -206,56 +180,51 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-6 border-t border-white/5 px-0 flex-col gap-4">
-                    <div className="w-full">
-                      <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
-                      <span className="text-gray-500 ml-2">/ deň</span>
-                      <p className="text-gray-400 mt-1">
-                        Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
-                      </p>
-                    </div>
-                    <div className="flex flex-col xs:flex-row gap-2 w-full">
-                      <Link to="/prenajom" className="w-full xs:w-auto">
-                        <Button className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 whitespace-nowrap">
-                          Späť do ponuky
-                        </Button>
-                      </Link>
-                      {isInCart ? (
-                        <Button 
-                          onClick={handleAddToCart}
-                          disabled={cartQuantity >= item.available}
-                          size="sm"
-                          className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full xs:w-auto whitespace-nowrap"
-                        >
-                          <Check size={18} className="mr-2 animate-pulse shrink-0" />
-                          V košíku ({cartQuantity})
-                        </Button>
-                      ) : (
-                        <Button 
-                          onClick={handleAddToCart}
-                          disabled={item.available === 0}
-                          size="sm"
-                          className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full xs:w-auto whitespace-nowrap"
-                        >
-                          <ShoppingBag size={18} className="mr-2 shrink-0" />
-                          Pridať do košíka
-                        </Button>
-                      )}
+                  <CardFooter className="pt-6 border-t border-white/5">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
+                      <div>
+                        <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
+                        <span className="text-gray-500 ml-2">/ deň</span>
+                        <p className="text-gray-400 mt-1">
+                          Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
+                        </p>
+                      </div>
+                      <div className="flex gap-3">
+                        <Link to="/prenajom">
+                          <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6">
+                            Späť do ponuky
+                          </Button>
+                        </Link>
+                        {isInCart ? (
+                          <Button 
+                            onClick={handleAddToCart}
+                            disabled={cartQuantity >= item.available}
+                            size="sm"
+                            className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none"
+                          >
+                            <Check size={18} className="mr-2 animate-pulse" />
+                            V košíku ({cartQuantity})
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={handleAddToCart}
+                            disabled={item.available === 0}
+                            size="sm"
+                            className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg"
+                          >
+                            <ShoppingBag size={18} className="mr-2" />
+                            Pridať do košíka
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardFooter>
                 </Card>
-
-                {/* SEO text block */}
-                <div className="mt-8 p-6 bg-white/3 border border-white/5 rounded-2xl">
-                  <p className="text-gray-400 text-xs leading-relaxed">
-                    {seo?.seoText}
-                  </p>
-                </div>
               </div>
 
               <div className="space-y-6">
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-6">Technické parametre</h2>
+                  <h3 className="text-2xl font-bold text-white mb-6">Technické parametre</h3>
                   {item.specifications && item.specifications.length > 0 ? (
                     <ul className="space-y-3 text-gray-300">
                       {item.specifications.map((spec, idx) => (
@@ -270,7 +239,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   )}
                 </Card>
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h2>
+                  <h3 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
                   {item.features && item.features.length > 0 ? (
                     <ul className="space-y-2 text-gray-300">
                       {item.features.map((feature, idx) => (
@@ -292,7 +261,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       
       <Footer />
 
-      {/* Lightbox */}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 md:p-8"
@@ -325,7 +293,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
           <img
             src={images[currentImageIndex]}
-            alt={`${generateEquipmentAlt(item.name)} – fotka ${currentImageIndex + 1}`}
+            alt={`${item.name} - fotka ${currentImageIndex + 1}`}
             onClick={(e) => e.stopPropagation()}
             className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
             onError={(e) => {

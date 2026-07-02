@@ -7,8 +7,6 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
-import { generateSalesSeo, generateSalesAlt } from '@/utils/salesSeo';
-import { usePageMeta } from '@/hooks/usePageMeta';
 import {
   ArrowLeft,
   Check,
@@ -31,17 +29,6 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // SEO metadáta
-  const seo = item ? generateSalesSeo(item.name, item.price, item.condition) : null;
-
-  // Use hook for title and meta description
-  usePageMeta(
-    seo?.title || 'Socializea-audio | Predaj techniky Žilina, Čadca, Kysuce',
-    seo?.description
-  );
-
-  // Remove old useEffect document.title
 
   // Form State
   const [inquiryName, setInquiryName] = useState('');
@@ -156,16 +143,11 @@ const ProductDetail = () => {
             <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
               <img
                 src={activeImage}
-                alt={generateSalesAlt(item.name)}
+                alt={item.name}
                 className="w-full h-full object-contain"
               />
 
-              {/* SEO Meta description (skryté) */}
-              <div className="sr-only" aria-hidden="true">
-                {seo?.description}
-              </div>
-
-              {/* Kategória — ľavý dolný roh */}
+              {/* Kategória — ľavý dolný roh, plne nepriehľadná */}
               <div className="absolute bottom-4 left-4">
                 <span className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
                   item.condition === 'new'
@@ -176,7 +158,7 @@ const ProductDetail = () => {
                 </span>
               </div>
 
-              {/* Šípky */}
+              {/* Šípky na preklikávanie — zobrazia sa pri hoveri */}
               {imagesList.length > 1 && (
                 <>
                   <button
@@ -203,7 +185,7 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Thumbnails */}
+            {/* Thumbnail Gallery List */}
             {imagesList.length > 1 && (
               <div className="flex flex-wrap gap-3">
                 {imagesList.map((imgUrl, idx) => (
@@ -219,22 +201,17 @@ const ProductDetail = () => {
                         : 'border-white/10 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={imgUrl} alt={`${generateSalesAlt(item.name)} – náhľad ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={imgUrl} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Product info */}
+            {/* Product description & Info */}
             <div className="space-y-4 pt-4">
-              {/* H1 */}
               <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                {seo?.h1 || item.name}
+                {item.name}
               </h1>
-              {/* H2 */}
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                {seo?.h2}
-              </p>
               <div className="text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
                 {item.price} € <span className="text-xs text-gray-400 font-normal">s DPH</span>
               </div>
@@ -243,11 +220,11 @@ const ProductDetail = () => {
               </p>
             </div>
 
-            {/* Specs & Features */}
+            {/* Specifications & Features */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
               {item.specs && item.specs.length > 0 && (
                 <div className="space-y-3">
-                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické parametre:</h2>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické parametre:</h3>
                   <ul className="space-y-2">
                     {item.specs.map((spec, i) => (
                       <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
@@ -261,7 +238,7 @@ const ProductDetail = () => {
 
               {item.features && item.features.length > 0 && (
                 <div className="space-y-3">
-                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové výhody:</h2>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové výhody:</h3>
                   <ul className="space-y-2">
                     {item.features.map((f, i) => (
                       <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
@@ -284,22 +261,15 @@ const ProductDetail = () => {
                 </p>
               </div>
             </div>
-
-            {/* SEO text block */}
-            <div className="p-5 bg-white/3 border border-white/5 rounded-2xl">
-              <p className="text-gray-400 text-xs leading-relaxed">
-                {seo?.seoText}
-              </p>
-            </div>
           </div>
 
           {/* RIGHT: INQUIRY FORM (5 cols) */}
           <div className="lg:col-span-5">
             <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-white mb-2">Mám záujem o kúpu</h2>
+                <h3 className="text-xl font-bold text-white mb-2">Mám záujem o produkt</h3>
                 <p className="text-gray-400 text-xs leading-relaxed">
-                  Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť alebo dohodneme osobné prevzatie v Čadci či Žiline.
+                  Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť prípadne dohodneme osobné prevzatie.
                 </p>
               </div>
 
@@ -344,7 +314,7 @@ const ProductDetail = () => {
                   <textarea
                     value={inquiryMessage}
                     onChange={(e) => setInquiryMessage(e.target.value)}
-                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber v Žiline..."
+                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
                   />
                 </div>

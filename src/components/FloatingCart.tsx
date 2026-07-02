@@ -160,6 +160,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
 
+  // Inštalácia / doprava pre samostatnú aparatúru
   const [installSelected, setInstallSelected] = useState(false);
   const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
   const [deliverySelected, setDeliverySelected] = useState(false);
@@ -219,12 +220,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
   const packageHasInstallUninstall = packageItems.some(p => p.install === 'install_uninstall');
   const packageHasDelivery = packageItems.some(p => p.arrival !== null);
-  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
-  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
 
   const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
   const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
 
+  // Helper function defined early so it can be used in calculations below
   const getPackageTotal = (pkg: PackageCartItem) => {
     let total = pkg.price;
     total += pkg.installPrice;
@@ -268,6 +268,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
+            // Spolahliva detekcia krajiny: kontrolujeme aj country_code aj nazov krajiny
             const countryCode = item.country_code || '';
             const countryName = (address.country || '').toLowerCase();
             const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
@@ -426,6 +427,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasEquipment = totalEquipmentQty > 0;
 
+  // Spočítame celkový počet inštalácií a deinštalácií z balíkov
+  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
+  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
+
   return (
     <>
       <style>{`
@@ -511,6 +516,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
       `}</style>
 
+      {/* FLOATING ACTION BUTTON */}
       {totalItems > 0 && (
         <div
           className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
@@ -525,7 +531,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                   return (
                     <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
-                      <img src={img} alt={`${item.name} – prenájom`} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
+                      <img src={img} alt="" className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
                       <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
                       <span className="truncate flex-grow">{item.name}</span>
                       <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
@@ -534,7 +540,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 })}
                 {packageItems.map((pkg) => (
                   <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <img src={pkg.image} alt={`${pkg.name} – balík prenájom`} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
+                    <img src={pkg.image} alt={pkg.name} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
                     <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
                     <span className="truncate flex-grow">{pkg.name}</span>
                     <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
@@ -558,6 +564,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
+      {/* POP-UP MODAL */}
       {isOpen && totalItems > 0 && (
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
@@ -572,6 +579,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+                {/* LEFT COLUMN: SELECTED ITEMS + SUMMARY */}
                 <div className="lg:col-span-5 space-y-4">
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
@@ -584,7 +592,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       return (
                         <div key={item.id} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-3 md:p-4">
                           <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
-                            <img src={displayImg} alt={`${item.name} – prenájom`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
+                            <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="text-base font-semibold text-white truncate">{item.name}</h4>
@@ -602,7 +610,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div key={pkg.id} className="flex items-start gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 md:p-4 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white"><X size={12} /></button>
                         <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
-                          <img src={pkg.image} alt={`${pkg.name} – balík prenájom`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
+                          <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-base font-bold text-white mb-1">{pkg.name}</h4>
@@ -626,6 +634,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     ))}
                   </div>
 
+                  {/* DOPLNKOVÉ SLUŽBY PRE SAMOSTATNÚ APARATÚRU */}
                   {hasEquipment && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
@@ -721,6 +730,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   )}
 
+                  {/* SUMMARY SECTION */}
                   <div className="border-t border-white/10 pt-4 space-y-2">
                     {hasEquipment && (
                       <>
@@ -746,6 +756,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
+                    {/* Inštalácia – z aparatúry aj z balíkov */}
                     {(installSelected && !installUninstallSelected) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
@@ -758,6 +769,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost + packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
                       </div>
                     )}
+                    {/* Ak balík má inštaláciu a aparatúra nemá nič vybrané – zobraz len balíkovú inštaláciu */}
                     {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
@@ -771,6 +783,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
+                    {/* Doprava – iba ak je vybraná */}
                     {deliverySelected && deliveryResult && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
@@ -791,6 +804,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
+                {/* RIGHT COLUMN: CHECKOUT FORM */}
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
