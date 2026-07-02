@@ -63,9 +63,9 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobilné menu – plné pozadie, veľké tlačidlá, čitateľné */}
+      {/* Mobilné menu – pevné nepriehľadné pozadie */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-[#020721] border-t border-[#BD20D3]/30">
+        <div className="md:hidden fixed inset-0 top-16 z-40" style={{ backgroundColor: '#020721' }}>
           <div className="flex flex-col items-stretch gap-4 p-6 pt-8 max-w-md mx-auto">
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -78,7 +78,7 @@ const Navbar = () => {
                   className={`flex items-center gap-5 px-6 py-5 rounded-2xl text-lg font-semibold transition-all duration-200 ${
                     active
                       ? 'bg-[#BD20D3]/20 border-2 border-[#BD20D3]/60 text-white shadow-[0_0_20px_rgba(189,32,211,0.15)]'
-                      : 'bg-white/8 border-2 border-white/10 text-white hover:bg-white/15 hover:border-white/30'
+                      : 'bg-[#1a1d2e] border-2 border-white/20 text-white hover:bg-[#25283a] hover:border-white/40'
                   }`}
                 >
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
