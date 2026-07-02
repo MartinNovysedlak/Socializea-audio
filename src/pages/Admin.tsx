@@ -1441,6 +1441,190 @@ const Admin = () => {
         </div>
       )}
 
+      {/* --- BLOG POP-UP MODAL --- */}
+      {isBlogFormOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto my-8 custom-scrollbar">
+            <Card className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-6 md:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
+                  <BookOpen size={20} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingBlog ? 'Upraviť článok' : 'Pridať nový článok'}
+                  </h2>
+                </div>
+              </div>
+
+              <form onSubmit={handleBlogSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Názov článku *</Label>
+                    <Input 
+                      type="text" 
+                      value={blogFormData.title} 
+                      onChange={(e) => setBlogFormData(p => ({ ...p, title: e.target.value }))} 
+                      className="bg-black/50 border-white/10 text-white rounded-xl h-12" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Autor</Label>
+                    <Input 
+                      type="text" 
+                      value={blogFormData.author} 
+                      onChange={(e) => setBlogFormData(p => ({ ...p, author: e.target.value }))} 
+                      className="bg-black/50 border-white/10 text-white rounded-xl h-12" 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Úvod / perex článku *</Label>
+                  <Textarea 
+                    value={blogFormData.excerpt} 
+                    onChange={(e) => setBlogFormData(p => ({ ...p, excerpt: e.target.value }))} 
+                    className="bg-black/50 border-white/10 text-white rounded-xl min-h-[80px]" 
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Náhľadový obrázok článku</Label>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {blogFormData.image && (
+                      <div className="relative w-20 h-16 rounded-lg overflow-hidden border border-white/10">
+                        <img src={blogFormData.image} alt="náhľad" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          onClick={() => setBlogFormData(p => ({ ...p, image: '' }))}
+                          className="absolute top-0.5 right-0.5 bg-black/70 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <label className="cursor-pointer inline-flex items-center gap-2 bg-black/50 border border-white/10 text-white hover:bg-white/5 transition-all rounded-xl h-11 px-4">
+                      <UploadCloud size={16} />
+                      <span className="text-sm">Nahrať náhľad</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleMainBlogImageUpload(file);
+                          e.target.value = '';
+                        }} 
+                      />
+                    </label>
+                    {blogFormData.image && (
+                      <span className="text-xs text-gray-500 truncate max-w-[200px]">{blogFormData.image}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-black/40 border border-white/10 rounded-2xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-gray-300 text-base font-semibold">Obsah článku (bloky)</Label>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => addBlock('paragraph')} className="flex items-center gap-1.5 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white text-xs rounded-lg h-8 px-3 transition-all">
+                        <Type size={13} /> Text
+                      </button>
+                      <button type="button" onClick={() => addBlock('heading')} className="flex items-center gap-1.5 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white text-xs rounded-lg h-8 px-3 transition-all">
+                        <Heading size={13} /> Nadpis
+                      </button>
+                      <button type="button" onClick={() => addBlock('image')} className="flex items-center gap-1.5 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white text-xs rounded-lg h-8 px-3 transition-all">
+                        <ImageIcon size={13} /> Obrázok
+                      </button>
+                    </div>
+                  </div>
+
+                  {blogBlocks.map((block, idx) => (
+                    <div key={idx} className="bg-black/30 border border-white/5 rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          {block.type === 'heading' ? <Heading size={14} className="text-[#BD20D3]" /> : block.type === 'image' ? <ImageIcon size={14} className="text-[#BD20D3]" /> : <Type size={14} className="text-[#BD20D3]" />}
+                          <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">
+                            {block.type === 'heading' ? 'NADPIS' : block.type === 'image' ? 'OBRÁZOK' : 'TEXT'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {block.type === 'paragraph' && (
+                            <>
+                              <button type="button" onClick={() => formatBlockText(idx, 'bold')} className="bg-white/5 hover:bg-white/10 text-white rounded-lg h-7 w-7 flex items-center justify-center">
+                                <Bold size={13} />
+                              </button>
+                              <button type="button" onClick={() => formatBlockText(idx, 'italic')} className="bg-white/5 hover:bg-white/10 text-white rounded-lg h-7 w-7 flex items-center justify-center">
+                                <Italic size={13} />
+                              </button>
+                            </>
+                          )}
+                          <button type="button" onClick={() => moveBlock(idx, 'up')} disabled={idx === 0} className="bg-white/5 hover:bg-white/10 text-white disabled:opacity-20 disabled:cursor-not-allowed rounded-lg h-7 w-7 flex items-center justify-center">
+                            <ArrowUp size={13} />
+                          </button>
+                          <button type="button" onClick={() => moveBlock(idx, 'down')} disabled={idx === blogBlocks.length - 1} className="bg-white/5 hover:bg-white/10 text-white disabled:opacity-20 disabled:cursor-not-allowed rounded-lg h-7 w-7 flex items-center justify-center">
+                            <ArrowDown size={13} />
+                          </button>
+                          <button type="button" onClick={() => removeBlock(idx)} className="bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg h-7 w-7 flex items-center justify-center">
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {block.type === 'image' ? (
+                        <div className="space-y-2">
+                          {block.value && (
+                            <div className="relative w-full max-w-xs rounded-xl overflow-hidden border border-white/10">
+                              <img src={block.value} alt="blok" className="w-full h-32 object-cover" />
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Input 
+                              type="text" 
+                              value={block.value} 
+                              onChange={(e) => updateBlockValue(idx, e.target.value)} 
+                              placeholder="URL obrázka..." 
+                              className="bg-black/50 border-white/10 text-white rounded-xl h-10 text-sm" 
+                            />
+                            <label className="cursor-pointer bg-[#BD20D3]/20 hover:bg-[#BD20D3]/40 text-white rounded-xl h-10 px-3 flex items-center justify-center transition-all">
+                              <Upload size={15} />
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBlockImageUpload(idx, f); e.target.value = ''; }} />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <textarea
+                          id={`blog-block-field-${idx}`}
+                          value={block.value}
+                          onChange={(e) => updateBlockValue(idx, e.target.value)}
+                          placeholder={block.type === 'heading' ? 'Napíšte nadpis...' : 'Napíšte text...'}
+                          rows={block.type === 'heading' ? 1 : 3}
+                          className="w-full bg-black/50 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#BD20D3] resize-none"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
+                  <Button type="button" variant="outline" onClick={() => { setIsBlogFormOpen(false); setEditingBlog(null); }} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 px-6">Zrušiť</Button>
+                  <Button type="submit" className="btn-cyber rounded-xl h-12 px-8 border-none">
+                    <Save size={18} className="mr-2" /> 
+                    {editingBlog ? 'Uložiť zmeny' : 'Publikovať článok'}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
+
       {/* --- FAQ POP-UP MODAL --- */}
       {isFaqFormOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
