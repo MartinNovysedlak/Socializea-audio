@@ -20,7 +20,6 @@ import {
   Navigation,
   Truck,
   Loader2,
-  Search,
   Ban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -268,7 +267,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
-            // Spolahliva detekcia krajiny: kontrolujeme aj country_code aj nazov krajiny
             const countryCode = item.country_code || '';
             const countryName = (address.country || '').toLowerCase();
             const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
@@ -427,7 +425,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasEquipment = totalEquipmentQty > 0;
 
-  // Spočítame celkový počet inštalácií a deinštalácií z balíkov
   const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
   const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
 
@@ -590,15 +587,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-3 md:p-4">
-                          <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
-                            <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
+                        <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
+                              <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm sm:text-base font-semibold text-white truncate">{item.name}</h4>
+                              <p className="text-[#BD20D3] font-bold text-xs sm:text-sm mt-0.5 sm:mt-1">{item.price_per_day} € / deň</p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-base font-semibold text-white truncate">{item.name}</h4>
-                            <p className="text-[#BD20D3] font-bold text-sm mt-1">{item.price_per_day} € / deň</p>
-                          </div>
-                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5">
+                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5 ml-auto sm:ml-0">
                             <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Minus size={12} /></button>
                             <span className="w-6 text-center text-white font-semibold text-sm">{qty}</span>
                             <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"><Plus size={12} /></button>
@@ -607,23 +606,23 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       );
                     })}
                     {packageItems.map((pkg) => (
-                      <div key={pkg.id} className="flex items-start gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 md:p-4 relative">
-                        <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white"><X size={12} /></button>
-                        <div className="w-16 h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
+                      <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
+                        <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
                           <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-base font-bold text-white mb-1">{pkg.name}</h4>
-                          <p className="text-[#BD20D3] font-bold text-base mt-0.5 mb-2">{getPackageTotal(pkg)} € / víkend</p>
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {pkg.hasLights && <span className="text-xs px-2 py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1.5 font-medium"><Lightbulb size={12} /> So svetlami</span>}
-                            {pkg.install === 'install' && <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium"><Wrench size={12} /> Inštalácia (+{pkg.installPrice} €)</span>}
-                            {pkg.install === 'install_uninstall' && <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium"><Wrench size={12} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
-                            {pkg.arrival && <span className="text-xs px-2 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1.5 font-medium"><MapPin size={12} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
+                        <div className="flex-grow min-w-0 pr-6 sm:pr-0">
+                          <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
+                          <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{getPackageTotal(pkg)} € / víkend</p>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {pkg.hasLights && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
+                            {pkg.install === 'install' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
+                            {pkg.install === 'install_uninstall' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
+                            {pkg.arrival && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><MapPin size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
                           </div>
                           {pkg.extras.length > 0 && (
-                            <div className="text-xs text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
-                              <p className="text-xs font-semibold text-gray-300 mb-1.5">Doplnkové produkty:</p>
+                            <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
+                              <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
                               {pkg.extras.map((e, i) => (
                                 <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
                               ))}
@@ -751,12 +750,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div className="border-t border-white/5 pt-3 space-y-2">
                         <p className="text-sm text-gray-400 font-bold uppercase">Balíky:</p>
                         {packageItems.map((pkg) => (
-                          <div key={pkg.id} className="flex justify-between text-base"><span className="text-gray-300 truncate flex-1 min-w-0">{pkg.name}</span><span className="text-[#BD20D3] font-bold shrink-0 ml-4">{getPackageTotal(pkg)} €</span></div>
+                          <div key={pkg.id} className="flex justify-between text-base"><span className="text-gray-300 truncate flex-1 min-w-0 pr-4">{pkg.name}</span><span className="text-[#BD20D3] font-bold shrink-0">{getPackageTotal(pkg)} €</span></div>
                         ))}
                       </div>
                     )}
 
-                    {/* Inštalácia – z aparatúry aj z balíkov */}
+                    {/* Inštalácia */}
                     {(installSelected && !installUninstallSelected) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
@@ -769,7 +768,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost + packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
                       </div>
                     )}
-                    {/* Ak balík má inštaláciu a aparatúra nemá nič vybrané – zobraz len balíkovú inštaláciu */}
                     {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
@@ -783,7 +781,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Doprava – iba ak je vybraná */}
+                    {/* Doprava */}
                     {deliverySelected && deliveryResult && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
