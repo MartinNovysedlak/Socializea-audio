@@ -207,6 +207,16 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
   const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
 
+  // Helper function defined early so it can be used in calculations below
+  const getPackageTotal = (pkg: PackageCartItem) => {
+    let total = pkg.price;
+    total += pkg.installPrice;
+    total += pkg.deliveryPrice;
+    const extrasSum = pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
+    total += extrasSum;
+    return total;
+  };
+
   useEffect(() => {
     const hasEquipment = Object.values(quantities).some(qty => qty > 0);
     if (!hasEquipment) {
@@ -382,15 +392,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   };
 
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
-
-  const getPackageTotal = (pkg: PackageCartItem) => {
-    let total = pkg.price;
-    total += pkg.installPrice;
-    total += pkg.deliveryPrice;
-    const extrasSum = pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
-    total += extrasSum;
-    return total;
-  };
 
   const hasEquipment = totalEquipmentQty > 0;
 
