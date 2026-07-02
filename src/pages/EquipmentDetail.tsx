@@ -240,7 +240,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                               size="sm"
                               className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full sm:w-auto"
                             >
-                              <Check size={18} className="mr-2 animate-pulse" />
+                              <Check size={18} className="mr-2" />
                               V košíku ({cartQuantity})
                             </Button>
                           ) : (

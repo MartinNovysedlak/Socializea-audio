@@ -48,7 +48,7 @@ const Navbar = () => {
             ))}
           </div>
           <Link to="/kontakt">
-            <Button className="btn-cyber rounded-full px-6 border-none hover:scale-105 active:scale-95 transition-transform duration-200">
+            <Button className="btn-cyber rounded-full px-6 border-none transition-colors duration-200">
               Napíšte nám
             </Button>
           </Link>
@@ -96,7 +96,7 @@ const Navbar = () => {
             
             <div className="pt-6 border-t border-white/10 w-full">
               <Link to="/kontakt" onClick={handleLinkClick}>
-                <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(189,32,211,0.4)]">
+                <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
                   <span>Napíšte nám</span>
                   <ArrowRight size={18} />
                 </Button>
