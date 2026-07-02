@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -8,6 +8,18 @@ import { Menu, X } from 'lucide-react';
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  // Zablokovanie scrollovania na pozadí, keď je menu otvorené
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     { name: 'Domov', href: '/' },
@@ -63,30 +75,78 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu overlay */}
+      {/* Overlay – tmavé pozadie cez celú obrazovku */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f]/95 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex flex-col items-center gap-6 py-10 px-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`text-lg font-medium transition-colors ${
-                  isActive(link.href) ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link to="/kontakt" onClick={() => setMobileMenuOpen(false)} className="w-full max-w-xs">
-              <Button className="btn-cyber rounded-full w-full border-none h-12 text-base">
-                Napíšte nám
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <div
+          className="md:hidden fixed inset-0 top-16 z-40 bg-black/60 transition-opacity duration-300"
+          onClick={() => setMobileMenuOpen(false)}
+        />
       )}
+
+      {/* Mobilné menu – vysúvanie sprava */}
+      <div
+        className={`md:hidden fixed top-16 right-0 z-50 h-[calc(100vh-4rem)] w-72 bg-[#0a0d1f] border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-out ${
+          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col gap-2 py-8 px-6">
+          {/* Tlačidlo zatvorenia */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="self-end text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors mb-4"
+            aria-label="Zavrieť menu"
+          >
+            <X size={22} />
+          </button>
+
+          {navLinks.map((link, index) => (
+            <Link
+              key={link.name}
+              to={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`text-lg font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:translate-x-1 ${
+                isActive(link.href)
+                  ? 'text-white bg-[#BD20D3]/10 border-l-2 border-[#BD20D3]'
+                  : 'text-gray-300 hover:text-white hover:bg-white/5'
+              }`}
+              style={{
+                animationDelay: `${index * 80}ms`,
+                animation: mobileMenuOpen ? `slideInRight 0.4s ease-out ${index * 80}ms both` : 'none',
+              }}
+            >
+              {link.name}
+            </Link>
+          ))}
+
+          <Link
+            to="/kontakt"
+            onClick={() => setMobileMenuOpen(false)}
+            className="mt-4"
+            style={{
+              animationDelay: `${navLinks.length * 80}ms`,
+              animation: mobileMenuOpen ? `slideInRight 0.4s ease-out ${navLinks.length * 80}ms both` : 'none',
+            }}
+          >
+            <Button className="btn-cyber rounded-full w-full border-none h-12 text-base">
+              Napíšte nám
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Inline štýly pre animáciu */}
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </nav>
   );
 };
