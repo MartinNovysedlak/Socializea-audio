@@ -22,7 +22,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f] border-b border-white/10 transition-all duration-300">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f] border-b border-white/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300 relative z-[60]">
@@ -48,7 +48,7 @@ const Navbar = () => {
             ))}
           </div>
           <Link to="/kontakt">
-            <Button className="btn-cyber rounded-full px-6 border-none animate-pulse-glow hover:scale-105 active:scale-95 duration-300">
+            <Button className="btn-cyber rounded-full px-6 border-none hover:scale-105 active:scale-95 transition-transform duration-200">
               Napíšte nám
             </Button>
           </Link>
@@ -68,8 +68,8 @@ const Navbar = () => {
 
       {/* MOBILE FULL-SCREEN OVERLAY MENU */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721]/98 backdrop-blur-xl flex flex-col justify-between p-6 pt-28 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="space-y-6 my-auto max-w-sm mx-auto w-full text-center">
+        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721]/98 backdrop-blur-xl flex flex-col justify-center p-6 animate-in fade-in duration-200">
+          <div className="space-y-6 max-w-sm mx-auto w-full text-center">
             <div className="space-y-4">
               {navLinks.map((link, idx) => {
                 const isActive = location.pathname === link.href;
@@ -102,10 +102,6 @@ const Navbar = () => {
                 </Button>
               </Link>
             </div>
-          </div>
-
-          <div className="text-center text-xs text-gray-500 pb-4 border-t border-white/5 pt-4">
-            © {new Date().getFullYear()} Socializea-audio. Všetky práva vyhradené.
           </div>
         </div>
       )}
