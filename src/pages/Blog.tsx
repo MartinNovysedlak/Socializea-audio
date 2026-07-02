@@ -69,7 +69,7 @@ const Blog = () => {
               <BookOpen size={16} className="shrink-0" />
               <span>Socializea-audio Blog</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-4 px-2">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-4 px-2">
               Rady, tipy & novinky <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
                 zo sveta audio-techniky

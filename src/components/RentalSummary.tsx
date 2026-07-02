@@ -31,7 +31,7 @@ const RentalSummary = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 text-[#BD20D3] text-xs font-bold uppercase tracking-widest">
                   Služby prenájmu
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
                   Prenájom aparatúry <br />
                   <span className="text-gray-500">bez starostí</span>
                 </h2>

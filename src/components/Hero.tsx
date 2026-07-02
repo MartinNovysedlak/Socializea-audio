@@ -19,7 +19,7 @@ const Hero = () => {
                 <span className="whitespace-nowrap">Prémiová technika pre vaše podujatia</span>
               </div>
               
-              <h1 className="text-3xl sm:text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-4 sm:mb-6 leading-[1.1]">
+              <h1 className="text-2xl sm:text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-4 sm:mb-6 leading-[1.1]">
                 Profesionálny prenájom a predaj <br className="hidden xs:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] animate-pulse duration-10000">
                   zvukovej a svetelnej techniky

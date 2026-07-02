@@ -61,7 +61,7 @@ const Predaj = () => {
               <ShoppingBag size={16} className="shrink-0" />
               <span>Predaj profesionálnej audio & svetelnej techniky</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-4 px-2">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold text-white leading-tight mb-3 sm:mb-4 px-2">
               Profesionálne vybavenie <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">
                 priamo pre vaše potreby

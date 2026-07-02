@@ -18,7 +18,7 @@ const SalesSummary = () => {
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 text-[#1A4BFF] text-xs font-bold uppercase tracking-widest">
                   Predaj techniky
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
                   Vybavte sa <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">profesionálne</span>
                 </h2>
