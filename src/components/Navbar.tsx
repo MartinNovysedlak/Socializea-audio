@@ -65,7 +65,7 @@ const Navbar = () => {
 
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f]/95 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
+        <div className="md:hidden fixed inset-0 top-16 z-40 bg-black/90 backdrop-blur-lg border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col items-center gap-6 py-10 px-4">
             {navLinks.map((link) => (
               <Link

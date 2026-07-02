@@ -83,13 +83,13 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
 
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-1.5 md:p-2 overflow-x-auto w-full md:w-auto">
                   <Filter className="text-[#BD20D3] ml-2 shrink-0" size={16} />
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-nowrap">
                     {["all", "sound", "lighting", "other"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setActiveFilter(filter as any)}
                         className={cn(
-                          "px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all whitespace-nowrap",
+                          "px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0",
                           activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
                         )}
                       >
