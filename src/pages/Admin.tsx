@@ -866,24 +866,24 @@ const Admin = () => {
               </div>
 
               <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
-                <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl inline-flex w-auto flex-wrap">
-                  <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl flex flex-nowrap overflow-x-auto gap-1 w-full md:w-auto scroll-smooth">
+                  <TabsTrigger value="rentals" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-4 gap-1.5 transition-all whitespace-nowrap shrink-0">
                     <Volume2 size={14} />
                     <span>Prenájom</span>
                   </TabsTrigger>
-                  <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <TabsTrigger value="sales" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-4 gap-1.5 transition-all whitespace-nowrap shrink-0">
                     <ShoppingBag size={14} />
                     <span>Predaj</span>
                   </TabsTrigger>
-                  <TabsTrigger value="packages" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <TabsTrigger value="packages" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-4 gap-1.5 transition-all whitespace-nowrap shrink-0">
                     <Package size={14} />
                     <span>Balíky</span>
                   </TabsTrigger>
-                  <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <TabsTrigger value="blog" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-4 gap-1.5 transition-all whitespace-nowrap shrink-0">
                     <BookOpen size={14} />
                     <span>Blog</span>
                   </TabsTrigger>
-                  <TabsTrigger value="faqs" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-5 gap-1.5 transition-all">
+                  <TabsTrigger value="faqs" className="rounded-lg data-[state=active]:bg-[#BD20D3] data-[state=active]:text-white data-[state=active]:shadow-[0_0_12px_rgba(189,32,211,0.4)] text-gray-400 hover:text-white font-medium text-xs sm:text-sm h-9 px-3 sm:px-4 gap-1.5 transition-all whitespace-nowrap shrink-0">
                     <HelpCircle size={14} />
                     <span>FAQ</span>
                   </TabsTrigger>
