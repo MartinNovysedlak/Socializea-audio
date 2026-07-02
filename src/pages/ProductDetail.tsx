@@ -147,7 +147,7 @@ const ProductDetail = () => {
                 className="w-full h-full object-contain"
               />
 
-              {/* Kategória — ľavý dolný roh, plne nepriehľadná */}
+              {/* Kategória — ľavý dolný roh */}
               <div className="absolute bottom-4 left-4">
                 <span className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
                   item.condition === 'new'
@@ -158,7 +158,7 @@ const ProductDetail = () => {
                 </span>
               </div>
 
-              {/* Šípky na preklikávanie — zobrazia sa pri hoveri */}
+              {/* Šípky */}
               {imagesList.length > 1 && (
                 <>
                   <button
@@ -185,7 +185,7 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Thumbnail Gallery List */}
+            {/* Thumbnails */}
             {imagesList.length > 1 && (
               <div className="flex flex-wrap gap-3">
                 {imagesList.map((imgUrl, idx) => (
@@ -207,7 +207,7 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Product description & Info */}
+            {/* Product info */}
             <div className="space-y-4 pt-4">
               <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
                 {item.name}
@@ -220,7 +220,7 @@ const ProductDetail = () => {
               </p>
             </div>
 
-            {/* Specifications & Features */}
+            {/* Specs & Features */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
               {item.specs && item.specs.length > 0 && (
                 <div className="space-y-3">
@@ -267,9 +267,9 @@ const ProductDetail = () => {
           <div className="lg:col-span-5">
             <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Mám záujem o produkt</h3>
+                <h3 className="text-xl font-bold text-white mb-2">Mám záujem o kúpu</h3>
                 <p className="text-gray-400 text-xs leading-relaxed">
-                  Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť prípadne dohodneme osobné prevzatie.
+                  Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť alebo dohodneme osobné prevzatie v Čadci či Žiline.
                 </p>
               </div>
 
@@ -314,7 +314,7 @@ const ProductDetail = () => {
                   <textarea
                     value={inquiryMessage}
                     onChange={(e) => setInquiryMessage(e.target.value)}
-                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
+                    placeholder="Mám záujem o zaslanie kuriérom / osobný odber v Žiline..."
                     className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
                   />
                 </div>

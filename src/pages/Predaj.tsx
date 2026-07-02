@@ -42,12 +42,12 @@ const Predaj = () => {
         <div className="max-w-5xl mx-auto text-center mb-16 animate-fade-slide-up">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 text-[#1A4BFF] text-sm font-medium mb-6 shadow-[0_0_15px_rgba(26,75,255,0.2)]">
             <ShoppingBag size={16} />
-            <span>Predaj profesionálnej audio & svetelnej techniky</span>
+            <span>Predaj profesionálnej audio & svetelnej techniky v Žiline a Čadci</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
-            Profesionálne vybavenie <br />
+            Profesionálne vybavenie priamo pre vaše potreby – <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">
-              priamo pre vaše potreby
+              predaj techniky v Žiline, Čadci a Kysuciach
             </span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -59,7 +59,7 @@ const Predaj = () => {
         <div className="max-w-5xl mx-auto mb-10 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
           <div className="flex items-center gap-2">
             <Filter size={18} className="text-[#BD20D3]" />
-            <span className="text-sm text-gray-300 font-semibold">Filtrovať podľa stavu:</span>
+            <span className="text-sm text-gray-300 font-semibold">Filtrovať podľa stavu – nové produkty alebo B-Stock bazár:</span>
           </div>
           <div className="flex gap-2">
             {[
@@ -70,11 +70,7 @@ const Predaj = () => {
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id as any)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                  activeFilter === f.id
-                    ? 'bg-[#BD20D3] text-white shadow-[0_0_15px_rgba(189,32,211,0.5)]'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeFilter === f.id ? 'bg-[#BD20D3] text-white shadow-[0_0_15px_rgba(189,32,211,0.5)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
               >
                 {f.label}
               </button>
@@ -116,11 +112,7 @@ const Predaj = () => {
                         
                         {/* Kategória */}
                         <div className="absolute bottom-4 right-4">
-                          <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${
-                            item.condition === 'new' 
-                              ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' 
-                              : 'bg-amber-600/90 border border-amber-400/50 text-white'
-                          }`}>
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest backdrop-blur-sm ${item.condition === 'new' ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' : 'bg-amber-600/90 border border-amber-400/50 text-white'}`}>
                             {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
                           </span>
                         </div>
