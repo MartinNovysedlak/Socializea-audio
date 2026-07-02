@@ -68,7 +68,7 @@ const Navbar = () => {
 
       {/* MOBILE FULL-SCREEN OVERLAY MENU (visible below lg) */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721] flex flex-col justify-between p-6 pt-28 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721]/98 backdrop-blur-xl flex flex-col justify-between p-6 pt-28 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="space-y-6 my-auto max-w-sm mx-auto w-full text-center">
             <div className="space-y-4">
               {navLinks.map((link, idx) => {
