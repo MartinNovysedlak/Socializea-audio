@@ -84,18 +84,18 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
                   <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2 w-full md:w-auto">
                   <Filter className="text-[#BD20D3] ml-3" size={18} />
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap justify-center">
                     {["all", "sound", "lighting", "other"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setActiveFilter(filter as any)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        className={`px-3 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                           activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
                         }`}
                       >
@@ -112,7 +112,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                 Žiadna technika nevyhovuje zadanému filtru.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => {
                   const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                   const catColor = getCategoryColor(item.category);

@@ -59,6 +59,17 @@ interface RentalItem {
   price: number | null;
 }
 
+interface CityMatch {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  postcode?: string;
+  district?: string;
+  distToNearest?: number;
+  nearestPoint?: string;
+}
+
 const PICKUP_POINTS = [
   { name: 'Žilina', lat: 49.2235, lng: 18.7394 },
   { name: 'Čadca', lat: 49.4358, lng: 18.7889 },
@@ -93,17 +104,6 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
     if (intersect) inside = !inside;
   }
   return inside;
-}
-
-interface CityMatch {
-  name: string;
-  country: string;
-  lat: number;
-  lng: number;
-  postcode?: string;
-  district?: string;
-  distToNearest?: number;
-  nearestPoint?: string;
 }
 
 function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
@@ -202,18 +202,15 @@ function getInstallType(installSelected: boolean, installUninstallSelected: bool
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
   const [includeLights, setIncludeLights] = useState(true);
 
-  // Inštalácia
   const [installSelected, setInstallSelected] = useState(false);
   const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
 
-  // Delivery
   const [deliveryCity, setDeliveryCity] = useState('');
   const [citySuggestions, setCitySuggestions] = useState<CityMatch[]>([]);
   const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [searchingCities, setSearchingCities] = useState(false);
-  // Flag that prevents search after a city has been selected
   const [cityLocked, setCityLocked] = useState(false);
 
   const debouncedCitySearch = useDebounce(deliveryCity, 400);
@@ -312,7 +309,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Online city search via Nominatim – skip if city is locked (already selected)
   useEffect(() => {
     if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
       setCitySuggestions([]);
@@ -343,7 +339,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
-            // Spolahliva detekcia krajiny: kontrolujeme aj country_code aj nazov krajiny
             const countryCode = item.country_code || '';
             const countryName = (address.country || '').toLowerCase();
             const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
@@ -358,7 +353,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               nearestPoint: nearest.name,
             };
           });
-          // Deduplicate by name
           const seen = new Set<string>();
           const unique = mapped.filter(c => {
             const key = c.name.toLowerCase();
@@ -390,7 +384,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       clearDelivery();
     } else {
       setDeliverySelected(true);
-      // focus the input after state update
       requestAnimationFrame(() => {
         const input = document.getElementById('city-input');
         if (input) input.focus();
@@ -558,7 +551,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-6 md:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh] custom-scrollbar">
+      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-4 md:p-6 lg:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh] custom-scrollbar">
         <DialogHeader className="border-b border-white/5 pb-4 mb-4">
           <DialogTitle className="text-xl md:text-2xl font-bold flex items-center gap-2 text-white">
             <Package className="text-[#BD20D3]" />
@@ -568,7 +561,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
         <div className="space-y-6">
           <div className="space-y-6">
-            {/* Warning – zachovávam */}
             {selectedPackage.warning && (
               <div className="flex gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-amber-300 text-sm">
                 <HelpCircle className="shrink-0 mt-0.5 text-amber-400" size={18} />
@@ -576,7 +568,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             )}
 
-            {/* HLAVNÁ KARTA */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-3xl overflow-hidden p-5">
               <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
                 <img
@@ -588,7 +579,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <div className="md:col-span-8 flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex flex-wrap gap-2 items-center">
-                    <h4 className="text-xl font-bold text-white">
+                    <h4 className="text-xl sm:text-2xl font-bold text-white">
                       {selectedPackage.name}
                     </h4>
                     <span
@@ -601,7 +592,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       {includeLights ? 'SO SVETLAMI' : 'BEZ SVETIEL'}
                     </span>
                   </div>
-                  {/* POPIS pod názvom */}
                   <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-2">
                     {selectedPackage.description}
                   </p>
@@ -611,7 +601,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     Cena na víkend:
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[#BD20D3] font-extrabold text-3xl">{totalPrice} €</span>
+                    <span className="text-[#BD20D3] font-extrabold text-2xl sm:text-3xl">{totalPrice} €</span>
                     <span className="text-gray-400 text-xs">/ víkend</span>
                   </div>
                   {includeLights && (
@@ -626,9 +616,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             </div>
 
-            {/* ZVUK A SVETLÁ - zväčšené karty */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-6 md:p-7 space-y-4">
+              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-5 md:p-6 md:p-7 space-y-4">
                 <span className="text-sm font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-3 border-b border-white/[0.08]">
                   <Volume2 size={18} /> Zvuková technika
                 </span>
@@ -645,7 +634,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               {hasLightSection && (
                 <div
                   onClick={() => setIncludeLights(!includeLights)}
-                  className={`p-6 md:p-7 rounded-2xl border-2 transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
+                  className={`p-5 md:p-6 md:p-7 rounded-2xl border-2 transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
                     includeLights
                       ? 'bg-[#BD20D3]/8 border-[#BD20D3]/40 shadow-[0_0_25px_rgba(189,32,211,0.08)] hover:bg-[#BD20D3]/12'
                       : 'bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] opacity-80 hover:opacity-100'
@@ -728,13 +717,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               )}
             </div>
 
-            {/* DOPLNKOVÉ SLUŽBY (inštalácia + doprava) */}
             <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
               <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
                 <Wrench size={16} /> Doplnkové služby
               </span>
 
-              {/* Inštalácia */}
               <div
                 onClick={() => {
                   setInstallSelected(!installSelected);
@@ -763,7 +750,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 </span>
               </div>
 
-              {/* Inštalácia a deinštalácia */}
               <div
                 onClick={() => {
                   setInstallUninstallSelected(!installUninstallSelected);
@@ -800,9 +786,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 </span>
               </div>
 
-              {/* Deliaca čiara */}
               <div className="border-t border-white/[0.06] pt-3 space-y-2">
-                {/* Doprava */}
                 <div className="relative" ref={cityRef}>
                   <div
                     onClick={toggleDelivery}
@@ -945,7 +929,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             </div>
 
-            {/* ĎALŠIE PRODUKTY */}
             <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-300 flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
                 <ShoppingBag size={16} className="text-[#1A4BFF]" /> Ďalšie produkty
@@ -1220,7 +1203,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               )}
             </div>
 
-            {/* SÚHRN CIEN */}
             <div className="bg-gradient-to-br from-[#020721] to-[#0a0d1f] border border-[#BD20D3]/20 rounded-2xl p-5 space-y-2 shadow-[0_0_20px_rgba(189,32,211,0.05)]">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-300 pb-1 flex items-center gap-1.5">
                 <Euro size={14} className="text-[#BD20D3]" /> Súhrn cien

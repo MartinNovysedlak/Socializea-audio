@@ -107,7 +107,7 @@ const BlogPostDetail = () => {
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
 
-        <article className="pt-32 pb-24 container mx-auto px-4">
+        <article className="pt-32 pb-16 md:pb-24 container mx-auto px-4">
           <div className="max-w-3xl mx-auto space-y-8">
             
             <Link to="/blog" className="inline-flex items-center gap-2 text-[#BD20D3] hover:underline text-sm font-semibold">
@@ -116,7 +116,7 @@ const BlogPostDetail = () => {
             </Link>
 
             <div className="space-y-4 border-b border-white/10 pb-6">
-              <h1 className="text-3xl md:text-5xl font-extrabold text-white leading-tight tracking-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight">
                 {post.title}
               </h1>
               
@@ -156,7 +156,7 @@ const BlogPostDetail = () => {
                     );
                   case 'heading':
                     return (
-                      <h2 key={index} className="text-2xl md:text-3xl font-bold text-white tracking-tight pt-6 border-l-2 border-[#BD20D3] pl-4">
+                      <h2 key={index} className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight pt-6 border-l-2 border-[#BD20D3] pl-4">
                         {block.value}
                       </h2>
                     );

@@ -159,7 +159,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
 
-  // Inštalácia / doprava pre samostatnú aparatúru
   const [installSelected, setInstallSelected] = useState(false);
   const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
   const [deliverySelected, setDeliverySelected] = useState(false);
@@ -223,7 +222,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
   const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
 
-  // Helper function defined early so it can be used in calculations below
   const getPackageTotal = (pkg: PackageCartItem) => {
     let total = pkg.price;
     total += pkg.installPrice;
@@ -513,7 +511,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
       `}</style>
 
-      {/* FLOATING ACTION BUTTON */}
       {totalItems > 0 && (
         <div
           className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
@@ -561,7 +558,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
-      {/* POP-UP MODAL */}
       {isOpen && totalItems > 0 && (
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
@@ -575,8 +571,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-                {/* LEFT COLUMN: SELECTED ITEMS + SUMMARY */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 lg:gap-8">
                 <div className="lg:col-span-5 space-y-4">
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
@@ -633,7 +628,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     ))}
                   </div>
 
-                  {/* DOPLNKOVÉ SLUŽBY PRE SAMOSTATNÚ APARATÚRU */}
                   {hasEquipment && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
@@ -729,7 +723,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   )}
 
-                  {/* SUMMARY SECTION */}
                   <div className="border-t border-white/10 pt-4 space-y-2">
                     {hasEquipment && (
                       <>
@@ -755,7 +748,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Inštalácia */}
                     {(installSelected && !installUninstallSelected) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
@@ -781,7 +773,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Doprava */}
                     {deliverySelected && deliveryResult && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
@@ -802,7 +793,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
-                {/* RIGHT COLUMN: CHECKOUT FORM */}
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">

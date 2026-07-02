@@ -7,15 +7,11 @@ const ContactMap = () => {
   const mapInstanceRef = useRef<any>(null);
   const [isLeafletLoaded, setIsLeafletLoaded] = useState(false);
   
-  // Súradnice pre Čadcu a Žilinu
   const locCadca: [number, number] = [49.46227, 18.82523];
   const locZilina: [number, number] = [49.21302405266172, 18.747822075596567];
-  
-  // Stred medzi Čadcou a Žilinou pre ideálne vycentrovanie
   const mapCenter: [number, number] = [49.337, 18.786];
 
   useEffect(() => {
-    // 1. Inject Leaflet CSS dynamically
     const leafletCssId = 'leaflet-cdn-css';
     if (!document.getElementById(leafletCssId)) {
       const link = document.createElement('link');
@@ -26,7 +22,6 @@ const ContactMap = () => {
       document.head.appendChild(link);
     }
 
-    // 2. Inject Leaflet JS dynamically
     const leafletJsId = 'leaflet-cdn-js';
     if (!document.getElementById(leafletJsId)) {
       const script = document.createElement('script');
@@ -41,7 +36,6 @@ const ContactMap = () => {
       setIsLeafletLoaded(true);
     }
 
-    // 3. Add custom map UI overrides
     const styleId = 'contact-map-custom-styles';
     if (!document.getElementById(styleId)) {
       const styleElement = document.createElement('style');
@@ -105,12 +99,10 @@ const ContactMap = () => {
     const L = (window as any).L;
     if (!L) return;
 
-    // Remove any existing map instance before initializing a new one
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
     }
 
-    // Initialize map vycentrovaná medzi oboma pobočkami
     const map = L.map(mapContainerRef.current, {
       center: mapCenter,
       zoom: 10,
@@ -119,14 +111,12 @@ const ContactMap = () => {
 
     mapInstanceRef.current = map;
 
-    // Use dark-themed map tiles from CartoDB
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19,
     }).addTo(map);
 
-    // Ikona pre Hlavné sídlo a sklad (Čadca) - Fialovo-Ružová
     const iconCadca = L.divIcon({
       className: 'custom-brand-marker',
       html: `
@@ -152,7 +142,6 @@ const ContactMap = () => {
       popupAnchor: [0, -42],
     });
 
-    // Ikona pre Odberné miesto (Žilina) - Modrá
     const iconZilina = L.divIcon({
       className: 'custom-brand-marker',
       html: `
@@ -178,7 +167,6 @@ const ContactMap = () => {
       popupAnchor: [0, -42],
     });
 
-    // Pridať pin pre Čadcu
     const markerCadca = L.marker(locCadca, { icon: iconCadca }).addTo(map);
     const popupCadca = `
       <div class="p-4 min-w-[220px] text-white">
@@ -202,7 +190,6 @@ const ContactMap = () => {
       className: 'custom-popup',
     }).openPopup();
 
-    // Pridať pin pre Žilinu
     const markerZilina = L.marker(locZilina, { icon: iconZilina }).addTo(map);
     const popupZilina = `
       <div class="p-4 min-w-[220px] text-white">
@@ -226,11 +213,9 @@ const ContactMap = () => {
       className: 'custom-popup',
     });
 
-    // Prispôsobenie hraníc mapy, aby obe mestá boli vidieť
     const bounds = L.latLngBounds([locCadca, locZilina]);
     map.fitBounds(bounds, { padding: [50, 50] });
 
-    // Trigger sizing recalculation
     setTimeout(() => {
       map.invalidateSize();
     }, 200);
@@ -245,13 +230,13 @@ const ContactMap = () => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kde nás nájdete</h2>
-              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Kde nás nájdete</h2>
+              <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
                 Naša hlavná základňa a sklad sídli v Čadci. Pre vaše pohodlie máme zriadené aj odberné miesto v centre Žiliny.
               </p>
             </div>
             
-            <div className="h-[450px] rounded-3xl overflow-hidden relative border border-white/5 bg-[#020721]">
+            <div className="h-[400px] sm:h-[450px] rounded-3xl overflow-hidden relative border border-white/5 bg-[#020721]">
               {!isLeafletLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                   Načítavam mapu pobočiek...

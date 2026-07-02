@@ -29,7 +29,7 @@ const Navbar = () => {
           <div className="w-12 h-12 overflow-hidden rounded-lg border border-[#BD20D3]/30 shadow-[0_0_15px_rgba(189,32,211,0.2)]">
             <img src="/logo.png" alt="Socializea Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="text-xl font-bold tracking-tighter text-white uppercase">
+          <span className="text-xl font-bold tracking-tighter text-white uppercase hidden sm:inline">
             Socializea<span className="text-[#BD20D3]">-audio</span>
           </span>
         </Link>

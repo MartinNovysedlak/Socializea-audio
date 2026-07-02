@@ -163,7 +163,7 @@ const ProductDetail = () => {
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
 
-        <div className="pt-36 pb-24 container mx-auto px-4">
+        <div className="pt-36 pb-16 md:pb-24 container mx-auto px-4">
           <div className="max-w-6xl mx-auto mb-8">
             <Link
               to="/predaj"
@@ -174,7 +174,7 @@ const ProductDetail = () => {
             </Link>
           </div>
 
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 md:gap-12">
 
             <div className="lg:col-span-7 space-y-8">
               <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
@@ -242,10 +242,10 @@ const ProductDetail = () => {
               )}
 
               <div className="space-y-4 pt-4">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight">
                   {item.name}
                 </h1>
-                <div className="text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
                   {item.price} € <span className="text-xs text-gray-400 font-normal">s DPH</span>
                 </div>
                 <p className="text-gray-300 text-base leading-relaxed whitespace-pre-line">

@@ -226,7 +226,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             <Badge className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white mb-6 px-4 py-1.5 rounded-full text-xs uppercase tracking-widest font-extrabold shadow-[0_0_15px_rgba(189,32,211,0.3)]">
               Výber techniky
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
               Zabezpečte si špičkový zvuk <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
                 a svetlo na akciu
@@ -256,14 +256,14 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
           </div>
         </section>
 
-        <section id="sety" className="py-20 bg-[#020721]/50 border-y border-white/5 relative">
+        <section id="sety" className="py-16 md:py-20 bg-[#020721]/50 border-y border-white/5 relative">
           <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+            <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-[#BD20D3] text-xs font-bold uppercase tracking-widest">
                 <Sparkles size={14} className="animate-spin-slow" />
                 <span>Bez starostí</span>
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold text-white">Naša ponuka balíkov</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">Naša ponuka balíkov</h2>
               <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                 Vyberte si jeden z našich overených a vyvážených setov, ktoré sme zostavili na základe stoviek úspešných akcií.
               </p>
@@ -272,7 +272,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             {loadingPackages ? (
               <div className="text-center py-12 text-gray-400">Načítavam balíky...</div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
                 {presetPackages.map((pkg, index) => {
                   const remainingSound = pkg.soundSpecs.length - 3;
                   const remainingLights = pkg.lightSpecs.length - 2;
@@ -283,7 +283,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       className="relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer"
                       onClick={() => handleOpenDetail(pkg)}
                     >
-                      <div className="h-56 overflow-hidden relative shrink-0">
+                      <div className="h-48 md:h-56 overflow-hidden relative shrink-0">
                         <img 
                           src={pkg.image} 
                           alt={pkg.name} 
@@ -293,18 +293,18 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </div>
 
                       <CardHeader className="p-6 pb-4 shrink-0">
-                        <CardTitle className="text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
+                        <CardTitle className="text-xl sm:text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
                           {pkg.name}
                         </CardTitle>
                         <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
                           {pkg.description}
                         </p>
                         <div className="flex items-baseline gap-1.5 pt-4">
-                          <span className="text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
+                          <span className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
                           <span className="text-gray-400 text-xs">/ deň bez svetiel</span>
                         </div>
                         <div className="flex items-baseline gap-1.5 text-sm">
-                          <span className="text-xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
+                          <span className="text-xl sm:text-2xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
                           <span className="text-gray-400 text-xs">/ deň so svetlami</span>
                         </div>
                       </CardHeader>
@@ -361,12 +361,12 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
           </div>
         </section>
 
-        <section id="polozky" className="py-16 bg-[#020721]">
+        <section id="polozky" className="py-12 md:py-16 bg-[#020721]">
           <div className="container mx-auto px-4 text-center max-w-4xl mb-12">
             <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 mb-4 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
               Vlastná konfigurácia
             </Badge>
-            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4">
               Potrebujete len konkrétny kus?
             </h2>
             <p className="text-gray-400 text-sm md:text-base">

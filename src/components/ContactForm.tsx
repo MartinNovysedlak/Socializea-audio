@@ -47,19 +47,19 @@ const ContactForm = () => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
               
                 <div className="space-y-10">
                   <div>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
-                    <p className="text-gray-300 text-lg leading-relaxed">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                       Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
                     </p>
                   </div>
 
                   <div className="space-y-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] shrink-0">
                         <Phone size={20} />
                       </div>
                       <div>
@@ -68,7 +68,7 @@ const ContactForm = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3]">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] shrink-0">
                         <Mail size={20} />
                       </div>
                       <div>
@@ -77,7 +77,7 @@ const ContactForm = () => {
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] mt-1">
+                      <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/20 flex items-center justify-center text-[#BD20D3] mt-1 shrink-0">
                         <MapPin size={20} />
                       </div>
                       <div>
@@ -99,7 +99,7 @@ const ContactForm = () => {
                   </div>
                 </div>
 
-                <div className="bg-black/20 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-sm">
+                <div className="bg-black/20 border border-white/10 p-6 md:p-8 md:p-10 rounded-3xl backdrop-blur-sm">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

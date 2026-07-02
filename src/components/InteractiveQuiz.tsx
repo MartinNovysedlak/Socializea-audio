@@ -29,7 +29,6 @@ interface QuizAnswers {
   eventType: string;
 }
 
-// Mapovanie decision tree ID na názvy balíkov
 const PACKAGE_NAME_MAPPING: Record<string, string> = {
   'oslava-mini': 'Oslava MINI',
   'party-mini': 'Párty MINI',
@@ -50,7 +49,6 @@ const InteractiveQuiz = () => {
     eventType: ''
   });
 
-  // Nový stav pre detail balíka
   const [isPackageDetailOpen, setIsPackageDetailOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
 
@@ -99,10 +97,8 @@ const InteractiveQuiz = () => {
     setAnswers(newAnswers);
 
     if (key === 'eventType') {
-      // Po dokončení 3. otázky – nájdi balík a otvor detail
       const recommendation = getRecommendation(newAnswers);
       setSelectedPackage(recommendation);
-      // Zatvoríme kvíz a otvoríme detail balíka
       setIsOpen(false);
       setTimeout(() => {
         setIsPackageDetailOpen(true);
@@ -112,7 +108,6 @@ const InteractiveQuiz = () => {
     }
   };
 
-  // ROZHODOVACÍ PAVÚK
   const getRecommendation = (answers: QuizAnswers): PackageOption | null => {
     const { people, location, eventType } = answers;
     if (loadedPackages.length === 0) return null;
@@ -137,7 +132,6 @@ const InteractiveQuiz = () => {
       return loadedPackages[0];
     };
 
-    // 1. Komorná akcia (do 30 ľudí)
     if (people === 'up-to-30') {
       if (location === 'indoor') {
         if (eventType === 'wedding') return findPackage('oslava-mini');
@@ -158,7 +152,6 @@ const InteractiveQuiz = () => {
       }
     }
 
-    // 2. Stredný event (do 100 ľudí)
     if (people === 'up-to-100') {
       if (location === 'indoor') {
         if (eventType === 'wedding') return findPackage('oslava-medium');
@@ -179,7 +172,6 @@ const InteractiveQuiz = () => {
       }
     }
 
-    // 3. Veľké podujatie (nad 100 ľudí)
     if (people === 'over-100') {
       if (location === 'indoor') {
         if (eventType === 'wedding') return findPackage('premium-max');
@@ -204,7 +196,7 @@ const InteractiveQuiz = () => {
       <section className="py-12 bg-transparent relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="bg-gradient-to-r from-[#1A4BFF]/20 via-[#0a0d1f] to-[#BD20D3]/20 border border-[#BD20D3]/30 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_0_50px_rgba(189,32,211,0.15)]">
+            <div className="bg-gradient-to-r from-[#1A4BFF]/20 via-[#0a0d1f] to-[#BD20D3]/20 border border-[#BD20D3]/30 rounded-[2.5rem] p-6 md:p-8 lg:p-12 backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_0_50px_rgba(189,32,211,0.15)]">
               <div className="absolute top-0 left-1/4 w-72 h-72 bg-[#BD20D3]/10 rounded-full blur-[100px] pointer-events-none" />
               <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-[#1A4BFF]/10 rounded-full blur-[100px] pointer-events-none" />
               
@@ -213,7 +205,7 @@ const InteractiveQuiz = () => {
                   <Sparkles size={14} />
                   <span>Inteligentný pomocník</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight">
                   Neviete, akú techniku vybrať?
                 </h2>
                 <p className="text-gray-300 text-sm md:text-base leading-relaxed">
@@ -337,7 +329,6 @@ const InteractiveQuiz = () => {
         </div>
       </section>
 
-      {/* Detail balíka – otvorí sa po dokončení kvízu */}
       <PackageDetailDialog 
         open={isPackageDetailOpen}
         onOpenChange={(open) => {

@@ -63,19 +63,19 @@ const Blog = () => {
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#BD20D3]/10 rounded-full blur-[120px] animate-float-slow pointer-events-none" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#1A4BFF]/5 rounded-full blur-[120px] animate-float-delayed pointer-events-none" />
 
-        <div className="pt-32 pb-24 container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto text-center mb-16 animate-fade-slide-up">
+        <div className="pt-32 pb-16 md:pb-24 container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto text-center mb-12 md:mb-16 animate-fade-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 text-[#BD20D3] text-sm font-medium mb-6 shadow-[0_0_15px_rgba(189,32,211,0.2)]">
               <BookOpen size={16} />
               <span>Socializea-audio Blog</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-4">
               Rady, tipy & novinky <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
                 zo sveta audio-techniky
               </span>
             </h1>
-            <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            <p className="text-gray-400 text-base md:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
               Prečítajte si odborné články o správnom nastavení svetiel, výbere ozvučenia a najnovších trendoch v eventovej technike.
             </p>
           </div>
@@ -87,7 +87,7 @@ const Blog = () => {
               Žiadne uverejnené články na tejto stránke.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
               {posts.map((post, index) => {
                 const displayImg = post.image || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80";
                 return (
@@ -119,7 +119,7 @@ const Blog = () => {
                             </span>
                           </div>
 
-                          <CardTitle className="text-xl font-bold text-white group-hover:text-[#BD20D3] transition-colors leading-snug line-clamp-2">
+                          <CardTitle className="text-lg sm:text-xl font-bold text-white group-hover:text-[#BD20D3] transition-colors leading-snug line-clamp-2">
                             {post.title}
                           </CardTitle>
                         </CardHeader>

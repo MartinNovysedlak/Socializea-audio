@@ -158,15 +158,15 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <section className="py-24">
+        <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                 <div>
                   <Card className="bg-white/5 border-white/10 rounded-xl p-6">
                     <CardHeader className="pb-4">
-                      <h1 className="text-3xl font-bold text-white">{item.name}</h1>
-                      <span className="text-xl text-[#BD20D3] uppercase">
+                      <h1 className="text-2xl sm:text-3xl font-bold text-white">{item.name}</h1>
+                      <span className="text-lg sm:text-xl text-[#BD20D3] uppercase">
                         {item.category === "sound"
                           ? "Zvuk"
                           : item.category === "lighting"
@@ -175,7 +175,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                       </span>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
+                      <p className="text-gray-300 leading-relaxed text-base md:text-lg">{item.description}</p>
 
                       <div
                         className="aspect-[4/3] rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
@@ -221,15 +221,15 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     <CardFooter className="pt-6 border-t border-white/5">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
                         <div>
-                          <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
+                          <span className="text-2xl sm:text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
                           <span className="text-gray-500 ml-2">/ deň</span>
                           <p className="text-gray-400 mt-1">
                             Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
                           </p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 w-full sm:w-auto">
                           <Link to="/prenajom">
-                            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6">
+                            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 w-full sm:w-auto">
                               Späť do ponuky
                             </Button>
                           </Link>
@@ -238,7 +238,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                               onClick={handleAddToCart}
                               disabled={cartQuantity >= item.available}
                               size="sm"
-                              className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none"
+                              className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full sm:w-auto"
                             >
                               <Check size={18} className="mr-2 animate-pulse" />
                               V košíku ({cartQuantity})
@@ -248,7 +248,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                               onClick={handleAddToCart}
                               disabled={item.available === 0}
                               size="sm"
-                              className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg"
+                              className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full sm:w-auto"
                             >
                               <ShoppingBag size={18} className="mr-2" />
                               Pridať do košíka
@@ -262,7 +262,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
                 <div className="space-y-6">
                   <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-6">Technické parametre</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Technické parametre</h3>
                     {item.specifications && item.specifications.length > 0 ? (
                       <ul className="space-y-3 text-gray-300">
                         {item.specifications.map((spec, idx) => (
@@ -277,7 +277,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     )}
                   </Card>
                   <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
                     {item.features && item.features.length > 0 ? (
                       <ul className="space-y-2 text-gray-300">
                         {item.features.map((feature, idx) => (

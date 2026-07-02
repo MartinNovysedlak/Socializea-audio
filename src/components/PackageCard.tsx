@@ -32,9 +32,9 @@ const PackageCard = ({ title, price, features, image, isPopular }: PackageProps)
       </div>
 
       <CardHeader className="pt-6">
-        <h3 className="text-2xl font-bold text-white">{title}</h3>
+        <h3 className="text-xl sm:text-2xl font-bold text-white">{title}</h3>
         <div className="flex items-baseline gap-1 mt-2">
-          <span className="text-3xl font-bold text-[#BD20D3]">{price} €</span>
+          <span className="text-2xl sm:text-3xl font-bold text-[#BD20D3]">{price} €</span>
           <span className="text-gray-400 text-sm">/ deň</span>
         </div>
       </CardHeader>

@@ -19,14 +19,14 @@ const Hero = () => {
                 <span>Prémiová technika pre vaše podujatia</span>
               </div>
               
-              <h1 className="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
                 Profesionálny prenájom a predaj <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] animate-pulse duration-10000">
                   zvukovej a svetelnej techniky
                 </span>
               </h1>
               
-              <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Zabezpečte si špičkový zvuk a dychberúce osvetlenie pre vašu svadbu, firemný večierok alebo súkromnú párty. Kvalita, na ktorú sa môžete spoľahnúť.
               </p>
               

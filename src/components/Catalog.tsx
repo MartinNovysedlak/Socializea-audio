@@ -48,13 +48,13 @@ const Catalog = () => {
     <section id="ponuka" className="py-24 bg-[#020721] relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Naša ponuka balíkov</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4">Naša ponuka balíkov</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Vyberte si z našich predpripravených setov, ktoré sme zostavili na základe dlhoročných skúseností.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {packages.map((pkg, index) => (
             <PackageCard key={index} {...pkg} />
           ))}

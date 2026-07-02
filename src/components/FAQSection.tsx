@@ -52,7 +52,7 @@ const FAQSection = () => {
                   <HelpCircle size={14} />
                   <span>Pomocník</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">Často kladené otázky</h2>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Často kladené otázky</h2>
                 <p className="text-gray-400 text-sm mt-2 max-w-xl mx-auto">
                   Rýchle odpovede na najčastejšie otázky o prenájme techniky.
                 </p>
@@ -65,7 +65,7 @@ const FAQSection = () => {
                     value={faq.id}
                     className="bg-white/5 border border-white/10 rounded-2xl px-6 transition-all data-[state=open]:border-[#BD20D3]/30 data-[state=open]:bg-[#BD20D3]/5"
                   >
-                    <AccordionTrigger className="text-white font-semibold text-left hover:text-[#BD20D3] transition-colors py-5 [&[data-state=open]>svg]:rotate-180">
+                    <AccordionTrigger className="text-white font-semibold text-left hover:text-[#BD20D3] transition-colors py-5 [&[data-state=open]>svg]:rotate-180 text-base">
                       <span className="pr-8">{faq.question}</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-gray-300 leading-relaxed pb-5 text-sm">

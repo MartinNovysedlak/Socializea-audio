@@ -13,16 +13,16 @@ const SalesSummary = () => {
           <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
             
-            <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-8 lg:gap-16">
               <div className="w-full lg:w-1/2 space-y-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 text-[#1A4BFF] text-xs font-bold uppercase tracking-widest">
                   Predaj techniky
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
                   Vybavte sa <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A4BFF] to-[#BD20D3]">profesionálne</span>
                 </h2>
-                <p className="text-gray-300 text-lg leading-relaxed">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                   Okrem prenájmu ponúkame aj predaj špičkovej techniky pre profesionálov aj nadšencov. 
                   Získajte vybavenie, ktoré vydrží a posunie vašu produkciu na novú úroveň.
                 </p>

@@ -56,7 +56,7 @@ const Index = () => {
 
       <div className="min-h-screen bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white">
         <Navbar />
-        <main className="space-y-4">
+        <main className="space-y-4 md:space-y-8 lg:space-y-12">
           <ScrollReveal delay={0.1}>
             <Hero />
           </ScrollReveal>
