@@ -343,9 +343,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
+            // Spolahliva detekcia krajiny: kontrolujeme aj country_code aj nazov krajiny
+            const countryCode = item.country_code || '';
+            const countryName = (address.country || '').toLowerCase();
+            const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
             return {
               name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
-              country: item.country_code === 'cz' ? 'cz' : 'sk',
+              country: isCzech ? 'cz' : 'sk',
               lat: coords.lat,
               lng: coords.lng,
               postcode,
