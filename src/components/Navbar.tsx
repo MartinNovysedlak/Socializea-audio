@@ -1,23 +1,35 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home, Speaker, ShoppingBag, BookOpen, Phone } from 'lucide-react';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Domov', href: '/' },
-    { name: 'Prenájom', href: '/prenajom' },
-    { name: 'Predaj', href: '/predaj' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Kontakt', href: '/kontakt' },
+    { name: 'Domov', href: '/', icon: Home },
+    { name: 'Prenájom', href: '/prenajom', icon: Speaker },
+    { name: 'Predaj', href: '/predaj', icon: ShoppingBag },
+    { name: 'Blog', href: '/blog', icon: BookOpen },
+    { name: 'Kontakt', href: '/kontakt', icon: Phone },
   ];
 
   const isActive = (href: string) => location.pathname === href;
+
+  // Zablokovanie scrollovania tela keď je menu otvorené
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f]/80 backdrop-blur-md border-b border-white/10 transition-all duration-300">
@@ -63,29 +75,55 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu overlay */}
+      {/* Mobilné menu - vysúvanie z pravej strany */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f]/95 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex flex-col items-center gap-6 py-10 px-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`text-lg font-medium transition-colors ${
-                  isActive(link.href) ? 'text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link to="/kontakt" onClick={() => setMobileMenuOpen(false)} className="w-full max-w-xs">
-              <Button className="btn-cyber rounded-full w-full border-none h-12 text-base">
-                Napíšte nám
-              </Button>
-            </Link>
+        <>
+          {/* Tmavé pozadie cez celú obrazovku */}
+          <div 
+            className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f] animate-in fade-in duration-300"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          
+          {/* Vysúvací panel z pravej strany */}
+          <div className="md:hidden fixed top-16 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[#020721] border-l border-white/10 animate-in slide-in-from-right duration-300 shadow-2xl shadow-black/50">
+            <div className="flex flex-col items-stretch gap-2 py-6 px-5 h-full overflow-y-auto">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 ${
+                      active
+                        ? 'bg-[#BD20D3]/15 border border-[#BD20D3]/40 text-white'
+                        : 'text-gray-200 hover:bg-white/5 active:bg-white/10'
+                    }`}
+                  >
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                      active ? 'bg-[#BD20D3]/20' : ''
+                    }`}>
+                      <Icon size={18} className={active ? 'text-[#BD20D3]' : 'text-gray-400'} />
+                    </div>
+                    <span className="flex-1">{link.name}</span>
+                    {active && (
+                      <div className="w-2 h-2 rounded-full bg-[#BD20D3] shadow-[0_0_8px_rgba(189,32,211,0.6)]" />
+                    )}
+                  </Link>
+                );
+              })}
+              <div className="mt-auto pt-4 border-t border-white/5">
+                <Link to="/kontakt" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="btn-cyber rounded-xl w-full border-none h-12 text-base font-bold shadow-[0_0_20px_rgba(189,32,211,0.3)]">
+                    <Phone size={18} className="mr-2" />
+                    Napíšte nám
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </nav>
   );
