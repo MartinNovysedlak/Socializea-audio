@@ -88,17 +88,15 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                   <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
                 </div>
 
-                <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-1.5 w-full md:w-auto">
-                  <Filter className="text-[#BD20D3] ml-3 shrink-0" size={16} />
-                  <div className="flex gap-1">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2 w-full md:w-auto">
+                  <Filter className="text-[#BD20D3] ml-3" size={18} />
+                  <div className="flex gap-1 flex-wrap justify-center">
                     {["all", "sound", "lighting", "other"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setActiveFilter(filter as any)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
-                          activeFilter === filter
-                            ? "bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white shadow-[0_0_12px_rgba(189,32,211,0.3)]"
-                            : "text-gray-400 hover:text-white hover:bg-white/10"
+                        className={`px-3 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                          activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
                         }`}
                       >
                         {filter === "all" ? "Všetko" : getCategoryLabel(filter)}
