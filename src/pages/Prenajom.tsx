@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { EquipmentItem } from '@/lib/supabase';
 import { packagesService, PackageData } from '@/lib/packagesService';
-import PackageDetailDialog, { PackageOption } from '@/components/PackageDetailDialog';
+import { PackageDetailDialog, PackageOption } from '@/components/PackageDetailDialog';
 
 interface PresetPackage {
   id: string;

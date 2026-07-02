@@ -21,7 +21,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { packagesService, PackageData } from '@/lib/packagesService';
-import PackageDetailDialog, { PackageOption } from './PackageDetailDialog';
+import { PackageDetailDialog, PackageOption } from './PackageDetailDialog';
 
 interface QuizAnswers {
   people: string;
