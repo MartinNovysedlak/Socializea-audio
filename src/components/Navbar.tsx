@@ -19,7 +19,6 @@ const Navbar = () => {
 
   const isActive = (href: string) => location.pathname === href;
 
-  // Zablokovanie scrollovania tela keď je menu otvorené
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -80,12 +79,12 @@ const Navbar = () => {
         <>
           {/* Tmavé pozadie cez celú obrazovku */}
           <div 
-            className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f] animate-in fade-in duration-300"
+            className="md:hidden fixed inset-0 top-16 z-40 bg-[#0a0d1f]"
             onClick={() => setMobileMenuOpen(false)}
           />
           
           {/* Vysúvací panel z pravej strany */}
-          <div className="md:hidden fixed top-16 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[#020721] border-l border-white/10 animate-in slide-in-from-right duration-300 shadow-2xl shadow-black/50">
+          <div className="md:hidden fixed top-16 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[#020721] border-l border-white/10 shadow-2xl shadow-black/50">
             <div className="flex flex-col items-stretch gap-2 py-6 px-5 h-full overflow-y-auto">
               {navLinks.map((link) => {
                 const Icon = link.icon;
