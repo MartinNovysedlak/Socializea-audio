@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Filter, Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } from "lucide-react";
+import { Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { EquipmentItem } from "@/lib/supabase";
@@ -13,6 +13,13 @@ interface EquipmentCatalogProps {
   quantities: Record<string, number>;
   setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
 }
+
+const FILTERS = [
+  { key: "all", label: "Všetko", shortLabel: "Všetko" },
+  { key: "sound", label: "Zvuk", shortLabel: "Zvuk" },
+  { key: "lighting", label: "Svetlá a efekty", shortLabel: "Svetlá" },
+  { key: "other", label: "Ostatné", shortLabel: "Ostatné" },
+] as const;
 
 const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: EquipmentCatalogProps) => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
@@ -26,15 +33,6 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
     const currentQty = quantities[id] ?? 0;
     const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
     setQuantities((prev) => ({ ...prev, [id]: newQty }));
-  };
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "sound": return "Zvuk";
-      case "lighting": return "Svetlá a efekty";
-      case "other": return "Ostatné";
-      default: return "";
-    }
   };
 
   const getCategoryIcon = (category: string) => {
@@ -76,27 +74,28 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
             
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6 md:mb-10">
-                <div>
+                <div className="shrink-0">
                   <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry na akcie</h2>
                   <p className="text-gray-400 text-sm md:text-base">Vyberte si jednotlivé položky a pridajte ich do kalkulačky pre oslavu, chatu alebo diskotéku</p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-1.5 md:p-2 overflow-x-auto w-full md:w-auto">
-                  <Filter className="text-[#BD20D3] ml-2 shrink-0" size={16} />
-                  <div className="flex gap-1">
-                    {["all", "sound", "lighting", "other"].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setActiveFilter(filter as any)}
-                        className={cn(
-                          "px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium transition-all whitespace-nowrap",
-                          activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
-                        )}
-                      >
-                        {filter === "all" ? "Všetko" : getCategoryLabel(filter)}
-                      </button>
-                    ))}
-                  </div>
+                {/* Filter – na mobile sa tlačidlá zalamujú, na desktope sú v jednom riadku */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-white/5 border border-white/10 rounded-2xl p-1.5 w-full md:w-auto md:flex-nowrap">
+                  {FILTERS.map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setActiveFilter(f.key as any)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap md:px-4 md:py-2 md:text-sm flex-1 md:flex-none text-center",
+                        activeFilter === f.key
+                          ? "bg-[#BD20D3] text-white"
+                          : "text-gray-400 hover:text-white hover:bg-white/10"
+                      )}
+                    >
+                      <span className="md:hidden">{f.shortLabel}</span>
+                      <span className="hidden md:inline">{f.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -129,7 +128,9 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
 
                         <div className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 md:px-3 md:py-1 mb-3", catColor.bg, catColor.border)}>
                           <span className={catColor.icon}>{getCategoryIcon(item.category)}</span>
-                          <span className={cn("text-[10px] md:text-xs font-semibold", catColor.text)}>{getCategoryLabel(item.category)}</span>
+                          <span className={cn("text-[10px] md:text-xs font-semibold", catColor.text)}>
+                            {item.category === "sound" ? "Zvuk" : item.category === "lighting" ? "Svetlá" : "Ostatné"}
+                          </span>
                         </div>
 
                         <h3 className="text-sm md:text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2 line-clamp-2">
