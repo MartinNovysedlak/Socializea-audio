@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { generateSalesSeo, generateSalesAlt } from '@/utils/salesSeo';
+import { usePageMeta } from '@/hooks/usePageMeta';
 import {
   ArrowLeft,
   Check,
@@ -34,14 +35,13 @@ const ProductDetail = () => {
   // SEO metadáta
   const seo = item ? generateSalesSeo(item.name, item.price, item.condition) : null;
 
-  // Nastavenie title tagu
-  useEffect(() => {
-    if (seo) {
-      document.title = seo.title;
-    } else {
-      document.title = "Socializea-audio | Predaj techniky Žilina, Čadca, Kysuce";
-    }
-  }, [seo]);
+  // Use hook for title and meta description
+  usePageMeta(
+    seo?.title || 'Socializea-audio | Predaj techniky Žilina, Čadca, Kysuce',
+    seo?.description
+  );
+
+  // Remove old useEffect document.title
 
   // Form State
   const [inquiryName, setInquiryName] = useState('');
@@ -247,7 +247,7 @@ const ProductDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
               {item.specs && item.specs.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické parametre:</h3>
+                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické parametre:</h2>
                   <ul className="space-y-2">
                     {item.specs.map((spec, i) => (
                       <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
@@ -261,7 +261,7 @@ const ProductDetail = () => {
 
               {item.features && item.features.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové výhody:</h3>
+                  <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové výhody:</h2>
                   <ul className="space-y-2">
                     {item.features.map((f, i) => (
                       <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
@@ -297,7 +297,7 @@ const ProductDetail = () => {
           <div className="lg:col-span-5">
             <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Mám záujem o kúpu</h3>
+                <h2 className="text-xl font-bold text-white mb-2">Mám záujem o kúpu</h2>
                 <p className="text-gray-400 text-xs leading-relaxed">
                   Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť alebo dohodneme osobné prevzatie v Čadci či Žiline.
                 </p>

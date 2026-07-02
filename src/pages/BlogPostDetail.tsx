@@ -8,12 +8,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { blogService, BlogPost, BlogBlock } from '@/lib/blogService';
 import { ChevronLeft, User, Calendar, BookOpen } from 'lucide-react';
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 const BlogPostDetail = () => {
   const { id } = useParams();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [parsedBlocks, setParsedBlocks] = useState<BlogBlock[]>([]);
+
+  usePageMeta(
+    post ? `${post.title} – Socializea-audio Blog` : 'Socializea-audio | Blog',
+    post ? post.excerpt : undefined
+  );
 
   useEffect(() => {
     const fetchPost = async () => {
