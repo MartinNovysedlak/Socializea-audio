@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Package,
@@ -130,15 +130,6 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
 }
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debouncedValue;
-}
-
 const CUSTOM_ITEM_DEFAULT_PRICE = 0;
 
 interface PackageDetailDialogProps {
@@ -180,6 +171,16 @@ function getInstallType(installSelected: boolean, installUninstallSelected: bool
   if (installUninstallSelected) return 'install_uninstall';
   if (installSelected) return 'install';
   return 'none';
+}
+
+// Debounce helper
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
 }
 
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
