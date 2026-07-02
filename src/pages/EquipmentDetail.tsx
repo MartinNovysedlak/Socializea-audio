@@ -36,8 +36,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     seo?.description
   );
 
-  // Remove the old useEffect that only set document.title, it's now handled by usePageMeta
-
   const images = item?.images && item.images.length > 0
     ? item.images
     : ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80"];
@@ -142,8 +140,8 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
-                <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                  <CardHeader className="pb-4">
+                <Card className="bg-white/5 border-white/10 rounded-xl p-4 sm:p-6">
+                  <CardHeader className="pb-4 px-0">
                     {/* H1 nadpis */}
                     <h1 className="text-3xl font-bold text-white">{seo?.h1 || item.name}</h1>
                     {/* H2 podnadpis */}
@@ -162,7 +160,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     {seo?.description}
                   </div>
 
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 px-0">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
                     {/* Main image */}
@@ -208,43 +206,41 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-6 border-t border-white/5">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
-                      <div>
-                        <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
-                        <span className="text-gray-500 ml-2">/ deň</span>
-                        <p className="text-gray-400 mt-1">
-                          Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
-                        </p>
-                      </div>
-                      <div className="flex gap-3">
-                        <Link to="/prenajom">
-                          <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6">
-                            Späť do ponuky
-                          </Button>
-                        </Link>
-                        {isInCart ? (
-                          <Button 
-                            onClick={handleAddToCart}
-                            disabled={cartQuantity >= item.available}
-                            size="sm"
-                            className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none"
-                          >
-                            <Check size={18} className="mr-2 animate-pulse" />
-                            V košíku ({cartQuantity})
-                          </Button>
-                        ) : (
-                          <Button 
-                            onClick={handleAddToCart}
-                            disabled={item.available === 0}
-                            size="sm"
-                            className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg"
-                          >
-                            <ShoppingBag size={18} className="mr-2" />
-                            Pridať do košíka
-                          </Button>
-                        )}
-                      </div>
+                  <CardFooter className="pt-6 border-t border-white/5 px-0 flex-col gap-4">
+                    <div className="w-full">
+                      <span className="text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
+                      <span className="text-gray-500 ml-2">/ deň</span>
+                      <p className="text-gray-400 mt-1">
+                        Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col xs:flex-row gap-2 w-full">
+                      <Link to="/prenajom" className="w-full xs:w-auto">
+                        <Button className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 whitespace-nowrap">
+                          Späť do ponuky
+                        </Button>
+                      </Link>
+                      {isInCart ? (
+                        <Button 
+                          onClick={handleAddToCart}
+                          disabled={cartQuantity >= item.available}
+                          size="sm"
+                          className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full xs:w-auto whitespace-nowrap"
+                        >
+                          <Check size={18} className="mr-2 animate-pulse shrink-0" />
+                          V košíku ({cartQuantity})
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={handleAddToCart}
+                          disabled={item.available === 0}
+                          size="sm"
+                          className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full xs:w-auto whitespace-nowrap"
+                        >
+                          <ShoppingBag size={18} className="mr-2 shrink-0" />
+                          Pridať do košíka
+                        </Button>
+                      )}
                     </div>
                   </CardFooter>
                 </Card>
