@@ -43,45 +43,10 @@
 
   body {
     @apply bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white overflow-x-hidden;
-    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3 {
     @apply tracking-tight;
-  }
-
-  /* Prevencia pretekania na mobile */
-  img, video {
-    @apply max-w-full h-auto;
-  }
-
-  /* Lepšie touch ciele na mobile */
-  button, a, input, select, textarea {
-    @apply touch-manipulation;
-  }
-  
-  /* Skrytie scrollbaru na mobile pre lepší vzhľad, ale zachovanie funkčnosti */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(189, 32, 211, 0.3);
-    border-radius: 20px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(189, 32, 211, 0.5);
-  }
-
-  /* Oprava overflow na telese po zatvorení modalu */
-  body:not(:has(.fixed.inset-0)) {
-    overflow-x: hidden;
   }
 }
 
@@ -98,6 +63,7 @@
     @apply border-[#1A4BFF]/50 shadow-[0_0_10px_rgba(26,75,255,0.2)];
   }
 
+  /* Plynulá animácia podčiarknutia navigácie */
   .nav-link-underline {
     @apply relative py-1;
   }
@@ -109,12 +75,6 @@
 
   .nav-link-underline:hover::after {
     @apply scale-x-100 origin-bottom-left;
-  }
-
-  /* Text selection */
-  ::selection {
-    background-color: rgba(189, 32, 211, 0.3);
-    color: white;
   }
 }
 
@@ -137,6 +97,7 @@
   }
 }
 
+/* Pulzovanie žiary pre akčné tlačidlá */
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: 0 0 12px rgba(189, 32, 211, 0.4);
@@ -148,6 +109,7 @@
   }
 }
 
+/* Slide up s fade-in pre úvodné prvky */
 @keyframes fade-slide-up {
   from {
     opacity: 0;
@@ -159,6 +121,7 @@
   }
 }
 
+/* Priradenie tried pre animácie */
 .animate-float-slow {
   animation: float-slow 12s infinite ease-in-out;
 }
@@ -173,54 +136,4 @@
 
 .animate-fade-slide-up {
   animation: fade-slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* DayPicker mobilné úpravy – už existujú v FloatingCart, doplňame globálne */
-.rdp {
-  --rdp-cell-size: 28px;
-  --rdp-accent-color: #BD20D3;
-  --rdp-background-color: rgba(189, 32, 211, 0.1);
-  --rdp-accent-color-dark: #BD20D3;
-  --rdp-background-color-dark: rgba(189, 32, 211, 0.2);
-  --rdp-outline: 2px solid #BD20D3;
-  --rdp-outline-selected: 2px solid #BD20D3;
-  margin: 0;
-}
-
-@media (max-width: 640px) {
-  .rdp {
-    --rdp-cell-size: 24px;
-  }
-  .rdp-day {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
-  }
-  .rdp-month {
-    padding: 4px;
-  }
-  .rdp-caption {
-    font-size: 11px;
-  }
-  .rdp-nav_button {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-/* Oprava select elementu v adminovi */
-select {
-  @apply appearance-none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.75rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
-}
-
-/* Zvýšenie čitateľnosti na mobile */
-@media (max-width: 640px) {
-  .text-gradient-responsive {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF];
-  }
 }
