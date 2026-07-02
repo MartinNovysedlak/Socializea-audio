@@ -52,15 +52,15 @@ const DJSection = () => {
               <div className="w-full lg:w-3/5 space-y-8">
                 <div className="flex items-center gap-3 text-[#BD20D3]">
                   <Headphones size={24} />
-                  <span className="font-bold uppercase tracking-widest text-sm">Profesionálny hudobný doprovod</span>
+                  <span className="font-bold uppercase tracking-widest text-sm">Profesionálny hudobný doprovod v Kysuckom regióne</span>
                 </div>
                 
                 <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight">
-                  Potrebujete <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">DJ-a</span> pre vašu udalosť?
+                  Potrebujete <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">DJ-a</span> na svadbu alebo párty v Kysuciach?
                 </h2>
                 
                 <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
-                  Chystáte sa na oslavu, stužkovú, jubileum alebo inú udalosť a hľadáte toho pravého DJ-a? 
+                  Chystáte sa na oslavu, stužkovú, jubileum alebo inú udalosť v Žiline, Čadci alebo v okolitých obciach Kysúc a hľadáte toho pravého DJ-a? 
                   S naším profesionálnym prístupom a širokou paletou hudobných štýlov sa postaráme o to, aby vaša akcia zaznela presne tak, ako si ju predstavujete.
                 </p>
 

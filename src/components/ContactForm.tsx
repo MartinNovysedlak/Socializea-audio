@@ -51,9 +51,9 @@ const ContactForm = () => {
               
                 <div className="space-y-10">
                   <div>
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín v Žiline alebo Čadci</h2>
                     <p className="text-gray-300 text-lg leading-relaxed">
-                      Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
+                      Máte otázky ohľadom prenájmu aparatúry v Čadci alebo v Žiline? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru. Pôsobíme v celom Kysuckom regióne.
                     </p>
                   </div>
 
@@ -84,12 +84,12 @@ const ContactForm = () => {
                         <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-2">Kde nás nájdete</p>
                         <div className="space-y-3">
                           <div>
-                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
+                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo – Čadca</p>
                             <p className="text-white text-lg leading-snug">Čadečka 1924</p>
                             <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
                           </div>
                           <div className="border-t border-white/5 pt-3">
-                            <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto</p>
+                            <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto – Žilina</p>
                             <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
                             <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
                           </div>
@@ -166,7 +166,7 @@ const ContactForm = () => {
                             <FormLabel className="text-gray-300">Vaša správa</FormLabel>
                             <FormControl>
                               <Textarea 
-                                placeholder="Napíšte nám viac o vašom podujatí..." 
+                                placeholder="Mám záujem o prenájom ozvučenia v Čadci na svadbu..." 
                                 className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
                                 {...field} 
                               />

@@ -51,6 +51,19 @@ const Footer = () => {
             </Link>
           </div>
         </div>
+
+        {/* SEO text v pätičke */}
+        <div className="mt-10 pt-6 border-t border-white/5 max-w-4xl mx-auto text-center">
+          <p className="text-gray-500 text-xs leading-relaxed">
+            Ponúkame profesionálny prenájom a predaj zvukovej a svetelnej techniky v Žiline, Čadci a celom regióne Kysuce. 
+            Naša ponuka zahŕňa ozvučenie na svadby, firemné akcie, DJ párty a kultúrne podujatia. 
+            Vybavíme kompletné svetelné show vrátane laserov, dymostrojov a moving headov. 
+            Pôsobíme v Žilinskom kraji – techniku vám dovezieme až na miesto. 
+            Osobný odber možný v Čadci (Čadečka 1924) alebo v Žiline (Vysokoškolská 4). 
+            Všetky zariadenia sú pravidelne servisované a pripravené na použitie. 
+            Kontaktujte nás a my vám pripravíme nezáväznú cenovú ponuku na mieru.
+          </p>
+        </div>
       </div>
     </footer>
   );

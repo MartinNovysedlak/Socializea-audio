@@ -16,18 +16,18 @@ const Hero = () => {
             <div className="max-w-4xl mx-auto text-center animate-fade-slide-up">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-[#BD20D3]/30 text-[#BD20D3] text-sm font-medium mb-8 transition-transform duration-300 hover:scale-105 cursor-default">
                 <Sparkles size={16} className="animate-pulse" />
-                <span>Prémiová technika pre vaše podujatia</span>
+                <span>Prenájom aparatúry v Žiline, Čadci a Kysuciach</span>
               </div>
               
               <h1 className="text-4xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1]">
-                Profesionálny prenájom a predaj <br />
+                Profesionálny prenájom aparatúry v Žiline, Čadci a celých Kysuciach <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] animate-pulse duration-10000">
-                  zvukovej a svetelnej techniky
+                  zvukovej a svetelnej techniky na vaše podujatie
                 </span>
               </h1>
               
               <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Zabezpečte si špičkový zvuk a dychberúce osvetlenie pre vašu svadbu, firemný večierok alebo súkromnú párty. Kvalita, na ktorú sa môžete spoľahnúť.
+                Zabezpečte si špičkový zvuk a dychberúce osvetlenie pre vašu svadbu, firemný večierok alebo súkromnú párty v Žiline, Čadci a okolí. Poctive kysucké služby s osobným prístupom a dopravou po celom regióne.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

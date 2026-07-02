@@ -18,7 +18,7 @@ const RentalSummary = () => {
                 <div className="relative z-10 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                   <img 
                     src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1000" 
-                    alt="Profesionálna audio technika" 
+                    alt="Profesionálna audio technika na prenájom v Žiline" 
                     className="w-full aspect-[4/3] object-cover hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#020721]/50 via-transparent to-transparent" />
@@ -31,12 +31,12 @@ const RentalSummary = () => {
                   Služby prenájmu
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-                  Prenájom aparatúry <br />
-                  <span className="text-gray-500">bez starostí</span>
+                  Prenájom ozvučenia a svetiel <br />
+                  <span className="text-gray-500">v Žilinskom kraji bez starostí</span>
                 </h2>
                 <p className="text-gray-300 text-lg leading-relaxed">
-                  Ak hľadáte zvuk a svetlo na prenájom, ste na správnom mieste! 
-                  Náš sortiment ozvučovacieho a osvetľovacieho vybavenia je tu, aby vašu udalosť pretvoril do nezabudnuteľného zážitku.
+                  Ak hľadáte prenájom aparatúry v Žiline, Čadci alebo v celých Kysuciach, ste na správnom mieste. 
+                  Náš sortiment ozvučovacieho a osvetľovacieho vybavenia pretvorí vašu udalosť na nezabudnuteľný zážitok. Techniku dovezieme až k vám.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
