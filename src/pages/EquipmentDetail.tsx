@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
+import { generateEquipmentSeo, generateEquipmentAlt } from "@/utils/seo";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +25,18 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
+
+  // SEO metadáta
+  const seo = item ? generateEquipmentSeo(item.name, item.category, item.price_per_day) : null;
+
+  // Nastavenie title tagu
+  useEffect(() => {
+    if (seo) {
+      document.title = seo.title;
+    } else {
+      document.title = "Socializea-audio | Prenájom aparatúry Žilina, Čadca, Kysuce";
+    }
+  }, [seo]);
 
   const images = item?.images && item.images.length > 0
     ? item.images
@@ -121,11 +134,20 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
+            {/* Breadcrumb / back link */}
+            <Link to="/prenajom" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-8 group">
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              <span>Späť na ponuku prenájmu v Žiline a Čadci</span>
+            </Link>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
                 <Card className="bg-white/5 border-white/10 rounded-xl p-6">
                   <CardHeader className="pb-4">
-                    <h2 className="text-3xl font-bold text-white">{item.name}</h2>
+                    {/* H1 nadpis */}
+                    <h1 className="text-3xl font-bold text-white">{seo?.h1 || item.name}</h1>
+                    {/* H2 podnadpis */}
+                    <p className="text-base text-gray-300 mt-2">{seo?.h2}</p>
                     <span className="text-xl text-[#BD20D3] uppercase">
                       {item.category === "sound"
                         ? "Zvuk"
@@ -134,17 +156,23 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                           : "Ostatné"}
                     </span>
                   </CardHeader>
+
+                  {/* Meta description (skrytý pre SEO, viditeľný len pre vyhľadávače) */}
+                  <div className="sr-only" aria-hidden="true">
+                    {seo?.description}
+                  </div>
+
                   <CardContent className="space-y-6">
                     <p className="text-gray-300 leading-relaxed text-lg">{item.description}</p>
 
-                    {/* Hlavný obrázok — celý produkt viditeľný */}
+                    {/* Main image */}
                     <div
                       className="aspect-[4/3] rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
                       onClick={() => openLightbox(0)}
                     >
                       <img
                         src={images[0]}
-                        alt={item.name}
+                        alt={generateEquipmentAlt(item.name)}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
@@ -157,7 +185,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                       </div>
                     </div>
 
-                    {/* Náhľady — tiež object-contain */}
+                    {/* Thumbnails */}
                     {images.length > 1 && (
                       <div className="grid grid-cols-3 gap-3">
                         {images.slice(1).map((img, idx) => (
@@ -168,7 +196,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                           >
                             <img
                               src={img}
-                              alt={`${item.name} - fotka ${idx + 2}`}
+                              alt={`${generateEquipmentAlt(item.name)} – fotka ${idx + 2}`}
                               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
@@ -220,6 +248,13 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     </div>
                   </CardFooter>
                 </Card>
+
+                {/* SEO text block */}
+                <div className="mt-8 p-6 bg-white/3 border border-white/5 rounded-2xl">
+                  <p className="text-gray-400 text-xs leading-relaxed">
+                    {seo?.seoText}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-6">
@@ -261,6 +296,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       
       <Footer />
 
+      {/* Lightbox */}
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 md:p-8"
@@ -293,7 +329,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
           <img
             src={images[currentImageIndex]}
-            alt={`${item.name} - fotka ${currentImageIndex + 1}`}
+            alt={`${generateEquipmentAlt(item.name)} – fotka ${currentImageIndex + 1}`}
             onClick={(e) => e.stopPropagation()}
             className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
             onError={(e) => {
