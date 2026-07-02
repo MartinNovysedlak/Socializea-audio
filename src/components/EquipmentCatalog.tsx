@@ -88,14 +88,14 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                   <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl p-2 w-full md:w-auto overflow-x-auto">
-                  <Filter className="text-[#BD20D3] ml-1 shrink-0" size={18} />
-                  <div className="flex gap-1 flex-nowrap">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl p-1.5 w-full md:w-auto">
+                  <Filter className="text-[#BD20D3] shrink-0" size={18} />
+                  <div className="flex gap-1 flex-wrap justify-center">
                     {["all", "sound", "lighting", "other"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setActiveFilter(filter as any)}
-                        className={`px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                        className={`px-2.5 py-1.5 rounded-lg text-xs md:px-3 md:py-2 md:rounded-xl md:text-sm font-medium transition-all whitespace-nowrap ${
                           activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
                         }`}
                       >
