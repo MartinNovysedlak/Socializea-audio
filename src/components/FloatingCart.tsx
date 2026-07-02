@@ -120,7 +120,7 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   }
 
   const isFree = minDist <= 10;
-  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70 * 100) / 100;
+  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
 
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
 }
@@ -366,7 +366,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     setDeliveryResult(result);
     if (result) {
       if (result.isFree) toast.success(`Doprava do ${cityName} je zadarmo!`);
-      else toast.info(`Doprava do ${cityName}: ${result.price.toFixed(2)} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`);
+      else toast.info(`Doprava do ${cityName}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`);
     }
   };
 
@@ -587,7 +587,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             {pkg.hasLights && <span className="text-xs px-2 py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1.5 font-medium"><Lightbulb size={12} /> So svetlami</span>}
                             {pkg.install === 'install' && <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium"><Wrench size={12} /> Inštalácia (+{pkg.installPrice} €)</span>}
                             {pkg.install === 'install_uninstall' && <span className="text-xs px-2 py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1.5 font-medium"><Wrench size={12} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
-                            {pkg.arrival && <span className="text-xs px-2 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1.5 font-medium"><MapPin size={12} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice.toFixed(2)} €)` : ' (Zdarma)'}</span>}
+                            {pkg.arrival && <span className="text-xs px-2 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1.5 font-medium"><MapPin size={12} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
                           </div>
                           {pkg.extras.length > 0 && (
                             <div className="text-xs text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
@@ -654,7 +654,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               )}
                             </div>
                             <div className="shrink-0 min-w-[70px] text-right">
-                              {packageHasDelivery ? <span className="text-xs text-gray-600">—</span> : deliverySelected && deliveryResult ? <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}</span> : <span className="text-xs text-gray-500">Vybrať</span>}
+                              {packageHasDelivery ? <span className="text-xs text-gray-600">—</span> : deliverySelected && deliveryResult ? <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span> : <span className="text-xs text-gray-500">Vybrať</span>}
                             </div>
                             {!packageHasDelivery && deliverySelected && (
                               <button type="button" onClick={(e) => { e.stopPropagation(); clearDelivery(); }} className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0"><X size={10} /></button>
@@ -674,7 +674,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           )}
                           {!packageHasDelivery && deliverySelected && deliveryResult && (
                             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
-                              <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>{deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price.toFixed(2)} €`}</span>
+                              <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>{deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price} €`}</span>
                               {!deliveryResult.isFree && <span className="text-gray-400 flex items-center gap-1"><Navigation size={10} /> {deliveryResult.distance} km od {deliveryResult.nearestPoint}</span>}
                               {deliveryResult.isKysuce && <span className="text-gray-500">(Kysuce – zadarmo)</span>}
                             </div>
@@ -742,13 +742,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     {deliverySelected && deliveryResult && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
-                        <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}</span>
+                        <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
                       </div>
                     )}
                     {packageItems.filter(p => p.arrival).map((pkg) => (
                       <div key={pkg.id} className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({pkg.arrival?.name})</span>
-                        <span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice.toFixed(2)} €` : 'Zdarma'}</span>
+                        <span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice} €` : 'Zdarma'}</span>
                       </div>
                     ))}
 

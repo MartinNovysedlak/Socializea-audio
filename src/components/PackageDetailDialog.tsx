@@ -125,9 +125,18 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   }
 
   const isFree = minDist <= 10;
-  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70 * 100) / 100;
+  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
 
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
 }
 
 const CUSTOM_ITEM_DEFAULT_PRICE = 0;
@@ -171,16 +180,6 @@ function getInstallType(installSelected: boolean, installUninstallSelected: bool
   if (installUninstallSelected) return 'install_uninstall';
   if (installSelected) return 'install';
   return 'none';
-}
-
-// Debounce helper
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-  return debouncedValue;
 }
 
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
@@ -379,7 +378,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         toast.success(`Doprava do ${cityName} je zadarmo!`);
       } else {
         toast.info(
-          `Doprava do ${cityName}: ${result.price.toFixed(2)} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
+          `Doprava do ${cityName}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
         );
       }
     }
@@ -823,7 +822,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                               : 'text-[#1A4BFF]'
                           }`}
                         >
-                          {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}
+                          {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}
                         </span>
                       ) : (
                         <span className="text-xs text-gray-500">Vybrať</span>
@@ -882,7 +881,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       >
                         {deliveryResult.isFree
                           ? '✓ Doprava ZDARMA'
-                          : `${deliveryResult.price.toFixed(2)} €`}
+                          : `${deliveryResult.price} €`}
                       </span>
                       {!deliveryResult.isFree && (
                         <span className="text-gray-400 flex items-center gap-1">
@@ -1215,7 +1214,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         : 'text-[#1A4BFF] font-semibold'
                     }
                   >
-                    {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}
+                    {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}
                   </span>
                 </div>
               )}
