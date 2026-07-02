@@ -94,7 +94,7 @@ const Navbar = () => {
               })}
             </div>
             
-            <div className="pt-6 border-t border-white/10 w-full animate-fade-slide-up" style={{ animationDelay: '350ms' }}>
+            <div className="pt-6 border-t border-white/10 w-full">
               <Link to="/kontakt" onClick={handleLinkClick}>
                 <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(189,32,211,0.4)]">
                   <span>Napíšte nám</span>
