@@ -8,6 +8,7 @@ import RentalSummary from '@/components/RentalSummary';
 import DJSection from '@/components/DJSection';
 import SalesSummary from '@/components/SalesSummary';
 import ContactForm from '@/components/ContactForm';
+import FAQSection from '@/components/FAQSection';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import { MadeWithDyad } from "@/components/made-with-dyad";
@@ -21,7 +22,6 @@ const Index = () => {
           <Hero />
         </ScrollReveal>
         
-        {/* Nový interaktívny sprievodca / kvíz pre rýchly výber */}
         <ScrollReveal delay={0.15}>
           <InteractiveQuiz />
         </ScrollReveal>
@@ -36,6 +36,10 @@ const Index = () => {
         
         <ScrollReveal delay={0.2}>
           <SalesSummary />
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.2}>
+          <FAQSection />
         </ScrollReveal>
         
         <ScrollReveal delay={0.2}>
