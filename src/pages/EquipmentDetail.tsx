@@ -227,9 +227,9 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                             Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
                           </p>
                         </div>
-                        <div className="flex gap-3 w-full sm:w-auto">
-                          <Link to="/prenajom">
-                            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 w-full sm:w-auto">
+                        <div className="flex flex-col gap-3 w-full sm:w-auto">
+                          <Link to="/prenajom" className="w-full sm:w-auto">
+                            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 w-full">
                               Späť do ponuky
                             </Button>
                           </Link>
@@ -237,8 +237,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                             <Button 
                               onClick={handleAddToCart}
                               disabled={cartQuantity >= item.available}
-                              size="sm"
-                              className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full sm:w-auto"
+                              className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full"
                             >
                               <Check size={18} className="mr-2" />
                               V košíku ({cartQuantity})
@@ -247,8 +246,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                             <Button 
                               onClick={handleAddToCart}
                               disabled={item.available === 0}
-                              size="sm"
-                              className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full sm:w-auto"
+                              className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full"
                             >
                               <ShoppingBag size={18} className="mr-2" />
                               Pridať do košíka
