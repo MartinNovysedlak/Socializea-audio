@@ -707,29 +707,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Inštalácia – iba ak je vybraná pre samostatnú aparatúru */}
-                    {installSelected && (
+                    {/* Inštalácia – iba ak je vybraná */}
+                    {(installSelected || packageHasInstall) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
-                        <span className="text-[#1A4BFF] font-semibold">+20 €</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{(installSelected ? 20 : 0) + (packageItems.some(p => p.install === 'install') ? packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0) : 0)} €</span>
                       </div>
                     )}
-                    {installUninstallSelected && (
+                    {(installUninstallSelected || packageHasInstallUninstall) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
-                        <span className="text-[#1A4BFF] font-semibold">+40 €</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{(installUninstallSelected ? 40 : 0) + (packageItems.some(p => p.install === 'install_uninstall') ? packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0) : 0)} €</span>
                       </div>
                     )}
 
-                    {/* Doprava – iba ak je vybraná pre samostatnú aparatúru */}
+                    {/* Doprava – iba ak je vybraná */}
                     {deliverySelected && deliveryResult && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
                         <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}</span>
                       </div>
                     )}
-
-                    {/* Doprava z balíkov – každý balík s arrival */}
                     {packageItems.filter(p => p.arrival).map((pkg) => (
                       <div key={pkg.id} className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({pkg.arrival?.name})</span>
