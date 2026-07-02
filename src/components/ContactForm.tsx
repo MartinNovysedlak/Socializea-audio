@@ -175,9 +175,9 @@ const ContactForm = () => {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full btn-cyber h-14 rounded-xl text-lg font-bold group border-none">
-                        Odoslať nezáväzný dopyt
-                        <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      <Button type="submit" className="w-full btn-cyber h-auto min-h-12 py-3 px-4 rounded-xl text-sm sm:text-base font-bold group border-none whitespace-normal">
+                        <span>Odoslať nezáväzný dopyt</span>
+                        <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                       </Button>
                     </form>
                   </Form>
