@@ -100,6 +100,10 @@ interface CityMatch {
   country: string;
   lat: number;
   lng: number;
+  postcode?: string;
+  district?: string;
+  distToNearest?: number;
+  nearestPoint?: string;
 }
 
 function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
@@ -128,6 +132,19 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
 
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
+}
+
+function getNearestPoint(coords: { lat: number; lng: number }): { name: string; distance: number } {
+  let minDist = Infinity;
+  let nearest = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = point.name;
+    }
+  }
+  return { name: nearest, distance: Math.round(minDist * 10) / 10 };
 }
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -309,7 +326,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSearchingCities(true);
       try {
         const query = encodeURIComponent(debouncedCitySearch.trim());
-        const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`;
         const res = await fetch(url, {
           headers: {
             'User-Agent': 'DjPartyRental/1.0 (djparty@example.com)',
@@ -320,12 +337,23 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         const data = await res.json();
         if (cancelled) return;
         if (data && Array.isArray(data)) {
-          const mapped: CityMatch[] = data.map((item: any) => ({
-            name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
-            country: item.country_code === 'cz' ? 'cz' : 'sk',
-            lat: parseFloat(item.lat),
-            lng: parseFloat(item.lon),
-          }));
+          const mapped: CityMatch[] = data.map((item: any) => {
+            const address = item.address || {};
+            const district = address.city_district || address.county || address.state_district || address.municipality || '';
+            const postcode = address.postcode || '';
+            const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
+            const nearest = getNearestPoint(coords);
+            return {
+              name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
+              country: item.country_code === 'cz' ? 'cz' : 'sk',
+              lat: coords.lat,
+              lng: coords.lng,
+              postcode,
+              district,
+              distToNearest: nearest.distance,
+              nearestPoint: nearest.name,
+            };
+          });
           // Deduplicate by name
           const seen = new Set<string>();
           const unique = mapped.filter(c => {
@@ -858,13 +886,22 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           onClick={() => selectCity(city.name, city.lat, city.lng)}
                           className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
                         >
-                          <MapPin size={13} className="text-gray-500 shrink-0" />
+                          <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-white truncate">{city.name}</p>
+                            <span className="text-[9px] text-gray-500/70 leading-tight block mt-0.5">
+                              {[city.postcode, city.district].filter(Boolean).join(', ')}
+                            </span>
                           </div>
-                          <span className="text-[9px] text-gray-500 uppercase">
-                            {city.country === 'sk' ? 'SK' : 'CZ'}
-                          </span>
+                          <div className="text-right shrink-0">
+                            <span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
+                            {city.distToNearest !== undefined && city.distToNearest > 0 && (
+                              <span className="text-[8px] text-gray-600 mt-0.5 block whitespace-nowrap">~{city.distToNearest} km od {city.nearestPoint}</span>
+                            )}
+                            {city.distToNearest !== undefined && city.distToNearest <= 0 && (
+                              <span className="text-[8px] text-emerald-500/60 mt-0.5 block">v mieste odberu</span>
+                            )}
+                          </div>
                         </button>
                       ))}
                     </div>
