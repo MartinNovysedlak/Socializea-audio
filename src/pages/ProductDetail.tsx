@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
+import { generateSalesSeo, generateSalesAlt } from '@/utils/salesSeo';
 import {
   ArrowLeft,
   Check,
@@ -29,6 +30,18 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // SEO metadáta
+  const seo = item ? generateSalesSeo(item.name, item.price, item.condition) : null;
+
+  // Nastavenie title tagu
+  useEffect(() => {
+    if (seo) {
+      document.title = seo.title;
+    } else {
+      document.title = "Socializea-audio | Predaj techniky Žilina, Čadca, Kysuce";
+    }
+  }, [seo]);
 
   // Form State
   const [inquiryName, setInquiryName] = useState('');
@@ -143,9 +156,14 @@ const ProductDetail = () => {
             <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
               <img
                 src={activeImage}
-                alt={item.name}
+                alt={generateSalesAlt(item.name)}
                 className="w-full h-full object-contain"
               />
+
+              {/* SEO Meta description (skryté) */}
+              <div className="sr-only" aria-hidden="true">
+                {seo?.description}
+              </div>
 
               {/* Kategória — ľavý dolný roh */}
               <div className="absolute bottom-4 left-4">
@@ -201,7 +219,7 @@ const ProductDetail = () => {
                         : 'border-white/10 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={imgUrl} alt={`${generateSalesAlt(item.name)} – náhľad ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -209,9 +227,14 @@ const ProductDetail = () => {
 
             {/* Product info */}
             <div className="space-y-4 pt-4">
+              {/* H1 */}
               <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                {item.name}
+                {seo?.h1 || item.name}
               </h1>
+              {/* H2 */}
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                {seo?.h2}
+              </p>
               <div className="text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
                 {item.price} € <span className="text-xs text-gray-400 font-normal">s DPH</span>
               </div>
@@ -260,6 +283,13 @@ const ProductDetail = () => {
                   Každé predávané zariadenie je kompletne otestované naším technikom. Všetky kusy doručujeme vrátane riadnej faktúry so zárukou. Možnosť odpočtu DPH pre firmy.
                 </p>
               </div>
+            </div>
+
+            {/* SEO text block */}
+            <div className="p-5 bg-white/3 border border-white/5 rounded-2xl">
+              <p className="text-gray-400 text-xs leading-relaxed">
+                {seo?.seoText}
+              </p>
             </div>
           </div>
 
