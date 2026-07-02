@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Package,
@@ -213,7 +213,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [searchingCities, setSearchingCities] = useState(false);
-  // Flag that prevents search after a city has been selected
   const [cityLocked, setCityLocked] = useState(false);
 
   const debouncedCitySearch = useDebounce(deliveryCity, 400);
@@ -312,7 +311,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Online city search via Nominatim – skip if city is locked (already selected)
   useEffect(() => {
     if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
       setCitySuggestions([]);
@@ -343,7 +341,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
-            // Spolahliva detekcia krajiny: kontrolujeme aj country_code aj nazov krajiny
             const countryCode = item.country_code || '';
             const countryName = (address.country || '').toLowerCase();
             const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
@@ -358,7 +355,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               nearestPoint: nearest.name,
             };
           });
-          // Deduplicate by name
           const seen = new Set<string>();
           const unique = mapped.filter(c => {
             const key = c.name.toLowerCase();
@@ -390,7 +386,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       clearDelivery();
     } else {
       setDeliverySelected(true);
-      // focus the input after state update
       requestAnimationFrame(() => {
         const input = document.getElementById('city-input');
         if (input) input.focus();
@@ -601,7 +596,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       {includeLights ? 'SO SVETLAMI' : 'BEZ SVETIEL'}
                     </span>
                   </div>
-                  {/* POPIS pod názvom */}
                   <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-2">
                     {selectedPackage.description}
                   </p>
@@ -626,7 +620,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             </div>
 
-            {/* ZVUK A SVETLÁ - zväčšené karty */}
+            {/* ZVUK A SVETLÁ */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-6 md:p-7 space-y-4">
                 <span className="text-sm font-bold uppercase tracking-widest text-[#BD20D3] flex items-center gap-1.5 pb-3 border-b border-white/[0.08]">
@@ -659,7 +653,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           size={20}
                         />
                         <span className="text-sm font-bold text-white uppercase tracking-wider">
-                          Svetlá, efekty & show
+                          Svetlá, efekty & show – na diskotéku alebo akciu
                         </span>
                       </div>
                       <div
@@ -728,13 +722,12 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               )}
             </div>
 
-            {/* DOPLNKOVÉ SLUŽBY (inštalácia + doprava) */}
+            {/* DOPLNKOVÉ SLUŽBY */}
             <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
               <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
                 <Wrench size={16} /> Doplnkové služby
               </span>
 
-              {/* Inštalácia */}
               <div
                 onClick={() => {
                   setInstallSelected(!installSelected);
@@ -756,14 +749,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
                   <span className="text-xs text-gray-300 font-medium">Inštalácia</span>
                 </div>
-                <span
-                  className={`text-xs font-bold ${installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}
-                >
-                  +20 €
-                </span>
+                <span className={`text-xs font-bold ${installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>+20 €</span>
               </div>
 
-              {/* Inštalácia a deinštalácia */}
               <div
                 onClick={() => {
                   setInstallUninstallSelected(!installUninstallSelected);
@@ -778,53 +766,23 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                      installUninstallSelected
-                        ? 'bg-[#1A4BFF] border-[#1A4BFF]'
-                        : 'border-gray-500'
+                      installUninstallSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'
                     }`}
                   >
-                    {installUninstallSelected && (
-                      <Check size={12} className="text-white stroke-[3]" />
-                    )}
+                    {installUninstallSelected && <Check size={12} className="text-white stroke-[3]" />}
                   </div>
-                  <span className="text-xs text-gray-300 font-medium">
-                    Inštalácia a deinštalácia
-                  </span>
+                  <span className="text-xs text-gray-300 font-medium">Inštalácia a deinštalácia</span>
                 </div>
-                <span
-                  className={`text-xs font-bold ${
-                    installUninstallSelected ? 'text-[#1A4BFF]' : 'text-gray-500'
-                  }`}
-                >
-                  +40 €
-                </span>
+                <span className={`text-xs font-bold ${installUninstallSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>+40 €</span>
               </div>
 
-              {/* Deliaca čiara */}
               <div className="border-t border-white/[0.06] pt-3 space-y-2">
-                {/* Doprava */}
                 <div className="relative" ref={cityRef}>
-                  <div
-                    onClick={toggleDelivery}
-                    className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20"
-                  >
-                    <div
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${
-                        deliverySelected
-                          ? 'bg-[#1A4BFF] border-[#1A4BFF]'
-                          : 'border-gray-500'
-                      }`}
-                    >
+                  <div onClick={toggleDelivery} className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20">
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
                       {deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
                     </div>
-
-                    <MapPin
-                      size={14}
-                      className={`shrink-0 ${
-                        deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'
-                      }`}
-                    />
-
+                    <MapPin size={14} className={`shrink-0 ${deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
                     <div className="flex-1 min-w-0">
                       <Input
                         id="city-input"
@@ -844,32 +802,17 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
                       />
                     </div>
-
                     <div className="shrink-0 min-w-[70px] text-right">
                       {deliverySelected && deliveryResult ? (
-                        <span
-                          className={`text-xs font-bold ${
-                            deliveryResult.isFree
-                              ? 'text-emerald-400'
-                              : 'text-[#1A4BFF]'
-                          }`}
-                        >
+                        <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>
                           {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}
                         </span>
                       ) : (
                         <span className="text-xs text-gray-500">Vybrať</span>
                       )}
                     </div>
-
                     {deliverySelected && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          clearDelivery();
-                        }}
-                        className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0"
-                      >
+                      <button type="button" onClick={(e) => { e.stopPropagation(); clearDelivery(); }} className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0">
                         <X size={10} />
                       </button>
                     )}
@@ -884,18 +827,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       )}
                       {citySuggestions.map((city, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => selectCity(city.name, city.lat, city.lng)}
-                          className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
-                        >
+                        <button key={i} type="button" onClick={() => selectCity(city.name, city.lat, city.lng)} className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer">
                           <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-white truncate">{city.name}</p>
-                            <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">
-                              {[city.postcode, city.district].filter(Boolean).join(', ')}
-                            </span>
+                            <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">{[city.postcode, city.district].filter(Boolean).join(', ')}</span>
                           </div>
                           <div className="text-right shrink-0">
                             <span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
@@ -913,34 +849,19 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
                   {deliverySelected && deliveryResult && (
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
-                      <span
-                        className={`font-bold px-2 py-0.5 rounded-full ${
-                          deliveryResult.isFree
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
-                        }`}
-                      >
-                        {deliveryResult.isFree
-                          ? '✓ Doprava ZDARMA'
-                          : `${deliveryResult.price} €`}
+                      <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>
+                        {deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price} €`}
                       </span>
                       {!deliveryResult.isFree && (
-                        <span className="text-gray-400 flex items-center gap-1">
-                          <Navigation size={10} />
-                          {deliveryResult.distance} km od {deliveryResult.nearestPoint}
-                        </span>
+                        <span className="text-gray-400 flex items-center gap-1"><Navigation size={10} /> {deliveryResult.distance} km od {deliveryResult.nearestPoint}</span>
                       )}
-                      {deliveryResult.isKysuce && (
-                        <span className="text-gray-500">(Kysuce – zadarmo)</span>
-                      )}
+                      {deliveryResult.isKysuce && <span className="text-gray-500">(Kysuce – zadarmo)</span>}
                     </div>
                   )}
                 </div>
 
                 <p className="text-[10px] text-gray-500 leading-relaxed">
-                  Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od
-                  výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme
-                  0,70 € / km.
+                  Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.
                 </p>
               </div>
             </div>
@@ -948,33 +869,24 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             {/* ĎALŠIE PRODUKTY */}
             <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-5 space-y-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-300 flex items-center gap-1.5 pb-2 border-b border-white/[0.06]">
-                <ShoppingBag size={16} className="text-[#1A4BFF]" /> Ďalšie produkty
-                (voliteľné)
+                <ShoppingBag size={16} className="text-[#1A4BFF]" /> Ďalšie produkty (voliteľné)
               </span>
 
               <div className="relative" ref={searchRef}>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <Search
-                      size={14}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                    />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                     <Input
                       ref={searchInputRef}
                       type="text"
                       value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setSearchOpen(true);
-                        setSelectedItem(null);
-                      }}
+                      onChange={(e) => { setSearchTerm(e.target.value); setSearchOpen(true); setSelectedItem(null); }}
                       onFocus={() => setSearchOpen(true)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           if (selectedItem) confirmRentalItem();
-                          else if (filteredItems.length > 0)
-                            setSelectedItem(filteredItems[0]);
+                          else if (filteredItems.length > 0) setSelectedItem(filteredItems[0]);
                           else if (searchTerm.trim()) addCustomProduct();
                         }
                       }}
@@ -1000,191 +912,77 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   <>
                     {loadingItems && (
                       <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-3 text-center z-50">
-                        <Loader2
-                          size={14}
-                          className="mx-auto mb-1 text-[#1A4BFF] animate-spin"
-                        />
+                        <Loader2 size={14} className="mx-auto mb-1 text-[#1A4BFF] animate-spin" />
                         <p className="text-[10px] text-gray-500">Hľadám...</p>
                       </div>
                     )}
                     {!loadingItems && dbError && (
                       <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/10 rounded-xl p-3 text-center z-50">
-                        <p className="text-[10px] text-gray-500">
-                          Databáza nie je dostupná – môžete pridať vlastnú položku.
-                        </p>
+                        <p className="text-[10px] text-gray-500">Databáza nie je dostupná – môžete pridať vlastnú položku.</p>
                       </div>
                     )}
-                    {!loadingItems &&
-                      !dbError &&
-                      filteredItems.length > 0 &&
-                      !selectedItem && (
-                        <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
-                          {filteredItems.map((item) => {
-                            const remaining = getAvailableForItem(
-                              item.name,
-                              item.availableCount
-                            );
-                            return (
-                              <button
-                                key={item.id}
-                                type="button"
-                                onClick={() => {
-                                  if (remaining <= 0) {
-                                    toast.error(
-                                      `Pre položku "${item.name}" nie sú k dispozícii ďalšie kusy.`
-                                    );
-                                    return;
-                                  }
-                                  setSelectedItem(item);
-                                  setItemQuantity(1);
-                                }}
-                                className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 ${
-                                  remaining > 0
-                                    ? 'hover:bg-[#1A4BFF]/5 cursor-pointer'
-                                    : 'opacity-40 cursor-not-allowed'
-                                }`}
-                              >
-                                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-white truncate">
-                                    {item.name}
-                                  </p>
-                                  {item.category && (
-                                    <p className="text-[9px] text-gray-500 uppercase tracking-wider">
-                                      {item.category}
-                                    </p>
-                                  )}
-                                </div>
-                                {item.price != null && (
-                                  <span className="text-[9px] text-gray-400 shrink-0 mr-2">
-                                    {item.price} €
-                                  </span>
-                                )}
-                                <div
-                                  className={`text-[9px] mr-2 shrink-0 ${
-                                    remaining > 0 ? 'text-emerald-400' : 'text-red-400'
-                                  }`}
-                                >
-                                  {remaining > 0 ? `${remaining} ks` : 'Vypredané'}
-                                </div>
-                                <div
-                                  className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                    remaining > 0
-                                      ? 'border-white/20 hover:bg-[#1A4BFF]/20 hover:border-[#1A4BFF]/40'
-                                      : 'border-red-500/30 bg-red-500/10'
-                                  }`}
-                                >
-                                  <Plus
-                                    size={10}
-                                    className={remaining > 0 ? 'text-white' : 'text-red-400'}
-                                  />
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                    {!loadingItems && !dbError && filteredItems.length > 0 && !selectedItem && (
+                      <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50">
+                        {filteredItems.map((item) => {
+                          const remaining = getAvailableForItem(item.name, item.availableCount);
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                if (remaining <= 0) {
+                                  toast.error(`Pre položku "${item.name}" nie sú k dispozícii ďalšie kusy.`);
+                                  return;
+                                }
+                                setSelectedItem(item);
+                                setItemQuantity(1);
+                              }}
+                              className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 ${remaining > 0 ? 'hover:bg-[#1A4BFF]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+                            >
+                              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-white truncate">{item.name}</p>
+                                {item.category && <p className="text-[9px] text-gray-500 uppercase tracking-wider">{item.category}</p>}
+                              </div>
+                              {item.price != null && <span className="text-[9px] text-gray-400 shrink-0 mr-2">{item.price} €</span>}
+                              <div className={`text-[9px] mr-2 shrink-0 ${remaining > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{remaining > 0 ? `${remaining} ks` : 'Vypredané'}</div>
+                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${remaining > 0 ? 'border-white/20 hover:bg-[#1A4BFF]/20 hover:border-[#1A4BFF]/40' : 'border-red-500/30 bg-red-500/10'}`}>
+                                <Plus size={10} className={remaining > 0 ? 'text-white' : 'text-red-400'} />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                     {!loadingItems && !dbError && selectedItem && (
                       <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-[#1A4BFF]/30 rounded-xl p-3 shadow-2xl z-50">
                         <div className="flex items-center gap-2.5 mb-2">
                           <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
-                            <img
-                              src={selectedItem.image}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
                           </div>
-                          <p className="text-xs font-bold text-white truncate flex-1">
-                            {selectedItem.name}
-                          </p>
-                          {selectedItem.price != null && (
-                            <span className="text-[10px] text-gray-300 font-bold">
-                              {selectedItem.price} € / ks / víkend
-                            </span>
-                          )}
+                          <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
+                          {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold">{selectedItem.price} € / ks / víkend</span>}
                         </div>
                         <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/[0.08] rounded-xl p-2">
-                          <span className="text-[10px] text-gray-400 uppercase shrink-0">
-                            Počet:
-                          </span>
+                          <span className="text-[10px] text-gray-400 uppercase shrink-0">Počet:</span>
                           <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setItemQuantity(Math.max(1, itemQuantity - 1))
-                              }
-                              className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span className="w-8 text-center text-white font-bold text-sm">
-                              {itemQuantity}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const maxAvailable = getAvailableForItem(
-                                  selectedItem.name,
-                                  selectedItem.availableCount
-                                );
-                                setItemQuantity(Math.min(maxAvailable, itemQuantity + 1));
-                              }}
-                              disabled={
-                                itemQuantity >=
-                                getAvailableForItem(
-                                  selectedItem.name,
-                                  selectedItem.availableCount
-                                )
-                              }
-                              className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
-                            >
-                              <Plus size={12} />
-                            </button>
+                            <button type="button" onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))} className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"><Minus size={12} /></button>
+                            <span className="w-8 text-center text-white font-bold text-sm">{itemQuantity}</span>
+                            <button type="button" onClick={() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); setItemQuantity(Math.min(maxAvailable, itemQuantity + 1)); }} disabled={itemQuantity >= getAvailableForItem(selectedItem.name, selectedItem.availableCount)} className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"><Plus size={12} /></button>
                           </div>
                         </div>
                         <p className="text-[9px] text-gray-500 mt-1">
                           {(() => {
-                            const maxAvailable = getAvailableForItem(
-                              selectedItem.name,
-                              selectedItem.availableCount
-                            );
-                            const usedInPkg = getUsedInPackageForDbItem(
-                              selectedItem.name,
-                              packageUsedCounts
-                            );
-                            return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${(
-                              (selectedItem.price ?? 0) * itemQuantity
-                            ).toFixed(2)} € / víkend`;
+                            const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+                            const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
+                            return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${(selectedItem.price ?? 0) * itemQuantity} € / víkend`;
                           })()}
                         </p>
                         <div className="flex gap-2 mt-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedItem(null);
-                              setItemQuantity(1);
-                            }}
-                            className="text-[10px] text-gray-400 hover:text-white h-8 flex-1"
-                          >
-                            Zrušiť
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={confirmRentalItem}
-                            className="bg-[#1A4BFF]/15 hover:bg-[#1A4BFF]/30 border border-[#1A4BFF]/25 text-white rounded-lg h-8 flex-1 text-[10px] font-semibold transition-all"
-                          >
-                            <ShoppingBag size={12} className="mr-1" />
-                            Pridať {itemQuantity} ks
-                          </Button>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedItem(null); setItemQuantity(1); }} className="text-[10px] text-gray-400 hover:text-white h-8 flex-1">Zrušiť</Button>
+                          <Button type="button" size="sm" onClick={confirmRentalItem} className="bg-[#1A4BFF]/15 hover:bg-[#1A4BFF]/30 border border-[#1A4BFF]/25 text-white rounded-lg h-8 flex-1 text-[10px] font-semibold transition-all"><ShoppingBag size={12} className="mr-1" /> Pridať {itemQuantity} ks</Button>
                         </div>
                       </div>
                     )}
@@ -1195,25 +993,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               {additionalProducts.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-2">
                   {additionalProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center gap-1.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 rounded-full pl-3 pr-1.5 py-1"
-                    >
-                      <span className="text-[11px] text-white truncate max-w-[180px]">
-                        {product.label}
-                      </span>
-                      {product.pricePerDay > 0 && (
-                        <span className="text-[9px] text-[#1A4BFF] font-bold">
-                          ({product.pricePerDay} €/ks)
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeAdditionalProduct(product.id)}
-                        className="w-4 h-4 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center"
-                      >
-                        <X size={9} />
-                      </button>
+                    <div key={product.id} className="flex items-center gap-1.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 rounded-full pl-3 pr-1.5 py-1">
+                      <span className="text-[11px] text-white truncate max-w-[180px]">{product.label}</span>
+                      {product.pricePerDay > 0 && <span className="text-[9px] text-[#1A4BFF] font-bold">({product.pricePerDay} €/ks)</span>}
+                      <button type="button" onClick={() => removeAdditionalProduct(product.id)} className="w-4 h-4 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center"><X size={9} /></button>
                     </div>
                   ))}
                 </div>
@@ -1227,9 +1010,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </span>
               <div className="flex justify-between text-xs text-gray-400">
                 <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
-                <span className="text-white font-semibold">
-                  {activePackagePrice} € / víkend
-                </span>
+                <span className="text-white font-semibold">{activePackagePrice} € / víkend</span>
               </div>
 
               {installSelected && (
@@ -1248,45 +1029,29 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               {deliverySelected && deliveryResult && (
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>Doprava ({deliveryCity}):</span>
-                  <span
-                    className={
-                      deliveryResult.isFree
-                        ? 'text-emerald-400 font-semibold'
-                        : 'text-[#1A4BFF] font-semibold'
-                    }
-                  >
-                    {deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}
-                  </span>
+                  <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
                 </div>
               )}
 
               {additionalProducts.length > 0 && (
                 <>
                   <div className="border-t border-white/[0.06] pt-2 mt-2 space-y-1.5">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
-                      Pridané produkty:
-                    </p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Pridané produkty:</p>
                     {additionalProducts.map((p) => {
                       const itemCost = p.pricePerDay * p.quantity;
                       return (
                         <div key={p.id} className="flex justify-between text-[11px] text-gray-400">
                           <span className="flex items-center gap-1">
                             <Plus size={10} className="text-[#1A4BFF]" />
-                            <span>
-                              {p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}
-                            </span>
+                            <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                           </span>
-                          <span className="text-white font-medium">
-                            {itemCost.toFixed(2)} € / víkend
-                          </span>
+                          <span className="text-white font-medium">{itemCost.toFixed(2)} € / víkend</span>
                         </div>
                       );
                     })}
                     <div className="flex justify-between text-xs text-gray-400 border-t border-white/[0.06] pt-1">
                       <span className="text-[#1A4BFF] font-semibold">Medzisúčet produktov:</span>
-                      <span className="text-[#1A4BFF] font-bold">
-                        {additionalProductsCost.toFixed(2)} € / víkend
-                      </span>
+                      <span className="text-[#1A4BFF] font-bold">{additionalProductsCost.toFixed(2)} € / víkend</span>
                     </div>
                   </div>
                 </>
@@ -1294,26 +1059,14 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
               <div className="flex justify-between items-center border-t border-[#BD20D3]/20 pt-2 mt-2">
                 <span className="text-sm font-bold text-white">Celková cena na víkend:</span>
-                <span className="text-[#BD20D3] text-xl font-extrabold">
-                  {totalPrice.toFixed(2)} €
-                </span>
+                <span className="text-[#BD20D3] text-xl font-extrabold">{totalPrice.toFixed(2)} €</span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1"
-              >
-                Zavrieť
-              </Button>
-              <Button
-                onClick={handleAddToCart}
-                className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold"
-              >
-                <ShoppingBag size={16} className="mr-2" />
-                Pridať do košíka
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1">Zavrieť</Button>
+              <Button onClick={handleAddToCart} className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold">
+                <ShoppingBag size={16} className="mr-2" /> Pridať do košíka
               </Button>
             </div>
           </div>

@@ -63,7 +63,7 @@ const PRESET_FALLBACK: PresetPackage[] = [
     priceNoLights: 140,
     priceWithLights: 180,
     image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
-    description: 'Rodinné oslavy, komorné svadby do 30 ľudí.',
+    description: 'Rodinné oslavy, komorné akcie do 30 ľudí.',
     soundSpecs: ['2x Behringer B112D', '1x Sub B1500XP', '2x mikrofón'],
     lightSpecs: ['BeamZ Party Bar', '2x Laser', 'Dymostroj']
   },
@@ -73,7 +73,7 @@ const PRESET_FALLBACK: PresetPackage[] = [
     priceNoLights: 180,
     priceWithLights: 270,
     image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
-    description: 'Klasická svadba alebo stredne veľká oslava do 100 ľudí.',
+    description: 'Klasická oslava alebo stredne veľká akcia do 100 ľudí.',
     soundSpecs: ['2x Behringer B112D', '1x Sub 18" DSP', '2x mikrofón'],
     lightSpecs: ['6x RGBWA Par', '2x Rotujúca hlava', 'Holografický Laser', 'Dymostroj']
   },
@@ -93,7 +93,7 @@ const PRESET_FALLBACK: PresetPackage[] = [
     priceNoLights: 250,
     priceWithLights: 430,
     image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
-    description: 'Luxusné svadby, firemné eventy nad 100 ľudí.',
+    description: 'Veľké firemné eventy a akcie nad 100 ľudí.',
     soundSpecs: ['2x Behringer B112D', '3x Sub 18" DSP', 'digitálny mixpult'],
     lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', 'Holografický Laser', '2x Dymostroj']
   },
@@ -189,11 +189,11 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
           <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
             Zabezpečte si špičkový zvuk <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
-              a svetlo na akciu
+              a svetlo na akciu, chatu alebo oslavu
             </span>
           </h1>
           <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Chystáte akciu? Vyberte si predpripravený komplet alebo si vyskladajte vlastnú aparatúru.
+            Chystáte oslavu, párty na chate, diskotéku alebo firemnú akciu? Vyberte si predpripravený komplet alebo si vyskladajte vlastnú aparatúru v Žiline, Čadci a Kysuciach.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -224,7 +224,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
               <Sparkles size={14} className="animate-spin-slow" />
               <span>Bez starostí</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-white">Naša ponuka balíkov</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-white">Hotové balíky na akcie – vyberte si set pre oslavu, párty alebo chatu</h2>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
               Vyberte si jeden z našich overených a vyvážených setov, ktoré sme zostavili na základe stoviek úspešných akcií.
             </p>
@@ -329,7 +329,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             Vlastná konfigurácia
           </Badge>
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-            Potrebujete len konkrétny kus?
+            Potrebujete len konkrétny kus? Vyskladajte si vlastnú aparatúru
           </h2>
           <p className="text-gray-400 text-sm md:text-base">
             Prehliadajte našu kompletnú ponuku a nakombinujte si reproduktory, mikrofóny alebo káble podľa seba.

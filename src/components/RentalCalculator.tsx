@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calculator, Info, Tag } from 'lucide-react';
+import { Calculator, Info, Tag, PartyPopper, Home, Music } from 'lucide-react';
 
 const RentalCalculator = () => {
   const [selectedPackage, setSelectedPackage] = useState('party-m');
@@ -17,9 +17,9 @@ const RentalCalculator = () => {
   });
 
   const packages = {
-    'party-m': { name: 'Párty Set M', price: 80 },
+    'party-m': { name: 'Párty Set M (chata/oslavy)', price: 80 },
     'wedding-l': { name: 'Svadobný Set L', price: 150 },
-    'light-set': { name: 'Svetelný Balík', price: 60 },
+    'light-set': { name: 'Svetelný Balík (diskotéka)', price: 60 },
   };
 
   const [total, setTotal] = useState(0);
@@ -52,15 +52,15 @@ const RentalCalculator = () => {
             
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kalkulačka prenájmu</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kalkulačka prenájmu na akcie</h2>
                 <p className="text-gray-300">
-                  Získajte okamžitý odhad ceny pre vaše podujatie. Stačí si vybrať balík a dĺžku prenájmu.
+                  Získajte okamžitý odhad ceny pre vašu oslavu, párty na chate alebo diskotéku. Stačí si vybrať balík a dĺžku prenájmu.
                 </p>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <Label className="text-white text-lg">1. Vyberte si balík</Label>
+                  <Label className="text-white text-lg">1. Vyberte si balík podľa akcie</Label>
                   <RadioGroup 
                     value={selectedPackage} 
                     onValueChange={setSelectedPackage}

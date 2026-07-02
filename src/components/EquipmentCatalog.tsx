@@ -84,8 +84,8 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
-                  <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry na akcie</h2>
+                  <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky pre oslavu, chatu alebo diskotéku</p>
                 </div>
 
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-2">
