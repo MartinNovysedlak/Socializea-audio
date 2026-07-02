@@ -9,8 +9,14 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, User, Calendar, ArrowRight } from 'lucide-react';
 import { blogService, BlogPost } from '@/lib/blogService';
 import { Link } from 'react-router-dom';
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 const Blog = () => {
+  usePageMeta(
+    'Blog – Socializea-audio | Tipy o ozvučení a svetlách v Žiline, Kysuciach',
+    'Prečítajte si odborné články o výbere ozvučenia, svetelnej show a DJ technike. Rady pre svadby, oslavy a akcie v Žiline, Čadci a Kysuciach.'
+  );
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 

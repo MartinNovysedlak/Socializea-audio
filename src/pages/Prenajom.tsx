@@ -21,103 +21,7 @@ import {
 import { EquipmentItem } from '@/lib/supabase';
 import { packagesService, PackageData } from '@/lib/packagesService';
 import PackageDetailDialog, { PackageOption } from '@/components/PackageDetailDialog';
-
-interface PresetPackage {
-  id: string;
-  name: string;
-  priceNoLights: number;
-  priceWithLights: number;
-  image: string;
-  isPopular?: boolean;
-  description: string;
-  soundSpecs: string[];
-  lightSpecs: string[];
-  otherSpecs?: string[];
-  warning?: string;
-}
-
-const PRESET_FALLBACK: PresetPackage[] = [
-  {
-    id: 'kompakt-prezentacia',
-    name: 'BALÍK 1: Kompakt Prezentácia',
-    priceNoLights: 100,
-    priceWithLights: 130,
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
-    description: 'Firemné prezentácie, prednášky, schôdze do 30-100 ľudí.',
-    soundSpecs: ['2x Behringer B112D', '1x Mix Xenyx 802', '2x bezdrôt mikrofón'],
-    lightSpecs: ['4x RGBWA UV Par']
-  },
-  {
-    id: 'party-mini',
-    name: 'BALÍK 2: Párty MINI (Chata / Oslava)',
-    priceNoLights: 110,
-    priceWithLights: 140,
-    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
-    description: 'Menšie narodeninové oslavy, DJ párty na chate do 30 ľudí.',
-    soundSpecs: ['1x Behringer B112D', '1x Sub B1500XP', '1x mikrofón'],
-    lightSpecs: ['BeamZ Party Bar', '2x Laser', 'Dymostroj']
-  },
-  {
-    id: 'oslava-mini',
-    name: 'BALÍK 3: Oslava MINI',
-    priceNoLights: 140,
-    priceWithLights: 180,
-    image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800',
-    description: 'Rodinné oslavy, komorné akcie do 30 ľudí.',
-    soundSpecs: ['2x Behringer B112D', '1x Sub B1500XP', '2x mikrofón'],
-    lightSpecs: ['BeamZ Party Bar', '2x Laser', 'Dymostroj']
-  },
-  {
-    id: 'oslava-medium',
-    name: 'BALÍK 4: Oslava MEDIUM',
-    priceNoLights: 180,
-    priceWithLights: 270,
-    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800',
-    description: 'Klasická oslava alebo stredne veľká akcia do 100 ľudí.',
-    soundSpecs: ['2x Behringer B112D', '1x Sub 18" DSP', '2x mikrofón'],
-    lightSpecs: ['6x RGBWA Par', '2x Rotujúca hlava', 'Holografický Laser', 'Dymostroj']
-  },
-  {
-    id: 'klub-medium',
-    name: 'BALÍK 5: Klub MEDIUM',
-    priceNoLights: 220,
-    priceWithLights: 340,
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800',
-    description: 'Klubové noci, stužkové, disko párty pre 100 ľudí.',
-    soundSpecs: ['2x Behringer B112D', '2x Sub 18" DSP', '2x mikrofón'],
-    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', 'Holografický Laser', '2x Dymostroj']
-  },
-  {
-    id: 'premium-max',
-    name: 'BALÍK 6: PREMIUM MAX',
-    priceNoLights: 250,
-    priceWithLights: 430,
-    image: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800',
-    description: 'Veľké firemné eventy a akcie nad 100 ľudí.',
-    soundSpecs: ['2x Behringer B112D', '3x Sub 18" DSP', 'digitálny mixpult'],
-    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', 'Holografický Laser', '2x Dymostroj']
-  },
-  {
-    id: 'klub-maximal',
-    name: 'BALÍK 7: Klub MAXIMAL',
-    priceNoLights: 380,
-    priceWithLights: 520,
-    image: 'https://images.unsplash.com/photo-1489641493513-ba4ee84ccee9?w=800',
-    description: 'Veľké diskotéky, festivalové stany nad 100 ľudí.',
-    soundSpecs: ['4x Sub 18" DSP', 'digitálny mixpult', 'procesor'],
-    lightSpecs: ['4x Rotujúca hlava', '6x RGBWA Par', '2x Dymostroj']
-  },
-  {
-    id: 'open-air-arena',
-    name: 'BALÍK 8: Open-Air ARENA',
-    priceNoLights: 480,
-    priceWithLights: 730,
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
-    description: 'Vonkajšie festivaly, hody, dni obce.',
-    soundSpecs: ['4x Behringer B112D', '5x Sub 18" DSP', 'digitálny mixpult'],
-    lightSpecs: ['4x Rotujúca hlava', '2x Laser BAR', '2x Plameňomet', '2x Dymostroj']
-  }
-];
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 interface PrenajomProps {
   quantities: Record<string, number>;
@@ -125,7 +29,14 @@ interface PrenajomProps {
   equipment: EquipmentItem[];
 }
 
+const PRESET_FALLBACK: PackageOption[] = [];
+
 const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
+  usePageMeta(
+    'Prenájom aparatúry – Socializea-audio | Žilina, Čadca, Kysuce',
+    'Prenajmite si profesionálne ozvučenie a svetelnú techniku v Žiline, Čadci a Kysuciach. Vyberte si z hotových balíkov alebo si vyskladajte vlastnú zostavu. Doprava a montáž po celom regióne.'
+  );
+
   const [loadedPackages, setLoadedPackages] = useState<PackageOption[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
@@ -177,7 +88,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     <main className="min-h-screen bg-[#020721]">
       <Navbar />
       
-      {/* SEKCIA 1: HERO */}
       <section className="relative pt-36 pb-16 overflow-hidden bg-gradient-to-b from-[#020721] via-[#05092a] to-[#020721]">
         <div className="absolute top-1/4 -left-20 w-80 h-80 bg-[#BD20D3]/10 rounded-full blur-[100px] pointer-events-none animate-float-slow" />
         <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-[#1A4BFF]/5 rounded-full blur-[100px] pointer-events-none animate-float-delayed" />
@@ -216,7 +126,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         </div>
       </section>
 
-      {/* SEKCIA 2: ALL PACKAGES */}
       <section id="sety" className="py-20 bg-[#020721]/50 border-y border-white/5 relative">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
@@ -322,7 +231,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         </div>
       </section>
 
-      {/* SEKCIA 3: SAMOSTATNÉ POLOŽKY */}
       <section id="polozky" className="py-16 bg-[#020721]">
         <div className="container mx-auto px-4 text-center max-w-4xl mb-12">
           <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 mb-4 px-3 py-1 text-xs uppercase tracking-wider font-semibold">
@@ -344,7 +252,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         />
       </section>
 
-      {/* DETAIL BALÍKA – zdieľaný komponent */}
       <PackageDetailDialog
         open={isDetailOpen}
         onOpenChange={(open) => {

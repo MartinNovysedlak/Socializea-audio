@@ -12,8 +12,14 @@ import FAQSection from '@/components/FAQSection';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import { usePageMeta } from '@/hooks/usePageMeta';
 
 const Index = () => {
+  usePageMeta(
+    'Socializea-audio | Prenájom a predaj zvukovej a svetelnej techniky v Žiline a Kysuciach',
+    'Profesionálny prenájom aparatúry v Žiline, Čadci a regióne Kysuce. Ozvučenie, svetlá, laserové show, DJ služby. Osobný odber v Čadci alebo Žiline. Kontaktujte nás!'
+  );
+
   return (
     <div className="min-h-screen bg-[#020721] text-white selection:bg-[#BD20D3]/30 selection:text-white">
       <Navbar />
