@@ -90,15 +90,6 @@ const Navbar = () => {
         }`}
       >
         <div className="flex flex-col gap-2 py-8 px-6">
-          {/* Tlačidlo zatvorenia */}
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="self-end text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors mb-4"
-            aria-label="Zavrieť menu"
-          >
-            <X size={22} />
-          </button>
-
           {navLinks.map((link, index) => (
             <Link
               key={link.name}
