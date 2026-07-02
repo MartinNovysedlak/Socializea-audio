@@ -40,9 +40,45 @@ import {
   Italic,
   Upload,
   Package,
-  HelpCircle
+  HelpCircle,
+  UploadCloud
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const DEFAULT_FAQS = [
+  {
+    question: 'Musím si techniku vyzdvihnúť sám, alebo mi ju doveziete?',
+    answer: 'Ponúkame obe možnosti. Techniku si môžete vyzdvihnúť osobne v Čadci, alebo v Žiline, alebo vám ju za poplatok dovezieme priamo na miesto akcie. Cenu dopravy si viete zrátať priamo na webe. Ponúkame aj možnosť kompletnej inštalácie a zapojenia na mieste.'
+  },
+  {
+    question: 'Zmestí sa mi aparatúra do auta?',
+    answer: 'Menšie balíky (ako Kompakt Prezentácia alebo Párty MINI) sa bez problémov zmestia do kufra bežného osobného auta. Pri väčších balíkoch (od Svadba MEDIUM vyššie), ktoré obsahujú 15" alebo 18" subwoofery a konštrukcie, budete potrebovať priestrannejšie combi, SUV alebo dodávku. Presné požiadavky na prevoz s vami radi preberieme pri rezervácii.'
+  },
+  {
+    question: 'Ako a kedy sa platí za prenájom?',
+    answer: 'Platba za prenájom prebieha pri prevzatí techniky. Akceptujeme platbu v hotovosti, prípadne pomocou QR kódu.'
+  },
+  {
+    question: 'Vyberáte pri prenájme vratnú kauciu?',
+    answer: 'Nie, pri prevzatí techniky nepožadujeme zloženie vratnej kaucie v hotovosti. V prípade poškodenia aparatúry alebo nedodržania podmienok prenájmu vám bude účtovaná pokuta podľa platnej zmluvy.'
+  },
+  {
+    question: 'Zvládnem aparatúru zapojiť, aj keď nemám skúsenosti?',
+    answer: 'Určite áno! Naše menšie a stredné balíky sú navrhnuté tak, aby ich zapojenie bolo intuitívne a zvládne ho aj laik ("Plug & Play"). Pri odovzdaní vám všetko ukážeme, vysvetlíme a v prípade potreby sme dostupní na telefóne. Pri zložitých konfiguráciách (Balík 6, 7 a 8) odporúčame priplatiť si našu inštaláciu.'
+  },
+  {
+    question: 'Čo ak sa počas akcie niečo pokazí?',
+    answer: 'Naša technika je pravidelne servisovaná a testovaná pred každým prenájmom. Ak by sa predsa len vyskytol technický problém, sme vám k dispozícii na telefóne a budeme sa snažiť situáciu čo najrýchlejšie vyriešiť, prípadne zabezpečíme náhradný kus, ak to bude v našich silách. Za poškodenie techniky nesprávnym zaobchádzaním alebo vonkajšími vplyvmi (rozliate nápoje, pád) zodpovedá nájomca.'
+  },
+  {
+    question: 'Potrebujem k technike nejaké špeciálne káble?',
+    answer: 'Nie, v cene každého balíka je zahrnutá kompletná kabeláž potrebná na prepojenie všetkých zapožičaných zariadení a napájacie káble. Štandardne pribalíme aj kábel (napr. s 3,5 mm Jackom) na pripojenie vášho notebooku alebo telefónu k mixpultu.'
+  },
+  {
+    question: 'Je možné si techniku prenajať aj na viac dní?',
+    answer: 'Áno, štandardná cena na webe platí na víkendový prenájom (napr. vyzdvihnutie v piatok, vrátenie v nedeľu). Ak potrebujete techniku na dlhší čas, radi vám vypracujeme individuálnu, zvýhodnenú cenovú ponuku.'
+  }
+];
 
 const Admin = () => {
   const [username, setUsername] = useState('');
@@ -129,6 +165,7 @@ const Admin = () => {
     question: '',
     answer: ''
   });
+  const [seedingFaqs, setSeedingFaqs] = useState(false);
 
   useEffect(() => {
     const authStatus = sessionStorage.getItem('admin_authenticated');
@@ -774,6 +811,42 @@ const Admin = () => {
     }
   };
 
+  const handleSeedFaqs = async () => {
+    if (faqItems.length > 0) {
+      const confirmed = window.confirm('Už existujú nejaké FAQ otázky. Naozaj chcete nahrať štandardné otázky? (Pôvodné ostanú zachované, nové sa pridajú na koniec.)');
+      if (!confirmed) return;
+    }
+
+    setSeedingFaqs(true);
+    const toastId = toast.loading('Nahrávam štandardné FAQ otázky...');
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < DEFAULT_FAQS.length; i++) {
+      const faq = DEFAULT_FAQS[i];
+      const created = await faqService.create(
+        { question: faq.question, answer: faq.answer },
+        faqItems.length + i
+      );
+      if (created) {
+        successCount++;
+      } else {
+        errorCount++;
+      }
+    }
+
+    toast.dismiss(toastId);
+    if (errorCount === 0) {
+      toast.success(`Úspešne nahratých ${successCount} FAQ otázok!`);
+    } else {
+      toast.error(`Nahratých ${successCount} otázok, ${errorCount} zlyhalo.`);
+    }
+
+    await loadFaqs();
+    setSeedingFaqs(false);
+  };
+
   return (
     <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
       <Navbar />
@@ -1164,9 +1237,20 @@ const Admin = () => {
               <TabsContent value="faqs" className="space-y-6">
                 <div className="flex justify-between items-center bg-white/2 p-4 rounded-2xl border border-white/5">
                   <span className="text-sm text-gray-400">Správa často kladených otázok (FAQ)</span>
-                  <Button onClick={handleOpenFaqAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
-                    <Plus size={16} className="mr-1.5" /> Pridať otázku
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleSeedFaqs}
+                      disabled={seedingFaqs}
+                      variant="outline"
+                      className="border-white/10 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl h-10 px-4"
+                    >
+                      <UploadCloud size={16} className="mr-1.5" />
+                      {seedingFaqs ? 'Nahrávam...' : 'Nahrať štandardné otázky'}
+                    </Button>
+                    <Button onClick={handleOpenFaqAdd} className="btn-cyber rounded-xl h-10 px-5 border-none">
+                      <Plus size={16} className="mr-1.5" /> Pridať otázku
+                    </Button>
+                  </div>
                 </div>
 
                 <Card className="bg-[#020721]/60 border border-white/10 rounded-3xl overflow-hidden">
@@ -1212,7 +1296,7 @@ const Admin = () => {
                           {faqItems.length === 0 && (
                             <tr>
                               <td colSpan={4} className="text-center py-8 text-gray-500 italic">
-                                Zatiaľ tu nie sú žiadne FAQ otázky. Pridajte prvú.
+                                Zatiaľ tu nie sú žiadne FAQ otázky. Pridajte prvú alebo kliknite na "Nahrať štandardné otázky".
                               </td>
                             </tr>
                           )}
