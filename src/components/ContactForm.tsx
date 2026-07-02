@@ -53,7 +53,7 @@ const ContactForm = () => {
                   <div>
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Rezervujte si termín v Žiline alebo Čadci</h2>
                     <p className="text-gray-300 text-lg leading-relaxed">
-                      Máte otázky ohľadom prenájmu aparatúry v Čadci alebo v Žiline? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru. Pôsobíme v celom Kysuckom regióne.
+                      Máte otázky ohľadom prenájmu aparatúry v Čadci alebo v Žiline? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru. Pôsobíme v celom Kysuckom regióne. Zavolajte alebo napíšte a my sa vám ozveme.
                     </p>
                   </div>
 
@@ -166,7 +166,7 @@ const ContactForm = () => {
                             <FormLabel className="text-gray-300">Vaša správa</FormLabel>
                             <FormControl>
                               <Textarea 
-                                placeholder="Mám záujem o prenájom ozvučenia v Čadci na svadbu..." 
+                                placeholder="Mám záujem o prenájom ozvučenia v Čadci na oslavu..." 
                                 className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
                                 {...field} 
                               />

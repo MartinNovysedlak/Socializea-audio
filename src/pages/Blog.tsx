@@ -42,7 +42,7 @@ const Blog = () => {
           <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
             Rady, tipy & novinky <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF]">
-              zo sveta audio-techniky
+              zo sveta audio-techniky, DJ techniky a osvetlenia pre akcie v Žiline, Čadci a Kysuciach
             </span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -114,6 +114,13 @@ const Blog = () => {
             })}
           </div>
         )}
+
+        {/* SEO text v pätičke blogu */}
+        <div className="mt-16 pt-8 border-t border-white/5 max-w-4xl mx-auto text-center">
+          <p className="text-gray-500 text-xs leading-relaxed">
+            Vitajte na blogu Socializea-audio – zdroji rád a tipov o prenájme aparatúry, výbere ozvučenia a svetelnej show pre akcie v Žiline, Čadci a regióne Kysuce. Dozviete sa, ako si správne vybrať reproduktory na chatu, aké svetlá sú vhodné na diskotéku, alebo ako nastaviť mixážny pult pre firemný event. Sledujte novinky zo sveta DJ techniky, trendov v stage designe a praktické rady pre každú oslavu.
+          </p>
+        </div>
       </div>
 
       <Footer />
