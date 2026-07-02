@@ -395,6 +395,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasEquipment = totalEquipmentQty > 0;
 
+  // Spočítame celkový počet inštalácií a deinštalácií z balíkov
+  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
+  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
+
   return (
     <>
       <style>{`
@@ -707,17 +711,30 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Inštalácia – iba ak je zaskrtnutá, nikdy oboje */}
-                    {installSelected && !installUninstallSelected && (
+                    {/* Inštalácia – z aparatúry aj z balíkov */}
+                    {(installSelected && !installUninstallSelected) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
-                        <span className="text-[#1A4BFF] font-semibold">+20 €</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{installCost + packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
                       </div>
                     )}
-                    {installUninstallSelected && !installSelected && (
+                    {(installUninstallSelected && !installSelected) && (
                       <div className="flex justify-between text-base text-gray-400">
                         <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
-                        <span className="text-[#1A4BFF] font-semibold">+40 €</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost + packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
+                      </div>
+                    )}
+                    {/* Ak balík má inštaláciu a aparatúra nemá nič vybrané – zobraz len balíkovú inštaláciu */}
+                    {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
+                      </div>
+                    )}
+                    {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
                       </div>
                     )}
 
