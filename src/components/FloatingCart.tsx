@@ -696,17 +696,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                                   <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-xs text-white truncate">{city.name}</p>
-                                    <span className="text-[9px] text-gray-500/70 leading-tight block mt-0.5">
+                                    <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">
                                       {[city.postcode, city.district].filter(Boolean).join(', ')}
                                     </span>
                                   </div>
                                   <div className="text-right shrink-0">
                                     <span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
                                     {city.distToNearest !== undefined && city.distToNearest > 0 && (
-                                      <span className="text-[8px] text-gray-600 mt-0.5 block whitespace-nowrap">~{city.distToNearest} km od {city.nearestPoint}</span>
+                                      <span className="text-[10px] text-gray-600 mt-0.5 block whitespace-nowrap">~{city.distToNearest} km od {city.nearestPoint}</span>
                                     )}
                                     {city.distToNearest !== undefined && city.distToNearest <= 0 && (
-                                      <span className="text-[8px] text-emerald-500/60 mt-0.5 block">v mieste odberu</span>
+                                      <span className="text-[10px] text-emerald-500/60 mt-0.5 block">v mieste odberu</span>
                                     )}
                                   </div>
                                 </button>
