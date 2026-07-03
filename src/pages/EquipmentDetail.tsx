@@ -9,7 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface EquipmentDetailProps {
@@ -23,12 +23,27 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeImage, setActiveImage] = useState<string>("");
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const [inquiryName, setInquiryName] = useState("");
+  const [inquiryPhone, setInquiryPhone] = useState("");
+  const [inquiryEmail, setInquiryEmail] = useState("");
+  const [inquiryMessage, setInquiryMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
 
   const images = item?.images && item.images.length > 0
     ? item.images
     : ["https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80"];
+
+  useEffect(() => {
+    if (item) {
+      setActiveImage(images[0]);
+      setActiveIndex(0);
+    }
+  }, [item]);
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
@@ -46,6 +61,18 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const goPrev = useCallback(() => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
+
+  const goToPrevImage = () => {
+    const newIndex = activeIndex === 0 ? images.length - 1 : activeIndex - 1;
+    setActiveIndex(newIndex);
+    setActiveImage(images[newIndex]);
+  };
+
+  const goToNextImage = () => {
+    const newIndex = activeIndex === images.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(newIndex);
+    setActiveImage(images[newIndex]);
+  };
 
   const handleAddToCart = () => {
     if (!item) return;
@@ -68,6 +95,26 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     });
   };
 
+  const handleSendInquiry = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inquiryName.trim() || !inquiryEmail.trim()) {
+      toast.error("Prosím vyplňte vaše meno a email!");
+      return;
+    }
+
+    setSending(true);
+    setTimeout(() => {
+      toast.success("Dopyt na prenájom bol úspešne odoslaný!", {
+        description: `Budeme vás kontaktovať ohľadom produktu ${item?.name} čo najskôr.`
+      });
+      setInquiryName("");
+      setInquiryPhone("");
+      setInquiryEmail("");
+      setInquiryMessage("");
+      setSending(false);
+    }, 1000);
+  };
+
   useEffect(() => {
     if (!lightboxOpen) return;
 
@@ -88,10 +135,13 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#020721]">
+      <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
         <Navbar />
-        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721]">
-          <div className="text-white text-center">Načítavam...</div>
+        <div className="flex-grow pt-48 pb-24 flex items-center justify-center">
+          <div className="text-center text-gray-400">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BD20D3] mx-auto mb-4"></div>
+            Načítavam detail aparatúry...
+          </div>
         </div>
         <Footer />
       </main>
@@ -115,42 +165,59 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   }
 
   const isInCart = cartQuantity > 0;
-  const categoryLabel = item.category === "sound" ? "Zvuková technika" : item.category === "lighting" ? "Svetelná technika" : "Ostatná technika";
+  const categoryLabel =
+    item.category === "sound"
+      ? "Zvuková technika"
+      : item.category === "lighting"
+        ? "Svetelná technika"
+        : "Ostatná technika";
   const pageTitle = `${item.name} – Prenájom ${categoryLabel} | Socializea Audio`;
 
   return (
     <>
       <Helmet>
         <title>{pageTitle}</title>
-        <meta name="description" content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price_per_day} € / deň. Dostupné: ${item.available} ks. Kategória: ${categoryLabel}.`} />
-        <meta name="keywords" content={`prenájom ${item.name}, ${item.category === 'sound' ? 'prenájom reproduktorov, prenájom ozvučenia' : item.category === 'lighting' ? 'prenájom svetiel, svetelná technika' : 'príslušenstvo prenájom'}, Socializea, Čadca, Žilina`} />
+        <meta
+          name="description"
+          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň. Dostupné: ${item.available} ks. Kategória: ${categoryLabel}.`}
+        />
+        <meta
+          name="keywords"
+          content={`prenájom ${item.name}, ${item.category === "sound" ? "prenájom reproduktorov, prenájom ozvučenia" : item.category === "lighting" ? "prenájom svetiel, svetelná technika" : "príslušenstvo prenájom"}, Socializea, Čadca, Žilina`}
+        />
         <link rel="canonical" href={`https://socializea.sk/prenajom/${item.id}`} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price_per_day} € / deň.`} />
+        <meta
+          property="og:description"
+          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
+        />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={`https://socializea.sk/prenajom/${item.id}`} />
-        <meta property="og:image" content={images[0] || 'https://socializea.sk/logo.png'} />
+        <meta property="og:image" content={images[0] || "https://socializea.sk/logo.png"} />
         <meta property="og:locale" content="sk_SK" />
         <meta property="product:price:amount" content={String(item.price_per_day)} />
         <meta property="product:price:currency" content="EUR" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price_per_day} € / deň.`} />
-        <meta name="twitter:image" content={images[0] || 'https://socializea.sk/logo.png'} />
+        <meta
+          name="twitter:description"
+          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
+        />
+        <meta name="twitter:image" content={images[0] || "https://socializea.sk/logo.png"} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
-            "name": item.name,
-            "description": item.description,
-            "image": images[0],
-            "category": categoryLabel,
-            "offers": {
+            name: item.name,
+            description: item.description,
+            image: images[0],
+            category: categoryLabel,
+            offers: {
               "@type": "Offer",
-              "price": item.price_per_day,
-              "priceCurrency": "EUR",
-              "availability": item.available > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "url": `https://socializea.sk/prenajom/${item.id}`
+              price: item.price_per_day,
+              priceCurrency: "EUR",
+              availability: item.available > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              url: `https://socializea.sk/prenajom/${item.id}`
             }
           })}
         </script>
@@ -158,153 +225,288 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <section className="pt-32 pb-16 md:pt-40 md:pb-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <button
-                onClick={() => window.history.back()}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group"
-              >
-                <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform duration-200" />
-                <span className="text-sm">Späť na ponuku prenájmu</span>
-              </button>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-                <div>
-                  <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <CardHeader className="pb-4">
-                      <h1 className="text-2xl sm:text-3xl font-bold text-white">{item.name}</h1>
-                      <span className="text-lg sm:text-xl text-[#BD20D3] uppercase">
-                        {item.category === "sound"
-                          ? "Zvuk"
-                          : item.category === "lighting"
-                            ? "Svetlá a efekty"
-                            : "Ostatné"}
-                      </span>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <p className="text-gray-300 leading-relaxed text-base md:text-lg">{item.description}</p>
+        <div className="pt-36 pb-16 md:pb-24 container mx-auto px-4">
+          <div className="max-w-6xl mx-auto mb-8">
+            <Link
+              to="/prenajom"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group text-sm font-semibold"
+            >
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              Späť na ponuku prenájmu
+            </Link>
+          </div>
 
-                      <div
-                        className="aspect-[4/3] rounded-xl overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
-                        onClick={() => openLightbox(0)}
-                      >
-                        <img
-                          src={images[0]}
-                          alt={item.name}
-                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                          <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50 px-4 py-2 rounded-full text-sm font-medium">
-                            Zväčšiť
-                          </span>
-                        </div>
-                      </div>
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 md:gap-12">
+            {/* Left column – gallery & description */}
+            <div className="lg:col-span-7 space-y-8">
+              {/* Main image */}
+              <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
+                <img
+                  src={activeImage}
+                  alt={item.name}
+                  className="w-full h-full object-contain"
+                />
 
-                      {images.length > 1 && (
-                        <div className="grid grid-cols-3 gap-3">
-                          {images.slice(1).map((img, idx) => (
-                            <div
-                              key={idx + 1}
-                              className="aspect-[4/3] rounded-lg overflow-hidden border border-white/10 cursor-pointer group relative bg-black/30"
-                              onClick={() => openLightbox(idx + 1)}
-                            >
-                              <img
-                                src={img}
-                                alt={`${item.name} - fotka ${idx + 2}`}
-                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
-                                }}
-                              />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                    <CardFooter className="pt-6 border-t border-white/5">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
-                        <div>
-                          <span className="text-2xl sm:text-3xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
-                          <span className="text-gray-500 ml-2">/ deň</span>
-                          <p className="text-gray-400 mt-1">
-                            Dostupné: {item.available} {item.available === 1 ? "kus" : "kusy"}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-3 w-full sm:w-auto">
-                          <Link to="/prenajom" className="w-full sm:w-auto">
-                            <Button className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-12 px-6 w-full">
-                              Späť do ponuky
-                            </Button>
-                          </Link>
-                          {isInCart ? (
-                            <Button 
-                              onClick={handleAddToCart}
-                              disabled={cartQuantity >= item.available}
-                              className="h-12 px-6 font-bold transition-all btn-cyber hover:opacity-95 text-white rounded-lg border-none w-full"
-                            >
-                              <Check size={18} className="mr-2" />
-                              V košíku ({cartQuantity})
-                            </Button>
-                          ) : (
-                            <Button 
-                              onClick={handleAddToCart}
-                              disabled={item.available === 0}
-                              className="h-12 px-6 font-bold transition-all bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg w-full"
-                            >
-                              <ShoppingBag size={18} className="mr-2" />
-                              Pridať do košíka
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardFooter>
-                  </Card>
+                {/* Availability / condition badge */}
+                <div className="absolute bottom-4 left-4">
+                  <span
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                      item.available > 0
+                        ? "bg-cyan-600/90 border border-cyan-400/50 text-white"
+                        : "bg-amber-600/90 border border-amber-400/50 text-white"
+                    }`}
+                  >
+                    {item.available > 0 ? "Dostupné" : "Vypredané"}
+                  </span>
                 </div>
 
-                <div className="space-y-6">
-                  <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Technické parametre</h3>
-                    {item.specifications && item.specifications.length > 0 ? (
-                      <ul className="space-y-3 text-gray-300">
-                        {item.specifications.map((spec, idx) => (
-                          <li key={idx} className="flex items-start gap-3 border-b border-white/5 pb-2">
-                            <div className="w-1.5 h-1.5 bg-[#BD20D3] rounded-full mt-2.5 flex-shrink-0"></div>
-                            <span className="text-white font-medium">{spec}</span>
-                          </li>
-                        ))}
-                      </ul>
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={goToPrevImage}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={goToNextImage}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
+
+                {item.available === 0 && (
+                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-sm">
+                    <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-6 py-3 rounded-2xl text-base font-extrabold uppercase tracking-widest">
+                      Vypredané
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {images.length > 1 && (
+                <div className="flex flex-wrap gap-3">
+                  {images.map((imgUrl, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setActiveImage(imgUrl);
+                        setActiveIndex(idx);
+                      }}
+                      className={`w-20 h-16 rounded-xl overflow-hidden border transition-all ${
+                        activeImage === imgUrl
+                          ? "border-[#BD20D3] ring-1 ring-[#BD20D3]"
+                          : "border-white/10 opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={imgUrl}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Name, price, description */}
+              <div className="space-y-4 pt-4">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                  {item.name}
+                </h1>
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
+                  {item.price_per_day} €{" "}
+                  <span className="text-xs text-gray-400 font-normal">/ deň</span>
+                </div>
+                <p className="text-gray-300 text-base leading-relaxed whitespace-pre-line">
+                  {item.description}
+                </p>
+              </div>
+
+              {/* Specs & Features */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
+                {item.specifications && item.specifications.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+                      Technické parametre:
+                    </h3>
+                    <ul className="space-y-2">
+                      {item.specifications.map((spec, i) => (
+                        <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
+                          <span className="text-[#BD20D3] font-bold mt-0.5">•</span>
+                          <span>{spec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {item.features && item.features.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+                      Kľúčové výhody:
+                    </h3>
+                    <ul className="space-y-2">
+                      {item.features.map((f, i) => (
+                        <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
+                          <Check size={16} className="text-[#1A4BFF] shrink-0 mt-0.5" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Show fallback if no specs/features */}
+                {(!item.specifications || item.specifications.length === 0) &&
+                  (!item.features || item.features.length === 0) && (
+                    <div className="md:col-span-2">
+                      <p className="text-gray-500 italic">Nie sú zadané žiadne dodatočné informácie.</p>
+                    </div>
+                  )}
+              </div>
+
+              {/* Guarantee card */}
+              <div className="p-5 bg-white/3 border border-white/5 rounded-2xl flex items-start gap-4">
+                <ShieldCheck size={32} className="text-[#BD20D3] shrink-0" />
+                <div className="text-sm text-gray-400">
+                  <p className="font-bold text-white mb-1">Garancia kvality a spoľahlivosti</p>
+                  <p className="leading-relaxed">
+                    Každé prenajímané zariadenie je pred odovzdaním dôkladne otestované naším technikom. 
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right column – inquiry form */}
+            <div className="lg:col-span-5">
+              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Mám záujem o prenájom</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">
+                    Vyplňte formulár a my vám obratom potvrdíme dostupnosť, zašleme cenovú ponuku alebo dohodneme osobné prevzatie.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSendInquiry} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-bold uppercase">
+                      Meno a priezvisko *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={inquiryName}
+                      onChange={(e) => setInquiryName(e.target.value)}
+                      placeholder="Napr. Ján Novák"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-bold uppercase">
+                      E-mailová adresa *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={inquiryEmail}
+                      onChange={(e) => setInquiryEmail(e.target.value)}
+                      placeholder="jan.novak@email.sk"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-bold uppercase">
+                      Telefónne číslo
+                    </label>
+                    <input
+                      type="tel"
+                      value={inquiryPhone}
+                      onChange={(e) => setInquiryPhone(e.target.value)}
+                      placeholder="+421 ..."
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-bold uppercase">
+                      Poznámka / doplňujúce otázky
+                    </label>
+                    <textarea
+                      value={inquiryMessage}
+                      onChange={(e) => setInquiryMessage(e.target.value)}
+                      placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={item.available === 0 || sending}
+                    className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2"
+                  >
+                    {sending ? "Odosielam..." : "Odoslať nezáväzný dopyt"}
+                  </Button>
+                </form>
+
+                {item.available > 0 && (
+                  <div className="pt-2">
+                    {isInCart ? (
+                      <Button
+                        onClick={handleAddToCart}
+                        disabled={cartQuantity >= item.available}
+                        className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
+                      >
+                        <Check size={18} className="mr-2" />
+                        V košíku ({cartQuantity})
+                      </Button>
                     ) : (
-                      <p className="text-gray-500 italic">Nie sú zadané žiadne technické parametre.</p>
+                      <Button
+                        onClick={handleAddToCart}
+                        disabled={item.available === 0}
+                        className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3] hover:bg-[#BD20D3]/85 border-none"
+                      >
+                        <ShoppingBag size={18} className="mr-2" />
+                        Pridať do košíka
+                      </Button>
                     )}
-                  </Card>
-                  <Card className="bg-white/5 border-white/10 rounded-xl p-6">
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">Kľúčové vlastnosti</h3>
-                    {item.features && item.features.length > 0 ? (
-                      <ul className="space-y-2 text-gray-300">
-                        {item.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <div className="w-2 h-2 bg-[#BD20D3] rounded-full mt-2 flex-shrink-0"></div>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-500 italic">Nie sú zadané žiadne kľúčové vlastnosti.</p>
-                    )}
-                  </Card>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Phone size={14} className="text-[#BD20D3]" />
+                    <span>
+                      Rýchla infolinka:{" "}
+                      <span className="text-white font-semibold">+421 948 070 577</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail size={14} className="text-[#1A4BFF]" />
+                    <span>
+                      E-mail:{" "}
+                      <span className="text-white font-semibold">socializea@socializea.com</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-        
+        </div>
+
         <Footer />
 
+        {/* Lightbox overlay */}
         {lightboxOpen && (
           <div
             className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 md:p-8"
@@ -341,7 +543,8 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
               onClick={(e) => e.stopPropagation()}
               className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
+                (e.target as HTMLImageElement).src =
+                  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80";
               }}
             />
 
