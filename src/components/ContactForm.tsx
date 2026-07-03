@@ -225,7 +225,10 @@ const ContactForm = () => {
                                     initialFocus
                                     locale={sk}
                                     fromDate={new Date()}
-                                    className="bg-[#020721] text-white"
+                                    fromYear={new Date().getFullYear()}
+                                    toYear={new Date().getFullYear() + 5}
+                                    captionLayout="dropdown"
+                                    className="bg-[#020721] text-white [&_.rdp-nav]:mt-0 [&_.rdp-nav_button]:relative [&_.rdp-nav_button]:top-0 [&_.rdp-caption]:pt-2 [&_.rdp-caption_label]:text-white [&_.rdp-dropdown]:text-white [&_.rdp-dropdown]:bg-[#020721] [&_.rdp-dropdown]:border [&_.rdp-dropdown]:border-white/10 [&_.rdp-head_cell]:text-gray-400"
                                   />
                                 </PopoverContent>
                               </Popover>
