@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
-import { Send, Phone, Mail, MapPin } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Calendar } from 'lucide-react';
+import { DayPicker } from "react-day-picker";
+import { format, addDays, isBefore, startOfDay } from "date-fns";
+import "react-day-picker/dist/style.css";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
@@ -21,6 +24,9 @@ const formSchema = z.object({
 });
 
 const ContactForm = () => {
+  const [showDateCalendar, setShowDateCalendar] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,6 +37,16 @@ const ContactForm = () => {
       message: "",
     },
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowDateCalendar(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const toastId = toast.loading('Odosielam dopyt...');
@@ -62,6 +78,13 @@ const ContactForm = () => {
       console.error('EmailJS error:', error);
     }
   }
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      form.setValue('date', format(date, "yyyy-MM-dd"));
+      setShowDateCalendar(false);
+    }
+  };
 
   return (
     <section id="kontakt" className="py-12 bg-transparent relative">
@@ -172,14 +195,36 @@ const ContactForm = () => {
                           control={form.control}
                           name="date"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="relative" ref={calendarRef}>
                               <FormLabel className="text-gray-300">
                                 Dátum podujatia
                                 <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
                               </FormLabel>
-                              <FormControl>
-                                <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
+                              <div className="relative">
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    readOnly
+                                    placeholder="Vyberte dátum"
+                                    value={field.value ? format(new Date(field.value), "dd.MM.yyyy") : ""}
+                                    onClick={() => setShowDateCalendar(!showDateCalendar)}
+                                    className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] cursor-pointer pr-10"
+                                  />
+                                </FormControl>
+                                <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
+                              </div>
+                              {showDateCalendar && (
+                                <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
+                                  <DayPicker
+                                    mode="single"
+                                    selected={field.value ? new Date(field.value) : undefined}
+                                    onSelect={handleDateSelect}
+                                    disabled={[{ before: startOfDay(new Date()) }]}
+                                    weekStartsOn={1}
+                                    initialFocus={showDateCalendar}
+                                  />
+                                </div>
+                              )}
                               <FormMessage />
                             </FormItem>
                           )}
