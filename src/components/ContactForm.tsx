@@ -74,7 +74,7 @@ const ContactForm = () => {
       setSubmitted(true);
       form.reset();
     } catch (error) {
-      toast.error('Nepodarilo sa odoslať dopyt.', {
+      toast.error('Nepodarilo sa odoslať správu.', {
         description: 'Skúste to prosím neskôr alebo nás kontaktujte telefonicky.',
       });
       console.error('EmailJS error:', error);
@@ -103,9 +103,9 @@ const ContactForm = () => {
                 
                   <div className="space-y-10">
                     <div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">Rezervujte si termín</h2>
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">Máte otázku?</h2>
                       <p className="text-gray-300 text-base md:text-lg leading-relaxed">
-                        Máte otázky alebo si chcete overiť dostupnosť techniky? Vyplňte formulár a my vám pripravíme nezáväznú cenovú ponuku na mieru.
+                        Chcete sa na niečo spýtať, overiť dostupnosť techniky alebo potrebujete poradiť? Vyplňte formulár nižšie a my sa vám ozveme čo najskôr.
                       </p>
                     </div>
 
@@ -298,7 +298,7 @@ const ContactForm = () => {
                             </>
                           ) : (
                             <>
-                              <span>Odoslať nezáväzný dopyt</span>
+                              <span>Odoslať otázku</span>
                               <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                             </>
                           )}
@@ -318,15 +318,15 @@ const ContactForm = () => {
 
       <Dialog open={submitted} onOpenChange={setSubmitted}>
         <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 className="text-green-400" size={32} />
+          <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="text-[#BD20D3]" size={32} />
           </div>
           <DialogHeader className="space-y-3">
             <DialogTitle className="text-2xl font-bold text-white">
-              Ďakujeme za vašu otázku!
+              Ďakujeme!
             </DialogTitle>
             <DialogDescription className="text-gray-300 text-base leading-relaxed">
-              Vašu otázku sme úspešne prijali. Budeme sa jej venovať a čo najskôr vás budeme kontaktovať.
+              Vaša správa bola úspešne odoslaná. Budeme sa jej venovať a čoskoro sa vám ozveme späť.
             </DialogDescription>
           </DialogHeader>
           <Button 
