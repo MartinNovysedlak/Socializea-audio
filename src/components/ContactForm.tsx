@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { Send, Phone, Mail, MapPin, Building, Calendar as CalendarIcon } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Building, Warehouse, Calendar as CalendarIcon } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -215,7 +215,10 @@ const ContactForm = () => {
                         <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-3">Kde nás nájdete</p>
                         <div className="space-y-4">
                           <div>
-                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
+                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1 flex items-center gap-2">
+                              <Warehouse size={16} className="shrink-0" />
+                              Hlavný sklad a sídlo
+                            </p>
                             <p className="text-white text-lg leading-snug">Čadečka 1924</p>
                             <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
                           </div>
