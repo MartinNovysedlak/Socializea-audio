@@ -44,7 +44,7 @@ serve(async (req: Request) => {
 
     // --- Pevne nastavené adresy (testovací režim) ---
     const FROM = "onboarding@resend.dev"
-    const TO = "socializea@socializea.com"
+    const TO = "martinnovysedlak48@gmail.com"
 
     const subject = `Dopyt od ${clientName} – ${pkg}`
 
