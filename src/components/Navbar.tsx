@@ -77,9 +77,29 @@ const Navbar = () => {
           
           {/* panel */}
           <div 
-            className="relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 animate-in slide-in-from-right duration-300 h-full flex flex-col justify-center px-8"
+            className="relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 animate-in slide-in-from-right duration-300 h-full flex flex-col"
           >
-            <div className="space-y-6 w-full text-center">
+            {/* Header s logom a krížikom */}
+            <div className="flex items-center justify-between px-6 h-20 border-b border-white/5 shrink-0">
+              <Link to="/" onClick={handleLinkClick} className="flex items-center gap-2.5">
+                <div className="w-9 h-9 overflow-hidden rounded-lg border border-[#BD20D3]/30">
+                  <img src="/logo.png" alt="" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-sm font-bold tracking-tighter text-white uppercase">
+                  Socializea<span className="text-[#BD20D3]">-audio</span>
+                </span>
+              </Link>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                aria-label="Zavrieť menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Navigačné linky */}
+            <div className="flex-1 flex flex-col justify-center px-8">
               <div className="space-y-4">
                 {navLinks.map((link, idx) => {
                   const isActive = location.pathname === link.href;
@@ -103,15 +123,16 @@ const Navbar = () => {
                   );
                 })}
               </div>
-              
-              <div className="pt-6 border-t border-white/10 w-full">
-                <Link to="/kontakt" onClick={handleLinkClick}>
-                  <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
-                    <span>Napíšte nám</span>
-                    <ArrowRight size={18} />
-                  </Button>
-                </Link>
-              </div>
+            </div>
+
+            {/* Spodné tlačidlo */}
+            <div className="px-8 pb-8 shrink-0 border-t border-white/5 pt-6">
+              <Link to="/kontakt" onClick={handleLinkClick}>
+                <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
+                  <span>Napíšte nám</span>
+                  <ArrowRight size={18} />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
