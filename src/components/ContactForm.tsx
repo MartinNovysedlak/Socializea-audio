@@ -219,15 +219,17 @@ const ContactForm = () => {
                             <p className="text-white text-lg leading-snug">Čadečka 1924</p>
                             <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
                           </div>
-                          <div className="border-t border-white/5 pt-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Building size={16} className="text-[#1A4BFF] shrink-0" />
-                              <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider">Odberné miesto</p>
-                            </div>
-                            <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
-                            <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
-                          </div>
                         </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 flex items-center justify-center text-[#1A4BFF] mt-1 shrink-0">
+                        <Building size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-2">Odberné miesto</p>
+                        <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
+                        <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
                       </div>
                     </div>
                   </div>
