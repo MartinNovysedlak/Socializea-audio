@@ -45,7 +45,6 @@ const ContactForm = () => {
           phone: values.phone,
           date: values.date || 'Neuvedený',
           message: values.message,
-          subject: 'Všeobecný dopyt z kontaktného formulára (socializea.sk/kontakt)',
         },
         'hlWKyd9fiWgqJJT3r'
       );
