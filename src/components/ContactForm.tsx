@@ -18,7 +18,8 @@ import { sk } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
+  firstName: z.string().min(2, { message: "Krstné meno musí mať aspoň 2 znaky." }),
+  lastName: z.string().min(2, { message: "Priezvisko musí mať aspoň 2 znaky." }),
   email: z.string().email({ message: "Zadajte platný email." }),
   phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }),
   date: z.date().optional(),
@@ -37,7 +38,8 @@ const ContactForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phone: "",
       date: undefined,
@@ -50,9 +52,10 @@ const ContactForm = () => {
     const toastId = toast.loading('Odosielam dopyt...');
 
     const formattedDate = values.date ? formatDate(values.date) : 'Neuvedené';
+    const fullName = `${values.firstName} ${values.lastName}`;
 
     const bodyData = {
-      customerName: values.name,
+      customerName: fullName,
       customerEmail: values.email,
       customerPhone: values.phone,
       selectedPackage: values.date ? `Dátum: ${formattedDate}` : 'Neuvedený',
@@ -230,19 +233,34 @@ const ContactForm = () => {
                 <div className="bg-black/20 border border-white/10 p-6 md:p-8 md:p-10 rounded-3xl backdrop-blur-sm">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Krstné meno *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ján" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">Priezvisko *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       <FormField
                         control={form.control}
                         name="email"
