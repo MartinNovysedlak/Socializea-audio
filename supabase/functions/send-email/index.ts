@@ -4,30 +4,26 @@ import { Resend } from "npm:resend@2.0.0";
 // @ts-ignore - Deno global, not available in standard TS
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
-const TO_EMAIL = "martinnovysedlak48@gmail.com";
+const TO_EMAIL = "djparty.sk@gmail.com";
 const FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
-const SUBJECT = "🔊 Nová správa z kontaktného formulára";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey, x-connection-encrypted",
-};
 
 function h(val: string): string {
   return val || "Neuvedené";
 }
 
+// Pôvodná HTML šablóna pre kontaktný formulár
 function buildHtml(body: Record<string, any>): string {
   const subjectPrefix = body.subjectPrefix || "Nová správa";
   const heading = subjectPrefix;
 
-  const name = h(body.customerName);
-  const email = h(body.customerEmail);
-  const phone = h(body.customerPhone);
-  const eventDate = h(body.eventDate);
-  const pkg = h(body.selectedPackage);
-  const msg = body.message || "—";
+  // Preberá anglické aj slovenské názvy kľúčov (kvôli kompatibilite)
+  const name = h(body.customerName || body.name || body.meno);
+  const email = h(body.customerEmail || body.email);
+  const phone = h(body.customerPhone || body.phone || body.tel);
+  const eventDate = h(body.eventDate || body.date || body.datum);
+  const pkg = h(body.selectedPackage || body.package || body.balik);
+  // Ak správu tvorí len „prehľad rezervácie“, zobrazíme ju ako plain text
+  const msg = body.message || body.sprava || "—";
 
   return `
 <div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);box-shadow: 0 4px 20px rgba(189,32,211,0.15);">
@@ -71,6 +67,12 @@ function buildHtml(body: Record<string, any>): string {
 </div>`;
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey, x-connection-encrypted",
+};
+
 // @ts-ignore - Deno global, not available in standard TS
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -80,11 +82,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
 
+    // Ak je poskytnuté priame HTML, použijeme ho (platí hlavne pre košík)
+    const htmlContent = body.html;
+
+    // Ak nie je explicitne nastavený predmet, použijeme predvolený alebo vlastný
+    const subject = body.subject || "🔊 Nová správa z kontaktného formulára";
+
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: TO_EMAIL,
-      subject: SUBJECT,
-      html: buildHtml(body),
+      to: body.to || TO_EMAIL,
+      subject: subject,
+      html: htmlContent || buildHtml(body),
     });
 
     if (error) {
