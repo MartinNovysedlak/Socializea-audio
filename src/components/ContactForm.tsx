@@ -20,6 +20,12 @@ const formSchema = z.object({
   message: z.string().min(10, { message: "Správa musí mať aspoň 10 znakov." }),
 });
 
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "Neuvedené";
+  const [year, month, day] = dateStr.split("-");
+  return `${day}.${month}.${year}`;
+}
+
 const ContactForm = () => {
   const [sending, setSending] = useState(false);
   
@@ -38,13 +44,12 @@ const ContactForm = () => {
     setSending(true);
     const toastId = toast.loading('Odosielam dopyt...');
 
-    // Nové jednotné kľúče podľa Edge Function
     const bodyData = {
       customerName: values.name,
       customerEmail: values.email,
       customerPhone: values.phone,
-      selectedPackage: (values.date ? `Dátum: ${values.date}` : 'Neuvedený'),
-      eventDate: values.date || 'Neuvedený',
+      selectedPackage: (values.date ? `Dátum: ${formatDate(values.date)}` : 'Neuvedený'),
+      eventDate: formatDate(values.date),
       message: values.message,
     };
 
