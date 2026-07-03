@@ -4,9 +4,9 @@ import { Resend } from "npm:resend@2.0.0";
 // @ts-ignore - Deno global, not available in standard TS
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
-const TO_EMAIL = "martinnovysedlak48@gmail.com";
-const FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
-const SUBJECT = "🔊 Nová správa z kontaktného formulára";
+const DEFAULT_TO_EMAIL = "martinnovysedlak48@gmail.com";
+const DEFAULT_FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
+const DEFAULT_SUBJECT = "🔊 Nová správa z kontaktného formulára";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,12 +80,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     const body = await req.json();
 
-    const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: TO_EMAIL,
-      subject: SUBJECT,
-      html: buildHtml(body),
-    });
+    // Determine recipient, subject and HTML content
+    const to = body.to || DEFAULT_TO_EMAIL;
+    const subject = body.subject || DEFAULT_SUBJECT;
+    const html = body.html || buildHtml(body);
+    const replyTo = body.replyTo || undefined;
+
+    const emailPayload: any = {
+      from: DEFAULT_FROM_EMAIL,
+      to: to,
+      subject: subject,
+      html: html,
+    };
+
+    if (replyTo) {
+      emailPayload.reply_to = replyTo;
+    }
+
+    const { error } = await resend.emails.send(emailPayload);
 
     if (error) {
       console.error("Resend error:", error);
