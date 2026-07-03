@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Send, Phone, Mail, MapPin, Calendar as CalendarIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
+import { DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { sk } from 'date-fns/locale';
@@ -87,6 +87,88 @@ const ContactForm = () => {
 
   return (
     <section id="kontakt" className="py-12 bg-transparent relative">
+      <style>{`
+        .rdp {
+          --rdp-cell-size: 28px;
+          --rdp-accent-color: #BD20D3;
+          --rdp-background-color: rgba(189, 32, 211, 0.1);
+          --rdp-accent-color-dark: #BD20D3;
+          --rdp-background-color-dark: rgba(189, 32, 211, 0.2);
+          --rdp-outline: 2px solid #BD20D3;
+          --rdp-outline-selected: 2px solid #BD20D3;
+          margin: 0;
+        }
+        .rdp-months { justify-content: center; }
+        .rdp-month {
+          background: rgba(10, 13, 31, 0.98);
+          border: 1px solid rgba(189, 32, 211, 0.4);
+          border-radius: 12px;
+          padding: 6px;
+        }
+        .rdp-caption {
+          color: white;
+          font-weight: 700;
+          font-size: 12px;
+          padding: 0 0 4px 0;
+        }
+        .rdp-head_cell {
+          color: #9ca3af;
+          font-size: 9px;
+          font-weight: 600;
+          padding: 2px 0;
+        }
+        .rdp-day {
+          color: #e5e7eb;
+          border-radius: 4px;
+          font-size: 11px;
+          width: 28px;
+          height: 28px;
+          padding: 0;
+        }
+        .rdp-day:hover:not(.rdp-day_selected) {
+          background: rgba(189, 32, 211, 0.2) !important;
+          color: white !important;
+        }
+        .rdp-day_selected {
+          background: #BD20D3 !important;
+          color: white !important;
+          font-weight: 700;
+        }
+        .rdp-day_today { border: 1px solid #BD20D3; font-weight: 700; }
+        .rdp-day_outside { opacity: 0.3; }
+        .rdp-nav_button {
+          color: #9ca3af;
+          border-radius: 4px;
+          width: 24px;
+          height: 24px;
+        }
+        .rdp-nav_button:hover {
+          background: rgba(189, 32, 211, 0.2) !important;
+          color: white !important;
+        }
+        .rdp-caption_dropdowns { gap: 2px; }
+        .rdp-dropdown {
+          background: rgba(189, 32, 211, 0.1);
+          border: 1px solid rgba(189, 32, 211, 0.3);
+          border-radius: 4px;
+          color: white;
+          font-size: 10px;
+          padding: 1px 3px;
+        }
+        .rdp-dropdown:focus { outline: none; border-color: #BD20D3; }
+        .rdp-vhidden { display: none; }
+        .rdp-table { border-collapse: collapse; margin: 0; }
+        .rdp-row { margin: 0; }
+        .rdp-head_row { height: 20px; }
+        .rdp-tbody { border: none; }
+        @media (max-width: 640px) {
+          .rdp { --rdp-cell-size: 24px; }
+          .rdp-day { width: 24px; height: 24px; font-size: 10px; }
+          .rdp-month { padding: 4px; }
+          .rdp-caption { font-size: 11px; }
+          .rdp-nav_button { width: 20px; height: 20px; }
+        }
+      `}</style>
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
@@ -214,21 +296,17 @@ const ContactForm = () => {
                                     </Button>
                                   </FormControl>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 border-[#BD20D3]/20 bg-[#020721]" align="start">
-                                  <Calendar
+                                <PopoverContent className="w-auto p-0 border-[#BD20D3]/20 bg-transparent shadow-none" align="start">
+                                  <DayPicker
                                     mode="single"
                                     selected={field.value}
                                     onSelect={(date) => {
                                       field.onChange(date);
                                       setDateOpen(false);
                                     }}
-                                    initialFocus
                                     locale={sk}
                                     fromDate={new Date()}
-                                    fromYear={new Date().getFullYear()}
-                                    toYear={new Date().getFullYear() + 5}
-                                    captionLayout="dropdown"
-                                    className="bg-[#020721] text-white [&_.rdp-nav]:mt-0 [&_.rdp-nav_button]:relative [&_.rdp-nav_button]:top-0 [&_.rdp-caption]:pt-2 [&_.rdp-caption_label]:text-white [&_.rdp-dropdown]:text-white [&_.rdp-dropdown]:bg-[#020721] [&_.rdp-dropdown]:border [&_.rdp-dropdown]:border-white/10 [&_.rdp-head_cell]:text-gray-400"
+                                    className="rdp"
                                   />
                                 </PopoverContent>
                               </Popover>
