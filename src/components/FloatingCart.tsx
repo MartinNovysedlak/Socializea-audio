@@ -33,6 +33,7 @@ import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
 import emailjs from '@emailjs/browser';
+import { generateEmailHtml } from '@/utils/emailTemplates';
 
 interface PackageCartItem {
   id: string;
@@ -490,45 +491,26 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      // Build a text summary for fallback
-      const cartText = cartItems.map(({ item, qty }) => `  • ${item.name} — ${qty}x × ${item.price_per_day} €/deň = ${(item.price_per_day * qty).toFixed(2)} €`).join('\n');
+      // 1. Vygenerujeme HTML pre košík (zostáva lokálna funkcia)
+      const cartSummaryHtml = buildCartSummaryHtml();
 
-      const packagesText = packageItems.map((pkg) => {
-        let desc = `  • ${pkg.name} — ${getPackageTotal(pkg).toFixed(2)} €`;
-        const tags = [];
-        if (pkg.hasLights) tags.push('So svetlami');
-        if (pkg.install === 'install') tags.push(`Inštalácia (+${pkg.installPrice} €)`);
-        if (pkg.install === 'install_uninstall') tags.push(`Inšt.+Deinšt. (+${pkg.installPrice} €)`);
-        if (pkg.arrival) tags.push(`${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`);
-        if (tags.length) desc += ` [${tags.join(', ')}]`;
-        if (pkg.extras.length) desc += `\n      Doplnky: ${pkg.extras.map(e => `${e.label} (${e.quantity}x — ${(e.quantity * e.pricePerDay).toFixed(2)} €)`).join(', ')}`;
-        return desc;
-      }).join('\n');
+      // 2. Použijeme centrálny generátor – vyrobí celý email vrátane hlavičky a pätičky
+      const htmlContent = generateEmailHtml('rezervacia', {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone || 'Neuvedený',
+        date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
+        message: formData.message || '—',
+        cartSummaryHtml,
+        days,
+        totalPrice: grandTotal + packagesTotal,
+      });
 
-      let servicesText = '';
-      if (installSelected) servicesText += `Inštalácia: +20 €\n`;
-      if (installUninstallSelected) servicesText += `Inštalácia a deinštalácia: +40 €\n`;
-
-      let deliveryText = '';
-      if (deliveryResult) {
-        deliveryText = `Doprava do: ${deliveryCity}\n`;
-        deliveryText += deliveryResult.isFree ? `Stav: Zdarma\n` : `Cena: ${deliveryResult.price} € (${deliveryResult.distance} km od ${deliveryResult.nearestPoint})\n`;
-      }
-
-      const summaryHtml = buildCartSummaryHtml();
-
+      // 3. Pošleme len message_html – v EmailJS šablóne bude len {{{message_html}}}
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        {
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone || 'Neuvedený',
-          date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
-          message: formData.message || '—',
-          cart_summary: summaryHtml,
-          cart_text: `Aparatúra:\n${cartText || '  (žiadna)'}\n\nBalíky:\n${packagesText || '  (žiadne)'}\n\nSlužby:\n${servicesText || '  (žiadne)'}\nDoprava:\n${deliveryText || '  (nevybratá)'}\n\nCelková suma: ${(grandTotal + packagesTotal).toFixed(2)} €\nPočet dní: ${days}`,
-        },
+        { message_html: htmlContent },
         'hlWKyd9fiWgqJJT3r'
       );
 
