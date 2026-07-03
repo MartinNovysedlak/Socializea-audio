@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
-import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store, CheckCircle2 } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store, CheckCircle2, Loader2 } from 'lucide-react';
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { startOfDay } from "date-fns";
@@ -29,6 +29,7 @@ const formSchema = z.object({
 const ContactForm = () => {
   const [showDateCalendar, setShowDateCalendar] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,7 +55,7 @@ const ContactForm = () => {
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const toastId = toast.loading('Odosielam dopyt...');
+    setIsSubmitting(true);
 
     try {
       await emailjs.send(
@@ -70,15 +71,15 @@ const ContactForm = () => {
         'hlWKyd9fiWgqJJT3r'
       );
 
-      toast.dismiss(toastId);
       setSubmitted(true);
       form.reset();
     } catch (error) {
-      toast.dismiss(toastId);
       toast.error('Nepodarilo sa odoslať dopyt.', {
         description: 'Skúste to prosím neskôr alebo nás kontaktujte telefonicky.',
       });
       console.error('EmailJS error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -285,9 +286,22 @@ const ContactForm = () => {
                             </FormItem>
                           )}
                         />
-                        <Button type="submit" className="w-full btn-cyber h-auto min-h-12 py-3 px-4 rounded-xl text-sm sm:text-base font-bold group border-none whitespace-normal">
-                          <span>Odoslať nezáväzný dopyt</span>
-                          <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        <Button 
+                          type="submit" 
+                          disabled={isSubmitting}
+                          className="w-full btn-cyber h-auto min-h-12 py-3 px-4 rounded-xl text-sm sm:text-base font-bold group border-none whitespace-normal"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="mr-2 w-4 h-4 animate-spin" />
+                              <span>Odosiela sa...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Odoslať nezáväzný dopyt</span>
+                              <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                            </>
+                          )}
                         </Button>
                       </form>
                     </Form>
