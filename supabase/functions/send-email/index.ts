@@ -86,9 +86,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const html = body.html || buildHtml(body);
     const replyTo = body.replyTo || undefined;
 
+    console.log("Sending email with:");
+    console.log("  To:", to);
+    console.log("  Subject:", subject);
+    console.log("  HTML length:", html?.length || 0);
+    console.log("  ReplyTo:", replyTo);
+
     const emailPayload: any = {
       from: DEFAULT_FROM_EMAIL,
-      to: to,
+      to: [to],
       subject: subject,
       html: html,
     };
@@ -97,23 +103,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
       emailPayload.reply_to = replyTo;
     }
 
-    const { error } = await resend.emails.send(emailPayload);
+    const { data, error } = await resend.emails.send(emailPayload);
 
     if (error) {
-      console.error("Resend error:", error);
-      return new Response(JSON.stringify({ success: false, error }), {
+      console.error("Resend error:", JSON.stringify(error, null, 2));
+      return new Response(JSON.stringify({ success: false, error: error.message || error }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    console.log("Email sent successfully:", JSON.stringify(data));
+
+    return new Response(JSON.stringify({ success: true, data }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Edge function error:", err);
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
+    console.error("Edge function error:", JSON.stringify(err, null, 2));
+    return new Response(JSON.stringify({ success: false, error: err.message || err }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
