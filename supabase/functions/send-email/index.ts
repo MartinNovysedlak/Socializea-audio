@@ -6,7 +6,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const TO_EMAIL = "martinnovysedlak48@gmail.com";
 const FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
-const SUBJECT = "🔊 Nový dopyt z webu";
+const SUBJECT = "🔊 Nová správa z kontaktného formulára";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,41 +19,21 @@ function h(val: string): string {
 }
 
 function buildHtml(body: Record<string, any>): string {
-  const subjectPrefix = body.subjectPrefix || "Nový dopyt";
-  const subheading = body.subheading || "Nezáväzná kalkulácia z webu";
+  const subjectPrefix = body.subjectPrefix || "Nová správa";
   const heading = subjectPrefix;
 
-  const name = h(body.customerName || body.name);
-  const email = h(body.customerEmail || body.email);
-  const phone = h(body.customerPhone || body.phone || body.tel);
-  const eventDate = h(body.eventDate || body.date || body.datum);
-  const pkg = body.selectedPackage || body.package || body.balik;
-  const msg = body.message || body.sprava || "—";
-  const cartHtml = body.cartHtml || body.cart_html || "";
-
-  let packageRow = "";
-  if (pkg && !cartHtml) {
-    packageRow = `
-    <tr>
-      <td style="padding:6px 0;color:#9ca3af;vertical-align: top;">Balík/Záujem:</td>
-      <td style="padding:6px 0;color:white;font-weight: 600;vertical-align: top;">${h(pkg)}</td>
-    </tr>`;
-  }
-
-  let cartSection = "";
-  if (cartHtml) {
-    cartSection = `
-    <h2 style="color:#BD20D3;font-size:16px;margin:24px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:16px;color:#d1d5db;">
-      ${cartHtml}
-    </div>`;
-  }
+  const name = h(body.customerName);
+  const email = h(body.customerEmail);
+  const phone = h(body.customerPhone);
+  const eventDate = h(body.eventDate);
+  const pkg = h(body.selectedPackage);
+  const msg = body.message || "—";
 
   return `
 <div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);box-shadow: 0 4px 20px rgba(189,32,211,0.15);">
   <div style="background:linear-gradient(135deg,#0a0d1f,#020721);padding:30px 24px 20px;text-align:center;border-bottom:1px solid rgba(189,32,211,0.2);">
     <h1 style="color:#BD20D3;font-size:24px;margin:0;">🔊 ${heading}</h1>
-    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">${subheading}</p>
+    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">Kontaktný formulár z webu</p>
   </div>
   <div style="padding:24px;">
     <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
@@ -73,15 +53,16 @@ function buildHtml(body: Record<string, any>): string {
         <td style="padding:6px 0;color:white;vertical-align: top;">${phone}</td>
       </tr>
       <tr>
-        <td style="padding:6px 0;color:#9ca3af;vertical-align: top;">Dátum:</td>
+        <td style="padding:6px 0;color:#9ca3af;vertical-align: top;">Dátum podujatia:</td>
         <td style="padding:6px 0;color:white;font-weight: 600;vertical-align: top;">${eventDate}</td>
       </tr>
-      ${packageRow}
+      <tr>
+        <td style="padding:6px 0;color:#9ca3af;vertical-align: top;">Balík/Záujem:</td>
+        <td style="padding:6px 0;color:white;font-weight: 600;vertical-align: top;">${pkg}</td>
+      </tr>
     </table>
 
-    ${cartSection}
-
-    <h2 style="color:#BD20D3;font-size:16px;margin:24px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
     <div style="background:rgba(189,32,211,0.08);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:16px;color:#d1d5db;font-size:14px;line-height:1.6;white-space:pre-line;">${msg}</div>
   </div>
   <div style="background:#040b33;padding:16px 24px;text-align:center;border-top:1px solid rgba(189,32,211,0.15);">
@@ -102,7 +83,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: TO_EMAIL,
-      subject: body.subject || SUBJECT,
+      subject: SUBJECT,
       html: buildHtml(body),
     });
 
