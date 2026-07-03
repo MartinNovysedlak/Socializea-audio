@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
-import emailjs from '@emailjs/browser';
+import { supabase } from "@/lib/supabase";
 
 interface PackageCartItem {
   id: string;
@@ -460,27 +460,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       });
     }
 
-    if (installSelected || installUninstallSelected || deliveryResult) {
-      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
-      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20 €</span></div>`;
-      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;">+40 €</span></div>`;
-      if (deliveryResult) {
-        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
-          <span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span>
-          <span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
-        </div>`;
-        if (!deliveryResult.isFree) {
-          html += `<div style="color:#6b7280;font-size:11px;padding-bottom:4px;">~${deliveryResult.distance} km od ${deliveryResult.nearestPoint}, 0,70 €/km</div>`;
-        }
-        if (deliveryResult.isKysuce) {
-          html += `<div style="color:#10b981;font-size:11px;padding-bottom:4px;">✅ Kysuce – doprava zdarma</div>`;
-        }
-      }
-    }
-
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
-    html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
-    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += `<span style="color:white;font-size:16px;font-weight:700;">Celková suma</span>`;
+    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
     html += '</div>';
 
     return html;
@@ -496,46 +478,54 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      const cartText = cartItems.map(({ item, qty }) => `  • ${item.name} — ${qty}x × ${item.price_per_day} €/deň = ${(item.price_per_day * qty).toFixed(2)} €`).join('\n');
+      const name = `${formData.firstName} ${formData.lastName}`;
+      const email = formData.email;
+      const phone = formData.phone || 'Neuvedené';
+      const date = formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedené';
+      const message = formData.message || '—';
 
-      const packagesText = packageItems.map((pkg) => {
-        let desc = `  • ${pkg.name} — ${getPackageTotal(pkg).toFixed(2)} €`;
-        const tags = [];
-        if (pkg.hasLights) tags.push('So svetlami');
-        if (pkg.install === 'install') tags.push(`Inštalácia (+${pkg.installPrice} €)`);
-        if (pkg.install === 'install_uninstall') tags.push(`Inšt.+Deinšt. (+${pkg.installPrice} €)`);
-        if (pkg.arrival) tags.push(`${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`);
-        if (tags.length) desc += ` [${tags.join(', ')}]`;
-        if (pkg.extras.length) desc += `\n      Doplnky: ${pkg.extras.map(e => `${e.label} (${e.quantity}x — ${(e.quantity * e.pricePerDay).toFixed(2)} €)`).join(', ')}`;
-        return desc;
-      }).join('\n');
+      const cartSummaryHtml = buildCartSummaryHtml();
 
-      let servicesText = '';
-      if (installSelected) servicesText += `Inštalácia: +20 €\n`;
-      if (installUninstallSelected) servicesText += `Inštalácia a deinštalácia: +40 €\n`;
+      const htmlContent = `
+<div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);">
+  <div style="background:linear-gradient(135deg,#0a0d1f,#020721);padding:30px 24px 20px;text-align:center;border-bottom:1px solid rgba(189,32,211,0.2);">
+    <h1 style="color:#BD20D3;font-size:24px;margin:0;">🔊 Nový dopyt z košíka</h1>
+    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">Nezáväzná kalkulácia z webu</p>
+  </div>
 
-      let deliveryText = '';
-      if (deliveryResult) {
-        deliveryText = `Doprava do: ${deliveryCity}\n`;
-        deliveryText += deliveryResult.isFree ? `Stav: Zdarma\n` : `Cena: ${deliveryResult.price} € (${deliveryResult.distance} km od ${deliveryResult.nearestPoint})\n`;
-      }
+  <div style="padding:24px;">
+    <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
+    <table style="width:100%;font-size:14px;color:#d1d5db;">
+      <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${name}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Email:</td><td style="padding:4px 0;color:#BD20D3;">${email}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${phone}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${date}</td></tr>
+    </table>
 
-      const summaryHtml = buildCartSummaryHtml();
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
+    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;">
+      ${cartSummaryHtml}
+    </div>
 
-      await emailjs.send(
-        'service_s8kq87k',
-        'template_st0hc2f',
-        {
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone || 'Neuvedený',
-          date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
-          message: formData.message || '—',
-          cart_summary: summaryHtml,
-          cart_text: `Aparatúra:\n${cartText || '  (žiadna)'}\n\nBalíky:\n${packagesText || '  (žiadne)'}\n\nSlužby:\n${servicesText || '  (žiadne)'}\nDoprava:\n${deliveryText || '  (nevybratá)'}\n\nCelková suma: ${(grandTotal + packagesTotal).toFixed(2)} €\nPočet dní: ${days}`,
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
+    <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${message}</div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(189,32,211,0.2);text-align:center;">
+      <p style="color:#9ca3af;font-size:12px;">Tento email bol odoslaný automaticky z webovej stránky.</p>
+    </div>
+  </div>
+</div>`;
+
+      const { error } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: 'djparty.sk@gmail.com',
+          subject: `🔊 Nový dopyt z košíka – ${name}`,
+          html: htmlContent,
+          replyTo: email,
         },
-        'hlWKyd9fiWgqJJT3r'
-      );
+      });
+
+      if (error) throw error;
 
       toast.dismiss(toastId);
       toast.success("Dopyt bol úspešne odoslaný!", {
@@ -553,7 +543,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       toast.error("Nepodarilo sa odoslať dopyt.", {
         description: "Skúste to prosím neskôr alebo nás kontaktujte telefonicky.",
       });
-      console.error('EmailJS error:', error);
+      console.error('Send error:', error);
     } finally {
       setIsSubmitting(false);
     }
