@@ -471,6 +471,65 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </Button>
                 )}
 
+                {/* Question button inside the card */}
+                <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
+                      <HelpCircle size={16} />
+                      Je vám niečo nejasné? Spýtajte sa nás
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                      <DialogDescription className="text-gray-400 text-sm">
+                        Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
+                        <input
+                          type="text"
+                          required
+                          value={questionName}
+                          onChange={(e) => setQuestionName(e.target.value)}
+                          placeholder="Napr. Ján Novák"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
+                        <input
+                          type="email"
+                          required
+                          value={questionEmail}
+                          onChange={(e) => setQuestionEmail(e.target.value)}
+                          placeholder="jan.novak@email.sk"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                        <textarea
+                          required
+                          value={questionMessage}
+                          onChange={(e) => setQuestionMessage(e.target.value)}
+                          placeholder="Napíšte, čo vás zaujíma..."
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={sendingQuestion}
+                        className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
+                      >
+                        {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
                 {/* Contact info */}
                 <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
                   <div className="flex items-center gap-2">
@@ -489,65 +548,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </div>
                 </div>
               </div>
-
-              {/* Question section below the card */}
-              <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
-                <DialogTrigger asChild>
-                  <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 mt-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
-                    <HelpCircle size={16} />
-                    Je vám niečo nejasné? Spýtajte sa nás
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
-                    <DialogDescription className="text-gray-400 text-sm">
-                      Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
-                      <input
-                        type="text"
-                        required
-                        value={questionName}
-                        onChange={(e) => setQuestionName(e.target.value)}
-                        placeholder="Napr. Ján Novák"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
-                      <input
-                        type="email"
-                        required
-                        value={questionEmail}
-                        onChange={(e) => setQuestionEmail(e.target.value)}
-                        placeholder="jan.novak@email.sk"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
-                      <textarea
-                        required
-                        value={questionMessage}
-                        onChange={(e) => setQuestionMessage(e.target.value)}
-                        placeholder="Napíšte, čo vás zaujíma..."
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      disabled={sendingQuestion}
-                      className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
-                    >
-                      {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
         </div>
