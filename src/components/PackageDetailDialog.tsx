@@ -366,12 +366,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           setCitySuggestions([]);
           setCityDropdownOpen(false);
         }
-      } catch {
-        if (!cancelled) {
-          setCitySuggestions([]);
-          setCityDropdownOpen(false);
-        }
-      } finally {
+     } finally {
         if (!cancelled) setSearchingCities(false);
       }
     };
