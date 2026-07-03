@@ -14,13 +14,11 @@ import {
   ShieldCheck,
   Phone,
   Mail,
-  ChevronRight,
-  ShoppingBag,
-  Info,
   ChevronLeft,
   ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,7 +49,7 @@ const ProductDetail = () => {
           toast.error('Produkt nebol nájdený.');
           navigate('/predaj');
         }
-      } catch (err) {
+      } catch {
         toast.error('Chyba pri načítavaní produktu.');
       } finally {
         setLoading(false);
@@ -63,7 +61,7 @@ const ProductDetail = () => {
     }
   }, [id, navigate]);
 
-  const handleSendInquiry = (e: React.FormEvent) => {
+  const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryName.trim() || !inquiryEmail.trim()) {
       toast.error('Prosím vyplňte vaše meno a email!');
@@ -71,7 +69,27 @@ const ProductDetail = () => {
     }
 
     setSending(true);
-    setTimeout(() => {
+    const toastId = toast.loading('Odosielam dopyt...');
+
+    try {
+      const productName = item?.name || 'Neznámy produkt';
+      const productPrice = item?.price ? `${item.price} €` : 'Neuvedená';
+      const productCondition = item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Bazár';
+
+      await emailjs.send(
+        'service_s8kq87k',
+        'template_st0hc2f',
+        {
+          name: inquiryName,
+          email: inquiryEmail,
+          phone: inquiryPhone || 'Neuvedený',
+          date: 'Kúpa produktu',
+          message: `${inquiryMessage || '—'}\n\nProdukt: ${productName}\nCena: ${productPrice}\nStav: ${productCondition}`,
+        },
+        'hlWKyd9fiWgqJJT3r'
+      );
+
+      toast.dismiss(toastId);
       toast.success('Dopyt na kúpu bol úspešne odoslaný!', {
         description: `Budeme vás kontaktovať ohľadom produktu ${item?.name} čo najskôr.`
       });
@@ -79,8 +97,14 @@ const ProductDetail = () => {
       setInquiryPhone('');
       setInquiryEmail('');
       setInquiryMessage('');
+    } catch {
+      toast.dismiss(toastId);
+      toast.error('Nepodarilo sa odoslať dopyt.', {
+        description: 'Skúste to prosím neskôr alebo nás kontaktujte telefonicky.',
+      });
+    } finally {
       setSending(false);
-    }, 1000);
+    }
   };
 
   const imagesList = item?.images && item.images.length > 0
