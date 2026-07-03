@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
-import emailjs from '@emailjs/browser';
+import { supabase } from '@/lib/supabase';
 import { Send, Phone, Mail, MapPin } from 'lucide-react';
 
 const formSchema = z.object({
@@ -21,6 +21,8 @@ const formSchema = z.object({
 });
 
 const ContactForm = () => {
+  const [sending, setSending] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,21 +35,54 @@ const ContactForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSending(true);
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      await emailjs.send(
-        'service_s8kq87k',
-        'template_zh6cnks',
-        {
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          date: values.date || 'Neuvedený',
-          message: values.message,
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0d1f; color: white; border-radius: 16px; overflow: hidden; border: 1px solid rgba(189,32,211,0.3);">
+          <div style="padding: 24px; background: linear-gradient(135deg, #BD20D3, #1A4BFF);">
+            <h1 style="margin: 0; font-size: 20px; color: white;">📬 Nový kontaktný dopyt</h1>
+          </div>
+          <div style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr>
+                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600; width: 120px;">Meno:</td>
+                <td style="padding: 8px 12px; color: white; font-weight: 700;">${values.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Email:</td>
+                <td style="padding: 8px 12px; color: white;">${values.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Telefón:</td>
+                <td style="padding: 8px 12px; color: white;">${values.phone}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Dátum:</td>
+                <td style="padding: 8px 12px; color: white;">${values.date || 'Neuvedený'}</td>
+              </tr>
+            </table>
+            <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+              <p style="margin: 0 0 8px 0; color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase;">Správa:</p>
+              <p style="margin: 0; color: #d1d5db; white-space: pre-wrap;">${values.message}</p>
+            </div>
+          </div>
+          <div style="padding: 12px 24px; background: rgba(0,0,0,0.2); text-align: center; font-size: 11px; color: #6b7280;">
+            Odoslané z webu Socializea Audio
+          </div>
+        </div>
+      `;
+
+      const { error } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: 'socializea@socializea.com',
+          subject: `📬 Nový dopyt z webu – ${values.name}`,
+          html,
         },
-        'hlWKyd9fiWgqJJT3r'
-      );
+      });
+
+      if (error) throw error;
 
       toast.dismiss(toastId);
       toast.success('Dopyt bol úspešne odoslaný!', {
@@ -59,7 +94,9 @@ const ContactForm = () => {
       toast.error('Nepodarilo sa odoslať dopyt.', {
         description: 'Skúste to prosím neskôr alebo nás kontaktujte telefonicky.',
       });
-      console.error('EmailJS error:', error);
+      console.error('Send email error:', error);
+    } finally {
+      setSending(false);
     }
   }
 
@@ -202,9 +239,19 @@ const ContactForm = () => {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full btn-cyber h-auto min-h-12 py-3 px-4 rounded-xl text-sm sm:text-base font-bold group border-none whitespace-normal">
-                        <span>Odoslať nezáväzný dopyt</span>
-                        <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      <Button 
+                        type="submit" 
+                        disabled={sending}
+                        className="w-full btn-cyber h-auto min-h-12 py-3 px-4 rounded-xl text-sm sm:text-base font-bold group border-none whitespace-normal"
+                      >
+                        {sending ? (
+                          <span>Odosielam...</span>
+                        ) : (
+                          <>
+                            <span>Odoslať nezáväzný dopyt</span>
+                            <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                          </>
+                        )}
                       </Button>
                     </form>
                   </Form>
