@@ -42,7 +42,7 @@ serve(async (req: Request) => {
     const pkg = body.packageName
     const msg = body.message || "—"
 
-    // --- Pevne nastavené adresy (testovací režim) ---
+    // --- DOČASNÉ PRESMEROVANIE ---
     const FROM = "onboarding@resend.dev"
     const TO = "martinnovysedlak48@gmail.com"
 
