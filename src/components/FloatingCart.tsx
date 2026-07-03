@@ -410,9 +410,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (e.key === 'Escape') setCityDropdownOpen(false);
   };
 
+  // ======================== UPRAVENÝ builder e-mailového HTML ========================
   const buildCartSummaryHtml = () => {
     let html = '';
 
+    // Aparatúra
     if (cartItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
       html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
@@ -429,6 +431,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       html += '</tbody></table>';
     }
 
+    // Balíky
     if (packageItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
       packageItems.forEach((pkg) => {
@@ -453,6 +456,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       });
     }
 
+    // Doplnkové služby (inštalácia, doprava)
     if (installSelected || installUninstallSelected) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
       if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20 €</span></div>`;
@@ -473,6 +477,20 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       }
     }
 
+    // ====== NOVÉ: Obdobie prenájmu a zľava ======
+    if (hasEquipment) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📅 Obdobie prenájmu</h3>';
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Do:</span><span style="color:white;font-weight:600;">${formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>`;
+      if (days > 1) {
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">1. deň (plná cena):</span><span style="color:white;font-weight:600;">${firstDayTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">${days - 1} ${days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50% cena):</span><span style="color:white;font-weight:600;">${additionalDaysTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-top:6px;"><span style="color:#10b981;">🌟 Zľava za dlhodobý prenájom:</span><span style="color:#10b981;font-weight:600;">– ${((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>`;
+      }
+    }
+
+    // Celková suma (ostáva rovnaká, len zarovnanie je už pekne odsadené)
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
     html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
     html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
@@ -481,6 +499,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return html;
   };
 
+  // ======================== UPRAVENÝ handleSubmit – formát dátumov ========================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -491,22 +510,22 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      // 1. Vygenerujeme HTML pre košík (zostáva lokálna funkcia)
       const cartSummaryHtml = buildCartSummaryHtml();
 
-      // 2. Použijeme centrálny generátor – vyrobí celý email vrátane hlavičky a pätičky
+      // Dátumy už v slovenskom formáte dd.MM.yyyy
       const htmlContent = generateEmailHtml('rezervacia', {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         phone: formData.phone || 'Neuvedený',
-        date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
+        date: formData.dateFrom
+          ? `${format(new Date(formData.dateFrom), "dd.MM.yyyy")} až ${format(new Date(formData.dateTo), "dd.MM.yyyy")}`
+          : 'Neuvedený',
         message: formData.message || '—',
         cartSummaryHtml,
         days,
         totalPrice: grandTotal + packagesTotal,
       });
 
-      // 3. Pošleme len message_html – v EmailJS šablóne bude len {{{message_html}}}
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
