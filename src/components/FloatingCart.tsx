@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   ShoppingBag,
   X,
@@ -22,8 +22,6 @@ import {
   Loader2,
   Ban,
   Send,
-  Speaker,
-  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +32,7 @@ import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
-import { supabase } from "@/lib/supabase";
+import emailjs from '@emailjs/browser';
 
 interface PackageCartItem {
   id: string;
@@ -98,7 +96,7 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
     const xi = polygon[i].lng, yi = polygon[i].lat;
     const xj = polygon[j].lng, yj = polygon[j].lat;
     const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
-      (point.lng < (xj - xi) * (point.lat - yi) / (xj - xi) + xi);
+      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
     if (intersect) inside = !inside;
   }
   return inside;
@@ -221,8 +219,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   }, []);
 
   const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
+  const packageHasInstallUninstall = packageItems.some(p => p.install === 'install_uninstall');
   const packageHasDelivery = packageItems.some(p => p.arrival !== null);
-  const hasServicesOrDelivery = installSelected || installUninstallSelected || packageHasInstall || packageHasDelivery || (deliverySelected && deliveryResult) || packageItems.filter(p => p.arrival).length > 0;
 
   const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
   const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
@@ -355,10 +353,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const deliveryCost = deliveryResult?.price ?? 0;
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
   const packagesTotal = packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0);
-  const hasEquipment = totalEquipmentQty > 0;
-  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
-  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
-  const servicesTotal = installCost + installUninstallCost + packageInstallTotal + deliveryCost + packageDeliveryTotal;
 
   const handleQuantityChange = (id: string, delta: number) => {
     setQuantities((prev) => {
@@ -415,7 +409,76 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (e.key === 'Escape') setCityDropdownOpen(false);
   };
 
-  const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
+  const buildCartSummaryHtml = () => {
+    let html = '';
+
+    if (cartItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<thead><tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th></tr></thead>';
+      html += '<tbody>';
+      cartItems.forEach(({ item, qty }) => {
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+          <td style="padding:8px 12px;color:white;">${item.name}</td>
+          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
+          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td>
+          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    if (packageItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
+      packageItems.forEach((pkg) => {
+        html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="color:white;font-size:14px;">${pkg.name}</strong>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+          </div>`;
+        if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
+        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
+        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
+        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
+        if (pkg.extras.length > 0) {
+          html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
+          html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
+          pkg.extras.forEach((e) => {
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+
+    if (installSelected || installUninstallSelected) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
+      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20 €</span></div>`;
+      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;">+40 €</span></div>`;
+    }
+
+    if (deliveryResult) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🚚 Doprava</h3>';
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+        <span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span>
+        <span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
+      </div>`;
+      if (!deliveryResult.isFree) {
+        html += `<div style="color:#6b7280;font-size:11px;padding-bottom:4px;">~${deliveryResult.distance} km od ${deliveryResult.nearestPoint}, 0,70 €/km</div>`;
+      }
+      if (deliveryResult.isKysuce) {
+        html += `<div style="color:#10b981;font-size:11px;padding-bottom:4px;">✅ Kysuce – doprava zdarma</div>`;
+      }
+    }
+
+    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
+    html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
+    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += '</div>';
+
+    return html;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -427,60 +490,47 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      const name = `${formData.firstName} ${formData.lastName}`;
-      const email = formData.email;
-      const phone = formData.phone || 'Neuvedené';
-      const formattedDate = formData.dateFrom
-        ? `${format(new Date(formData.dateFrom), "dd.MM.yyyy")} až ${format(new Date(formData.dateTo), "dd.MM.yyyy")} (${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'})`
-        : 'Neuvedené';
+      // Build a text summary for fallback
+      const cartText = cartItems.map(({ item, qty }) => `  • ${item.name} — ${qty}x × ${item.price_per_day} €/deň = ${(item.price_per_day * qty).toFixed(2)} €`).join('\n');
 
-      // štruktúrované dáta pre rezerváciu
-      const cartItemsPayload = cartItems.map(({ item, qty }) => ({
-        name: item.name,
-        quantity: qty,
-        pricePerDay: item.price_per_day
-      }));
+      const packagesText = packageItems.map((pkg) => {
+        let desc = `  • ${pkg.name} — ${getPackageTotal(pkg).toFixed(2)} €`;
+        const tags = [];
+        if (pkg.hasLights) tags.push('So svetlami');
+        if (pkg.install === 'install') tags.push(`Inštalácia (+${pkg.installPrice} €)`);
+        if (pkg.install === 'install_uninstall') tags.push(`Inšt.+Deinšt. (+${pkg.installPrice} €)`);
+        if (pkg.arrival) tags.push(`${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`);
+        if (tags.length) desc += ` [${tags.join(', ')}]`;
+        if (pkg.extras.length) desc += `\n      Doplnky: ${pkg.extras.map(e => `${e.label} (${e.quantity}x — ${(e.quantity * e.pricePerDay).toFixed(2)} €)`).join(', ')}`;
+        return desc;
+      }).join('\n');
 
-      const packagesPayload = packageItems.map(pkg => {
-        const addons = [];
-        if (pkg.hasLights) addons.push({ label: 'So svetlami', type: 'lights' });
-        if (pkg.install === 'install') addons.push({ label: `Inštalácia (+${pkg.installPrice} €)`, type: 'install' });
-        if (pkg.install === 'install_uninstall') addons.push({ label: `Inštalácia a deinštalácia (+${pkg.installPrice} €)`, type: 'install' });
-        if (pkg.arrival) {
-          addons.push({
-            label: `Doprava: ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`,
-            type: 'delivery'
-          });
-        }
-        pkg.extras.forEach(e => {
-          addons.push({ label: `${e.label} (${e.quantity}x) - ${(e.pricePerDay * e.quantity).toFixed(2)} €`, type: 'extra' });
-        });
-        return {
-          name: pkg.name,
-          price: getPackageTotal(pkg),
-          addons
-        };
-      });
+      let servicesText = '';
+      if (installSelected) servicesText += `Inštalácia: +20 €\n`;
+      if (installUninstallSelected) servicesText += `Inštalácia a deinštalácia: +40 €\n`;
 
-      const totalPrice = grandTotal + packagesTotal;
+      let deliveryText = '';
+      if (deliveryResult) {
+        deliveryText = `Doprava do: ${deliveryCity}\n`;
+        deliveryText += deliveryResult.isFree ? `Stav: Zdarma\n` : `Cena: ${deliveryResult.price} € (${deliveryResult.distance} km od ${deliveryResult.nearestPoint})\n`;
+      }
 
-      const bodyData = {
-        formType: 'reservation',
-        name,
-        email,
-        phone,
-        date: formattedDate,
-        message: formData.message || '',
-        cartItems: cartItemsPayload,
-        packages: packagesPayload,
-        totalPrice
-      };
+      const summaryHtml = buildCartSummaryHtml();
 
-      const { error } = await supabase.functions.invoke('send-email', {
-        body: bodyData,
-      });
-
-      if (error) throw error;
+      await emailjs.send(
+        'service_s8kq87k',
+        'template_st0hc2f',
+        {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone || 'Neuvedený',
+          date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
+          message: formData.message || '—',
+          cart_summary: summaryHtml,
+          cart_text: `Aparatúra:\n${cartText || '  (žiadna)'}\n\nBalíky:\n${packagesText || '  (žiadne)'}\n\nSlužby:\n${servicesText || '  (žiadne)'}\nDoprava:\n${deliveryText || '  (nevybratá)'}\n\nCelková suma: ${(grandTotal + packagesTotal).toFixed(2)} €\nPočet dní: ${days}`,
+        },
+        'hlWKyd9fiWgqJJT3r'
+      );
 
       toast.dismiss(toastId);
       toast.success("Dopyt bol úspešne odoslaný!", {
@@ -498,11 +548,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       toast.error("Nepodarilo sa odoslať dopyt.", {
         description: "Skúste to prosím neskôr alebo nás kontaktujte telefonicky.",
       });
-      console.error('Send error:', error);
+      console.error('EmailJS error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
+
+  const hasEquipment = totalEquipmentQty > 0;
+
+  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
+  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
 
   return (
     <>
@@ -587,19 +644,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           .rdp-caption { font-size: 11px; }
           .rdp-nav_button { width: 20px; height: 20px; }
         }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(189, 32, 211, 0.3);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(189, 32, 211, 0.6);
-        }
       `}</style>
 
       {totalItems > 0 && (
@@ -669,54 +713,52 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">{totalItems} ks</span>
                   </h3>
 
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 max-h-[260px] overflow-y-auto pr-2 custom-scrollbar">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
+                        <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
                               <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="text-sm font-semibold text-white truncate">{item.name}</h4>
-                              <p className="text-[#BD20D3] font-bold text-xs mt-0.5">{item.price_per_day} € / deň</p>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm sm:text-base font-semibold text-white truncate">{item.name}</h4>
+                              <p className="text-[#BD20D3] font-bold text-xs sm:text-sm mt-0.5 sm:mt-1">{item.price_per_day} € / deň</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-lg p-1 shrink-0">
+                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5 ml-auto sm:ml-0">
                             <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Minus size={12} /></button>
-                            <span className="w-7 text-center text-white font-semibold text-sm">{qty}</span>
+                            <span className="w-6 text-center text-white font-semibold text-sm">{qty}</span>
                             <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"><Plus size={12} /></button>
                           </div>
                         </div>
                       );
                     })}
                     {packageItems.map((pkg) => (
-                      <div key={pkg.id} className="flex flex-col bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 relative">
+                      <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
-                        <div className="flex items-center gap-3 pr-6">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
-                            <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="text-sm font-bold text-white">{pkg.name}</h4>
-                            <p className="text-[#BD20D3] font-bold text-sm">{getPackageTotal(pkg)} €</p>
-                          </div>
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
+                          <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                         </div>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {pkg.hasLights && <span className="text-[10px] px-2 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
-                          {pkg.install === 'install' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
-                          {pkg.install === 'install_uninstall' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
-                          {pkg.arrival && <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><Truck size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
-                        </div>
-                        {pkg.extras.length > 0 && (
-                          <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
-                            <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
-                            {pkg.extras.map((e, i) => (
-                              <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
-                            ))}
+                        <div className="flex-grow min-w-0 pr-6 sm:pr-0">
+                          <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
+                          <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{getPackageTotal(pkg)} € / víkend</p>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {pkg.hasLights && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
+                            {pkg.install === 'install' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
+                            {pkg.install === 'install_uninstall' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
+                            {pkg.arrival && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><MapPin size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
                           </div>
-                        )}
+                          {pkg.extras.length > 0 && (
+                            <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
+                              <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
+                              {pkg.extras.map((e, i) => (
+                                <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -763,7 +805,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               {packageHasDelivery && <Ban size={10} className="text-gray-400" />}
                               {!packageHasDelivery && deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
                             </div>
-                            <Truck size={14} className={`shrink-0 ${packageHasDelivery ? 'text-gray-600' : deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
+                            <MapPin size={14} className={`shrink-0 ${packageHasDelivery ? 'text-gray-600' : deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
                             <div className="flex-1 min-w-0">
                               {packageHasDelivery ? (
                                 <span className="text-xs text-gray-500">Doprava (už v balíku)</span>
@@ -816,136 +858,71 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   )}
 
-                  {/* === PREHEADNE ROZDELENIE VÝPOČTOV === */}
-                  <div className="border-t border-white/10 pt-4 space-y-4">
-
-                    {/* SEKCIE: Aparatúra */}
+                  <div className="border-t border-white/10 pt-4 space-y-2">
                     {hasEquipment && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Speaker size={14} className="text-[#BD20D3]" />
-                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Aparatúra</p>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-400 mb-1">
-                          <span>Cena na deň:</span>
-                          <span className="font-semibold text-white">{subtotalPerDay.toFixed(2)} €</span>
-                        </div>
-                        <div className="flex justify-between text-base text-gray-400 mb-1">
-                          <span className="flex items-center gap-1.5">
-                            <Clock size={14} className="text-gray-500" />
-                            Počet dní:
-                          </span>
-                          <span className="font-semibold text-white">{days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span>
-                        </div>
+                      <>
+                        <div className="flex justify-between text-base text-gray-400"><span>Aparatúra na deň:</span><span className="font-semibold text-white">{subtotalPerDay.toFixed(2)} €</span></div>
+                        <div className="flex justify-between text-base text-gray-400"><span>Počet dní prenájmu:</span><span className="flex items-center gap-1.5 font-semibold text-white"><Clock size={14} className="text-gray-500" /> {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>
                         {days > 1 && (
-                          <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 space-y-1.5 mt-2">
-                            <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-1">Výpočet ceny</p>
-                            <div className="flex justify-between text-[13px] text-gray-300">
-                              <span>1. deň (plná cena):</span>
-                              <span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span>
-                            </div>
-                            <div className="flex justify-between text-[13px] text-gray-300">
-                              <span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50%):</span>
-                              <span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span>
-                            </div>
-                            <div className="flex justify-between text-[13px] text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1">
-                              <span>Zľava za dlhodobý prenájom:</span>
-                              <span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span>
-                            </div>
+                          <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 space-y-2 mt-2">
+                            <p className="text-emerald-400 text-sm font-bold uppercase tracking-wider mb-2">Výpočet ceny:</p>
+                            <div className="flex justify-between text-base text-gray-300"><span>1. deň (plná cena):</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-base text-gray-300"><span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50%):</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-base text-emerald-400 font-semibold border-t border-emerald-500/20 pt-2 mt-1"><span>Zľava za dlhodobý prenájom:</span><span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>
                           </div>
                         )}
-                        <div className="flex justify-between text-base font-semibold mt-2 pt-2 border-t border-white/5">
-                          <span className="text-white">Aparatúra spolu:</span>
-                          <span className="text-white">{subtotalPerDay + additionalDaysTotal} €</span>
-                        </div>
-                      </div>
+                      </>
                     )}
 
-                    {/* SEKCIE: Balíky */}
                     {packageItems.length > 0 && (
-                      <div className="border-t border-white/5 pt-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Package size={14} className="text-[#BD20D3]" />
-                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Balíky</p>
-                        </div>
+                      <div className="border-t border-white/5 pt-3 space-y-2">
+                        <p className="text-sm text-gray-400 font-bold uppercase">Balíky:</p>
                         {packageItems.map((pkg) => (
-                          <div key={pkg.id} className="flex justify-between text-base mb-1">
-                            <span className="text-gray-300 truncate flex-1 min-w-0 pr-4">{pkg.name}</span>
-                            <span className="text-[#BD20D3] font-bold shrink-0">{getPackageTotal(pkg)} €</span>
-                          </div>
+                          <div key={pkg.id} className="flex justify-between text-base"><span className="text-gray-300 truncate flex-1 min-w-0 pr-4">{pkg.name}</span><span className="text-[#BD20D3] font-bold shrink-0">{getPackageTotal(pkg)} €</span></div>
                         ))}
-                        <div className="flex justify-between text-base font-semibold mt-2 pt-2 border-t border-white/5">
-                          <span className="text-white">Balíky spolu:</span>
-                          <span className="text-white">{packagesTotal.toFixed(2)} €</span>
-                        </div>
                       </div>
                     )}
 
-                    {/* SEKCIE: Doplnkové služby (vrátane inštalácie a dopravy) */}
-                    {hasServicesOrDelivery && (
-                      <div className="border-t border-white/5 pt-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Wrench size={14} className="text-[#1A4BFF]" />
-                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Doplnkové služby</p>
-                        </div>
-
-                        {/* Inštalácia (samostatná) */}
-                        {installSelected && !installUninstallSelected && (
-                          <div className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Wrench size={12} className="text-[#1A4BFF]" /> Inštalácia</span>
-                            <span className="text-[#1A4BFF] font-semibold">+{installCost} €</span>
-                          </div>
-                        )}
-                        {installUninstallSelected && !installSelected && (
-                          <div className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Wrench size={12} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
-                            <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span>
-                          </div>
-                        )}
-
-                        {/* Inštalácia z balíka */}
-                        {packageInstallCount > 0 && !installSelected && !installUninstallSelected && (
-                          <div className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Wrench size={12} className="text-[#1A4BFF]" /> Inštalácia (z balíkov)</span>
-                            <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
-                          </div>
-                        )}
-                        {packageInstallUninstallCount > 0 && !installSelected && !installUninstallSelected && (
-                          <div className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Wrench size={12} className="text-[#1A4BFF]" /> Inšt.+Deinšt. (z balíkov)</span>
-                            <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
-                          </div>
-                        )}
-
-                        {/* Doprava (samostatná) */}
-                        {deliverySelected && deliveryResult && (
-                          <div className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Truck size={12} className="text-emerald-400" /> Doprava <strong className="text-white font-semibold">({deliveryCity})</strong></span>
-                            <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
-                          </div>
-                        )}
-
-                        {/* Doprava z balíka */}
-                        {packageItems.filter(p => p.arrival).map((pkg) => (
-                          <div key={pkg.id} className="flex justify-between text-base text-gray-400 mb-1">
-                            <span className="flex items-center gap-1.5"><Truck size={12} className="text-emerald-400" /> Doprava <strong className="text-white font-semibold">({pkg.arrival?.name})</strong></span>
-                            <span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice} €` : 'Zdarma'}</span>
-                          </div>
-                        ))}
-
-                        <div className="flex justify-between text-base font-semibold mt-2 pt-2 border-t border-white/5">
-                          <span className="text-white">Služby spolu:</span>
-                          <span className="text-white">{servicesTotal.toFixed(2)} €</span>
-                        </div>
+                    {(installSelected && !installUninstallSelected) && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{installCost + packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
+                      </div>
+                    )}
+                    {(installUninstallSelected && !installSelected) && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost + packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
+                      </div>
+                    )}
+                    {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
+                      </div>
+                    )}
+                    {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Wrench size={14} className="text-[#1A4BFF]" /> Inštalácia a deinštalácia</span>
+                        <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
                       </div>
                     )}
 
-                    {/* CELKOVÁ SUMA */}
+                    {deliverySelected && deliveryResult && (
+                      <div className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({deliveryCity})</span>
+                        <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
+                      </div>
+                    )}
+                    {packageItems.filter(p => p.arrival).map((pkg) => (
+                      <div key={pkg.id} className="flex justify-between text-base text-gray-400">
+                        <span className="flex items-center gap-1.5"><Truck size={14} className="text-emerald-400" /> Doprava ({pkg.arrival?.name})</span>
+                        <span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice} €` : 'Zdarma'}</span>
+                      </div>
+                    ))}
+
                     <div className="border-t border-white/5 pt-4 flex justify-between items-end">
-                      <div className="flex items-center gap-2">
-                        <ShoppingBag size={16} className="text-[#BD20D3]" />
-                        <span className="text-white font-bold text-lg">Celková suma</span>
-                      </div>
+                      <span className="text-white font-bold text-lg">Celková suma</span>
                       <span className="text-[#BD20D3] font-extrabold text-3xl">{(grandTotal + packagesTotal).toFixed(2)} €</span>
                     </div>
                   </div>
