@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
+import emailjs from '@emailjs/browser';
 import { Send, Phone, Mail, MapPin } from 'lucide-react';
 
 const formSchema = z.object({
@@ -31,12 +32,35 @@ const ContactForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast.success("Dopyt bol úspešne odoslaný!", {
-      description: "Budeme vás kontaktovať v čo najkratšom čase.",
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const toastId = toast.loading('Odosielam dopyt...');
+
+    try {
+      await emailjs.send(
+        'service_s8kq87k',
+        'template_zh6cnks',
+        {
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          date: values.date,
+          message: values.message,
+        },
+        'hlWKyd9fiWgqJJT3r'
+      );
+
+      toast.dismiss(toastId);
+      toast.success('Dopyt bol úspešne odoslaný!', {
+        description: 'Budeme vás kontaktovať v čo najkratšom čase.',
+      });
+      form.reset();
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error('Nepodarilo sa odoslať dopyt.', {
+        description: 'Skúste to prosím neskôr alebo nás kontaktujte telefonicky.',
+      });
+      console.error('EmailJS error:', error);
+    }
   }
 
   return (
