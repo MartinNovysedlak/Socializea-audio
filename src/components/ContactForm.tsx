@@ -39,6 +39,7 @@ const ContactForm = () => {
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
+      // Posielame len dynamické polia – žiadny subject ani html
       const { error } = await supabase.functions.invoke('send-email', {
         body: {
           clientName: values.name,
