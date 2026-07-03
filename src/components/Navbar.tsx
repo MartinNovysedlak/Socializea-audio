@@ -22,10 +22,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0d1f] border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-[100] bg-[#0a0d1f] border-b border-white/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300 relative z-[60]">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300">
           <div className="w-12 h-12 overflow-hidden rounded-lg border border-[#BD20D3]/30 shadow-[0_0_15px_rgba(189,32,211,0.2)]">
             <img src="/logo.png" alt="Socializea Logo" className="w-full h-full object-cover" />
           </div>
@@ -55,7 +55,7 @@ const Navbar = () => {
         </div>
 
         {/* MOBILE BURGER TOGGLE */}
-        <div className="flex lg:hidden items-center gap-3 relative z-[60]">
+        <div className="flex lg:hidden items-center gap-3">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"
