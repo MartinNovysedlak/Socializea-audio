@@ -85,6 +85,7 @@ const ProductDetail = () => {
           phone: inquiryPhone || 'Neuvedený',
           date: 'Kúpa produktu',
           message: `${inquiryMessage || '—'}\n\nProdukt: ${productName}\nCena: ${productPrice}\nStav: ${productCondition}`,
+          subject: 'Dopyt na kúpu produktu (socializea.sk/predaj)',
         },
         'hlWKyd9fiWgqJJT3r'
       );
