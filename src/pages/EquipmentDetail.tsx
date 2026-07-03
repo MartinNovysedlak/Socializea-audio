@@ -16,7 +16,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface EquipmentDetailProps {
@@ -37,6 +37,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [questionEmail, setQuestionEmail] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
+  const [desiredQuantity, setDesiredQuantity] = useState(1);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
 
@@ -48,6 +49,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     if (item) {
       setActiveImage(images[0]);
       setActiveIndex(0);
+      setDesiredQuantity(1);
     }
   }, [item]);
 
@@ -85,18 +87,18 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
     setQuantities((prev) => {
       const currentQty = prev[item.id] || 0;
-      if (currentQty >= item.available) {
+      const newTotal = currentQty + desiredQuantity;
+      if (newTotal > item.available) {
         toast.error(`Nemôžete pridať viac kusov. Maximálne dostupné množstvo je ${item.available}.`);
         return prev;
       }
       
-      const newQty = currentQty + 1;
       toast.success("Produkt bol pridaný do košíka!", {
-        description: `${item.name} je teraz vo vašom košíku (Spolu: ${newQty} ks).`,
+        description: `${desiredQuantity} ks ${item.name} je teraz vo vašom košíku (Spolu: ${newTotal} ks).`,
       });
       return {
         ...prev,
-        [item.id]: newQty
+        [item.id]: newTotal
       };
     });
   };
@@ -119,6 +121,15 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       setQuestionDialogOpen(false);
       setSendingQuestion(false);
     }, 1000);
+  };
+
+  const decreaseQuantity = () => {
+    setDesiredQuantity((prev) => Math.max(1, prev - 1));
+  };
+
+  const increaseQuantity = () => {
+    if (!item) return;
+    setDesiredQuantity((prev) => Math.min(item.available - cartQuantity, prev + 1));
   };
 
   useEffect(() => {
@@ -180,6 +191,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const pageTitle = `${item.name} – Prenájom ${categoryLabel} | Socializea Audio`;
 
   const isSoldOut = item.available === 0;
+  const maxToAdd = item.available - cartQuantity;
 
   return (
     <>
@@ -381,20 +393,9 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     </div>
                   )}
               </div>
-
-              {/* Guarantee card */}
-              <div className="p-5 bg-white/3 border border-white/5 rounded-2xl flex items-start gap-4">
-                <ShieldCheck size={32} className="text-[#BD20D3] shrink-0" />
-                <div className="text-sm text-gray-400">
-                  <p className="font-bold text-white mb-1">Garancia kvality a spoľahlivosti</p>
-                  <p className="leading-relaxed">
-                    Každé prenajímané zariadenie je pred odovzdaním dôkladne otestované naším technikom. 
-                  </p>
-                </div>
-              </div>
             </div>
 
-            {/* Right column – add to cart & question */}
+            {/* Right column – add to cart */}
             <div className="lg:col-span-5">
               <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
                 {/* Available quantity */}
@@ -410,6 +411,39 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </div>
                 </div>
 
+                {/* Quantity selector */}
+                {!isSoldOut && (
+                  <div>
+                    <label className="text-xs text-gray-400 font-bold uppercase tracking-wider block mb-3">
+                      Počet kusov
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={decreaseQuantity}
+                        disabled={desiredQuantity <= 1}
+                        className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <Minus size={18} />
+                      </button>
+                      <span className="text-xl font-bold text-white w-12 text-center tabular-nums">
+                        {desiredQuantity}
+                      </span>
+                      <button
+                        onClick={increaseQuantity}
+                        disabled={desiredQuantity >= maxToAdd}
+                        className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <Plus size={18} />
+                      </button>
+                      {maxToAdd > 0 && (
+                        <span className="text-xs text-gray-500 ml-1">
+                          max {maxToAdd}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Add to cart button */}
                 {isSoldOut ? (
                   <Button
@@ -421,11 +455,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                 ) : isInCart ? (
                   <Button
                     onClick={handleAddToCart}
-                    disabled={cartQuantity >= item.available}
+                    disabled={maxToAdd <= 0}
                     className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
                   >
                     <Check size={18} className="mr-2" />
-                    V košíku ({cartQuantity})
+                    Pridať ďalšie ({cartQuantity} v košíku)
                   </Button>
                 ) : (
                   <Button
@@ -436,65 +470,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     Pridať do košíka
                   </Button>
                 )}
-
-                {/* Question dialog trigger */}
-                <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-2 rounded-xl hover:bg-white/5">
-                      <HelpCircle size={16} />
-                      Je vám niečo nejasné? Spýtajte sa nás
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
-                      <DialogDescription className="text-gray-400 text-sm">
-                        Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
-                        <input
-                          type="text"
-                          required
-                          value={questionName}
-                          onChange={(e) => setQuestionName(e.target.value)}
-                          placeholder="Napr. Ján Novák"
-                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
-                        <input
-                          type="email"
-                          required
-                          value={questionEmail}
-                          onChange={(e) => setQuestionEmail(e.target.value)}
-                          placeholder="jan.novak@email.sk"
-                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
-                        <textarea
-                          required
-                          value={questionMessage}
-                          onChange={(e) => setQuestionMessage(e.target.value)}
-                          placeholder="Napíšte, čo vás zaujíma..."
-                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={sendingQuestion}
-                        className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
-                      >
-                        {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
 
                 {/* Contact info */}
                 <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
@@ -514,6 +489,65 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </div>
                 </div>
               </div>
+
+              {/* Question section below the card */}
+              <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+                <DialogTrigger asChild>
+                  <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 mt-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
+                    <HelpCircle size={16} />
+                    Je vám niečo nejasné? Spýtajte sa nás
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                    <DialogDescription className="text-gray-400 text-sm">
+                      Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
+                      <input
+                        type="text"
+                        required
+                        value={questionName}
+                        onChange={(e) => setQuestionName(e.target.value)}
+                        placeholder="Napr. Ján Novák"
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
+                      <input
+                        type="email"
+                        required
+                        value={questionEmail}
+                        onChange={(e) => setQuestionEmail(e.target.value)}
+                        placeholder="jan.novak@email.sk"
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                      <textarea
+                        required
+                        value={questionMessage}
+                        onChange={(e) => setQuestionMessage(e.target.value)}
+                        placeholder="Napíšte, čo vás zaujíma..."
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={sendingQuestion}
+                      className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
+                    >
+                      {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
