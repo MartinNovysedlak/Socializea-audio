@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
-import { Send, Phone, Mail, MapPin, Calendar } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store } from 'lucide-react';
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
@@ -130,17 +130,25 @@ const ContactForm = () => {
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-2">Kde nás nájdete</p>
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
-                            <p className="text-white text-lg leading-snug">Čadečka 1924</p>
-                            <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-4">Kde nás nájdete</p>
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-3">
+                            <Warehouse size={18} className="text-[#BD20D3] mt-1 shrink-0" />
+                            <div>
+                              <p className="text-[#BD20D3] font-bold text-sm uppercase tracking-wider mb-1">Hlavný sklad a sídlo</p>
+                              <p className="text-white text-lg leading-snug">Čadečka 1924</p>
+                              <p className="text-gray-400 text-sm">022 01 Čadca, Slovensko</p>
+                            </div>
                           </div>
-                          <div className="border-t border-white/5 pt-3">
-                            <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto</p>
-                            <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
-                            <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
+                          <div className="border-t border-white/5 pt-4">
+                            <div className="flex items-start gap-3">
+                              <Store size={18} className="text-[#1A4BFF] mt-1 shrink-0" />
+                              <div>
+                                <p className="text-[#1A4BFF] font-bold text-sm uppercase tracking-wider mb-1">Odberné miesto</p>
+                                <p className="text-white text-lg leading-snug">Vysokoškolská 4, Budova SADOP</p>
+                                <p className="text-gray-400 text-sm">010 01 Žilina, Slovensko</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
