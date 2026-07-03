@@ -55,15 +55,13 @@ const ContactForm = () => {
     const fullName = `${values.firstName} ${values.lastName}`;
 
     const bodyData = {
-      customerName: fullName,
-      customerEmail: values.email,
-      customerPhone: values.phone,
-      selectedPackage: values.date ? `Dátum: ${formattedDate}` : 'Neuvedený',
-      eventDate: formattedDate,
+      formType: 'contact',
+      name: fullName,
+      email: values.email,
+      phone: values.phone,
+      date: formattedDate,
       message: values.message,
     };
-
-    console.log('Odosielané dáta do Edge Function:', bodyData);
 
     try {
       const { error } = await supabase.functions.invoke('send-email', {

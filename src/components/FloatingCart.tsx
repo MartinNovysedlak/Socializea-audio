@@ -417,110 +417,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
 
-  const buildCartSummaryText = () => {
-    let text = "";
-    if (cartItems.length > 0) {
-      text += "🎧 VYBRANÁ APARATÚRA:\n";
-      cartItems.forEach(({ item, qty }) => {
-        text += `• ${item.name} (${qty}x) - ${(item.price_per_day * qty).toFixed(2)} €/deň\n`;
-      });
-      text += "\n";
-    }
-    if (packageItems.length > 0) {
-      text += "📦 BALÍKY:\n";
-      packageItems.forEach((pkg) => {
-        text += `• ${pkg.name} - ${getPackageTotal(pkg).toFixed(2)} €\n`;
-        if (pkg.hasLights) text += "  - Svetlá: Áno\n";
-        if (pkg.install === 'install') text += `  - Inštalácia (+${pkg.installPrice} €)\n`;
-        if (pkg.install === 'install_uninstall') text += `  - Inštalácia a deinštalácia (+${pkg.installPrice} €)\n`;
-        if (pkg.arrival) text += `  - Doprava: ${pkg.arrival.name} (+${pkg.deliveryPrice} €)\n`;
-        if (pkg.extras.length > 0) {
-          text += "  - Doplnky:\n";
-          pkg.extras.forEach(e => {
-            text += `    * ${e.label} (${e.quantity}x) - ${(e.quantity * e.pricePerDay).toFixed(2)} €\n`;
-          });
-        }
-      });
-      text += "\n";
-    }
-
-    if (hasServicesOrDelivery) {
-      text += "🔧 DOPLNKOVÉ SLUŽBY & DOPRAVA:\n";
-      if (installSelected) text += `• Inštalácia: +${installCost} €\n`;
-      if (installUninstallSelected) text += `• Inštalácia a deinštalácia: +${installUninstallCost} €\n`;
-      if (deliverySelected && deliveryResult) {
-        text += `• Doprava do: ${deliveryCity} (${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`})\n`;
-        if (!deliveryResult.isFree) text += `  - Vzdialenosť: ${deliveryResult.distance} km od ${deliveryResult.nearestPoint}\n`;
-      }
-      text += "\n";
-    }
-
-    text += `CELKOVÁ SUMA OBJEDNÁVKY: ${(grandTotal + packagesTotal).toFixed(2)} €`;
-    return text;
-  };
-
-  const getPackageListText = () => {
-    const list: string[] = [];
-    if (packageItems.length > 0) {
-      packageItems.forEach(p => list.push(p.name));
-    }
-    if (cartItems.length > 0) {
-      list.push(`${totalEquipmentQty}x aparatúra`);
-    }
-    return list.join(", ") || "Doplnkové služby";
-  };
-
-  const buildCartSummaryHtml = () => {
-    let html = '';
-
-    if (cartItems.length > 0) {
-      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
-      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-      html += '<thead><tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th></tr></thead>';
-      html += '<tbody>';
-      cartItems.forEach(({ item, qty }) => {
-        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-          <td style="padding:8px 12px;color:white;">${item.name}</td>
-          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
-          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td>
-          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-    }
-
-    if (packageItems.length > 0) {
-      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
-      packageItems.forEach((pkg) => {
-        html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <strong style="color:white;font-size:14px;">${pkg.name}</strong>
-            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
-          </div>`;
-        if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
-        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
-        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
-        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
-        if (pkg.extras.length > 0) {
-          html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
-          html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
-          pkg.extras.forEach((e) => {
-            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
-          });
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-    }
-
-    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
-    html += `<span style="color:white;font-size:16px;font-weight:700;">Celková suma</span>`;
-    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
-    html += '</div>';
-
-    return html;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -534,73 +430,54 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const name = `${formData.firstName} ${formData.lastName}`;
       const email = formData.email;
       const phone = formData.phone || 'Neuvedené';
-      
-      const formattedDate = formData.dateFrom 
-        ? `${format(new Date(formData.dateFrom), "dd.MM.yyyy")} až ${format(new Date(formData.dateTo), "dd.MM.yyyy")} (${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'})` 
+      const formattedDate = formData.dateFrom
+        ? `${format(new Date(formData.dateFrom), "dd.MM.yyyy")} až ${format(new Date(formData.dateTo), "dd.MM.yyyy")} (${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'})`
         : 'Neuvedené';
 
-      const cartSummaryText = buildCartSummaryText();
-      const packagesText = getPackageListText();
-      
-      // Spojíme komentár od zákazníka s prehľadným rozpisom do sekcie pre správu
-      const clientNote = formData.message ? `Komentár zákazníka:\n${formData.message}\n\n` : "";
-      const messageBody = `${clientNote}--- PREHĽAD REZERVÁCIE ---\n\n${cartSummaryText}`;
+      // štruktúrované dáta pre rezerváciu
+      const cartItemsPayload = cartItems.map(({ item, qty }) => ({
+        name: item.name,
+        quantity: qty,
+        pricePerDay: item.price_per_day
+      }));
 
-      const cartSummaryHtml = buildCartSummaryHtml();
+      const packagesPayload = packageItems.map(pkg => {
+        const addons = [];
+        if (pkg.hasLights) addons.push({ label: 'So svetlami', type: 'lights' });
+        if (pkg.install === 'install') addons.push({ label: `Inštalácia (+${pkg.installPrice} €)`, type: 'install' });
+        if (pkg.install === 'install_uninstall') addons.push({ label: `Inštalácia a deinštalácia (+${pkg.installPrice} €)`, type: 'install' });
+        if (pkg.arrival) {
+          addons.push({
+            label: `Doprava: ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`,
+            type: 'delivery'
+          });
+        }
+        pkg.extras.forEach(e => {
+          addons.push({ label: `${e.label} (${e.quantity}x) - ${(e.pricePerDay * e.quantity).toFixed(2)} €`, type: 'extra' });
+        });
+        return {
+          name: pkg.name,
+          price: getPackageTotal(pkg),
+          addons
+        };
+      });
 
-      const htmlContent = `
-<div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);">
-  <div style="background:linear-gradient(135deg,#0a0d1f,#020721);padding:30px 24px 20px;text-align:center;border-bottom:1px solid rgba(189,32,211,0.2);">
-    <h1 style="color:#BD20D3;font-size:24px;margin:0;">🔊 Nový dopyt z košíka</h1>
-    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">Nezáväzná kalkulácia z webu</p>
-  </div>
+      const totalPrice = grandTotal + packagesTotal;
 
-  <div style="padding:24px;">
-    <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
-    <table style="width:100%;font-size:14px;color:#d1d5db;">
-      <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${name}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Email:</td><td style="padding:4px 0;color:#BD20D3;">${email}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${phone}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${formattedDate}</td></tr>
-    </table>
+      const bodyData = {
+        formType: 'reservation',
+        name,
+        email,
+        phone,
+        date: formattedDate,
+        message: formData.message || '',
+        cartItems: cartItemsPayload,
+        packages: packagesPayload,
+        totalPrice
+      };
 
-    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
-    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;">
-      ${cartSummaryHtml}
-    </div>
-
-    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
-    <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${formData.message || 'Bez poznámky'}</div>
-
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(189,32,211,0.2);text-align:center;">
-      <p style="color:#9ca3af;font-size:12px;">Tento email bol odoslaný automaticky z webovej stránky.</p>
-    </div>
-  </div>
-</div>`;
-
-      // Odoslanie payloadu s pokrytím všetkých možných názvov kľúčov pre pevnú aj voľnú šablónu emailu v Supabase Edge funkcii
       const { error } = await supabase.functions.invoke('send-email', {
-        body: {
-          to: 'djparty.sk@gmail.com',
-          subject: `🔊 Nový dopyt z košíka – ${name}`,
-          replyTo: email,
-          
-          // Ak Edge funkcia podporuje priame HTML:
-          html: htmlContent,
-
-          // Ak Edge funkcia generuje email cez preddefinovanú šablónu (preto odosielame obidva jazyky pre istotu):
-          name: name,
-          meno: name,
-          email: email,
-          phone: phone,
-          tel: phone,
-          date: formattedDate,
-          datum: formattedDate,
-          package: packagesText,
-          balik: packagesText,
-          message: messageBody,
-          sprava: messageBody
-        },
+        body: bodyData,
       });
 
       if (error) throw error;
