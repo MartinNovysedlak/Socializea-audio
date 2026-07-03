@@ -7,6 +7,7 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const location = useLocation();
 
   const navLinks = [
@@ -17,8 +18,21 @@ const Navbar = () => {
     { name: 'Kontakt', href: '/kontakt' },
   ];
 
+  const openMenu = () => {
+    setIsClosing(false);
+    setIsMobileMenuOpen(true);
+  };
+
+  const closeMenu = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsMobileMenuOpen(false);
+      setIsClosing(false);
+    }, 300);
+  };
+
   const handleLinkClick = () => {
-    setIsMobileMenuOpen(false);
+    closeMenu();
   };
 
   return (
@@ -57,7 +71,7 @@ const Navbar = () => {
         {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3">
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={isMobileMenuOpen ? closeMenu : openMenu}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"
             aria-label="Prepnúť menu"
           >
@@ -67,17 +81,21 @@ const Navbar = () => {
       </div>
 
       {/* MOBILE FULL-SCREEN OVERLAY MENU – slide from right */}
-      {isMobileMenuOpen && (
+      {(isMobileMenuOpen || isClosing) && (
         <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
           {/* backdrop */}
           <div 
-            className="absolute inset-0 bg-black/60 animate-in fade-in duration-300"
-            onClick={() => setIsMobileMenuOpen(false)}
+            className={`absolute inset-0 bg-black/60 ${isClosing ? 'animate-out fade-out duration-300' : 'animate-in fade-in duration-300'}`}
+            onClick={closeMenu}
           />
           
           {/* panel */}
           <div 
-            className="relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 animate-in slide-in-from-right duration-300 h-full flex flex-col"
+            className={`relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 h-full flex flex-col ${
+              isClosing 
+                ? 'animate-out slide-out-to-right duration-300' 
+                : 'animate-in slide-in-from-right duration-300'
+            }`}
           >
             {/* Header s logom a krížikom */}
             <div className="flex items-center justify-between px-6 h-20 border-b border-white/5 shrink-0">
@@ -90,7 +108,7 @@ const Navbar = () => {
                 </span>
               </Link>
               <button
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={closeMenu}
                 className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
                 aria-label="Zavrieť menu"
               >
@@ -98,9 +116,9 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Navigačné linky */}
-            <div className="flex-1 flex flex-col justify-center px-8">
-              <div className="space-y-4">
+            {/* Navigačné linky – posunuté nižšie od vrchu */}
+            <div className="flex-1 flex flex-col justify-start pt-12 md:pt-16 px-8">
+              <div className="space-y-3">
                 {navLinks.map((link, idx) => {
                   const isActive = location.pathname === link.href;
                   return (
@@ -115,7 +133,7 @@ const Navbar = () => {
                       }`}
                       style={{ 
                         animationDelay: `${idx * 75}ms`,
-                        animation: 'fade-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                        animation: !isClosing ? 'fade-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none'
                       }}
                     >
                       {link.name}
