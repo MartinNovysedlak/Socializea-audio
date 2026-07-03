@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
-import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store, CheckCircle2 } from 'lucide-react';
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
@@ -26,6 +26,7 @@ const formSchema = z.object({
 
 const ContactForm = () => {
   const [showDateCalendar, setShowDateCalendar] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -68,9 +69,7 @@ const ContactForm = () => {
       );
 
       toast.dismiss(toastId);
-      toast.success('Dopyt bol úspešne odoslaný!', {
-        description: 'Budeme vás kontaktovať v čo najkratšom čase.',
-      });
+      setSubmitted(true);
       form.reset();
     } catch (error) {
       toast.dismiss(toastId);
@@ -83,10 +82,36 @@ const ContactForm = () => {
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      form.setValue('date', format(date, "yyyy-MM-dd"));
+      form.setValue('date', format(date, "dd.MM.yyyy"));
       setShowDateCalendar(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <section id="kontakt" className="py-12 bg-transparent relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-10 md:p-14 backdrop-blur-xl text-center">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="text-green-400" size={32} />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-4">Ďakujeme za váš dopyt!</h3>
+              <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-md mx-auto">
+                Váš dopyt sme úspešne prijali. Budeme sa mu venovať a čo najskôr vás budeme kontaktovať s nezáväznou cenovou ponukou.
+              </p>
+              <Button 
+                onClick={() => setSubmitted(false)} 
+                className="btn-cyber border-none px-8 py-3 rounded-xl text-base font-bold"
+              >
+                Odoslať ďalší dopyt
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="kontakt" className="py-12 bg-transparent relative">
@@ -237,7 +262,7 @@ const ContactForm = () => {
                                   type="text"
                                   readOnly
                                   placeholder="Vyberte dátum"
-                                  value={field.value ? format(new Date(field.value), "dd.MM.yyyy") : ""}
+                                  value={field.value || ""}
                                   onClick={() => setShowDateCalendar(!showDateCalendar)}
                                   className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] cursor-pointer pr-10"
                                 />
@@ -248,7 +273,10 @@ const ContactForm = () => {
                               <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                                 <DayPicker
                                   mode="single"
-                                  selected={field.value ? new Date(field.value) : undefined}
+                                  selected={field.value ? (() => {
+                                    const [d, m, y] = field.value.split('.');
+                                    return new Date(Number(y), Number(m) - 1, Number(d));
+                                  })() : undefined}
                                   onSelect={handleDateSelect}
                                   disabled={[{ before: startOfDay(new Date()) }]}
                                   weekStartsOn={1}
