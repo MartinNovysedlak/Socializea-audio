@@ -1,115 +1,84 @@
-// @ts-nocheck
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { Resend } from "npm:resend@4.1.0"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-}
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
-interface EmailPayload {
-  clientName: string
-  clientEmail: string
-  clientPhone?: string
-  packageName: string
-  message?: string
-}
+const TO_EMAIL = "martinnovysedlak48@gmail.com";
+const FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
+const SUBJECT = "🎉 Nová rezervácia z webu Socializea!";
 
-serve(async (req: Request) => {
-  // CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders })
-  }
+function buildHtml(body: Record<string, any>) {
+  const customerName = body.customerName || 'Neuvedené';
+  const customerEmail = body.customerEmail || 'Neuvedené';
+  const selectedPackage = body.selectedPackage || 'Neuvedené';
+  const eventDate = body.eventDate || 'Neuvedené';
+  const message = body.message || '—';
 
-  try {
-    const resendApiKey = Deno.env.get("RESEND_API_KEY")
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY nie je nastavený v Supabase secrets")
-    }
-
-    const resend = new Resend(resendApiKey)
-    const body: EmailPayload = await req.json()
-
-    // Povinné polia
-    if (!body.clientName || !body.clientEmail || !body.packageName) {
-      throw new Error("Chýbajú povinné polia: clientName, clientEmail, packageName")
-    }
-
-    const clientName = body.clientName
-    const clientEmail = body.clientEmail
-    const clientPhone = body.clientPhone || "Neuvedený"
-    const pkg = body.packageName
-    const msg = body.message || "—"
-
-    // --- DOČASNÉ PRESMEROVANIE ---
-    const FROM = "onboarding@resend.dev"
-    const TO = "martinnovysedlak48@gmail.com"
-
-    const subject = `Dopyt od ${clientName} – ${pkg}`
-
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0d1f; color: white; border-radius: 16px; overflow: hidden; border: 1px solid rgba(189,32,211,0.3);">
-        <div style="padding: 24px; background: linear-gradient(135deg, #BD20D3, #1A4BFF);">
-          <h1 style="margin: 0; font-size: 20px; color: white;">📬 Nový dopyt cez web</h1>
-        </div>
-        <div style="padding: 24px;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <tr>
-              <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600; width: 120px;">Meno:</td>
-              <td style="padding: 8px 12px; color: white; font-weight: 700;">${clientName}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Email:</td>
-              <td style="padding: 8px 12px; color: white;">${clientEmail}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Telefón:</td>
-              <td style="padding: 8px 12px; color: white;">${clientPhone}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Balík:</td>
-              <td style="padding: 8px 12px; color: white; font-weight: 700;">${pkg}</td>
-            </tr>
-          </table>
-          <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-            <p style="margin: 0 0 8px 0; color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase;">Správa:</p>
-            <p style="margin: 0; color: #d1d5db; white-space: pre-wrap;">${msg}</p>
-          </div>
-        </div>
-        <div style="padding: 12px 24px; background: rgba(0,0,0,0.2); text-align: center; font-size: 11px; color: #6b7280;">
-          Odoslané z webu Socializea Audio (testovací režim Resend)
-        </div>
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width:600px; margin:0 auto; background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <div style="background: linear-gradient(135deg, #BD20D3, #1A4BFF); padding:32px 24px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; font-size:26px; font-weight:700;">Nová rezervácia 🎉</h1>
+        <p style="color:#f0e6ff; margin-top:8px; font-size:15px;">Socializea Audio</p>
       </div>
-    `
+      <div style="padding:32px 24px; background-color:#fafafa;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr style="border-bottom:1px solid #e0e0e0;">
+            <td style="padding:12px 0; color:#555; font-weight:600;">Meno</td>
+            <td style="padding:12px 0; color:#111; text-align:right;">${customerName}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e0e0e0;">
+            <td style="padding:12px 0; color:#555; font-weight:600;">E‑mail</td>
+            <td style="padding:12px 0; color:#111; text-align:right;">${customerEmail}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e0e0e0;">
+            <td style="padding:12px 0; color:#555; font-weight:600;">Balík</td>
+            <td style="padding:12px 0; color:#111; text-align:right;">${selectedPackage}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e0e0e0;">
+            <td style="padding:12px 0; color:#555; font-weight:600;">Dátum podujatia</td>
+            <td style="padding:12px 0; color:#111; text-align:right;">${eventDate}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 0; color:#555; font-weight:600; vertical-align:top;">Správa</td>
+            <td style="padding:12px 0; color:#111; text-align:right; white-space:pre-line;">${message}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="background-color:#f3f4f6; padding:16px 24px; text-align:center; font-size:12px; color:#888;">
+        Tento e‑mail bol vygenerovaný automaticky z webového formulára socializea.com
+      </div>
+    </div>
+  `;
+}
 
-    const { data, error } = await resend.emails.send({
-      from: FROM,
-      to: [TO],
-      subject,
-      html,
-    })
+serve(async (req) => {
+  try {
+    const body = await req.json();
+
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: TO_EMAIL,
+      subject: SUBJECT,
+      html: buildHtml(body),
+    });
 
     if (error) {
-      console.error("Resend error:", error)
-      throw new Error(error.message || "Chyba pri odosielaní emailu")
+      console.error("Resend error:", error);
+      return new Response(JSON.stringify({ success: false, error }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    )
-  } catch (error) {
-    console.error("Edge Function error:", error)
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
-    )
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    console.error("Edge function error:", err);
+    return new Response(JSON.stringify({ success: false, error: err.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-})
+});

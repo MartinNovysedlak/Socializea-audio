@@ -38,16 +38,21 @@ const ContactForm = () => {
     setSending(true);
     const toastId = toast.loading('Odosielam dopyt...');
 
+    // Nové jednotné kľúče podľa Edge Function
+    const bodyData = {
+      customerName: values.name,
+      customerEmail: values.email,
+      customerPhone: values.phone,
+      selectedPackage: (values.date ? `Dátum: ${values.date}` : 'Neuvedený'),
+      eventDate: values.date || 'Neuvedený',
+      message: values.message,
+    };
+
+    console.log('Odosielané dáta do Edge Function:', bodyData);
+
     try {
-      // Posielame len dynamické polia – žiadny subject ani html
       const { error } = await supabase.functions.invoke('send-email', {
-        body: {
-          clientName: values.name,
-          clientEmail: values.email,
-          clientPhone: values.phone,
-          packageName: values.date || 'Neuvedený dátum',
-          message: values.message,
-        },
+        body: bodyData,
       });
 
       if (error) throw error;
