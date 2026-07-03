@@ -32,6 +32,7 @@ function formatDate(date: Date | undefined): string {
 
 const ContactForm = () => {
   const [sending, setSending] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -193,12 +194,12 @@ const ContactForm = () => {
                           control={form.control}
                           name="date"
                           render={({ field }) => (
-                            <FormItem className="flex flex-col">
+                            <FormItem>
                               <FormLabel className="text-gray-300">
                                 Dátum podujatia
                                 <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
                               </FormLabel>
-                              <Popover>
+                              <Popover open={dateOpen} onOpenChange={setDateOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
@@ -208,7 +209,7 @@ const ContactForm = () => {
                                         !field.value && "text-gray-500"
                                       )}
                                     >
-                                      <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                                      <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 shrink-0" />
                                       {field.value ? format(field.value, 'dd.MM.yyyy') : <span>Vyberte dátum</span>}
                                     </Button>
                                   </FormControl>
@@ -217,7 +218,10 @@ const ContactForm = () => {
                                   <Calendar
                                     mode="single"
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setDateOpen(false);
+                                    }}
                                     initialFocus
                                     locale={sk}
                                     fromDate={new Date()}
