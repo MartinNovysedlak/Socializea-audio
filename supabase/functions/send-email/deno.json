@@ -1,8 +1,11 @@
 {
-  "imports": {
-    "@supabase/functions-js": "jsr:@supabase/functions-js@^2",
-    "@supabase/server": "npm:@supabase/server@^1",
-    "http/": "https://deno.land/std@0.168.0/http/",
-    "resend": "npm:resend@4.1.0"
+  "compilerOptions": {
+    "types": ["https://deno.land/std@0.168.0/http/server.ts"]
+  },
+  "importMap": {
+    "imports": {
+      "https://deno.land/std@0.168.0/http/server.ts": "https://deno.land/std@0.168.0/http/server.ts",
+      "npm:resend@2.0.0": "npm:resend@2.0.0"
+    }
   }
 }
