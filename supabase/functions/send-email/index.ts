@@ -1,67 +1,69 @@
+// @ts-ignore - Deno typy nie sú dostupné v projekte
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { Resend } from "npm:resend@4.1.0"
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-}
+// @ts-ignore - Deno je globálne dostupné v runtime
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")
 
-interface EmailPayload {
-  to: string
-  subject: string
-  html: string
-  from?: string
-}
+const handler = async (req: Request): Promise<Response> => {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  }
 
-serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders })
+    return new Response("ok", { headers })
   }
 
   try {
-    const resendApiKey = Deno.env.get("RESEND_API_KEY")
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY nie je nastavený v Supabase secrets")
+    if (!RESEND_API_KEY) {
+      throw new Error("Chýba RESEND_API_KEY v Secrets")
     }
 
-    const resend = new Resend(resendApiKey)
-
-    const body: EmailPayload = await req.json()
-    const { to, subject, html, from } = body
+    const { to, subject, html } = await req.json()
 
     if (!to || !subject || !html) {
-      throw new Error("Chýbajú povinné polia: to, subject, html")
+      return new Response(
+        JSON.stringify({ error: "Chýbajú povinné polia: to, subject, html" }),
+        { status: 400, headers: { ...headers, "Content-Type": "application/json" } }
+      )
     }
 
-    const { data, error } = await resend.emails.send({
-      from: from || "Socializea Audio <onboarding@resend.dev>",
-      to: [to],
-      subject,
-      html,
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "onboarding@resend.dev",
+        to: [to],
+        subject: subject,
+        html: html,
+      }),
     })
 
-    if (error) {
-      console.error("Resend error:", error)
-      throw new Error(error.message || "Chyba pri odosielaní emailu")
+    const data = await res.json()
+
+    if (!res.ok) {
+      console.error("Resend API error:", data)
+      throw new Error(data.message || "Nepodarilo sa odoslať email")
     }
 
+    console.log("Email odoslaný:", data)
+
     return new Response(
-      JSON.stringify({ success: true, data }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
+      JSON.stringify({ success: true, id: data.id }),
+      { status: 200, headers: { ...headers, "Content-Type": "application/json" } }
     )
   } catch (error) {
-    console.error("Edge Function error:", error)
+    console.error("Chyba:", error.message)
+
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      }
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
     )
   }
-})
+}
+
+serve(handler)
