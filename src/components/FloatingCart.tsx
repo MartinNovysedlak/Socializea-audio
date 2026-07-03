@@ -410,7 +410,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (e.key === 'Escape') setCityDropdownOpen(false);
   };
 
-  // ======================== UPRAVENÝ builder e-mailového HTML ========================
+  const hasEquipment = totalEquipmentQty > 0;
+
+  // ======================== buildCartSummaryHtml INSIDE the component ========================
   const buildCartSummaryHtml = () => {
     let html = '';
 
@@ -438,7 +440,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <strong style="color:white;font-size:14px;">${pkg.name}</strong>
-            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;white-space:nowrap;margin-left:24px;">${getPackageTotal(pkg).toFixed(2)} €</span>
           </div>`;
         if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
         if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
@@ -448,7 +450,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
           html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
           pkg.extras.forEach((e) => {
-            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;margin-left:24px;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
           });
           html += '</div>';
         }
@@ -459,15 +461,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     // Doplnkové služby (inštalácia, doprava)
     if (installSelected || installUninstallSelected) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
-      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20 €</span></div>`;
-      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;">+40 €</span></div>`;
+      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;">+20 €</span></div>`;
+      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;">+40 €</span></div>`;
     }
 
     if (deliveryResult) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🚚 Doprava</h3>';
       html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
         <span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span>
-        <span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
+        <span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;margin-left:24px;white-space:nowrap;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
       </div>`;
       if (!deliveryResult.isFree) {
         html += `<div style="color:#6b7280;font-size:11px;padding-bottom:4px;">~${deliveryResult.distance} km od ${deliveryResult.nearestPoint}, 0,70 €/km</div>`;
@@ -477,29 +479,29 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       }
     }
 
-    // ====== NOVÉ: Obdobie prenájmu a zľava ======
+    // Obdobie prenájmu a zľava
     if (hasEquipment) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📅 Obdobie prenájmu</h3>';
-      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
-      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Do:</span><span style="color:white;font-weight:600;">${formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
-      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;margin-left:24px;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Do:</span><span style="color:white;font-weight:600;margin-left:24px;">${formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;margin-left:24px;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>`;
       if (days > 1) {
-        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">1. deň (plná cena):</span><span style="color:white;font-weight:600;">${firstDayTotal.toFixed(2)} €</span></div>`;
-        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">${days - 1} ${days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50% cena):</span><span style="color:white;font-weight:600;">${additionalDaysTotal.toFixed(2)} €</span></div>`;
-        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-top:6px;"><span style="color:#10b981;">🌟 Zľava za dlhodobý prenájom:</span><span style="color:#10b981;font-weight:600;">– ${((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">1. deň (plná cena):</span><span style="color:white;font-weight:600;margin-left:24px;">${firstDayTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">${days - 1} ${days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50% cena):</span><span style="color:white;font-weight:600;margin-left:24px;">${additionalDaysTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-top:6px;"><span style="color:#10b981;">🌟 Zľava za dlhodobý prenájom:</span><span style="color:#10b981;font-weight:600;margin-left:24px;">– ${((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>`;
       }
     }
 
-    // Celková suma (ostáva rovnaká, len zarovnanie je už pekne odsadené)
+    // Celková suma
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
     html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
-    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;margin-left:24px;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
     html += '</div>';
 
     return html;
   };
 
-  // ======================== UPRAVENÝ handleSubmit – formát dátumov ========================
+  // ======================== handleSubmit ========================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -512,7 +514,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     try {
       const cartSummaryHtml = buildCartSummaryHtml();
 
-      // Dátumy už v slovenskom formáte dd.MM.yyyy
       const htmlContent = generateEmailHtml('rezervacia', {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
@@ -556,8 +557,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   };
 
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
-
-  const hasEquipment = totalEquipmentQty > 0;
 
   const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
   const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
