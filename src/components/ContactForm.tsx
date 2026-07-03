@@ -230,91 +230,87 @@ const ContactForm = () => {
                 <div className="bg-black/20 border border-white/10 p-6 md:p-8 md:p-10 rounded-3xl backdrop-blur-sm">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Telefón</FormLabel>
-                              <FormControl>
-                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">
-                                Dátum podujatia
-                                <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
-                              </FormLabel>
-                              <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn(
-                                        "h-12 rounded-xl border-white/10 bg-black/50 text-white hover:bg-black/60 hover:text-white w-full justify-start text-left font-normal",
-                                        !field.value && "text-gray-500"
-                                      )}
-                                    >
-                                      <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 shrink-0" />
-                                      {field.value ? format(field.value, 'dd.MM.yyyy') : <span>Vyberte dátum</span>}
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 border-[#BD20D3]/20 bg-transparent shadow-none" align="start">
-                                  <DayPicker
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={(date) => {
-                                      field.onChange(date);
-                                      setDateOpen(false);
-                                    }}
-                                    locale={sk}
-                                    fromDate={new Date()}
-                                    className="rdp"
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Telefón</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">
+                              Dátum podujatia
+                              <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
+                            </FormLabel>
+                            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "h-12 rounded-xl border-white/10 bg-black/50 text-white hover:bg-black/60 hover:text-white w-full justify-start text-left font-normal",
+                                      !field.value && "text-gray-500"
+                                    )}
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4 text-gray-400 shrink-0" />
+                                    {field.value ? format(field.value, 'dd.MM.yyyy') : <span>Vyberte dátum</span>}
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0 border-[#BD20D3]/20 bg-transparent shadow-none" align="start">
+                                <DayPicker
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                    field.onChange(date);
+                                    setDateOpen(false);
+                                  }}
+                                  locale={sk}
+                                  fromDate={new Date()}
+                                  className="rdp"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name="message"
