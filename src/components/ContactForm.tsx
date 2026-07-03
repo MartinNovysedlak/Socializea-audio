@@ -266,7 +266,7 @@ const ContactForm = () => {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-300">Email</FormLabel>
+                            <FormLabel className="text-gray-300">Email *</FormLabel>
                             <FormControl>
                               <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
                             </FormControl>
@@ -279,7 +279,7 @@ const ContactForm = () => {
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-300">Telefón</FormLabel>
+                            <FormLabel className="text-gray-300">Telefón *</FormLabel>
                             <FormControl>
                               <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
                             </FormControl>
@@ -334,7 +334,7 @@ const ContactForm = () => {
                         name="message"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-300">Vaša správa</FormLabel>
+                            <FormLabel className="text-gray-300">Vaša správa *</FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="Napíšte nám viac o vašom podujatí..." 
