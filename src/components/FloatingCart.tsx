@@ -417,6 +417,57 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
 
+  const buildCartSummaryHtml = () => {
+    let html = '';
+
+    if (cartItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<thead><tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th></tr></thead>';
+      html += '<tbody>';
+      cartItems.forEach(({ item, qty }) => {
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+          <td style="padding:8px 12px;color:white;">${item.name}</td>
+          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
+          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td>
+          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    if (packageItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
+      packageItems.forEach((pkg) => {
+        html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="color:white;font-size:14px;">${pkg.name}</strong>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+          </div>`;
+        if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
+        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
+        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
+        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
+        if (pkg.extras.length > 0) {
+          html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
+          html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
+          pkg.extras.forEach((e) => {
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+
+    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
+    html += `<span style="color:white;font-size:16px;font-weight:700;">Celková suma</span>`;
+    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += '</div>';
+
+    return html;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -433,50 +484,45 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const date = formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedené';
       const message = formData.message || '—';
 
-      // Build cart items array for the server
-      const cartItemsForEmail = [];
-      
-      for (const { item, qty } of cartItems) {
-        cartItemsForEmail.push({
-          name: item.name,
-          qty: qty,
-          price: `${(item.price_per_day * qty).toFixed(2)}`,
-          details: `Cena na deň: ${item.price_per_day} €/ks`
-        });
-      }
+      const cartSummaryHtml = buildCartSummaryHtml();
 
-      for (const pkg of packageItems) {
-        let details = pkg.hasLights ? "So svetlami" : "Bez svetiel";
-        if (pkg.install === 'install') details += `, Inštalácia (+${pkg.installPrice} €)`;
-        if (pkg.install === 'install_uninstall') details += `, Inšt.+Deinšt. (+${pkg.installPrice} €)`;
-        if (pkg.arrival) details += `, Doprava: ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`;
-        
-        cartItemsForEmail.push({
-          name: pkg.name,
-          qty: 1,
-          price: getPackageTotal(pkg).toFixed(2),
-          details: details
-        });
-      }
+      const htmlContent = `
+<div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);">
+  <div style="background:linear-gradient(135deg,#0a0d1f,#020721);padding:30px 24px 20px;text-align:center;border-bottom:1px solid rgba(189,32,211,0.2);">
+    <h1 style="color:#BD20D3;font-size:24px;margin:0;">🔊 Nový dopyt z košíka</h1>
+    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">Nezáväzná kalkulácia z webu</p>
+  </div>
 
-      const payload = {
-        type: 'cart',
-        customerName: name,
-        customerEmail: email,
-        customerPhone: phone,
-        eventDate: date,
-        selectedPackage: 'Dopyt z košíka',
-        message: message,
-        to: 'djparty.sk@gmail.com',
-        replyTo: email,
-        cartItems: cartItemsForEmail,
-        totalPrice: (grandTotal + packagesTotal).toFixed(2)
-      };
+  <div style="padding:24px;">
+    <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
+    <table style="width:100%;font-size:14px;color:#d1d5db;">
+      <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${name}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Email:</td><td style="padding:4px 0;color:#BD20D3;">${email}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${phone}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${date}</td></tr>
+    </table>
 
-      console.log('Sending payload:', JSON.stringify(payload, null, 2));
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
+    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;">
+      ${cartSummaryHtml}
+    </div>
+
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
+    <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${message}</div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(189,32,211,0.2);text-align:center;">
+      <p style="color:#9ca3af;font-size:12px;">Tento email bol odoslaný automaticky z webovej stránky.</p>
+    </div>
+  </div>
+</div>`;
 
       const { error } = await supabase.functions.invoke('send-email', {
-        body: payload,
+        body: {
+          to: 'djparty.sk@gmail.com',
+          subject: `🔊 Nový dopyt z košíka – ${name}`,
+          html: htmlContent,
+          replyTo: email,
+        },
       });
 
       if (error) throw error;
