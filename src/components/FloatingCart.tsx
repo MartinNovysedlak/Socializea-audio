@@ -96,7 +96,7 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
     const xi = polygon[i].lng, yi = polygon[i].lat;
     const xj = polygon[j].lng, yj = polygon[j].lat;
     const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
-      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+      (point.lng < (xj - xi) * (point.lat - yi) / (xj - xi) + xi);
     if (intersect) inside = !inside;
   }
   return inside;
@@ -644,6 +644,19 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           .rdp-caption { font-size: 11px; }
           .rdp-nav_button { width: 20px; height: 20px; }
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(189, 32, 211, 0.3);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(189, 32, 211, 0.6);
+        }
       `}</style>
 
       {totalItems > 0 && (
@@ -713,52 +726,54 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">{totalItems} ks</span>
                   </h3>
 
-                  <div className="space-y-3 max-h-[260px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
-                          <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
+                        <div key={item.id} className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
                               <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm sm:text-base font-semibold text-white truncate">{item.name}</h4>
-                              <p className="text-[#BD20D3] font-bold text-xs sm:text-sm mt-0.5 sm:mt-1">{item.price_per_day} € / deň</p>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-semibold text-white truncate">{item.name}</h4>
+                              <p className="text-[#BD20D3] font-bold text-xs mt-0.5">{item.price_per_day} € / deň</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5 ml-auto sm:ml-0">
+                          <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-lg p-1 shrink-0">
                             <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Minus size={12} /></button>
-                            <span className="w-6 text-center text-white font-semibold text-sm">{qty}</span>
+                            <span className="w-7 text-center text-white font-semibold text-sm">{qty}</span>
                             <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"><Plus size={12} /></button>
                           </div>
                         </div>
                       );
                     })}
                     {packageItems.map((pkg) => (
-                      <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
+                      <div key={pkg.id} className="flex flex-col bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
-                          <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
-                        </div>
-                        <div className="flex-grow min-w-0 pr-6 sm:pr-0">
-                          <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
-                          <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{getPackageTotal(pkg)} € / víkend</p>
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {pkg.hasLights && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
-                            {pkg.install === 'install' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
-                            {pkg.install === 'install_uninstall' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
-                            {pkg.arrival && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><MapPin size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
+                        <div className="flex items-center gap-3 pr-6">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
+                            <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                           </div>
-                          {pkg.extras.length > 0 && (
-                            <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
-                              <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
-                              {pkg.extras.map((e, i) => (
-                                <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
-                              ))}
-                            </div>
-                          )}
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-white">{pkg.name}</h4>
+                            <p className="text-[#BD20D3] font-bold text-sm">{getPackageTotal(pkg)} €</p>
+                          </div>
                         </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {pkg.hasLights && <span className="text-[10px] px-2 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
+                          {pkg.install === 'install' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
+                          {pkg.install === 'install_uninstall' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
+                          {pkg.arrival && <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><MapPin size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
+                        </div>
+                        {pkg.extras.length > 0 && (
+                          <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
+                            <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
+                            {pkg.extras.map((e, i) => (
+                              <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
