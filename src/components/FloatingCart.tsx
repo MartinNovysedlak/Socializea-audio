@@ -21,6 +21,7 @@ import {
   Truck,
   Loader2,
   Ban,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
+import emailjs from '@emailjs/browser';
 
 interface PackageCartItem {
   id: string;
@@ -155,6 +157,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const [isHovered, setIsHovered] = useState(false);
   const [showFromCalendar, setShowFromCalendar] = useState(false);
   const [showToCalendar, setShowToCalendar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
@@ -349,8 +352,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const installUninstallCost = installUninstallSelected ? 40 : 0;
   const deliveryCost = deliveryResult?.price ?? 0;
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
-  const totalInstallCost = installCost + installUninstallCost + packageInstallTotal;
-  const totalDeliveryCost = deliveryCost + packageDeliveryTotal;
   const packagesTotal = packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0);
 
   const handleQuantityChange = (id: string, delta: number) => {
@@ -408,15 +409,149 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (e.key === 'Escape') setCityDropdownOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const buildCartSummaryHtml = () => {
+    let html = '';
+
+    if (cartItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<thead><tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th></tr></thead>';
+      html += '<tbody>';
+      cartItems.forEach(({ item, qty }) => {
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+          <td style="padding:8px 12px;color:white;">${item.name}</td>
+          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
+          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td>
+          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    if (packageItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
+      packageItems.forEach((pkg) => {
+        html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="color:white;font-size:14px;">${pkg.name}</strong>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+          </div>`;
+        if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
+        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
+        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
+        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
+        if (pkg.extras.length > 0) {
+          html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
+          html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
+          pkg.extras.forEach((e) => {
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+
+    if (installSelected || installUninstallSelected) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
+      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20 €</span></div>`;
+      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;">+40 €</span></div>`;
+    }
+
+    if (deliveryResult) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🚚 Doprava</h3>';
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+        <span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span>
+        <span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
+      </div>`;
+      if (!deliveryResult.isFree) {
+        html += `<div style="color:#6b7280;font-size:11px;padding-bottom:4px;">~${deliveryResult.distance} km od ${deliveryResult.nearestPoint}, 0,70 €/km</div>`;
+      }
+      if (deliveryResult.isKysuce) {
+        html += `<div style="color:#10b981;font-size:11px;padding-bottom:4px;">✅ Kysuce – doprava zdarma</div>`;
+      }
+    }
+
+    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
+    html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
+    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += '</div>';
+
+    return html;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
     if (!formData.email.trim()) { toast.error("Prosím vyplňte platný email!"); return; }
     if (!formData.dateFrom || !formData.dateTo) { toast.error("Prosím vyberte dátum od a do!"); return; }
-    toast.success("Dopyt bol úspešne odoslaný!", { description: "Náš tím vás bude čoskoro kontaktovať pre potvrdenie rezervácie." });
-    setQuantities({}); setPackageItems([]); setInstallSelected(false); setInstallUninstallSelected(false); clearDelivery();
-    setFormData({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
-    setIsOpen(false);
+
+    setIsSubmitting(true);
+    const toastId = toast.loading('Odosielam dopyt...');
+
+    try {
+      // Build a text summary for fallback
+      const cartText = cartItems.map(({ item, qty }) => `  • ${item.name} — ${qty}x × ${item.price_per_day} €/deň = ${(item.price_per_day * qty).toFixed(2)} €`).join('\n');
+
+      const packagesText = packageItems.map((pkg) => {
+        let desc = `  • ${pkg.name} — ${getPackageTotal(pkg).toFixed(2)} €`;
+        const tags = [];
+        if (pkg.hasLights) tags.push('So svetlami');
+        if (pkg.install === 'install') tags.push(`Inštalácia (+${pkg.installPrice} €)`);
+        if (pkg.install === 'install_uninstall') tags.push(`Inšt.+Deinšt. (+${pkg.installPrice} €)`);
+        if (pkg.arrival) tags.push(`${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}`);
+        if (tags.length) desc += ` [${tags.join(', ')}]`;
+        if (pkg.extras.length) desc += `\n      Doplnky: ${pkg.extras.map(e => `${e.label} (${e.quantity}x — ${(e.quantity * e.pricePerDay).toFixed(2)} €)`).join(', ')}`;
+        return desc;
+      }).join('\n');
+
+      let servicesText = '';
+      if (installSelected) servicesText += `Inštalácia: +20 €\n`;
+      if (installUninstallSelected) servicesText += `Inštalácia a deinštalácia: +40 €\n`;
+
+      let deliveryText = '';
+      if (deliveryResult) {
+        deliveryText = `Doprava do: ${deliveryCity}\n`;
+        deliveryText += deliveryResult.isFree ? `Stav: Zdarma\n` : `Cena: ${deliveryResult.price} € (${deliveryResult.distance} km od ${deliveryResult.nearestPoint})\n`;
+      }
+
+      const summaryHtml = buildCartSummaryHtml();
+
+      await emailjs.send(
+        'service_s8kq87k',
+        'template_zh6cnks',
+        {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone || 'Neuvedený',
+          date: formData.dateFrom ? `${formData.dateFrom} až ${formData.dateTo}` : 'Neuvedený',
+          message: formData.message || '—',
+          cart_summary: summaryHtml,
+          cart_text: `Aparatúra:\n${cartText || '  (žiadna)'}\n\nBalíky:\n${packagesText || '  (žiadne)'}\n\nSlužby:\n${servicesText || '  (žiadne)'}\nDoprava:\n${deliveryText || '  (nevybratá)'}\n\nCelková suma: ${(grandTotal + packagesTotal).toFixed(2)} €\nPočet dní: ${days}`,
+        },
+        'hlWKyd9fiWgqJJT3r'
+      );
+
+      toast.dismiss(toastId);
+      toast.success("Dopyt bol úspešne odoslaný!", {
+        description: "Náš tím vás bude čoskoro kontaktovať pre potvrdenie rezervácie.",
+      });
+      setQuantities({});
+      setPackageItems([]);
+      setInstallSelected(false);
+      setInstallUninstallSelected(false);
+      clearDelivery();
+      setFormData({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
+      setIsOpen(false);
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error("Nepodarilo sa odoslať dopyt.", {
+        description: "Skúste to prosím neskôr alebo nás kontaktujte telefonicky.",
+      });
+      console.error('EmailJS error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
@@ -845,7 +980,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5 text-sm"><MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke</Label>
                       <Textarea id="message" placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]" />
                     </div>
-                    <Button type="submit" className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4">Odoslať nezáväzný dopyt</Button>
+                    <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2">
+                      {isSubmitting ? (
+                        <><Loader2 size={18} className="animate-spin" /> Odosielam...</>
+                      ) : (
+                        <><Send size={16} /> Odoslať nezáväzný dopyt</>
+                      )}
+                    </Button>
                   </form>
                 </div>
               </div>
