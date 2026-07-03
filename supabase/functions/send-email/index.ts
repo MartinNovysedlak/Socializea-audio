@@ -1,11 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const TO_EMAIL = "martinnovysedlak48@gmail.com";
 const FROM_EMAIL = "Socializea Audio <onboarding@resend.dev>";
-const SUBJECT = "\u{1F389} Nov\u00E1 rezerv\u00E1cia z webu Socializea!";
+const SUBJECT = "🎉 Nová rezervácia z webu Socializea!";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +13,7 @@ const corsHeaders = {
 };
 
 function h(val: string): string {
-  return val || "Neuveden\u00E9";
+  return val || "Neuvedené";
 }
 
 function buildHtml(body: Record<string, any>): string {
@@ -22,7 +21,7 @@ function buildHtml(body: Record<string, any>): string {
   const email = h(body.customerEmail);
   const pkg = h(body.selectedPackage);
   const date = h(body.eventDate);
-  const msg = body.message || "\u2014";
+  const msg = body.message || "—";
 
   const lines = [
     '<div style="font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)">',
@@ -63,7 +62,7 @@ function buildHtml(body: Record<string, any>): string {
   return lines.join("\n");
 }
 
-serve(async (req: Request): Promise<Response> => {
+Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
