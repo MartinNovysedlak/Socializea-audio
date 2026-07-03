@@ -298,7 +298,7 @@ const ContactForm = () => {
                             </>
                           ) : (
                             <>
-                              <span>Odoslať otázku</span>
+                              <span>Odoslať správu</span>
                               <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5 shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                             </>
                           )}
