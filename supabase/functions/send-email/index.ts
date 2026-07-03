@@ -1,5 +1,7 @@
+// @ts-ignore - Deno module, not available in standard TS
 import { Resend } from "npm:resend@2.0.0";
 
+// @ts-ignore - Deno global, not available in standard TS
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const TO_EMAIL = "martinnovysedlak48@gmail.com";
@@ -9,7 +11,7 @@ const SUBJECT = "🎉 Nová rezervácia z webu Socializea!";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey, x-connection-encrypted",
 };
 
 function h(val: string): string {
@@ -62,6 +64,7 @@ function buildHtml(body: Record<string, any>): string {
   return lines.join("\n");
 }
 
+// @ts-ignore - Deno global, not available in standard TS
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
