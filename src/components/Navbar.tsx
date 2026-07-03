@@ -66,41 +66,52 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE FULL-SCREEN OVERLAY MENU */}
+      {/* MOBILE FULL-SCREEN OVERLAY MENU – slide from right */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721] backdrop-blur-xl flex flex-col justify-center p-6 animate-in fade-in duration-200">
-          <div className="space-y-6 max-w-sm mx-auto w-full text-center">
-            <div className="space-y-4">
-              {navLinks.map((link, idx) => {
-                const isActive = location.pathname === link.href;
-                return (
-                  <Link
-                    key={link.name}
-                    to={link.href}
-                    onClick={handleLinkClick}
-                    className={`block py-3 text-2xl font-bold rounded-2xl transition-all ${
-                      isActive 
-                        ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] scale-105' 
-                        : 'text-white hover:text-gray-200'
-                    }`}
-                    style={{ 
-                      animationDelay: `${idx * 75}ms`,
-                      animation: 'fade-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-                    }}
-                  >
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </div>
-            
-            <div className="pt-6 border-t border-white/10 w-full">
-              <Link to="/kontakt" onClick={handleLinkClick}>
-                <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
-                  <span>Napíšte nám</span>
-                  <ArrowRight size={18} />
-                </Button>
-              </Link>
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
+          {/* backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 animate-in fade-in duration-300"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* panel */}
+          <div 
+            className="relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 animate-in slide-in-from-right duration-300 h-full flex flex-col justify-center px-8"
+          >
+            <div className="space-y-6 w-full text-center">
+              <div className="space-y-4">
+                {navLinks.map((link, idx) => {
+                  const isActive = location.pathname === link.href;
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.href}
+                      onClick={handleLinkClick}
+                      className={`block py-3 text-2xl font-bold rounded-2xl transition-all ${
+                        isActive 
+                          ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] scale-105' 
+                          : 'text-white hover:text-gray-200'
+                      }`}
+                      style={{ 
+                        animationDelay: `${idx * 75}ms`,
+                        animation: 'fade-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                      }}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
+              </div>
+              
+              <div className="pt-6 border-t border-white/10 w-full">
+                <Link to="/kontakt" onClick={handleLinkClick}>
+                  <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
+                    <span>Napíšte nám</span>
+                    <ArrowRight size={18} />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
