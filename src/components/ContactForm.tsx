@@ -10,20 +10,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { Send, Phone, Mail, MapPin } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { sk } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
   email: z.string().email({ message: "Zadajte platný email." }),
   phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }),
-  date: z.string().optional(),
+  date: z.date().optional(),
   message: z.string().min(10, { message: "Správa musí mať aspoň 10 znakov." }),
 });
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return "Neuvedené";
-  const [year, month, day] = dateStr.split("-");
-  return `${day}.${month}.${year}`;
+function formatDate(date: Date | undefined): string {
+  if (!date) return "Neuvedené";
+  return format(date, 'dd.MM.yyyy');
 }
 
 const ContactForm = () => {
@@ -35,7 +39,7 @@ const ContactForm = () => {
       name: "",
       email: "",
       phone: "",
-      date: "",
+      date: undefined,
       message: "",
     },
   });
@@ -44,12 +48,14 @@ const ContactForm = () => {
     setSending(true);
     const toastId = toast.loading('Odosielam dopyt...');
 
+    const formattedDate = values.date ? formatDate(values.date) : 'Neuvedené';
+
     const bodyData = {
       customerName: values.name,
       customerEmail: values.email,
       customerPhone: values.phone,
-      selectedPackage: (values.date ? `Dátum: ${formatDate(values.date)}` : 'Neuvedený'),
-      eventDate: formatDate(values.date),
+      selectedPackage: values.date ? `Dátum: ${formattedDate}` : 'Neuvedený',
+      eventDate: formattedDate,
       message: values.message,
     };
 
@@ -187,14 +193,38 @@ const ContactForm = () => {
                           control={form.control}
                           name="date"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel className="text-gray-300">
                                 Dátum podujatia
                                 <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
                               </FormLabel>
-                              <FormControl>
-                                <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      className={cn(
+                                        "h-12 rounded-xl border-white/10 bg-black/50 text-white hover:bg-black/60 hover:text-white w-full justify-start text-left font-normal",
+                                        !field.value && "text-gray-500"
+                                      )}
+                                    >
+                                      <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                                      {field.value ? format(field.value, 'dd.MM.yyyy') : <span>Vyberte dátum</span>}
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 border-[#BD20D3]/20 bg-[#020721]" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    initialFocus
+                                    locale={sk}
+                                    fromDate={new Date()}
+                                    className="bg-[#020721] text-white"
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}
