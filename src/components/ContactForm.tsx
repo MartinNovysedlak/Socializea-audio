@@ -16,9 +16,10 @@ import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
+  firstName: z.string().min(1, { message: "Zadajte meno." }),
+  lastName: z.string().min(1, { message: "Zadajte priezvisko." }),
   email: z.string().email({ message: "Zadajte platný email." }),
-  phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }),
+  phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }).optional().or(z.literal('')),
   date: z.string().optional(),
   message: z.string().min(10, { message: "Správa musí mať aspoň 10 znakov." }),
 });
@@ -30,7 +31,8 @@ const ContactForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phone: "",
       date: "",
@@ -56,9 +58,9 @@ const ContactForm = () => {
         'service_s8kq87k',
         'template_zh6cnks',
         {
-          name: values.name,
+          name: `${values.firstName} ${values.lastName}`,
           email: values.email,
-          phone: values.phone,
+          phone: values.phone || 'Neuvedený',
           date: values.date || 'Neuvedený',
           message: values.message,
         },
@@ -149,93 +151,116 @@ const ContactForm = () => {
                 <div className="bg-black/20 border border-white/10 p-6 md:p-8 md:p-10 rounded-3xl backdrop-blur-sm">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
-                          name="name"
+                          name="firstName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">Meno a priezvisko</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ján Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-gray-300">Telefón</FormLabel>
-                              <FormControl>
-                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="date"
-                          render={({ field }) => (
-                            <FormItem className="relative" ref={calendarRef}>
                               <FormLabel className="text-gray-300">
-                                Dátum podujatia
-                                <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
+                                Meno <span className="text-red-400">*</span>
                               </FormLabel>
-                              <div className="relative">
-                                <FormControl>
-                                  <Input
-                                    type="text"
-                                    readOnly
-                                    placeholder="Vyberte dátum"
-                                    value={field.value ? format(new Date(field.value), "dd.MM.yyyy") : ""}
-                                    onClick={() => setShowDateCalendar(!showDateCalendar)}
-                                    className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] cursor-pointer pr-10"
-                                  />
-                                </FormControl>
-                                <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
-                              </div>
-                              {showDateCalendar && (
-                                <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                                  <DayPicker
-                                    mode="single"
-                                    selected={field.value ? new Date(field.value) : undefined}
-                                    onSelect={handleDateSelect}
-                                    disabled={[{ before: startOfDay(new Date()) }]}
-                                    weekStartsOn={1}
-                                    initialFocus={showDateCalendar}
-                                  />
-                                </div>
-                              )}
+                              <FormControl>
+                                <Input placeholder="Ján" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-gray-300">
+                                Priezvisko <span className="text-red-400">*</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Input placeholder="Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">
+                              Email <span className="text-red-400">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-300">Telefón</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="date"
+                        render={({ field }) => (
+                          <FormItem className="relative" ref={calendarRef}>
+                            <FormLabel className="text-gray-300">
+                              Dátum podujatia
+                              <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
+                            </FormLabel>
+                            <div className="relative">
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  readOnly
+                                  placeholder="Vyberte dátum"
+                                  value={field.value ? format(new Date(field.value), "dd.MM.yyyy") : ""}
+                                  onClick={() => setShowDateCalendar(!showDateCalendar)}
+                                  className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3] cursor-pointer pr-10"
+                                />
+                              </FormControl>
+                              <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
+                            </div>
+                            {showDateCalendar && (
+                              <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
+                                <DayPicker
+                                  mode="single"
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={handleDateSelect}
+                                  disabled={[{ before: startOfDay(new Date()) }]}
+                                  weekStartsOn={1}
+                                  initialFocus={showDateCalendar}
+                                />
+                              </div>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
                       <FormField
                         control={form.control}
                         name="message"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-300">Vaša správa</FormLabel>
+                            <FormLabel className="text-gray-300">
+                              Vaša správa <span className="text-red-400">*</span>
+                            </FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="Napíšte nám viac o vašom podujatí..." 
