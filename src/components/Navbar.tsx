@@ -68,7 +68,7 @@ const Navbar = () => {
 
       {/* MOBILE FULL-SCREEN OVERLAY MENU */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721]/98 backdrop-blur-xl flex flex-col justify-center p-6 animate-in fade-in duration-200">
+        <div className="lg:hidden fixed inset-0 z-50 bg-[#020721] backdrop-blur-xl flex flex-col justify-center p-6 animate-in fade-in duration-200">
           <div className="space-y-6 max-w-sm mx-auto w-full text-center">
             <div className="space-y-4">
               {navLinks.map((link, idx) => {
@@ -81,7 +81,7 @@ const Navbar = () => {
                     className={`block py-3 text-2xl font-bold rounded-2xl transition-all ${
                       isActive 
                         ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] scale-105' 
-                        : 'text-gray-300 hover:text-white'
+                        : 'text-white hover:text-gray-200'
                     }`}
                     style={{ 
                       animationDelay: `${idx * 75}ms`,
