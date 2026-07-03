@@ -72,7 +72,7 @@ const Predaj = () => {
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto mb-8 flex items-center justify-center gap-2 bg-white/5 border border-white/10 p-2 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
+          <div className="w-full max-w-5xl mx-auto mb-8 flex items-center justify-center gap-2 bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
             <Filter size={16} className="text-[#BD20D3] shrink-0" />
             <div className="flex gap-1.5">
               {[
