@@ -1,7 +1,7 @@
-// @ts-ignore - Deno module, not available in standard TS
+// @ts-expect-error - Deno npm: prefix, not available in standard TS
 import { Resend } from "npm:resend@2.0.0";
 
-// @ts-ignore - Deno global, not available in standard TS
+// @ts-expect-error - Deno global, not available in standard TS
 const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const TO_EMAIL = "djparty.sk@gmail.com";
@@ -13,12 +13,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey, x-connection-encrypted",
 };
 
-// Jednoduchý bezpečný výpis hodnoty
-function h(val: string | undefined | null): string {
-  return val || "Neuvedené";
+function h(val: unknown): string {
+  if (val === null || val === undefined) return "Neuvedené";
+  if (typeof val === "object") return JSON.stringify(val);
+  return String(val);
 }
 
-function buildContactHtml(body: Record<string, any>): string {
+// --- Šablóna pre kontaktný formulár (formType: contact) ---
+function buildContactHtml(body: Record<string, unknown>): string {
   const name = h(body.name);
   const email = h(body.email);
   const phone = h(body.phone);
@@ -39,7 +41,6 @@ function buildContactHtml(body: Record<string, any>): string {
       <p style="margin:0 0 8px;"><strong style="color:#9ca3af;">Telefón:</strong> ${phone}</p>
       <p style="margin:0 0 8px;"><strong style="color:#9ca3af;">Dátum podujatia:</strong> ${date}</p>
     </div>
-
     <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
     <div style="background:rgba(189,32,211,0.08);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:16px;color:#d1d5db;font-size:14px;line-height:1.6;white-space:pre-line;">${message}</div>
   </div>
@@ -49,17 +50,19 @@ function buildContactHtml(body: Record<string, any>): string {
 </div>`;
 }
 
-function buildReservationHtml(body: Record<string, any>): string {
+// --- Šablóna pre rezerváciu z košíka (formType: reservation) ---
+function buildReservationHtml(body: Record<string, unknown>): string {
   const name = h(body.name);
   const email = h(body.email);
   const phone = h(body.phone);
   const date = h(body.date);
-  const message = body.message || "";
+  const message = body.message ? String(body.message) : "";
 
-  const cartItems: any[] = body.cartItems || [];
-  const packages: any[] = body.packages || [];
-  const totalPrice = body.totalPrice;
+  const cartItems = Array.isArray(body.cartItems) ? body.cartItems : [];
+  const packages = Array.isArray(body.packages) ? body.packages : [];
+  const totalPrice = typeof body.totalPrice === "number" ? body.totalPrice : undefined;
 
+  // --- HTML tabuľky pre aparatúru ---
   let cartHtml = "";
   if (cartItems.length > 0) {
     cartHtml += `
@@ -75,12 +78,13 @@ function buildReservationHtml(body: Record<string, any>): string {
       </thead>
       <tbody>`;
     for (const item of cartItems) {
-      const qty = item.quantity || 1;
-      const price = item.pricePerDay || 0;
+      const itemName = h(item.name || item.nazov);
+      const qty = Number(item.quantity || item.pocet || 1);
+      const price = Number(item.pricePerDay || item.cena || 0);
       const total = price * qty;
       cartHtml += `
         <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-          <td style="padding:8px 12px;color:white;">${h(item.name)}</td>
+          <td style="padding:8px 12px;color:white;">${itemName}</td>
           <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
           <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${price.toFixed(2)} €</td>
           <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${total.toFixed(2)} €</td>
@@ -89,27 +93,33 @@ function buildReservationHtml(body: Record<string, any>): string {
     cartHtml += `</tbody></table>`;
   }
 
+  // --- HTML pre balíky s príplatkami ako tagmi ---
   let packagesHtml = "";
   if (packages.length > 0) {
     packagesHtml += `<h3 style="color:#BD20D3;font-size:16px;margin:24px 0 12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>`;
     for (const pkg of packages) {
+      const pkgName = h(pkg.name || pkg.nazov);
+      const pkgPrice = typeof pkg.price === "number" ? pkg.price : 0;
+      const addons = Array.isArray(pkg.addons) ? pkg.addons : [];
+
       packagesHtml += `
       <div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:14px 16px;margin-bottom:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <strong style="color:white;font-size:15px;">${h(pkg.name)}</strong>
-          <span style="color:#BD20D3;font-weight:700;font-size:16px;">${h(pkg.price?.toFixed(2))} €</span>
+          <strong style="color:white;font-size:15px;">${pkgName}</strong>
+          <span style="color:#BD20D3;font-weight:700;font-size:16px;">${pkgPrice.toFixed(2)} €</span>
         </div>`;
-      const addons: any[] = pkg.addons || [];
       if (addons.length > 0) {
         packagesHtml += `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">`;
         for (const addon of addons) {
+          const addonLabel = h(addon.label || addon.nazov);
+          const addonType = String(addon.type || "");
           let color = "#9ca3af";
           let bg = "rgba(255,255,255,0.05)";
-          if (addon.type === 'lights') { color = "#BD20D3"; bg = "rgba(189,32,211,0.1)"; }
-          else if (addon.type === 'install') { color = "#1A4BFF"; bg = "rgba(26,75,255,0.1)"; }
-          else if (addon.type === 'delivery') { color = "#10b981"; bg = "rgba(16,185,129,0.1)"; }
+          if (addonType === "lights") { color = "#BD20D3"; bg = "rgba(189,32,211,0.1)"; }
+          else if (addonType === "install") { color = "#1A4BFF"; bg = "rgba(26,75,255,0.1)"; }
+          else if (addonType === "delivery") { color = "#10b981"; bg = "rgba(16,185,129,0.1)"; }
           packagesHtml += `
-            <span style="display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid;color:${color};border-color:${color}40;background:${bg};">${h(addon.label)}</span>`;
+            <span style="display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid;color:${color};border-color:${color}40;background:${bg};">${addonLabel}</span>`;
         }
         packagesHtml += `</div>`;
       }
@@ -117,8 +127,9 @@ function buildReservationHtml(body: Record<string, any>): string {
     }
   }
 
+  // --- Celková suma ---
   let totalHtml = "";
-  if (totalPrice !== undefined && totalPrice !== null) {
+  if (totalPrice !== undefined) {
     totalHtml = `
     <div style="margin-top:24px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">
       <span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>
@@ -126,6 +137,7 @@ function buildReservationHtml(body: Record<string, any>): string {
     </div>`;
   }
 
+  // --- Správa ---
   let messageBlock = "";
   if (message.trim()) {
     messageBlock = `
@@ -147,7 +159,6 @@ function buildReservationHtml(body: Record<string, any>): string {
       <p style="margin:0 0 6px;"><strong style="color:#9ca3af;">Telefón:</strong> ${phone}</p>
       <p style="margin:0 0 6px;"><strong style="color:#9ca3af;">Dátum:</strong> ${date}</p>
     </div>
-
     <h2 style="color:#BD20D3;font-size:16px;margin:24px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
     ${cartHtml}
     ${packagesHtml}
@@ -160,20 +171,20 @@ function buildReservationHtml(body: Record<string, any>): string {
 </div>`;
 }
 
-// @ts-ignore - Deno global, not available in standard TS
-Deno.serve(async (req: Request): Promise<Response> => {
+// @ts-expect-error - Deno global, not available in standard TS
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
-    const body = await req.json();
-    const formType = body.formType || 'contact'; // predvolene kontaktny formular
+    const body = await req.json() as Record<string, unknown>;
+    const formType = String(body.formType || "contact");
 
     let html = "";
     let subject = "🔊 Nová správa z kontaktného formulára";
 
-    if (formType === 'reservation') {
+    if (formType === "reservation") {
       subject = `🛒 Nová rezervácia – ${h(body.name)}`;
       html = buildReservationHtml(body);
     } else {
@@ -183,7 +194,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: body.to || TO_EMAIL,
+      to: String(body.to || TO_EMAIL),
       subject: subject,
       html: html,
     });
@@ -201,8 +212,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Edge function error:", err);
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Edge function error:", msg);
+    return new Response(JSON.stringify({ success: false, error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
