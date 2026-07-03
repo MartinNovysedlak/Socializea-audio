@@ -16,7 +16,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Meno musí mať aspoň 2 znaky." }),
   email: z.string().email({ message: "Zadajte platný email." }),
   phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }),
-  date: z.string().min(1, { message: "Vyberte dátum podujatia." }),
+  date: z.string().optional(),
   message: z.string().min(10, { message: "Správa musí mať aspoň 10 znakov." }),
 });
 
@@ -43,7 +43,7 @@ const ContactForm = () => {
           name: values.name,
           email: values.email,
           phone: values.phone,
-          date: values.date,
+          date: values.date || 'Neuvedený',
           message: values.message,
         },
         'hlWKyd9fiWgqJJT3r'
@@ -173,7 +173,10 @@ const ContactForm = () => {
                           name="date"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-gray-300">Dátum podujatia</FormLabel>
+                              <FormLabel className="text-gray-300">
+                                Dátum podujatia
+                                <span className="text-gray-500 font-normal ml-1">(nepovinné)</span>
+                              </FormLabel>
                               <FormControl>
                                 <Input type="date" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
                               </FormControl>
