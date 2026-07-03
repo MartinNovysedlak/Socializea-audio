@@ -39,46 +39,13 @@ const ContactForm = () => {
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0d1f; color: white; border-radius: 16px; overflow: hidden; border: 1px solid rgba(189,32,211,0.3);">
-          <div style="padding: 24px; background: linear-gradient(135deg, #BD20D3, #1A4BFF);">
-            <h1 style="margin: 0; font-size: 20px; color: white;">📬 Nový kontaktný dopyt</h1>
-          </div>
-          <div style="padding: 24px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-              <tr>
-                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600; width: 120px;">Meno:</td>
-                <td style="padding: 8px 12px; color: white; font-weight: 700;">${values.name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Email:</td>
-                <td style="padding: 8px 12px; color: white;">${values.email}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Telefón:</td>
-                <td style="padding: 8px 12px; color: white;">${values.phone}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 12px; color: #9ca3af; font-weight: 600;">Dátum:</td>
-                <td style="padding: 8px 12px; color: white;">${values.date || 'Neuvedený'}</td>
-              </tr>
-            </table>
-            <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-              <p style="margin: 0 0 8px 0; color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase;">Správa:</p>
-              <p style="margin: 0; color: #d1d5db; white-space: pre-wrap;">${values.message}</p>
-            </div>
-          </div>
-          <div style="padding: 12px 24px; background: rgba(0,0,0,0.2); text-align: center; font-size: 11px; color: #6b7280;">
-            Odoslané z webu Socializea Audio
-          </div>
-        </div>
-      `;
-
       const { error } = await supabase.functions.invoke('send-email', {
         body: {
-          to: 'socializea@socializea.com',
-          subject: `📬 Nový dopyt z webu – ${values.name}`,
-          html,
+          clientName: values.name,
+          clientEmail: values.email,
+          clientPhone: values.phone,
+          packageName: values.date || 'Neuvedený dátum',
+          message: values.message,
         },
       });
 
