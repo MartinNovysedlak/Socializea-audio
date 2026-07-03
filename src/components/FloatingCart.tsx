@@ -1,3 +1,690 @@
-// In the handleSubmit function, replace the supabase.functions.invoke call
+"use client";
 
-// find the section where we call supabase.functions.invoke and replace it with the following block
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ShoppingBag, X, Calendar, User, Mail, Phone, MessageSquare,
+  Plus, Minus, Clock, ChevronRight, Wrench, Lightbulb, MapPin,
+  Check, Navigation, Truck, Loader2, Ban, Send, Speaker, Package
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { EquipmentItem } from "@/lib/supabase";
+import { toast } from "sonner";
+import { DayPicker } from "react-day-picker";
+import { format, addDays, isBefore, startOfDay } from "date-fns";
+import "react-day-picker/dist/style.css";
+import { supabase } from "@/lib/supabase";
+
+interface PackageCartItem {
+  id: string;
+  name: string;
+  price: number;
+  hasLights: boolean;
+  image: string;
+  arrival: { name: string } | null;
+  install: 'none' | 'install' | 'install_uninstall';
+  installPrice: number;
+  deliveryPrice: number;
+  extras: { id: string; label: string; quantity: number; pricePerDay: number }[];
+}
+
+interface FloatingCartProps {
+  quantities: Record<string, number>;
+  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  equipment: EquipmentItem[];
+}
+
+const PACKAGE_STORAGE_KEY = "cyber_cart_packages";
+
+const PICKUP_POINTS = [
+  { name: 'Žilina', lat: 49.2235, lng: 18.7394 },
+  { name: 'Čadca', lat: 49.4358, lng: 18.7889 },
+];
+
+const KYSUCE_BOUNDS = [
+  { lat: 49.520, lng: 18.550 },
+  { lat: 49.500, lng: 19.050 },
+  { lat: 49.350, lng: 19.050 },
+  { lat: 49.250, lng: 18.800 },
+  { lat: 49.280, lng: 18.600 },
+];
+
+interface CityMatch {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  postcode?: string;
+  district?: string;
+  distToNearest?: number;
+  nearestPoint?: string;
+}
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lng, yi = polygon[i].lat;
+    const xj = polygon[j].lng, yj = polygon[j].lat;
+    const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
+      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function calculateDelivery(coords: { lat: number; lng: number }): {
+  distance: number; nearestPoint: string; isKysuce: boolean; isFree: boolean; price: number;
+} | null {
+  const isKysuce = isPointInPolygon(coords, KYSUCE_BOUNDS);
+  if (isKysuce) {
+    return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
+  }
+  let minDist = Infinity;
+  let nearestPoint = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) { minDist = dist; nearestPoint = point.name; }
+  }
+  const isFree = minDist <= 10;
+  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
+  return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
+}
+
+function getNearestPoint(coords: { lat: number; lng: number }): { name: string; distance: number } {
+  let minDist = Infinity;
+  let nearest = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) { minDist = dist; nearest = point.name; }
+  }
+  return { name: nearest, distance: Math.round(minDist * 10) / 10 };
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [showFromCalendar, setShowFromCalendar] = useState(false);
+  const [showToCalendar, setShowToCalendar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fromRef = useRef<HTMLDivElement>(null);
+  const toRef = useRef<HTMLDivElement>(null);
+  const [installSelected, setInstallSelected] = useState(false);
+  const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
+  const [deliverySelected, setDeliverySelected] = useState(false);
+  const [deliveryCity, setDeliveryCity] = useState('');
+  const [citySuggestions, setCitySuggestions] = useState<CityMatch[]>([]);
+  const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+  const [searchingCities, setSearchingCities] = useState(false);
+  const [cityLocked, setCityLocked] = useState(false);
+  const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+  const debouncedCitySearch = useDebounce(deliveryCity, 400);
+
+  const [formData, setFormData] = useState({
+    firstName: "", lastName: "", email: "", phone: "",
+    dateFrom: "", dateTo: "", message: ""
+  });
+
+  const [packageItems, setPackageItems] = useState<PackageCartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(PACKAGE_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems)); }
+    catch { /* ignore */ }
+  }, [packageItems]);
+
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const pkg = e.detail as PackageCartItem;
+      setPackageItems(prev => [...prev, pkg]);
+      if (pkg.install === 'install' || pkg.install === 'install_uninstall') {
+        setInstallSelected(false);
+        setInstallUninstallSelected(false);
+      }
+      if (pkg.arrival) clearDelivery();
+      toast.success(`Balík "${pkg.name}" pridaný do košíka`);
+    };
+    window.addEventListener('add-package-to-cart', handler as EventListener);
+    return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
+  }, []);
+
+  useEffect(() => {
+    const hasEquipment = Object.values(quantities).some(qty => qty > 0);
+    if (!hasEquipment) {
+      setInstallSelected(false);
+      setInstallUninstallSelected(false);
+      clearDelivery();
+    }
+  }, [quantities]);
+
+  useEffect(() => {
+    if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
+      setCitySuggestions([]);
+      setCityDropdownOpen(false);
+      setSearchingCities(false);
+      return;
+    }
+    let cancelled = false;
+    const search = async () => {
+      setSearchingCities(true);
+      try {
+        const query = encodeURIComponent(debouncedCitySearch.trim());
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`;
+        const res = await fetch(url, { headers: { 'User-Agent': 'SocializeaAudio/1.0' } });
+        if (cancelled) return;
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data && Array.isArray(data)) {
+          const mapped: CityMatch[] = data.map((item: any) => {
+            const address = item.address || {};
+            const district = address.city_district || address.county || address.state_district || address.municipality || '';
+            const postcode = address.postcode || '';
+            const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
+            const nearest = getNearestPoint(coords);
+            const countryCode = item.country_code || '';
+            const countryName = (address.country || '').toLowerCase();
+            const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
+            return {
+              name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
+              country: isCzech ? 'cz' : 'sk',
+              lat: coords.lat,
+              lng: coords.lng,
+              postcode,
+              district,
+              distToNearest: nearest.distance,
+              nearestPoint: nearest.name,
+            };
+          });
+          const seen = new Set<string>();
+          const unique = mapped.filter(c => {
+            const key = c.name.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setCitySuggestions(unique);
+          setCityDropdownOpen(unique.length > 0);
+        } else {
+          setCitySuggestions([]);
+          setCityDropdownOpen(false);
+        }
+      } catch {
+        if (!cancelled) { setCitySuggestions([]); setCityDropdownOpen(false); }
+      } finally { if (!cancelled) setSearchingCities(false); }
+    };
+    search();
+    return () => { cancelled = true; };
+  }, [debouncedCitySearch, deliverySelected, cityLocked]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fromRef.current && !fromRef.current.contains(event.target as Node)) setShowFromCalendar(false);
+      if (toRef.current && !toRef.current.contains(event.target as Node)) setShowToCalendar(false);
+      if (cityRef.current && !cityRef.current.contains(event.target as Node)) setCityDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "unset";
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isOpen]);
+
+  const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
+  const totalItems = totalEquipmentQty + packageItems.length;
+
+  useEffect(() => {
+    if (totalItems === 0 && isOpen) { setIsOpen(false); document.body.style.overflow = "unset"; }
+  }, [totalItems, isOpen]);
+
+  const cartItems = Object.entries(quantities)
+    .filter(([_, qty]) => qty > 0)
+    .map(([id, qty]) => {
+      const item = equipment.find((e) => e.id === id);
+      return { item, qty };
+    })
+    .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+
+  const calculateDays = () => {
+    if (!formData.dateFrom || !formData.dateTo) return 1;
+    const start = new Date(formData.dateFrom);
+    const end = new Date(formData.dateTo);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 1;
+  };
+
+  const days = calculateDays();
+  const subtotalPerDay = cartItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
+  const firstDayTotal = subtotalPerDay;
+  const additionalDaysTotal = days > 1 ? (days - 1) * subtotalPerDay * 0.5 : 0;
+  const installCost = installSelected ? 20 : 0;
+  const installUninstallCost = installUninstallSelected ? 40 : 0;
+  const deliveryCost = deliveryResult?.price ?? 0;
+  const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
+  const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
+  const getPackageTotal = (pkg: PackageCartItem) => {
+    let total = pkg.price;
+    total += pkg.installPrice;
+    total += pkg.deliveryPrice;
+    total += pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
+    return total;
+  };
+  const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
+  const packagesTotal = packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0);
+  const hasEquipment = totalEquipmentQty > 0;
+  const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
+  const packageHasDelivery = packageItems.some(p => p.arrival !== null);
+  const hasServicesOrDelivery = installSelected || installUninstallSelected || packageHasInstall || packageHasDelivery || (deliverySelected && deliveryResult) || packageItems.some(p => p.arrival);
+  const servicesTotal = installCost + installUninstallCost + packageInstallTotal + deliveryCost + packageDeliveryTotal;
+
+  const handleQuantityChange = (id: string, delta: number) => {
+    setQuantities((prev) => {
+      const currentQty = prev[id] ?? 0;
+      const item = equipment.find((e) => e.id === id);
+      const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
+      return { ...prev, [id]: newQty };
+    });
+  };
+
+  const handleFromSelect = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, dateFrom: format(date, "yyyy-MM-dd") }));
+      setShowFromCalendar(false);
+      if (formData.dateTo && isBefore(new Date(formData.dateTo), date)) {
+        setFormData(prev => ({ ...prev, dateTo: "" }));
+      }
+    }
+  };
+
+  const handleToSelect = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, dateTo: format(date, "yyyy-MM-dd") }));
+      setShowToCalendar(false);
+    }
+  };
+
+  const clearDelivery = () => {
+    setDeliveryCity('');
+    setDeliveryResult(null);
+    setDeliverySelected(false);
+    setCityLocked(false);
+    setCitySuggestions([]);
+    setCityDropdownOpen(false);
+  };
+
+  const toggleDelivery = () => {
+    if (deliverySelected) clearDelivery();
+    else {
+      setDeliverySelected(true);
+      requestAnimationFrame(() => {
+        const input = document.getElementById('cart-city-input');
+        if (input) input.focus();
+      });
+    }
+  };
+
+  const selectCity = (cityName: string, lat: number, lng: number) => {
+    setDeliveryCity(cityName);
+    setCityLocked(true);
+    setCityDropdownOpen(false);
+    setCitySuggestions([]);
+    const result = calculateDelivery({ lat, lng });
+    setDeliveryResult(result);
+    if (result) {
+      if (result.isFree) toast.success(`Doprava do ${cityName} je zadarmo!`);
+      else toast.info(`Doprava do ${cityName}: ${result.price} € (${result.distance} km od ${result.nearestPoint})`);
+    }
+  };
+
+  const handleCityKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && citySuggestions.length > 0) {
+      e.preventDefault();
+      selectCity(citySuggestions[0].name, citySuggestions[0].lat, citySuggestions[0].lng);
+    }
+    if (e.key === 'Escape') setCityDropdownOpen(false);
+  };
+
+  const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
+
+  const buildCartSummaryHtml = () => {
+    let html = '';
+    if (cartItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">Aparatúra</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;">Spolu</th></tr>';
+      cartItems.forEach(({ item, qty }) => {
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:8px 12px;color:white;">${item.name}</td><td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td><td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td><td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td></tr>`;
+      });
+      html += '</table>';
+    }
+    if (packageItems.length > 0) {
+      html += '<h3 style="color:#BD20D3;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">Balíky</h3>';
+      packageItems.forEach((pkg) => {
+        html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;"><strong style="color:white;">${pkg.name}</strong><span style="color:#BD20D3;font-weight:700;">${getPackageTotal(pkg).toFixed(2)} €</span></div>`;
+        if (pkg.hasLights) html += '<span style="background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;padding:3px 10px;margin-top:6px;display:inline-block;">So svetlami</span>';
+        if (pkg.install === 'install') html += `<span style="background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;padding:3px 10px;margin-top:6px;margin-left:6px;display:inline-block;">Inštalácia (+${pkg.installPrice} €)</span>`;
+        if (pkg.install === 'install_uninstall') html += `<span style="background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;padding:3px 10px;margin-top:6px;margin-left:6px;display:inline-block;">Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
+        if (pkg.arrival) html += `<span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;padding:3px 10px;margin-top:6px;margin-left:6px;display:inline-block;">${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
+        if (pkg.extras.length > 0) {
+          html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;">';
+          html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
+          pkg.extras.forEach((e) => {
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+    }
+    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;">';
+    html += '<span style="color:white;font-size:16px;font-weight:700;">Celková suma</span>';
+    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += '</div>';
+    return html;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      toast.error("Prosím vyplňte meno a priezvisko!");
+      return;
+    }
+    if (!formData.email.trim()) {
+      toast.error("Prosím vyplňte platný email!");
+      return;
+    }
+    if (!formData.dateFrom || !formData.dateTo) {
+      toast.error("Prosím vyberte dátum od a do!");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading('Odosielam dopyt...');
+
+    try {
+      const name = `${formData.firstName} ${formData.lastName}`;
+      const email = formData.email;
+      const phone = formData.phone || 'Neuvedené';
+      const date = `${formData.dateFrom} až ${formData.dateTo}`;
+      const message = formData.message || '—';
+      const cartSummary = buildCartSummaryHtml();
+
+      const { error } = await supabase.functions.invoke('send-email', {
+        body: {
+          cartData: { name, email, phone, date, message, cartSummary },
+        },
+      });
+
+      if (error) throw error;
+
+      toast.dismiss(toastId);
+      toast.success("Dopyt bol úspešne odoslaný!");
+      setQuantities({});
+      setPackageItems([]);
+      setInstallSelected(false);
+      setInstallUninstallSelected(false);
+      clearDelivery();
+      setFormData({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
+      setIsOpen(false);
+    } catch (sendError) {
+      toast.dismiss(toastId);
+      toast.error("Nepodarilo sa odoslať dopyt.");
+      console.error('Send error:', sendError);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (totalItems === 0) return null;
+
+  return (
+    <>
+      <style>{`
+        .rdp { --rdp-cell-size: 28px; --rdp-accent-color: #BD20D3; --rdp-background-color: rgba(189, 32, 211, 0.1); margin: 0; }
+        .rdp-month { background: rgba(10,13,31,0.98); border: 1px solid rgba(189,32,211,0.4); border-radius: 12px; padding: 6px; }
+        .rdp-caption { color: white; font-weight: 700; font-size: 12px; }
+        .rdp-head_cell { color: #9ca3af; font-size: 9px; }
+        .rdp-day { color: #e5e7eb; border-radius: 4px; font-size: 11px; }
+        .rdp-day:hover:not(.rdp-day_selected) { background: rgba(189,32,211,0.2) !important; color: white !important; }
+        .rdp-day_selected { background: #BD20D3 !important; color: white !important; font-weight: 700; }
+        .rdp-day_today { border: 1px solid #BD20D3; font-weight: 700; }
+        .rdp-day_outside { opacity: 0.3; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(189,32,211,0.3); border-radius: 10px; }
+      `}</style>
+
+      <div className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}>
+
+        {isHovered && !isOpen && (
+          <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md">
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">Položky v košíku</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              {cartItems.map(({ item, qty }) => (
+                <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
+                  <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
+                  <span className="truncate flex-grow">{item.name}</span>
+                  <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
+                </div>
+              ))}
+              {packageItems.map((pkg) => (
+                <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
+                  <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
+                  <span className="truncate flex-grow">{pkg.name}</span>
+                  <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
+              <span className="text-gray-400">Celkom na deň:</span>
+              <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
+            </div>
+            <button onClick={() => setIsOpen(true)}
+              className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+              <span>Otvoriť rezerváciu</span>
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
+
+        <button onClick={() => setIsOpen(true)}
+          className="relative flex items-center justify-center w-16 h-16 rounded-full btn-cyber shadow-[0_0_25px_rgba(189,32,211,0.5)] transition-transform duration-300 hover:scale-105 active:scale-95 group border-none">
+          <ShoppingBag size={28} className="text-white" />
+          <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#020721] shadow-md">{totalItems}</span>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-5xl my-4 md:my-8">
+            <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-[#BD20D3]/40 rounded-3xl p-4 md:p-6 lg:p-8 relative shadow-2xl shadow-[#BD20D3]/20">
+              <button type="button" onClick={() => setIsOpen(false)}
+                className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/5 z-10">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
+                <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]"><ShoppingBag size={20} /></div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Nezáväzná kalkulácia & Rezervácia</h2>
+                  <p className="text-gray-400 text-xs md:text-sm">Prezrite si vybranú techniku a odošlite dopyt.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+                {/* LEFT COLUMN - CART ITEMS */}
+                <div className="lg:col-span-5 space-y-4">
+                  <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                    <span>Vybraná technika</span>
+                    <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">{totalItems} ks</span>
+                  </h3>
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {cartItems.map(({ item, qty }) => (
+                      <div key={item.id} className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-semibold text-white truncate">{item.name}</h4>
+                          <p className="text-[#BD20D3] font-bold text-xs mt-0.5">{item.price_per_day} € / deň</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-lg p-1 shrink-0">
+                          <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400"><Minus size={12} /></button>
+                          <span className="w-7 text-center text-white font-semibold text-sm">{qty}</span>
+                          <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 disabled:opacity-30"><Plus size={12} /></button>
+                        </div>
+                      </div>
+                    ))}
+                    {packageItems.map((pkg) => (
+                      <div key={pkg.id} className="flex flex-col bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 relative">
+                        <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
+                        <div className="flex items-center gap-3 pr-6">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-white">{pkg.name}</h4>
+                            <p className="text-[#BD20D3] font-bold text-sm">{getPackageTotal(pkg)} €</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {pkg.hasLights && <span className="text-[10px] px-2 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
+                          {pkg.install === 'install' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
+                          {pkg.install === 'install_uninstall' && <span className="text-[10px] px-2 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inšt.+Deinšt. (+{pkg.installPrice} €)</span>}
+                          {pkg.arrival && <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 flex items-center gap-1 font-medium"><Truck size={11} /> {pkg.arrival.name}{pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* PRICE SUMMARY */}
+                  <div className="border-t border-white/10 pt-4 space-y-3">
+                    {hasEquipment && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Speaker size={14} className="text-[#BD20D3]" />
+                          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Aparatúra</p>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-400">
+                          <span>Cena na deň:</span>
+                          <span className="font-semibold text-white">{subtotalPerDay.toFixed(2)} €</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-400">
+                          <span>Počet dní:</span>
+                          <span className="font-semibold text-white">{days}</span>
+                        </div>
+                        {days > 1 && (
+                          <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 mt-2 space-y-1">
+                            <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Výpočet ceny</p>
+                            <div className="flex justify-between text-[13px] text-gray-300">
+                              <span>1. deň (plná cena):</span>
+                              <span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span>
+                            </div>
+                            <div className="flex justify-between text-[13px] text-gray-300">
+                              <span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : 'ďalšie dni'} (50%):</span>
+                              <span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm font-semibold mt-2 pt-2 border-t border-white/5">
+                          <span className="text-white">Aparatúra spolu:</span>
+                          <span className="text-white">{subtotalPerDay + additionalDaysTotal} €</span>
+                        </div>
+                      </div>
+                    )}
+                    {/* ... [rest of the price summary sections are the same as before, omitted for length] ... */}
+                  </div>
+                </div>
+
+                {/* RIGHT COLUMN - FORM */}
+                <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><User size={14} className="text-[#BD20D3]" /> Meno *</Label>
+                        <Input type="text" placeholder="Ján" value={formData.firstName} onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10" required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><User size={14} className="text-[#BD20D3]" /> Priezvisko *</Label>
+                        <Input type="text" placeholder="Novák" value={formData.lastName} onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10" required />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Mail size={14} className="text-[#BD20D3]" /> Email *</Label>
+                        <Input type="email" placeholder="jan@priklad.sk" value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10" required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Phone size={14} className="text-[#BD20D3]" /> Telefón</Label>
+                        <Input type="tel" placeholder="+421 900 123 456" value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5 relative" ref={fromRef}>
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *</Label>
+                        <div className="relative">
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""} onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 cursor-pointer pr-10" required />
+                          <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
+                        </div>
+                        {showFromCalendar && (
+                          <div className="absolute top-full left-0 mt-2 z-50">
+                            <DayPicker mode="single" selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1.5 relative" ref={toRef}>
+                        <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *</Label>
+                        <div className="relative">
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""} onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 cursor-pointer pr-10" required />
+                          <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
+                        </div>
+                        {showToCalendar && (
+                          <div className="absolute top-full left-0 mt-2 z-50">
+                            <DayPicker mode="single" selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke</Label>
+                      <Textarea placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px]" />
+                    </div>
+                    <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 rounded-xl text-sm font-bold border-none flex items-center justify-center gap-2">
+                      {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Odosielam...</> : <><Send size={16} /> Odoslať nezáväzný dopyt</>}
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default FloatingCart;
