@@ -72,9 +72,9 @@ const Predaj = () => {
             </p>
           </div>
 
-          <div className="w-full max-w-5xl mx-auto mb-8 flex items-center justify-center gap-2 bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
-            <Filter size={16} className="text-[#BD20D3] shrink-0" />
-            <div className="flex gap-1.5">
+          <div className="w-full max-w-5xl mx-auto mb-8 flex items-center gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
+            <Filter size={20} className="text-[#BD20D3] shrink-0" />
+            <div className="flex-1 grid grid-cols-3 gap-2">
               {[
                 { id: 'all', label: 'Všetko' },
                 { id: 'new', label: 'Nové' },
@@ -83,9 +83,9 @@ const Predaj = () => {
                 <button
                   key={f.id}
                   onClick={() => setActiveFilter(f.id as any)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                     activeFilter === f.id
-                      ? 'bg-[#BD20D3] text-white shadow-[0_0_10px_rgba(189,32,211,0.4)]'
+                      ? 'bg-[#BD20D3] text-white shadow-[0_0_15px_rgba(189,32,211,0.4)]'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
