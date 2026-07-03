@@ -519,7 +519,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
       await emailjs.send(
         'service_s8kq87k',
-        'template_zh6cnks',
+        'template_st0hc2f',
         {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
