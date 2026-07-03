@@ -130,7 +130,7 @@ const ContactForm = () => {
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-4">Kde nás nájdete</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-bold mb-4 mt-1">Kde nás nájdete</p>
                         <div className="space-y-4">
                           <div className="flex items-start gap-3">
                             <Warehouse size={18} className="text-[#BD20D3] mt-1 shrink-0" />
