@@ -3,13 +3,20 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package } from "lucide-react";
 import { toast } from "sonner";
 
 interface EquipmentDetailProps {
@@ -25,12 +32,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const [inquiryName, setInquiryName] = useState("");
-  const [inquiryPhone, setInquiryPhone] = useState("");
-  const [inquiryEmail, setInquiryEmail] = useState("");
-  const [inquiryMessage, setInquiryMessage] = useState("");
-  const [sending, setSending] = useState(false);
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
+  const [questionName, setQuestionName] = useState("");
+  const [questionEmail, setQuestionEmail] = useState("");
+  const [questionMessage, setQuestionMessage] = useState("");
+  const [sendingQuestion, setSendingQuestion] = useState(false);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
 
@@ -95,23 +101,23 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     });
   };
 
-  const handleSendInquiry = (e: React.FormEvent) => {
+  const handleSendQuestion = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inquiryName.trim() || !inquiryEmail.trim()) {
-      toast.error("Prosím vyplňte vaše meno a email!");
+    if (!questionName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
+      toast.error("Prosím vyplňte všetky povinné polia!");
       return;
     }
 
-    setSending(true);
+    setSendingQuestion(true);
     setTimeout(() => {
-      toast.success("Dopyt na prenájom bol úspešne odoslaný!", {
-        description: `Budeme vás kontaktovať ohľadom produktu ${item?.name} čo najskôr.`
+      toast.success("Vaša otázka bola odoslaná!", {
+        description: "Odpovieme vám čo najskôr na uvedený email."
       });
-      setInquiryName("");
-      setInquiryPhone("");
-      setInquiryEmail("");
-      setInquiryMessage("");
-      setSending(false);
+      setQuestionName("");
+      setQuestionEmail("");
+      setQuestionMessage("");
+      setQuestionDialogOpen(false);
+      setSendingQuestion(false);
     }, 1000);
   };
 
@@ -172,6 +178,8 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         ? "Svetelná technika"
         : "Ostatná technika";
   const pageTitle = `${item.name} – Prenájom ${categoryLabel} | Socializea Audio`;
+
+  const isSoldOut = item.available === 0;
 
   return (
     <>
@@ -252,12 +260,12 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                 <div className="absolute bottom-4 left-4">
                   <span
                     className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${
-                      item.available > 0
+                      !isSoldOut
                         ? "bg-cyan-600/90 border border-cyan-400/50 text-white"
                         : "bg-amber-600/90 border border-amber-400/50 text-white"
                     }`}
                   >
-                    {item.available > 0 ? "Dostupné" : "Vypredané"}
+                    {!isSoldOut ? "Dostupné" : "Vypredané"}
                   </span>
                 </div>
 
@@ -278,7 +286,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </>
                 )}
 
-                {item.available === 0 && (
+                {isSoldOut && (
                   <div className="absolute inset-0 bg-black/80 flex items-center justify-center backdrop-blur-sm">
                     <span className="text-red-500 border border-red-500/30 bg-red-500/10 px-6 py-3 rounded-2xl text-base font-extrabold uppercase tracking-widest">
                       Vypredané
@@ -386,103 +394,109 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
               </div>
             </div>
 
-            {/* Right column – inquiry form */}
+            {/* Right column – add to cart & question */}
             <div className="lg:col-span-5">
               <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Mám záujem o prenájom</h3>
-                  <p className="text-gray-400 text-xs leading-relaxed">
-                    Vyplňte formulár a my vám obratom potvrdíme dostupnosť, zašleme cenovú ponuku alebo dohodneme osobné prevzatie.
-                  </p>
+                {/* Available quantity */}
+                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                  <Package size={20} className="text-[#BD20D3]" />
+                  <div>
+                    <p className="text-sm text-gray-400">
+                      Dostupnosť:{" "}
+                      <span className={`font-bold ${!isSoldOut ? "text-cyan-400" : "text-amber-400"}`}>
+                        {isSoldOut ? "0 ks" : `${item.available} ks`}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
-                <form onSubmit={handleSendInquiry} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      Meno a priezvisko *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={inquiryName}
-                      onChange={(e) => setInquiryName(e.target.value)}
-                      placeholder="Napr. Ján Novák"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      E-mailová adresa *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={inquiryEmail}
-                      onChange={(e) => setInquiryEmail(e.target.value)}
-                      placeholder="jan.novak@email.sk"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      Telefónne číslo
-                    </label>
-                    <input
-                      type="tel"
-                      value={inquiryPhone}
-                      onChange={(e) => setInquiryPhone(e.target.value)}
-                      placeholder="+421 ..."
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      Poznámka / doplňujúce otázky
-                    </label>
-                    <textarea
-                      value={inquiryMessage}
-                      onChange={(e) => setInquiryMessage(e.target.value)}
-                      placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
-                    />
-                  </div>
-
+                {/* Add to cart button */}
+                {isSoldOut ? (
                   <Button
-                    type="submit"
-                    disabled={item.available === 0 || sending}
-                    className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2"
+                    disabled
+                    className="w-full h-12 rounded-xl font-bold text-base bg-white/10 text-gray-500 border-white/10 cursor-not-allowed"
                   >
-                    {sending ? "Odosielam..." : "Odoslať nezáväzný dopyt"}
+                    Vypredané
                   </Button>
-                </form>
-
-                {item.available > 0 && (
-                  <div className="pt-2">
-                    {isInCart ? (
-                      <Button
-                        onClick={handleAddToCart}
-                        disabled={cartQuantity >= item.available}
-                        className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
-                      >
-                        <Check size={18} className="mr-2" />
-                        V košíku ({cartQuantity})
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleAddToCart}
-                        disabled={item.available === 0}
-                        className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3] hover:bg-[#BD20D3]/85 border-none"
-                      >
-                        <ShoppingBag size={18} className="mr-2" />
-                        Pridať do košíka
-                      </Button>
-                    )}
-                  </div>
+                ) : isInCart ? (
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={cartQuantity >= item.available}
+                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
+                  >
+                    <Check size={18} className="mr-2" />
+                    V košíku ({cartQuantity})
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleAddToCart}
+                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3] hover:bg-[#BD20D3]/85 border-none"
+                  >
+                    <ShoppingBag size={18} className="mr-2" />
+                    Pridať do košíka
+                  </Button>
                 )}
 
+                {/* Question dialog trigger */}
+                <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-2 rounded-xl hover:bg-white/5">
+                      <HelpCircle size={16} />
+                      Je vám niečo nejasné? Spýtajte sa nás
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                      <DialogDescription className="text-gray-400 text-sm">
+                        Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
+                        <input
+                          type="text"
+                          required
+                          value={questionName}
+                          onChange={(e) => setQuestionName(e.target.value)}
+                          placeholder="Napr. Ján Novák"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
+                        <input
+                          type="email"
+                          required
+                          value={questionEmail}
+                          onChange={(e) => setQuestionEmail(e.target.value)}
+                          placeholder="jan.novak@email.sk"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                        <textarea
+                          required
+                          value={questionMessage}
+                          onChange={(e) => setQuestionMessage(e.target.value)}
+                          placeholder="Napíšte, čo vás zaujíma..."
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={sendingQuestion}
+                        className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
+                      >
+                        {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Contact info */}
                 <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
                   <div className="flex items-center gap-2">
                     <Phone size={14} className="text-[#BD20D3]" />
