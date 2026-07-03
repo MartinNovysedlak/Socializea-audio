@@ -81,6 +81,17 @@ interface CityMatch {
   nearestPoint?: string;
 }
 
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&',
+    '<': '<',
+    '>': '>',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -427,10 +438,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       html += '<tbody>';
       cartItems.forEach(({ item, qty }) => {
         html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-          <td style="padding:8px 12px;color:white;">${item.name}</td>
-          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td>
-          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td>
-          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td>
+          <td style="padding:8px 12px;color:white;">${escapeHtml(item.name)}</td>
+          <td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${escapeHtml(String(qty))}x</td>
+          <td style="padding:8px 12px;text-align:right;color:#9ca3af;">${escapeHtml(item.price_per_day.toFixed(2))} €</td>
+          <td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${escapeHtml((item.price_per_day * qty).toFixed(2))} €</td>
         </tr>`;
       });
       html += '</tbody></table>';
@@ -441,18 +452,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       packageItems.forEach((pkg) => {
         html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
-            <strong style="color:white;font-size:14px;">${pkg.name}</strong>
-            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+            <strong style="color:white;font-size:14px;">${escapeHtml(pkg.name)}</strong>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;">${escapeHtml(getPackageTotal(pkg).toFixed(2))} €</span>
           </div>`;
         if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
-        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
-        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${pkg.installPrice} €)</span>`;
-        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${pkg.arrival.name}${pkg.deliveryPrice > 0 ? ` (+${pkg.deliveryPrice} €)` : ' (Zdarma)'}</span>`;
+        if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${escapeHtml(String(pkg.installPrice))} €)</span>`;
+        if (pkg.install === 'install_uninstall') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+${escapeHtml(String(pkg.installPrice))} €)</span>`;
+        if (pkg.arrival) html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 ${escapeHtml(pkg.arrival.name)}${pkg.deliveryPrice > 0 ? ` (+${escapeHtml(String(pkg.deliveryPrice))} €)` : ' (Zdarma)'}</span>`;
         if (pkg.extras.length > 0) {
           html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
           html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
           pkg.extras.forEach((e) => {
-            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${escapeHtml(e.label)} (${escapeHtml(String(e.quantity))}x)</span><span style="color:#BD20D3;">${escapeHtml((e.quantity * e.pricePerDay).toFixed(2))} €</span></div>`;
           });
           html += '</div>';
         }
@@ -462,7 +473,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
     html += `<span style="color:white;font-size:16px;font-weight:700;">Celková suma</span>`;
-    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += `<span style="color:#BD20D3;font-size:20px;font-weight:900;">${escapeHtml((grandTotal + packagesTotal).toFixed(2))} €</span>`;
     html += '</div>';
 
     return html;
@@ -496,10 +507,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   <div style="padding:24px;">
     <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
     <table style="width:100%;font-size:14px;color:#d1d5db;">
-      <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${name}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Email:</td><td style="padding:4px 0;color:#BD20D3;">${email}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${phone}</td></tr>
-      <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${date}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(name)}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Email:</td><td style="padding:4px 0;color:#BD20D3;">${escapeHtml(email)}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${escapeHtml(phone)}</td></tr>
+      <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${escapeHtml(date)}</td></tr>
     </table>
 
     <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
@@ -508,7 +519,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     </div>
 
     <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
-    <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${message}</div>
+    <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${escapeHtml(message)}</div>
 
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(189,32,211,0.2);text-align:center;">
       <p style="color:#9ca3af;font-size:12px;">Tento email bol odoslaný automaticky z webovej stránky.</p>
@@ -519,7 +530,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const { error } = await supabase.functions.invoke('send-email', {
         body: {
           to: 'djparty.sk@gmail.com',
-          subject: `🔊 Nový dopyt z košíka – ${name}`,
+          subject: `🔊 Nový dopyt z košíka – ${escapeHtml(name)}`,
           html: htmlContent,
           replyTo: email,
         },
