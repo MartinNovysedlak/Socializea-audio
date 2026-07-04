@@ -415,11 +415,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasEquipment = totalEquipmentQty > 0;
 
-  // ======================== buildCartSummaryHtml INSIDE the component =======================
   const buildCartSummaryHtml = () => {
     let html = '';
 
-    // Aparatúra
     if (cartItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
       html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
@@ -436,7 +434,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       html += '</tbody></table>';
     }
 
-    // Balíky
     if (packageItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
       packageItems.forEach((pkg) => {
@@ -461,7 +458,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       });
     }
 
-    // Doplnkové služby (inštalácia, doprava)
     if (installSelected || installUninstallSelected) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
       if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;">+20 €</span></div>`;
@@ -482,7 +478,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       }
     }
 
-    // Obdobie prenájmu a zľava
     if (hasEquipment) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📅 Obdobie prenájmu</h3>';
       html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;margin-left:24px;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
@@ -495,7 +490,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       }
     }
 
-    // Celková suma
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
     html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
     html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;margin-left:24px;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
@@ -504,7 +498,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return html;
   };
 
-  // ======================== handleSubmit =======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -564,6 +557,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   return (
     <>
+      {/* Styles */}
       <style>{`
         .rdp {
           --rdp-cell-size: 28px;
@@ -645,8 +639,126 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           .rdp-caption { font-size: 11px; }
           .rdp-nav_button { width: 20px; height: 20px; }
         }
+        .cart-scroll-wrapper {
+          overflow-y: auto;
+          overflow-x: hidden;
+          max-height: 260px;
+          padding-right: 0.5rem;
+        }
+        .cart-scroll-wrapper::-webkit-scrollbar {
+          width: 4px;
+        }
+        .cart-scroll-wrapper::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .cart-scroll-wrapper::-webkit-scrollbar-thumb {
+          background: rgba(189, 32, 211, 0.3);
+          border-radius: 4px;
+        }
+        .cart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+          background: rgba(189, 32, 211, 0.5);
+        }
+        .cart-item-row {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          gap: 0.75rem;
+          align-items: center;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          padding: 0.75rem 1rem;
+        }
+        @media (min-width: 640px) {
+          .cart-item-row {
+            padding: 0.875rem 1rem;
+            gap: 1rem;
+          }
+        }
+        .cart-item-image {
+          width: 48px;
+          height: 48px;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.1);
+          flex-shrink: 0;
+          background: rgba(0,0,0,0.4);
+        }
+        @media (min-width: 640px) {
+          .cart-item-image {
+            width: 56px;
+            height: 56px;
+          }
+        }
+        .cart-item-details {
+          min-width: 0;
+          overflow: hidden;
+        }
+        .cart-item-name {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: white;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        @media (min-width: 640px) {
+          .cart-item-name {
+            font-size: 1rem;
+          }
+        }
+        .cart-item-price {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #BD20D3;
+          margin-top: 2px;
+        }
+        @media (min-width: 640px) {
+          .cart-item-price {
+            font-size: 0.875rem;
+            margin-top: 4px;
+          }
+        }
+        .cart-qty-controls {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          padding: 0.375rem;
+          flex-shrink: 0;
+        }
+        .cart-qty-btn {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #9ca3af;
+          transition: all 0.15s;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        .cart-qty-btn:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+        .cart-qty-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+        .cart-qty-value {
+          width: 24px;
+          text-align: center;
+          color: white;
+          font-weight: 600;
+          font-size: 0.875rem;
+        }
       `}</style>
 
+      {/* Floating cart button */}
       {totalItems > 0 && (
         <div
           className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
@@ -656,7 +768,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           {isHovered && !isOpen && (
             <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">Položky v košíku</h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="space-y-2 cart-scroll-wrapper">
                 {cartItems.map(({ item, qty }) => {
                   const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                   return (
@@ -694,6 +806,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
+      {/* Main cart overlay */}
       {isOpen && totalItems > 0 && (
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
@@ -707,35 +820,38 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
               </div>
 
+              {/* Grid layout */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 lg:gap-8">
+                {/* Left column: cart items */}
                 <div className="lg:col-span-5 space-y-4">
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
                     <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">{totalItems} ks</span>
                   </h3>
 
-                  <div className="space-y-3 max-h-[260px] overflow-y-auto pr-2 custom-scrollbar">
+                  {/* Equipment items */}
+                  <div className="cart-scroll-wrapper space-y-3">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
                       return (
-                        <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4">
-                          <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-black/40">
-                              <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm sm:text-base font-semibold text-white truncate">{item.name}</h4>
-                              <p className="text-[#BD20D3] font-bold text-xs sm:text-sm mt-0.5 sm:mt-1">{item.price_per_day} € / deň</p>
-                            </div>
+                        <div key={item.id} className="cart-item-row">
+                          <div className="cart-item-image">
+                            <img src={displayImg} alt={item.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} />
                           </div>
-                          <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-lg p-1.5 ml-auto sm:ml-0">
-                            <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"><Minus size={12} /></button>
-                            <span className="w-6 text-center text-white font-semibold text-sm">{qty}</span>
-                            <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="w-7 h-7 rounded-md hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-30"><Plus size={12} /></button>
+                          <div className="cart-item-details">
+                            <div className="cart-item-name">{item.name}</div>
+                            <div className="cart-item-price">{item.price_per_day} € / deň</div>
+                          </div>
+                          <div className="cart-qty-controls">
+                            <button type="button" onClick={() => handleQuantityChange(item.id, -1)} className="cart-qty-btn"><Minus size={12} /></button>
+                            <span className="cart-qty-value">{qty}</span>
+                            <button type="button" onClick={() => handleQuantityChange(item.id, 1)} disabled={qty >= item.available} className="cart-qty-btn"><Plus size={12} /></button>
                           </div>
                         </div>
                       );
                     })}
+
+                    {/* Package items */}
                     {packageItems.map((pkg) => (
                       <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
@@ -764,6 +880,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     ))}
                   </div>
 
+                  {/* Additional services */}
                   {hasEquipment && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
@@ -859,6 +976,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   )}
 
+                  {/* Summary */}
                   <div className="border-t border-white/10 pt-4 space-y-2">
                     {hasEquipment && (
                       <>
@@ -929,6 +1047,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
+                {/* Right column: form */}
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -955,35 +1074,77 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div className="space-y-1.5 relative" ref={fromRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *</Label>
                         <div className="relative">
-                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""} onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
+                          <Input
+                            type="text"
+                            readOnly
+                            placeholder="Vyberte dátum"
+                            value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""}
+                            onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
+                            required
+                          />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showFromCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker mode="single" selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showFromCalendar} />
+                            <DayPicker
+                              mode="single"
+                              selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
+                              onSelect={handleFromSelect}
+                              disabled={[{ before: startOfDay(new Date()) }]}
+                              weekStartsOn={1}
+                              initialFocus={showFromCalendar}
+                            />
                           </div>
                         )}
                       </div>
                       <div className="space-y-1.5 relative" ref={toRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *</Label>
                         <div className="relative">
-                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""} onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
+                          <Input
+                            type="text"
+                            readOnly
+                            placeholder="Vyberte dátum"
+                            value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""}
+                            onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }}
+                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
+                            required
+                          />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showToCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker mode="single" selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showToCalendar} />
+                            <DayPicker
+                              mode="single"
+                              selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
+                              onSelect={handleToSelect}
+                              disabled={[
+                                { before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }
+                              ]}
+                              weekStartsOn={1}
+                              initialFocus={showToCalendar}
+                            />
                           </div>
                         )}
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5 text-sm"><MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke</Label>
-                      <Textarea id="message" placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]" />
+                      <Textarea
+                        id="message"
+                        placeholder="Napíšte nám podrobnosti..."
+                        value={formData.message}
+                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]"
+                      />
                     </div>
-                    <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2"
+                    >
                       {isSubmitting ? (
-                        <><Loader2 size={18} className="animate-spin" /> Odosielam...</>
+                        <><Loader2 size={18} className="animate-spin" /> Odosielám...</>
                       ) : (
                         <><Send size={16} /> Odoslať nezáväzný dopyt</>
                       )}
