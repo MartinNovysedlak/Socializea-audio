@@ -22,6 +22,7 @@ import {
   Loader2,
   Ban,
   Send,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ import { format, addDays, isBefore, startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface PackageCartItem {
   id: string;
@@ -159,6 +161,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const [showFromCalendar, setShowFromCalendar] = useState(false);
   const [showToCalendar, setShowToCalendar] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReservationSuccess, setShowReservationSuccess] = useState(false);
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
@@ -535,9 +538,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       );
 
       toast.dismiss(toastId);
-      toast.success("Dopyt bol úspešne odoslaný!", {
-        description: "Náš tím vás bude čoskoro kontaktovať pre potvrdenie rezervácie.",
-      });
+      setShowReservationSuccess(true);
       setQuantities({});
       setPackageItems([]);
       setInstallSelected(false);
@@ -994,6 +995,29 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           </div>
         </div>
       )}
+
+      {/* Potvrdzovací dialog po odoslaní rezervácie */}
+      <Dialog open={showReservationSuccess} onOpenChange={setShowReservationSuccess}>
+        <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="text-[#BD20D3]" size={32} />
+          </div>
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-2xl font-bold text-white">
+              Ďakujeme za rezerváciu!
+            </DialogTitle>
+            <DialogDescription className="text-gray-300 text-base leading-relaxed">
+              V najbližšej dobe sa vám budeme venovať.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            onClick={() => setShowReservationSuccess(false)}
+            className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
+          >
+            Zavrieť
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
