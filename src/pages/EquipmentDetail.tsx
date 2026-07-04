@@ -19,6 +19,7 @@ import { EquipmentItem } from "@/lib/supabase";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import emailjs from '@emailjs/browser';
+import { generateEmailHtml } from '@/utils/emailTemplates';
 
 interface EquipmentDetailProps {
   quantities: Record<string, number>;
@@ -118,7 +119,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     setSendingQuestion(true);
 
     try {
-      const { generateEmailHtml } = await import('@/utils/emailTemplates');
       const htmlContent = generateEmailHtml('package-question', {
         name: `${questionFirstName} ${questionLastName}`,
         email: questionEmail,
@@ -131,10 +131,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        {
-          message_html: htmlContent,
-          subject: 'Otázka',
-        },
+        { message_html: htmlContent, title: 'Otázka' },
         'hlWKyd9fiWgqJJT3r'
       );
 
@@ -598,6 +595,29 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </DialogContent>
                 </Dialog>
 
+                {/* Potvrdzovací dialog po odoslaní otázky */}
+                <Dialog open={showQuestionSuccess} onOpenChange={setShowQuestionSuccess}>
+                  <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
+                      <CheckCircle2 className="text-[#BD20D3]" size={32} />
+                    </div>
+                    <DialogHeader className="space-y-3">
+                      <DialogTitle className="text-2xl font-bold text-white">
+                        Ďakujeme!
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-300 text-base leading-relaxed">
+                        Vaša otázka bola úspešne odoslaná. Budeme sa jej venovať a čoskoro sa vám ozveme späť.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Button
+                      onClick={() => setShowQuestionSuccess(false)}
+                      className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
+                    >
+                      Zavrieť
+                    </Button>
+                  </DialogContent>
+                </Dialog>
+
                 {/* Contact info */}
                 <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
                   <div className="flex items-center gap-2">
@@ -619,29 +639,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
             </div>
           </div>
         </div>
-
-        {/* Potvrdzovací dialog po odoslaní otázky */}
-        <Dialog open={showQuestionSuccess} onOpenChange={setShowQuestionSuccess}>
-          <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
-              <CheckCircle2 className="text-[#BD20D3]" size={32} />
-            </div>
-            <DialogHeader className="space-y-3">
-              <DialogTitle className="text-2xl font-bold text-white">
-                Ďakujeme!
-              </DialogTitle>
-              <DialogDescription className="text-gray-300 text-base leading-relaxed">
-                Vaša otázka bola úspešne odoslaná. Budeme sa jej venovať a čoskoro sa vám ozveme späť.
-              </DialogDescription>
-            </DialogHeader>
-            <Button
-              onClick={() => setShowQuestionSuccess(false)}
-              className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
-            >
-              Zavrieť
-            </Button>
-          </DialogContent>
-        </Dialog>
 
         <Footer />
 

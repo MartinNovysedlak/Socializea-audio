@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
+import { generateEmailHtml } from '@/utils/emailTemplates';
 
 export interface PackageOption {
   id: string;
@@ -547,7 +548,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setSendingQuestion(true);
 
     try {
-      const { generateEmailHtml } = await import('@/utils/emailTemplates');
       const htmlContent = generateEmailHtml('package-question', {
         name: `${questionFirstName} ${questionLastName}`,
         email: questionEmail,
@@ -560,7 +560,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        { message_html: htmlContent, subject: 'Otázka' },
+        { message_html: htmlContent, title: 'Otázka' },
         'hlWKyd9fiWgqJJT3r'
       );
 
