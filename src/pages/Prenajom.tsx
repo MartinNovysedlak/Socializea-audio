@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
@@ -132,14 +132,26 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
+  const lastScrollSaveRef = useRef<number>(0);
 
-  // 1. 🔑 Uložíme si scroll pozíciu, keď odchádzame z tejto stránky (unmount)
+  // 🔑 Prieběžné ukladanie scroll pozície (throttle 100ms)
+  // Toto beží len kým sme na stránke Prenajom (nie v detaile)
   useEffect(() => {
+    const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollSaveRef.current > 100) {
+        lastScrollSaveRef.current = now;
+        sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
+  // Načítanie balíkov
   useEffect(() => {
     const fetchPackages = async () => {
       setLoadingPackages(true);
@@ -171,7 +183,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     fetchPackages();
   }, []);
 
-  // 2. 🔑 Obnovíme scroll AŽ keď sú načítané balíky aj equipment (vtedy má stránka plnú výšku)
+  // 🔑 Obnovenie scrollu AŽ keď sú načítané balíky aj equipment
   useEffect(() => {
     if (loadingPackages || !equipment || equipment.length === 0) return;
 
@@ -179,10 +191,8 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     if (saved !== null) {
       const targetY = parseInt(saved, 10);
       
-      // setTimeout s 50ms zaistí, že React úplne dorobil render a paint katalógu do DOMu
       const timer = setTimeout(() => {
         window.scrollTo({ top: targetY, behavior: 'instant' as any });
-        sessionStorage.removeItem('prenajom-scroll-position');
       }, 50);
 
       return () => clearTimeout(timer);
