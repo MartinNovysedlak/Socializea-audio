@@ -132,6 +132,19 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
+  // Obnovenie scrollu po návrate z detailu
+  useEffect(() => {
+    const savedScrollY = sessionStorage.getItem('prenajom-scroll-position');
+    if (savedScrollY) {
+      const scrollY = parseInt(savedScrollY, 10);
+      // Po krátkom oneskorení, aby sa stihol render
+      setTimeout(() => {
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
+      }, 0);
+      sessionStorage.removeItem('prenajom-scroll-position');
+    }
+  }, []);
+
   useEffect(() => {
     const fetchPackages = async () => {
       setLoadingPackages(true);
