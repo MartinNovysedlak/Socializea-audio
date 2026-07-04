@@ -20,9 +20,14 @@ export interface ProductInquiryData extends ContactFormData {
   productCondition: string;
 }
 
+// Nový typ pre otázku k balíku
+export interface PackageQuestionData extends ContactFormData {
+  packageName: string;
+}
+
 export function generateEmailHtml(
-  type: 'contact' | 'rezervacia' | 'produkt',
-  data: ContactFormData | ReservationFormData | ProductInquiryData
+  type: 'contact' | 'rezervacia' | 'produkt' | 'package-question',
+  data: ContactFormData | ReservationFormData | ProductInquiryData | PackageQuestionData
 ): string {
   switch (type) {
     case 'contact':
@@ -42,6 +47,12 @@ export function generateEmailHtml(
         title: '🔊 Nová nezáväzná rezervácia',
         subtitle: 'Kalkulácia a rezervácia z webu Socializea-audio',
         content: buildReservationContent(data as ReservationFormData),
+      });
+    case 'package-question':
+      return buildBaseHtml({
+        title: '📦 Otázka k balíku',
+        subtitle: 'Zákazník sa pýta na konkrétny balík z webu Socializea-audio',
+        content: buildPackageQuestionContent(data as PackageQuestionData),
       });
     default:
       return '';
@@ -120,6 +131,21 @@ function buildReservationContent(data: ReservationFormData): string {
     <div style="margin-top:16px;padding:12px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.2);border-radius:12px;text-align:center;">
       <p style="color:#9ca3af;font-size:13px;margin:0 0 4px;">Počet dní prenájmu: <strong style="color:white;">${data.days}</strong></p>
       <p style="color:white;font-size:20px;font-weight:900;margin:0;">Celková suma: <span style="color:#BD20D3;">${data.totalPrice.toFixed(2)} €</span></p>
+    </div>
+
+    ${buildMessageBlock(data.message)}
+  `;
+}
+
+function buildPackageQuestionContent(data: PackageQuestionData): string {
+  return `
+    ${buildContactInfo(data)}
+
+    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Otázka k balíku</h2>
+    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;font-size:14px;">
+      <table style="width:100%;color:#d1d5db;">
+        <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Balík:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.packageName)}</td></tr>
+      </table>
     </div>
 
     ${buildMessageBlock(data.message)}
