@@ -21,6 +21,7 @@ import {
   Euro,
   MapPin,
   Navigation,
+  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
@@ -233,6 +234,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [questionPhone, setQuestionPhone] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
+  const [showQuestionSuccess, setShowQuestionSuccess] = useState(false);
 
   useEffect(() => {
     if (open && selectedPackage) {
@@ -558,20 +560,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        { message_html: htmlContent },
+        { message_html: htmlContent, subject: 'Otázka' },
         'hlWKyd9fiWgqJJT3r'
       );
 
-      toast.success("Vaša otázka bola odoslaná!", {
-        description: "Odpovieme vám čo najskôr na uvedený email."
-      });
+      setQuestionDialogOpen(false);
+      setShowQuestionSuccess(true);
 
       setQuestionFirstName("");
       setQuestionLastName("");
       setQuestionEmail("");
       setQuestionPhone("");
       setQuestionMessage("");
-      setQuestionDialogOpen(false);
     } catch (error) {
       console.error("EmailJS send failed:", error);
       toast.error("Odoslanie zlyhalo. Skúste to prosím neskôr.");
@@ -984,8 +984,14 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
-                    <input type="tel" value={questionPhone} onChange={(e) => setQuestionPhone(e.target.value)}
-                      placeholder="+421 901 234 567" className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm" />
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      value={questionPhone}
+                      onChange={(e) => setQuestionPhone(e.target.value)}
+                      placeholder="+421 901 234 567"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
@@ -1002,6 +1008,29 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     {sendingQuestion ? (<><Loader2 size={16} className="mr-2 animate-spin" />Odosiela sa...</>) : "Odoslať otázku"}
                   </Button>
                 </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Potvrdzovací dialog po odoslaní otázky */}
+            <Dialog open={showQuestionSuccess} onOpenChange={setShowQuestionSuccess}>
+              <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle2 className="text-[#BD20D3]" size={32} />
+                </div>
+                <DialogHeader className="space-y-3">
+                  <DialogTitle className="text-2xl font-bold text-white">
+                    Ďakujeme!
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 text-base leading-relaxed">
+                    Vaša otázka bola úspešne odoslaná. Budeme sa jej venovať a čoskoro sa vám ozveme späť.
+                  </DialogDescription>
+                </DialogHeader>
+                <Button
+                  onClick={() => setShowQuestionSuccess(false)}
+                  className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
+                >
+                  Zavrieť
+                </Button>
               </DialogContent>
             </Dialog>
           </div>
