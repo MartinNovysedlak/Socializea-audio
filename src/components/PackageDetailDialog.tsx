@@ -29,6 +29,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import emailjs from 'emailjs-com';  // Ensure emailjs-com is installed
 
 export interface PackageOption {
   id: string;
@@ -239,6 +240,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [questionPhone, setQuestionPhone] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
+
+  // Ref for the question form to use emailjs sendForm
+  const questionFormRef = useRef<HTMLFormElement>(null);
 
   React.useEffect(() => {
     if (open && selectedPackage) {
@@ -541,7 +545,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     onOpenChange(false);
   };
 
-  const handleSendQuestion = (e: React.FormEvent) => {
+  // Updated: send question via EmailJS with loading state and success popup/toast
+  const handleSendQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!questionFirstName.trim() || !questionLastName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
       toast.error("Prosím vyplňte všetky povinné polia (meno, priezvisko, email a správa)!");
@@ -549,18 +554,36 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     }
 
     setSendingQuestion(true);
-    setTimeout(() => {
+
+    try {
+      // Use EmailJS sendForm – assumes the form has the right data attributes.
+      // Service ID, template ID and user ID should come from environment variables or constants.
+      // These are the same as used elsewhere (e.g. reservation form, contact form)
+      const serviceID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'your_service_id';
+      const templateID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_QUESTION || 'template_question';
+      const userID = process.env.NEXT_PUBLIC_EMAILJS_USER_ID || 'your_user_id';
+
+      // If using sendForm, we need to have a form ref. Also add hidden fields for package name.
+      // We'll include package name as a hidden input in the form.
+      await emailjs.sendForm(serviceID, templateID, questionFormRef.current!, userID);
+
       toast.success("Vaša otázka bola odoslaná!", {
         description: "Odpovieme vám čo najskôr na uvedený email."
       });
+
+      // Reset form and close dialog
       setQuestionFirstName("");
       setQuestionLastName("");
       setQuestionEmail("");
       setQuestionPhone("");
       setQuestionMessage("");
       setQuestionDialogOpen(false);
+    } catch (error) {
+      console.error("EmailJS send failed:", error);
+      toast.error("Odoslanie zlyhalo. Skúste to prosím neskôr.");
+    } finally {
       setSendingQuestion(false);
-    }, 1000);
+    }
   };
 
   if (!selectedPackage) return null;
@@ -1315,28 +1338,49 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              {/* Question dialog button */}
+            <div className="flex flex-col gap-2 pt-2">
+              {/* Pridať do košíka – first */}
+              <Button
+                onClick={handleAddToCart}
+                className="btn-cyber rounded-xl h-12 border-none font-bold w-full"
+              >
+                <ShoppingBag size={16} className="mr-2" />
+                Pridať do košíka
+              </Button>
+
+              {/* Zavrieť – second */}
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 w-full"
+              >
+                Zavrieť
+              </Button>
+
+              {/* Je vám niečo nejasné? – third, just clickable text */}
               <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
                 <DialogTrigger asChild>
-                  <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
+                  <button className="flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-2 rounded-xl w-full cursor-pointer bg-transparent border-0">
                     <HelpCircle size={16} />
                     Je vám niečo nejasné? Spýtajte sa nás
                   </button>
                 </DialogTrigger>
                 <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-white">Máte otázku k tomuto balíku?</DialogTitle>
                     <DialogDescription className="text-gray-400 text-sm">
                       Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                  <form ref={questionFormRef} onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                    {/* Hidden field for package name */}
+                    <input type="hidden" name="package_name" value={selectedPackage?.name || ''} />
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <label className="text-xs text-gray-400 font-bold uppercase">Meno *</label>
                         <input
                           type="text"
+                          name="first_name"
                           required
                           value={questionFirstName}
                           onChange={(e) => setQuestionFirstName(e.target.value)}
@@ -1348,6 +1392,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         <label className="text-xs text-gray-400 font-bold uppercase">Priezvisko *</label>
                         <input
                           type="text"
+                          name="last_name"
                           required
                           value={questionLastName}
                           onChange={(e) => setQuestionLastName(e.target.value)}
@@ -1360,6 +1405,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
                       <input
                         type="email"
+                        name="email"
                         required
                         value={questionEmail}
                         onChange={(e) => setQuestionEmail(e.target.value)}
@@ -1371,6 +1417,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
                       <input
                         type="tel"
+                        name="phone"
                         value={questionPhone}
                         onChange={(e) => setQuestionPhone(e.target.value)}
                         placeholder="+421 901 234 567"
@@ -1388,6 +1435,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       )}
                       <textarea
+                        name="message"
                         required
                         value={questionMessage}
                         onChange={(e) => setQuestionMessage(e.target.value)}
@@ -1400,26 +1448,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       disabled={sendingQuestion}
                       className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
                     >
-                      {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                      {sendingQuestion ? (
+                        <>
+                          <Loader2 size={16} className="mr-2 animate-spin" />
+                          Odosiela sa...
+                        </>
+                      ) : (
+                        "Odoslať otázku"
+                      )}
                     </Button>
                   </form>
                 </DialogContent>
               </Dialog>
-
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="border-white/10 text-white hover:bg-white/5 rounded-xl h-12 flex-1"
-              >
-                Zavrieť
-              </Button>
-              <Button
-                onClick={handleAddToCart}
-                className="btn-cyber rounded-xl h-12 flex-1 border-none font-bold"
-              >
-                <ShoppingBag size={16} className="mr-2" />
-                Pridať do košíka
-              </Button>
             </div>
           </div>
         </div>
