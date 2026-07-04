@@ -233,8 +233,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   // Question dialog state
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
-  const [questionName, setQuestionName] = useState("");
+  const [questionFirstName, setQuestionFirstName] = useState("");
+  const [questionLastName, setQuestionLastName] = useState("");
   const [questionEmail, setQuestionEmail] = useState("");
+  const [questionPhone, setQuestionPhone] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
 
@@ -254,9 +256,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setItemQuantity(1);
       setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
       // Reset question dialog state
-      setQuestionName("");
+      setQuestionFirstName("");
+      setQuestionLastName("");
       setQuestionEmail("");
-      setQuestionMessage("");
+      setQuestionPhone("");
+      setQuestionMessage(`Mám otázku k balíku: ${selectedPackage.name}`);
       setSendingQuestion(false);
     }
   }, [open, selectedPackage]);
@@ -539,8 +543,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const handleSendQuestion = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!questionName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
-      toast.error("Prosím vyplňte všetky povinné polia!");
+    if (!questionFirstName.trim() || !questionLastName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
+      toast.error("Prosím vyplňte všetky povinné polia (meno, priezvisko, email a správa)!");
       return;
     }
 
@@ -549,9 +553,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       toast.success("Vaša otázka bola odoslaná!", {
         description: "Odpovieme vám čo najskôr na uvedený email."
       });
-      setQuestionName("");
+      setQuestionFirstName("");
+      setQuestionLastName("");
       setQuestionEmail("");
-      setQuestionMessage("");
+      setQuestionPhone("");
+      setQuestionMessage(`Mám otázku k balíku: ${selectedPackage?.name || ""}`);
       setQuestionDialogOpen(false);
       setSendingQuestion(false);
     }, 1000);
@@ -663,8 +669,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   onClick={() => setIncludeLights(!includeLights)}
                   className={`p-5 md:p-6 md:p-7 rounded-2xl border-2 transition-all flex flex-col justify-between cursor-pointer select-none group relative ${
                     includeLights
-                      ? 'bg-[#BD20D3]/8 border-[#BD20D3]/40 shadow-[0_0_25px_rgba(189,32,211,0.08)] hover:bg-[#BD20D3]/12'
-                      : 'bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] opacity-80 hover:opacity-100'
+                      ? 'bg-[#BD20D3]/8 border-[#BD20D3]/40 shadow-[0_0_25px_rgba(189,32,211,0.08)] hover:bg-[#e040D3]/12'
+                      : 'bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.07] opacity-80 hover:opacity-100'
                   }`}
                 >
                   <div>
@@ -1326,16 +1332,29 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
-                      <input
-                        type="text"
-                        required
-                        value={questionName}
-                        onChange={(e) => setQuestionName(e.target.value)}
-                        placeholder="Napr. Ján Novák"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                      />
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Meno *</label>
+                        <input
+                          type="text"
+                          required
+                          value={questionFirstName}
+                          onChange={(e) => setQuestionFirstName(e.target.value)}
+                          placeholder="Napr. Ján"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Priezvisko *</label>
+                        <input
+                          type="text"
+                          required
+                          value={questionLastName}
+                          onChange={(e) => setQuestionLastName(e.target.value)}
+                          placeholder="Napr. Novák"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
@@ -1345,6 +1364,16 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         value={questionEmail}
                         onChange={(e) => setQuestionEmail(e.target.value)}
                         placeholder="jan.novak@email.sk"
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
+                      <input
+                        type="tel"
+                        value={questionPhone}
+                        onChange={(e) => setQuestionPhone(e.target.value)}
+                        placeholder="+421 901 234 567"
                         className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                       />
                     </div>
