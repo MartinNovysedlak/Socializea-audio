@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ShoppingBag,
   X,
@@ -557,6 +557,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasAnyAdditionalService = installSelected || installUninstallSelected || deliverySelected || packageHasInstall || packageHasInstallUninstall || (packageItems.some(p => p.arrival));
 
+  const hasSomethingToShow = hasEquipment || packageItems.length > 0;
+
   return (
     <>
       <style>{`
@@ -577,47 +579,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           border-radius: 12px;
           padding: 6px;
         }
-        .rdp-caption {
-          color: white;
-          font-weight: 700;
-          font-size: 12px;
-          padding: 0 0 4px 0;
-        }
-        .rdp-head_cell {
-          color: #9ca3af;
-          font-size: 9px;
-          font-weight: 600;
-          padding: 2px 0;
-        }
+        .rdp-caption { color: white; font-weight: 700; font-size: 12px; padding: 0 0 4px 0; }
+        .rdp-head_cell { color: #9ca3af; font-size: 9px; font-weight: 600; padding: 2px 0; }
         .rdp-day {
-          color: #e5e7eb;
-          border-radius: 4px;
-          font-size: 11px;
-          width: 28px;
-          height: 28px;
-          padding: 0;
+          color: #e5e7eb; border-radius: 4px; font-size: 11px; width: 28px; height: 28px; padding: 0;
         }
-        .rdp-day:hover:not(.rdp-day_selected) {
-          background: rgba(189, 32, 211, 0.2) !important;
-          color: white !important;
-        }
-        .rdp-day_selected {
-          background: #BD20D3 !important;
-          color: white !important;
-          font-weight: 700;
-        }
+        .rdp-day:hover:not(.rdp-day_selected) { background: rgba(189, 32, 211, 0.2) !important; color: white !important; }
+        .rdp-day_selected { background: #BD20D3 !important; color: white !important; font-weight: 700; }
         .rdp-day_today { border: 1px solid #BD20D3; font-weight: 700; }
         .rdp-day_outside { opacity: 0.3; }
-        .rdp-nav_button {
-          color: #9ca3af;
-          border-radius: 4px;
-          width: 24px;
-          height: 24px;
-        }
-        .rdp-nav_button:hover {
-          background: rgba(189, 32, 211, 0.2) !important;
-          color: white !important;
-        }
+        .rdp-nav_button { color: #9ca3af; border-radius: 4px; width: 24px; height: 24px; }
+        .rdp-nav_button:hover { background: rgba(189, 32, 211, 0.2) !important; color: white !important; }
         .rdp-caption_dropdowns { gap: 2px; }
         .rdp-dropdown {
           background: rgba(189, 32, 211, 0.1);
@@ -649,16 +621,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         .cart-scroll-wrapper::-webkit-scrollbar {
           width: 4px;
         }
-        .cart-scroll-wrapper::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .cart-scroll-wrapper::-webkit-scrollbar-thumb {
-          background: rgba(189, 32, 211, 0.3);
-          border-radius: 4px;
-        }
-        .cart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-          background: rgba(189, 32, 211, 0.5);
-        }
+        .cart-scroll-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .cart-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(189, 32, 211, 0.3); border-radius: 4px; }
+        .cart-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(189, 32, 211, 0.5); }
         .cart-item-row {
           display: grid;
           grid-template-columns: auto 1fr auto;
@@ -670,93 +635,28 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           padding: 0.75rem 1rem;
         }
         @media (min-width: 640px) {
-          .cart-item-row {
-            padding: 0.875rem 1rem;
-            gap: 1rem;
-          }
+          .cart-item-row { padding: 0.875rem 1rem; gap: 1rem; }
         }
         .cart-item-image {
-          width: 48px;
-          height: 48px;
-          border-radius: 8px;
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.1);
-          flex-shrink: 0;
-          background: rgba(0,0,0,0.4);
+          width: 48px; height: 48px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; background: rgba(0,0,0,0.4);
         }
-        @media (min-width: 640px) {
-          .cart-item-image {
-            width: 56px;
-            height: 56px;
-          }
-        }
-        .cart-item-details {
-          min-width: 0;
-          overflow: hidden;
-        }
+        @media (min-width: 640px) { .cart-item-image { width: 56px; height: 56px; } }
+        .cart-item-details { min-width: 0; overflow: hidden; }
         .cart-item-name {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: white;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 0.875rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        @media (min-width: 640px) {
-          .cart-item-name {
-            font-size: 1rem;
-          }
-        }
-        .cart-item-price {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #BD20D3;
-          margin-top: 2px;
-        }
-        @media (min-width: 640px) {
-          .cart-item-price {
-            font-size: 0.875rem;
-            margin-top: 4px;
-          }
-        }
+        @media (min-width: 640px) { .cart-item-name { font-size: 1rem; } }
+        .cart-item-price { font-size: 0.75rem; font-weight: 700; color: #BD20D3; margin-top: 2px; }
+        @media (min-width: 640px) { .cart-item-price { font-size: 0.875rem; margin-top: 4px; } }
         .cart-qty-controls {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(0,0,0,0.3);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 8px;
-          padding: 0.375rem;
-          flex-shrink: 0;
+          display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.375rem; flex-shrink: 0;
         }
         .cart-qty-btn {
-          width: 28px;
-          height: 28px;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #9ca3af;
-          transition: all 0.15s;
-          border: none;
-          background: transparent;
-          cursor: pointer;
+          width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #9ca3af; transition: all 0.15s; border: none; background: transparent; cursor: pointer;
         }
-        .cart-qty-btn:hover {
-          background: rgba(255,255,255,0.1);
-          color: white;
-        }
-        .cart-qty-btn:disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-        .cart-qty-value {
-          width: 24px;
-          text-align: center;
-          color: white;
-          font-weight: 600;
-          font-size: 0.875rem;
-        }
+        .cart-qty-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .cart-qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .cart-qty-value { width: 24px; text-align: center; color: white; font-weight: 600; font-size: 0.875rem; }
       `}</style>
 
       {totalItems > 0 && (
@@ -875,7 +775,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     ))}
                   </div>
 
-                  {(hasEquipment || packageItems.length > 0) && (
+                  {hasSomethingToShow && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
 
@@ -940,9 +840,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                                   <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-xs text-white truncate">{city.name}</p>
-                                    <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">
-                                      {[city.postcode, city.district].filter(Boolean).join(', ')}
-                                    </span>
+                                    <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">{city.postcode ? `${city.postcode}, ` : ''}{city.district || ''}</span>
                                   </div>
                                   <div className="text-right shrink-0">
                                     <span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
@@ -973,16 +871,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   <div className="border-t border-white/10 pt-4 space-y-4">
                     {cartItems.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
-                          <span className="w-1.5 h-4 bg-[#BD20D3] rounded-full"></span>
-                          Aparatúra
-                        </h4>
+                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-[#BD20D3] rounded-full"></span>Aparatúra</h4>
                         <div className="space-y-1.5">
                           {cartItems.map(({ item, qty }) => (
                             <div key={item.id} className="flex justify-between text-sm text-gray-400">
-                              <span className="truncate flex-1 min-w-0 pr-4">
-                                {item.name} <span className="text-[#BD20D3] font-medium">×{qty}</span>
-                              </span>
+                              <span className="truncate flex-1 min-w-0 pr-4">{item.name} <span className="text-[#BD20D3] font-medium">×{qty}</span></span>
                               <span className="text-white font-medium shrink-0">{(item.price_per_day * qty).toFixed(2)} €</span>
                             </div>
                           ))}
@@ -1006,16 +899,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {cartItems.length > 0 && packageItems.length > 0 && (
-                      <div className="border-t border-white/10"></div>
-                    )}
+                    {cartItems.length > 0 && packageItems.length > 0 && <div className="border-t border-white/10"></div>}
 
                     {packageItems.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
-                          <span className="w-1.5 h-4 bg-[#1A4BFF] rounded-full"></span>
-                          Balíky
-                        </h4>
+                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-[#1A4BFF] rounded-full"></span>Balíky</h4>
                         <div className="space-y-2">
                           {packageItems.map((pkg) => (
                             <div key={pkg.id} className="bg-black/20 rounded-lg p-3 space-y-1.5">
@@ -1046,55 +934,29 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {packageItems.length > 0 && hasAnyAdditionalService && (
-                      <div className="border-t border-white/10"></div>
-                    )}
-                    {cartItems.length > 0 && !packageItems.length && hasAnyAdditionalService && (
-                      <div className="border-t border-white/10"></div>
-                    )}
+                    {((packageItems.length > 0 && hasAnyAdditionalService) || (cartItems.length > 0 && !packageItems.length && hasAnyAdditionalService)) && <div className="border-t border-white/10"></div>}
 
                     {hasAnyAdditionalService && (
                       <div>
-                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
-                          <span className="w-1.5 h-4 bg-emerald-400 rounded-full"></span>
-                          Doplnkové služby
-                        </h4>
+                        <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-emerald-400 rounded-full"></span>Doplnkové služby</h4>
                         <div className="space-y-1.5">
                           {installSelected && !installUninstallSelected && (
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>Inštalácia</span>
-                              <span className="text-[#1A4BFF] font-semibold">+{installCost} €</span>
-                            </div>
+                            <div className="flex justify-between text-sm text-gray-400"><span>Inštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installCost} €</span></div>
                           )}
                           {installUninstallSelected && !installSelected && (
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>Inštalácia a deinštalácia</span>
-                              <span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span>
-                            </div>
+                            <div className="flex justify-between text-sm text-gray-400"><span>Inštalácia a deinštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span></div>
                           )}
                           {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>Inštalácia (z balíkov)</span>
-                              <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span>
-                            </div>
+                            <div className="flex justify-between text-sm text-gray-400"><span>Inštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
                           )}
                           {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>Inštalácia a deinštalácia (z balíkov)</span>
-                              <span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span>
-                            </div>
+                            <div className="flex justify-between text-sm text-gray-400"><span>Inštalácia a deinštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
                           )}
                           {deliverySelected && deliveryResult && (
-                            <div className="flex justify-between text-sm text-gray-400">
-                              <span>Doprava ({deliveryCity})</span>
-                              <span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
-                            </div>
+                            <div className="flex justify-between text-sm text-gray-400"><span>Doprava ({deliveryCity})</span><span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span></div>
                           )}
                           {packageItems.filter(p => p.arrival).map((pkg) => (
-                            <div key={pkg.id} className="flex justify-between text-sm text-gray-400">
-                              <span>Doprava ({pkg.arrival?.name})</span>
-                              <span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice} €` : 'Zdarma'}</span>
-                            </div>
+                            <div key={pkg.id} className="flex justify-between text-sm text-gray-400"><span>Doprava ({pkg.arrival?.name})</span><span className={pkg.deliveryPrice > 0 ? 'text-[#1A4BFF] font-semibold' : 'text-emerald-400 font-semibold'}>{pkg.deliveryPrice > 0 ? `+${pkg.deliveryPrice} €` : 'Zdarma'}</span></div>
                           ))}
                         </div>
                       </div>
@@ -1107,7 +969,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
-                <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
+                {/* Sticky form column */}
+                <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8 lg:sticky lg:top-8 self-start">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
@@ -1133,80 +996,34 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div className="space-y-1.5 relative" ref={fromRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *</Label>
                         <div className="relative">
-                          <Input
-                            type="text"
-                            readOnly
-                            placeholder="Vyberte dátum"
-                            value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""}
-                            onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
-                            required
-                          />
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""} onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showFromCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker
-                              mode="single"
-                              selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined}
-                              onSelect={handleFromSelect}
-                              disabled={[{ before: startOfDay(new Date()) }]}
-                              weekStartsOn={1}
-                              initialFocus={showFromCalendar}
-                            />
+                            <DayPicker mode="single" selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showFromCalendar} />
                           </div>
                         )}
                       </div>
                       <div className="space-y-1.5 relative" ref={toRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *</Label>
                         <div className="relative">
-                          <Input
-                            type="text"
-                            readOnly
-                            placeholder="Vyberte dátum"
-                            value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""}
-                            onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }}
-                            className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10"
-                            required
-                          />
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""} onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showToCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker
-                              mode="single"
-                              selected={formData.dateTo ? new Date(formData.dateTo) : undefined}
-                              onSelect={handleToSelect}
-                              disabled={[
-                                { before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }
-                              ]}
-                              weekStartsOn={1}
-                              initialFocus={showToCalendar}
-                            />
+                            <DayPicker mode="single" selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showToCalendar} />
                           </div>
                         )}
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5 text-sm"><MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke</Label>
-                      <Textarea
-                        id="message"
-                        placeholder="Napíšte nám podrobnosti..."
-                        value={formData.message}
-                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                        className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]"
-                      />
+                      <Textarea id="message" placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]" />
                     </div>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <><Loader2 size={18} className="animate-spin" /> Odosielám...</>
-                      ) : (
-                        <><Send size={16} /> Odoslať nezáväzný dopyt</>
-                      )}
+                    <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2">
+                      {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Odosielám...</> : <><Send size={16} /> Odoslať nezáväzný dopyt</>}
                     </Button>
                   </form>
                 </div>
@@ -1222,19 +1039,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             <CheckCircle2 className="text-[#BD20D3]" size={32} />
           </div>
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-2xl font-bold text-white">
-              Ďakujeme za rezerváciu!
-            </DialogTitle>
-            <DialogDescription className="text-gray-300 text-base leading-relaxed">
-              V najbližšej dobe sa vám budeme venovať.
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-bold text-white">Ďakujeme za rezerváciu!</DialogTitle>
+            <DialogDescription className="text-gray-300 text-base leading-relaxed">V najbližšej dobe sa vám budeme venovať.</DialogDescription>
           </DialogHeader>
-          <Button
-            onClick={() => setShowReservationSuccess(false)}
-            className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
-          >
-            Zavrieť
-          </Button>
+          <Button onClick={() => setShowReservationSuccess(false)} className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full">Zavrieť</Button>
         </DialogContent>
       </Dialog>
     </>
