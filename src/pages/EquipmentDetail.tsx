@@ -181,9 +181,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   }, [lightboxOpen, goNext, goPrev]);
 
   const handleBack = () => {
-    // Uložíme aktuálnu pozíciu scrollu do sessionStorage
-    const scrollY = window.scrollY;
-    sessionStorage.setItem('prenajom-scroll-position', String(scrollY));
+    // Už neprepisujeme pozíciu, tá je bezpečne uložená priamo z Prenajom.tsx!
     navigate('/prenajom');
   };
 

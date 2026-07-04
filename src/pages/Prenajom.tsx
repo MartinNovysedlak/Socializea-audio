@@ -133,6 +133,13 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
+  // 1. 🔑 Uložíme si scroll pozíciu, keď odchádzame z tejto stránky (unmount)
+  useEffect(() => {
+    return () => {
+      sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
+    };
+  }, []);
+
   useEffect(() => {
     const fetchPackages = async () => {
       setLoadingPackages(true);
@@ -164,23 +171,23 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     fetchPackages();
   }, []);
 
-  // 🔑 Obnovenie scrollu AŽ PO načítaní všetkých dát a vykreslení DOM-u
+  // 2. 🔑 Obnovíme scroll AŽ keď sú načítané balíky aj equipment (vtedy má stránka plnú výšku)
   useEffect(() => {
-    if (loadingPackages) return; // počkáme, kým sa načítajú balíky
+    if (loadingPackages || !equipment || equipment.length === 0) return;
 
     const saved = sessionStorage.getItem('prenajom-scroll-position');
     if (saved !== null) {
       const targetY = parseInt(saved, 10);
-      // requestAnimationFrame zabezpečí, že DOM je už vykreslený a stránka má správnu výšku
-      requestAnimationFrame(() => {
-        // Druhý rAF pre istotu – po layout a paint fáze prehliadača
-        requestAnimationFrame(() => {
-          window.scrollTo(0, targetY);
-          sessionStorage.removeItem('prenajom-scroll-position');
-        });
-      });
+      
+      // setTimeout s 50ms zaistí, že React úplne dorobil render a paint katalógu do DOMu
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: targetY, behavior: 'instant' as any });
+        sessionStorage.removeItem('prenajom-scroll-position');
+      }, 50);
+
+      return () => clearTimeout(timer);
     }
-  }, [loadingPackages]);
+  }, [loadingPackages, equipment]);
 
   const presetPackages = loadedPackages;
 
