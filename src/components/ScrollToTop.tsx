@@ -9,17 +9,14 @@ export default function ScrollToTop() {
   useEffect(() => {
     window.history.scrollRestoration = 'manual';
 
-    // Ak sme na stránke prenájmu a je uložená pozícia, obnovíme ju
+    // Ak ideme na /prenajom a je uložená pozícia, necháme obnovenie na Prenajom.tsx
     if (pathname === '/prenajom') {
-      const savedScrollY = sessionStorage.getItem('prenajom-scroll-position');
-      if (savedScrollY !== null) {
-        window.scrollTo(0, parseInt(savedScrollY, 10));
-        sessionStorage.removeItem('prenajom-scroll-position');
-        return;
+      const saved = sessionStorage.getItem('prenajom-scroll-position');
+      if (saved !== null) {
+        return; // Prenajom.tsx obnoví pozíciu až po načítaní obsahu
       }
     }
 
-    // Inak skrolujeme na vrch
     window.scrollTo(0, 0);
   }, [pathname]);
 

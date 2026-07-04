@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
@@ -131,6 +131,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -162,6 +163,24 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     };
     fetchPackages();
   }, []);
+
+  // 🔑 Obnovenie scrollu AŽ PO načítaní všetkých dát a vykreslení DOM-u
+  useEffect(() => {
+    if (loadingPackages) return; // počkáme, kým sa načítajú balíky
+
+    const saved = sessionStorage.getItem('prenajom-scroll-position');
+    if (saved !== null) {
+      const targetY = parseInt(saved, 10);
+      // requestAnimationFrame zabezpečí, že DOM je už vykreslený a stránka má správnu výšku
+      requestAnimationFrame(() => {
+        // Druhý rAF pre istotu – po layout a paint fáze prehliadača
+        requestAnimationFrame(() => {
+          window.scrollTo(0, targetY);
+          sessionStorage.removeItem('prenajom-scroll-position');
+        });
+      });
+    }
+  }, [loadingPackages]);
 
   const presetPackages = loadedPackages;
 
@@ -215,7 +234,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         </script>
       </Helmet>
 
-      <main className="min-h-screen bg-[#020721]">
+      <main className="min-h-screen bg-[#020721]" ref={mainRef}>
         <Navbar />
         
         <section className="relative pt-36 pb-16 overflow-hidden bg-gradient-to-b from-[#020721] via-[#05092a] to-[#020721]">
