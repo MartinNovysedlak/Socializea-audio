@@ -488,10 +488,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   <Button
                     onClick={handleAddToCart}
                     disabled={maxToAdd <= 0}
-                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
+                    size="sm"
+                    className="w-full btn-cyber hover:opacity-95 text-white rounded-lg h-10 mb-4 transition-all border-none"
                   >
-                    <Check size={18} className="mr-2" />
-                    Pridať ďalšie ({cartQuantity} v košíku)
+                    <Check size={14} className="mr-2 animate-pulse" />
+                    V košíku ({cartQuantity})
                   </Button>
                 ) : (
                   <Button
