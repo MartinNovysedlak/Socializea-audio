@@ -969,7 +969,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
-                {/* Sticky form column */}
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8 lg:sticky lg:top-8 self-start">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -1023,7 +1022,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <Textarea id="message" placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]" />
                     </div>
                     <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2">
-                      {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Odosielám...</> : <><Send size={16} /> Odoslať nezáväzný dopyt</>}
+                      {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Odosielám...</> : <><Send size={16} /> Odoslať nezáväznú rezerváciu</>}
                     </Button>
                   </form>
                 </div>
