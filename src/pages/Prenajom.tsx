@@ -133,13 +133,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  // 🔑 Pri opustení stránky vymažeme uloženú pozíciu
-  useEffect(() => {
-    return () => {
-      sessionStorage.removeItem('prenajom-scroll-position');
-    };
-  }, []);
-
   useEffect(() => {
     const fetchPackages = async () => {
       setLoadingPackages(true);
