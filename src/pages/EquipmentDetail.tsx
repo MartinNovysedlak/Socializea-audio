@@ -189,7 +189,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     return (
       <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
         <Navbar />
-        <div className="flex-grow pt-48 pb-24 flex items-center justify-center">
+        <div className="flex-grow pt-48 pb-24 flex items-center justify-center animate-fade-slide-up">
           <div className="text-center text-gray-400">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BD20D3] mx-auto mb-4"></div>
             Načítavam detail aparatúry...
@@ -204,7 +204,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     return (
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721]">
+        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721] animate-fade-slide-up">
           <div className="text-white text-center">
             <h1 className="text-2xl font-bold mb-2">Aparatúra nie je nájdená</h1>
             <p className="text-gray-400">Požadovaná položka nebola nájdená v našom katalógu.</p>
@@ -281,7 +281,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
 
-        <div className="pt-36 pb-16 md:pb-24 container mx-auto px-4">
+        <div className="pt-36 pb-16 md:pb-24 container mx-auto px-4 animate-fade-slide-up">
           <div className="max-w-6xl mx-auto mb-8">
             <button
               onClick={handleBack}
@@ -432,7 +432,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
             {/* Right column – add to cart */}
             <div className="lg:col-span-5">
-              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
+              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6" style={{ animationDelay: '0.1s' }}>
                 {/* Available quantity */}
                 <div className="flex items-center gap-3 pb-4 border-b border-white/5">
                   <Package size={20} className="text-[#BD20D3]" />
