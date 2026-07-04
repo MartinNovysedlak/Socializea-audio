@@ -1004,10 +1004,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           </div>
           <DialogHeader className="space-y-3">
             <DialogTitle className="text-2xl font-bold text-white">
-              Ďakujeme za rezerváciu!
+              Ďakujeme za vašu rezerváciu.
             </DialogTitle>
             <DialogDescription className="text-gray-300 text-base leading-relaxed">
-              V najbližšej dobe sa vám budeme venovať.
+              Vašu rezerváciu sme prijali a čoskoro vás budeme kontaktovať pre potvrdenie termínu a finálnu kalkuláciu.
             </DialogDescription>
           </DialogHeader>
           <Button
