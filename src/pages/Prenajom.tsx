@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react'; // pridaný useLayoutEffect
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
@@ -132,15 +132,14 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // Obnovenie scrollu po návrate z detailu
-  useEffect(() => {
+  // useLayoutEffect – obnoví scroll ešte PRED vykreslením stránky, takže žiadny blik na vrch
+  useLayoutEffect(() => {
     const savedScrollY = sessionStorage.getItem('prenajom-scroll-position');
     if (savedScrollY) {
       const scrollY = parseInt(savedScrollY, 10);
-      // Po krátkom oneskorení, aby sa stihol render
-      setTimeout(() => {
-        window.scrollTo({ top: scrollY, behavior: 'instant' });
-      }, 0);
+      // Okamžite skrolujeme bez akejkoľvek animácie
+      window.scrollTo(0, scrollY);
+      // Kľúč vymažeme, aby sme ho znovu nepoužili
       sessionStorage.removeItem('prenajom-scroll-position');
     }
   }, []);
