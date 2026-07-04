@@ -1356,16 +1356,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         />
                       </div>
                     </div>
-                    <div>
-                      {selectedPackage && (
-                        <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-1">
-                          <Package size={14} className="text-[#BD20D3] shrink-0" />
-                          <span className="text-xs text-white font-medium truncate">
-                            {selectedPackage.name}
-                          </span>
-                        </div>
-                      )}
-                    </div>
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
                       <input
@@ -1389,6 +1379,14 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                      {selectedPackage && (
+                        <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-2">
+                          <Package size={14} className="text-[#BD20D3] shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">
+                            {selectedPackage.name}
+                          </span>
+                        </div>
+                      )}
                       <textarea
                         required
                         value={questionMessage}
