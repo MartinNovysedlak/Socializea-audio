@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -231,6 +231,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const [packageUsedCounts, setPackageUsedCounts] = useState<Record<string, number>>({});
 
+  // Question dialog state
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
+  const [questionName, setQuestionName] = useState("");
+  const [questionEmail, setQuestionEmail] = useState("");
+  const [questionMessage, setQuestionMessage] = useState("");
+  const [sendingQuestion, setSendingQuestion] = useState(false);
+
   React.useEffect(() => {
     if (open && selectedPackage) {
       setIncludeLights(true);
@@ -246,6 +253,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSelectedItem(null);
       setItemQuantity(1);
       setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
+      // Reset question dialog state
+      setQuestionName("");
+      setQuestionEmail("");
+      setQuestionMessage("");
+      setSendingQuestion(false);
     }
   }, [open, selectedPackage]);
 
@@ -523,6 +535,26 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     };
     window.dispatchEvent(new CustomEvent('add-package-to-cart', { detail: pkg }));
     onOpenChange(false);
+  };
+
+  const handleSendQuestion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!questionName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
+      toast.error("Prosím vyplňte všetky povinné polia!");
+      return;
+    }
+
+    setSendingQuestion(true);
+    setTimeout(() => {
+      toast.success("Vaša otázka bola odoslaná!", {
+        description: "Odpovieme vám čo najskôr na uvedený email."
+      });
+      setQuestionName("");
+      setQuestionEmail("");
+      setQuestionMessage("");
+      setQuestionDialogOpen(false);
+      setSendingQuestion(false);
+    }, 1000);
   };
 
   if (!selectedPackage) return null;
@@ -1278,6 +1310,65 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              {/* Question dialog button */}
+              <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+                <DialogTrigger asChild>
+                  <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
+                    <HelpCircle size={16} />
+                    Je vám niečo nejasné? Spýtajte sa nás
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                    <DialogDescription className="text-gray-400 text-sm">
+                      Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
+                      <input
+                        type="text"
+                        required
+                        value={questionName}
+                        onChange={(e) => setQuestionName(e.target.value)}
+                        placeholder="Napr. Ján Novák"
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
+                      <input
+                        type="email"
+                        required
+                        value={questionEmail}
+                        onChange={(e) => setQuestionEmail(e.target.value)}
+                        placeholder="jan.novak@email.sk"
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                      <textarea
+                        required
+                        value={questionMessage}
+                        onChange={(e) => setQuestionMessage(e.target.value)}
+                        placeholder="Napíšte, čo vás zaujíma..."
+                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={sendingQuestion}
+                      className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
+                    >
+                      {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
