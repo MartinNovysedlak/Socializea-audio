@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom"; // pridaný useNavigate
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +35,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
-  // Rozdelené na meno + priezvisko rovnako ako pri balíku
   const [questionFirstName, setQuestionFirstName] = useState("");
   const [questionLastName, setQuestionLastName] = useState("");
   const [questionEmail, setQuestionEmail] = useState("");
@@ -181,7 +180,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   }, [lightboxOpen, goNext, goPrev]);
 
   const handleBack = () => {
-    // Už neprepisujeme pozíciu, tá je bezpečne uložená priamo z Prenajom.tsx!
     navigate('/prenajom');
   };
 
@@ -420,7 +418,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </div>
                 )}
 
-                {/* Show fallback if no specs/features */}
                 {(!item.specifications || item.specifications.length === 0) &&
                   (!item.features || item.features.length === 0) && (
                     <div className="md:col-span-2">
@@ -506,10 +503,10 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </Button>
                 )}
 
-                {/* Question button inside the card – ROVNAKÝ FORMULÁR AKO PRI BALÍKU */}
+                {/* Question button – bez orámovania */}
                 <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
                   <DialogTrigger asChild>
-                    <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
+                    <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4">
                       <HelpCircle size={16} />
                       Je vám niečo nejasné? Spýtajte sa nás
                     </button>
