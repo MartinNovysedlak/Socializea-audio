@@ -16,8 +16,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import emailjs from '@emailjs/browser';
 
 interface EquipmentDetailProps {
   quantities: Record<string, number>;
@@ -33,8 +34,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [activeImage, setActiveImage] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
-  const [questionName, setQuestionName] = useState("");
+  // Rozdelené na meno + priezvisko rovnako ako pri balíku
+  const [questionFirstName, setQuestionFirstName] = useState("");
+  const [questionLastName, setQuestionLastName] = useState("");
   const [questionEmail, setQuestionEmail] = useState("");
+  const [questionPhone, setQuestionPhone] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
   const [desiredQuantity, setDesiredQuantity] = useState(1);
@@ -103,24 +107,49 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     });
   };
 
-  const handleSendQuestion = (e: React.FormEvent) => {
+  const handleSendQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!questionName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
-      toast.error("Prosím vyplňte všetky povinné polia!");
+    if (!questionFirstName.trim() || !questionLastName.trim() || !questionEmail.trim() || !questionMessage.trim()) {
+      toast.error("Prosím vyplňte všetky povinné polia (meno, priezvisko, email a správa)!");
       return;
     }
 
     setSendingQuestion(true);
-    setTimeout(() => {
+
+    try {
+      const { generateEmailHtml } = await import('@/utils/emailTemplates');
+      const htmlContent = generateEmailHtml('package-question', {
+        name: `${questionFirstName} ${questionLastName}`,
+        email: questionEmail,
+        phone: questionPhone || 'Neuvedený',
+        date: 'Otázka k produktu',
+        message: questionMessage,
+        packageName: item?.name || 'Neznámy produkt',
+      });
+
+      await emailjs.send(
+        'service_s8kq87k',
+        'template_st0hc2f',
+        { message_html: htmlContent },
+        'hlWKyd9fiWgqJJT3r'
+      );
+
       toast.success("Vaša otázka bola odoslaná!", {
         description: "Odpovieme vám čo najskôr na uvedený email."
       });
-      setQuestionName("");
+
+      setQuestionFirstName("");
+      setQuestionLastName("");
       setQuestionEmail("");
+      setQuestionPhone("");
       setQuestionMessage("");
       setQuestionDialogOpen(false);
+    } catch (error) {
+      console.error("EmailJS send failed:", error);
+      toast.error("Odoslanie zlyhalo. Skúste to prosím neskôr.");
+    } finally {
       setSendingQuestion(false);
-    }, 1000);
+    }
   };
 
   const decreaseQuantity = () => {
@@ -471,7 +500,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </Button>
                 )}
 
-                {/* Question button inside the card */}
+                {/* Question button inside the card – ROVNAKÝ FORMULÁR AKO PRI BALÍKU */}
                 <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
                   <DialogTrigger asChild>
                     <button className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-white transition-colors py-4 rounded-2xl border border-white/5 hover:border-white/20 hover:bg-white/[0.02]">
@@ -481,22 +510,36 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   </DialogTrigger>
                   <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-md">
                     <DialogHeader>
-                      <DialogTitle className="text-xl font-bold text-white">Máte otázku?</DialogTitle>
+                      <DialogTitle className="text-xl font-bold text-white">Máte otázku k tomuto produktu?</DialogTitle>
                       <DialogDescription className="text-gray-400 text-sm">
                         Napíšte nám, čo vás zaujíma a my sa vám ozveme čo najskôr.
                       </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSendQuestion} className="space-y-4 mt-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
-                        <input
-                          type="text"
-                          required
-                          value={questionName}
-                          onChange={(e) => setQuestionName(e.target.value)}
-                          placeholder="Napr. Ján Novák"
-                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
-                        />
+                      <input type="hidden" name="package_name" value={item?.name || ''} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400 font-bold uppercase">Meno *</label>
+                          <input
+                            type="text"
+                            required
+                            value={questionFirstName}
+                            onChange={(e) => setQuestionFirstName(e.target.value)}
+                            placeholder="Napr. Ján"
+                            className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs text-gray-400 font-bold uppercase">Priezvisko *</label>
+                          <input
+                            type="text"
+                            required
+                            value={questionLastName}
+                            onChange={(e) => setQuestionLastName(e.target.value)}
+                            placeholder="Napr. Novák"
+                            className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                          />
+                        </div>
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
@@ -510,7 +553,23 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                         />
                       </div>
                       <div className="space-y-1.5">
+                        <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
+                        <input
+                          type="tel"
+                          value={questionPhone}
+                          onChange={(e) => setQuestionPhone(e.target.value)}
+                          placeholder="+421 901 234 567"
+                          className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
                         <label className="text-xs text-gray-400 font-bold uppercase">Vaša otázka *</label>
+                        {item && (
+                          <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-2">
+                            <Package size={14} className="text-[#BD20D3] shrink-0" />
+                            <span className="text-xs text-white font-medium truncate">{item.name}</span>
+                          </div>
+                        )}
                         <textarea
                           required
                           value={questionMessage}
@@ -524,7 +583,9 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                         disabled={sendingQuestion}
                         className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2"
                       >
-                        {sendingQuestion ? "Odosielam..." : "Odoslať otázku"}
+                        {sendingQuestion ? (
+                          <><Loader2 size={16} className="mr-2 animate-spin" />Odosiela sa...</>
+                        ) : "Odoslať otázku"}
                       </Button>
                     </form>
                   </DialogContent>
