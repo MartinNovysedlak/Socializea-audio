@@ -412,7 +412,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const hasEquipment = totalEquipmentQty > 0;
 
-  // ======================== buildCartSummaryHtml INSIDE the component ========================
+  // ======================== buildCartSummaryHtml INSIDE the component =======================
   const buildCartSummaryHtml = () => {
     let html = '';
 
@@ -501,7 +501,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return html;
   };
 
-  // ======================== handleSubmit ========================
+  // ======================== handleSubmit =======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
@@ -530,7 +530,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        { message_html: htmlContent },
+        { message_html: htmlContent, title: 'Prenájom' },
         'hlWKyd9fiWgqJJT3r'
       );
 
