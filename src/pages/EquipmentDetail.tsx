@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom"; // pridaný useNavigate
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ interface EquipmentDetailProps {
 
 const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDetailProps) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { item, loading } = useEquipmentItem(id || "");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -179,6 +180,13 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     };
   }, [lightboxOpen, goNext, goPrev]);
 
+  const handleBack = () => {
+    // Uložíme aktuálnu pozíciu scrollu do sessionStorage
+    const scrollY = window.scrollY;
+    sessionStorage.setItem('prenajom-scroll-position', String(scrollY));
+    navigate('/prenajom');
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
@@ -277,13 +285,13 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
 
         <div className="pt-36 pb-16 md:pb-24 container mx-auto px-4">
           <div className="max-w-6xl mx-auto mb-8">
-            <Link
-              to="/prenajom"
+            <button
+              onClick={handleBack}
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group text-sm font-semibold"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               Späť na ponuku prenájmu
-            </Link>
+            </button>
           </div>
 
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 md:gap-12">
