@@ -161,7 +161,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                           <Button
                             onClick={() => handleAdd(item.id)}
                             size="sm"
-                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg h-10 mb-4 transition-all"
+                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white font-bold rounded-lg h-10 mb-4 transition-all border-none"
                           >
                             <ShoppingBag size={14} className="mr-2" />
                             Pridať do košíka

@@ -480,7 +480,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                 {isSoldOut ? (
                   <Button
                     disabled
-                    className="w-full h-12 rounded-xl font-bold text-base bg-white/10 text-gray-500 border-white/10 cursor-not-allowed"
+                    className="w-full h-10 rounded-lg font-bold text-base bg-white/10 text-gray-500 border-white/10 cursor-not-allowed"
                   >
                     Vypredané
                   </Button>
@@ -488,17 +488,19 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   <Button
                     onClick={handleAddToCart}
                     disabled={maxToAdd <= 0}
-                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
+                    size="sm"
+                    className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white font-bold rounded-lg h-10 border-none"
                   >
-                    <Check size={18} className="mr-2" />
+                    <Check size={14} className="mr-2" />
                     Pridať ďalšie ({cartQuantity} v košíku)
                   </Button>
                 ) : (
                   <Button
                     onClick={handleAddToCart}
-                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3] hover:bg-[#BD20D3]/85 border-none"
+                    size="sm"
+                    className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white font-bold rounded-lg h-10 border-none"
                   >
-                    <ShoppingBag size={18} className="mr-2" />
+                    <ShoppingBag size={14} className="mr-2" />
                     Pridať do košíka
                   </Button>
                 )}
