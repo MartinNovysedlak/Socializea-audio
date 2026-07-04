@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
@@ -132,21 +132,11 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
-  const lastScrollSaveRef = useRef<number>(0);
 
-  // 🔑 Prieběžné ukladanie scroll pozície (throttle 100ms)
+  // 🔑 Pri opustení stránky vymažeme uloženú pozíciu
   useEffect(() => {
-    const handleScroll = () => {
-      const now = Date.now();
-      if (now - lastScrollSaveRef.current > 100) {
-        lastScrollSaveRef.current = now;
-        sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      sessionStorage.removeItem('prenajom-scroll-position');
     };
   }, []);
 
@@ -203,7 +193,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
 
       return () => clearTimeout(timer);
     } else {
-      // Žiadna uložená pozícia – rovno zobrazíme
+      // Žiadna uložená pozícia – rovno zobrazíme (sme na vrchu)
       if (el) el.style.opacity = '1';
     }
   }, [loadingPackages, equipment]);

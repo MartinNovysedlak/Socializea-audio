@@ -35,6 +35,10 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
     handleQuantityChange(id, -1);
   };
 
+  const handleProductClick = () => {
+    sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
+  };
+
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case "sound": return "Zvuk";
@@ -120,7 +124,11 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
-                      <Link to={`/equipment/${item.id}`} className="w-full flex flex-col items-center mb-4 cursor-pointer">
+                      <Link 
+                        to={`/equipment/${item.id}`} 
+                        onClick={handleProductClick}
+                        className="w-full flex flex-col items-center mb-4 cursor-pointer"
+                      >
                         <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
                           <img
                             src={displayImage}
