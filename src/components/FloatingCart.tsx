@@ -559,7 +559,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   return (
     <>
-      {/* Styles */}
       <style>{`
         .rdp {
           --rdp-cell-size: 28px;
@@ -760,7 +759,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
       `}</style>
 
-      {/* Floating cart button */}
       {totalItems > 0 && (
         <div
           className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
@@ -808,7 +806,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
-      {/* Main cart overlay */}
       {isOpen && totalItems > 0 && (
         <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-5xl my-4 md:my-8">
@@ -822,16 +819,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
               </div>
 
-              {/* Grid layout */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 lg:gap-8">
-                {/* Left column: cart items */}
                 <div className="lg:col-span-5 space-y-4">
                   <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2">
                     <span>Vybraná technika</span>
                     <span className="text-sm bg-[#BD20D3]/20 border border-[#BD20D3]/40 text-[#BD20D3] px-3 py-1 rounded-full font-semibold">{totalItems} ks</span>
                   </h3>
 
-                  {/* Equipment items */}
                   <div className="cart-scroll-wrapper space-y-3">
                     {cartItems.map(({ item, qty }) => {
                       const displayImg = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100";
@@ -853,7 +847,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       );
                     })}
 
-                    {/* Package items */}
                     {packageItems.map((pkg) => (
                       <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
@@ -882,8 +875,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     ))}
                   </div>
 
-                  {/* Additional services */}
-                  {hasEquipment && (
+                  {(hasEquipment || packageItems.length > 0) && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
 
@@ -978,9 +970,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   )}
 
-                  {/* ========== NOVÝ SUMÁR ========== */}
                   <div className="border-t border-white/10 pt-4 space-y-4">
-                    {/* 1. APARATÚRA */}
                     {cartItems.length > 0 && (
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
@@ -1016,12 +1006,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Deliaca čiara */}
                     {cartItems.length > 0 && packageItems.length > 0 && (
                       <div className="border-t border-white/10"></div>
                     )}
 
-                    {/* 2. BALÍKY */}
                     {packageItems.length > 0 && (
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
@@ -1058,7 +1046,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Deliaca čiara */}
                     {packageItems.length > 0 && hasAnyAdditionalService && (
                       <div className="border-t border-white/10"></div>
                     )}
@@ -1066,7 +1053,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div className="border-t border-white/10"></div>
                     )}
 
-                    {/* 3. DOPLNKOVÉ SLUŽBY */}
                     {hasAnyAdditionalService && (
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2">
@@ -1114,7 +1100,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Celková suma */}
                     <div className="border-t-2 border-[#BD20D3]/30 pt-4 flex justify-between items-end">
                       <span className="text-white font-bold text-lg">Celková suma</span>
                       <span className="text-[#BD20D3] font-extrabold text-3xl">{(grandTotal + packagesTotal).toFixed(2)} €</span>
@@ -1122,7 +1107,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   </div>
                 </div>
 
-                {/* Right column: form */}
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8">
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -1232,7 +1216,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
-      {/* Potvrdzovací dialog po odoslaní rezervácie */}
       <Dialog open={showReservationSuccess} onOpenChange={setShowReservationSuccess}>
         <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
