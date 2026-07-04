@@ -16,7 +16,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useEquipmentItem } from "@/hooks/useEquipment";
 import { EquipmentItem } from "@/lib/supabase";
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus, Loader2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check, ShieldCheck, Phone, Mail, HelpCircle, Package, Minus, Plus, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import emailjs from '@emailjs/browser';
 
@@ -41,6 +41,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   const [questionPhone, setQuestionPhone] = useState("");
   const [questionMessage, setQuestionMessage] = useState("");
   const [sendingQuestion, setSendingQuestion] = useState(false);
+  const [showQuestionSuccess, setShowQuestionSuccess] = useState(false);
   const [desiredQuantity, setDesiredQuantity] = useState(1);
 
   const cartQuantity = id ? (quantities[id] || 0) : 0;
@@ -130,20 +131,21 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        { message_html: htmlContent },
+        {
+          message_html: htmlContent,
+          subject: 'Otázka',
+        },
         'hlWKyd9fiWgqJJT3r'
       );
 
-      toast.success("Vaša otázka bola odoslaná!", {
-        description: "Odpovieme vám čo najskôr na uvedený email."
-      });
+      setQuestionDialogOpen(false);
+      setShowQuestionSuccess(true);
 
       setQuestionFirstName("");
       setQuestionLastName("");
       setQuestionEmail("");
       setQuestionPhone("");
       setQuestionMessage("");
-      setQuestionDialogOpen(false);
     } catch (error) {
       console.error("EmailJS send failed:", error);
       toast.error("Odoslanie zlyhalo. Skúste to prosím neskôr.");
@@ -560,6 +562,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                         <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
                         <input
                           type="tel"
+                          autoComplete="tel"
                           value={questionPhone}
                           onChange={(e) => setQuestionPhone(e.target.value)}
                           placeholder="+421 901 234 567"
@@ -616,6 +619,29 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
             </div>
           </div>
         </div>
+
+        {/* Potvrdzovací dialog po odoslaní otázky */}
+        <Dialog open={showQuestionSuccess} onOpenChange={setShowQuestionSuccess}>
+          <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
+              <CheckCircle2 className="text-[#BD20D3]" size={32} />
+            </div>
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="text-2xl font-bold text-white">
+                Ďakujeme!
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 text-base leading-relaxed">
+                Vaša otázka bola úspešne odoslaná. Budeme sa jej venovať a čoskoro sa vám ozveme späť.
+              </DialogDescription>
+            </DialogHeader>
+            <Button
+              onClick={() => setShowQuestionSuccess(false)}
+              className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
+            >
+              Zavrieť
+            </Button>
+          </DialogContent>
+        </Dialog>
 
         <Footer />
 
