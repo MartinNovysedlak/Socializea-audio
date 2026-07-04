@@ -135,7 +135,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const lastScrollSaveRef = useRef<number>(0);
 
   // 🔑 Prieběžné ukladanie scroll pozície (throttle 100ms)
-  // Toto beží len kým sme na stránke Prenajom (nie v detaile)
   useEffect(() => {
     const handleScroll = () => {
       const now = Date.now();
@@ -151,7 +150,6 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     };
   }, []);
 
-  // Načítanie balíkov
   useEffect(() => {
     const fetchPackages = async () => {
       setLoadingPackages(true);
@@ -183,19 +181,30 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     fetchPackages();
   }, []);
 
-  // 🔑 Obnovenie scrollu AŽ keď sú načítané balíky aj equipment
+  // 🔑 Obnovenie scrollu – skryjeme obsah, scrollneme, potom zobrazíme (fade-in)
   useEffect(() => {
     if (loadingPackages || !equipment || equipment.length === 0) return;
 
     const saved = sessionStorage.getItem('prenajom-scroll-position');
+    const el = mainRef.current;
+
     if (saved !== null) {
       const targetY = parseInt(saved, 10);
-      
+
+      // Skryjeme obsah
+      if (el) el.style.opacity = '0';
+
       const timer = setTimeout(() => {
         window.scrollTo({ top: targetY, behavior: 'instant' as any });
+        // Zobrazíme až po scrolle – už na správnej pozícii
+        if (el) el.style.opacity = '1';
+        sessionStorage.removeItem('prenajom-scroll-position');
       }, 50);
 
       return () => clearTimeout(timer);
+    } else {
+      // Žiadna uložená pozícia – rovno zobrazíme
+      if (el) el.style.opacity = '1';
     }
   }, [loadingPackages, equipment]);
 
@@ -251,7 +260,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         </script>
       </Helmet>
 
-      <main className="min-h-screen bg-[#020721]" ref={mainRef}>
+      <main className="min-h-screen bg-[#020721]" ref={mainRef} style={{ opacity: 0, transition: 'opacity 0.3s ease' }}>
         <Navbar />
         
         <section className="relative pt-36 pb-16 overflow-hidden bg-gradient-to-b from-[#020721] via-[#05092a] to-[#020721]">
