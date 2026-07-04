@@ -260,7 +260,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setQuestionLastName("");
       setQuestionEmail("");
       setQuestionPhone("");
-      setQuestionMessage(`Mám otázku k balíku: ${selectedPackage.name}`);
+      setQuestionMessage("");
       setSendingQuestion(false);
     }
   }, [open, selectedPackage]);
@@ -557,7 +557,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setQuestionLastName("");
       setQuestionEmail("");
       setQuestionPhone("");
-      setQuestionMessage(`Mám otázku k balíku: ${selectedPackage?.name || ""}`);
+      setQuestionMessage("");
       setQuestionDialogOpen(false);
       setSendingQuestion(false);
     }, 1000);
@@ -1355,6 +1355,16 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                         />
                       </div>
+                    </div>
+                    <div>
+                      {selectedPackage && (
+                        <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-1">
+                          <Package size={14} className="text-[#BD20D3] shrink-0" />
+                          <span className="text-xs text-white font-medium truncate">
+                            {selectedPackage.name}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
