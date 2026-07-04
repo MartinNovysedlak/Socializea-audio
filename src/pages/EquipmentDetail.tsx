@@ -488,7 +488,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                   <Button
                     onClick={handleAddToCart}
                     disabled={maxToAdd <= 0}
-                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3]/80 hover:bg-[#BD20D3] border-none"
+                    className="w-full h-12 rounded-xl font-bold text-white btn-cyber border-none"
                   >
                     <Check size={18} className="mr-2" />
                     Pridať ďalšie ({cartQuantity} v košíku)
@@ -496,7 +496,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                 ) : (
                   <Button
                     onClick={handleAddToCart}
-                    className="w-full h-12 rounded-xl font-bold text-white bg-[#BD20D3] hover:bg-[#BD20D3]/85 border-none"
+                    className="w-full h-12 rounded-xl font-bold text-white btn-cyber border-none"
                   >
                     <ShoppingBag size={18} className="mr-2" />
                     Pridať do košíka
