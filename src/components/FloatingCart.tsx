@@ -156,6 +156,13 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// Helper: vypočíta cenu balíka na základe počtu dní
+function calculatePackageTotal(pkgBasePrice: number, days: number): number {
+  if (days <= 2) return pkgBasePrice;
+  const extraDays = days - 2;
+  return pkgBasePrice + extraDays * (pkgBasePrice * 0.5);
+}
+
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -346,15 +353,29 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     .filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
   const calculateDays = () => {
-    if (!formData.dateFrom || !formData.dateTo) return 1;
+    if (!formData.dateFrom || !formData.dateTo) return 2; // defaultne 2 dni (víkend)
     const start = new Date(formData.dateFrom);
     const end = new Date(formData.dateTo);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 1;
+    return diffDays > 0 ? diffDays : 2;
   };
 
   const days = calculateDays();
+
+  // NOVÁ LOGIKA pre balíky: prvé 2 dni = plná cena, každý ďalší = +50 %
+  const getAdjustedPackageTotal = (pkg: PackageCartItem): number => {
+    return calculatePackageTotal(pkg.price, days);
+  };
+
+  // Celková cena všetkých balíkov s ošetrením dní
+  const packagesTotal = packageItems.reduce((sum, p) => sum + getAdjustedPackageTotal(p) + p.installPrice + p.deliveryPrice, 0);
+
+  // Extras v balíkoch tiež závisia od dní
+  const packagesExtrasTotal = packageItems.reduce((sum, p) => {
+    return sum + p.extras.reduce((s, e) => s + e.pricePerDay * e.quantity * days, 0);
+  }, 0);
+
   const getSubtotalPerDay = () => cartItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
   const subtotalPerDay = getSubtotalPerDay();
   const firstDayTotal = subtotalPerDay;
@@ -362,8 +383,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const installCost = installSelected ? 20 : 0;
   const installUninstallCost = installUninstallSelected ? 40 : 0;
   const deliveryCost = deliveryResult?.price ?? 0;
-  const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
-  const packagesTotal = packageItems.reduce((sum, p) => sum + getPackageTotal(p), 0);
+  const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost + packagesTotal + packagesExtrasTotal;
 
   const handleQuantityChange = (id: string, delta: number) => {
     setQuantities((prev) => {
@@ -444,10 +464,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (packageItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
       packageItems.forEach((pkg) => {
+        const adjustedPkgTotal = getAdjustedPackageTotal(pkg);
         html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <strong style="color:white;font-size:14px;">${pkg.name}</strong>
-            <span style="color:#BD20D3;font-weight:700;font-size:14px;white-space:nowrap;margin-left:24px;">${getPackageTotal(pkg).toFixed(2)} €</span>
+            <span style="color:#BD20D3;font-weight:700;font-size:14px;white-space:nowrap;margin-left:24px;">${adjustedPkgTotal.toFixed(2)} €</span>
           </div>`;
         if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
         if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
@@ -457,9 +478,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
           html += '<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:12px;">';
           html += '<div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>';
           pkg.extras.forEach((e) => {
-            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x)</span><span style="color:#BD20D3;margin-left:24px;">${(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>`;
+            html += `<div style="display:flex;justify-content:space-between;color:#d1d5db;padding:2px 0;"><span>${e.label} (${e.quantity}x × ${days} dní)</span><span style="color:#BD20D3;margin-left:24px;">${(e.quantity * e.pricePerDay * days).toFixed(2)} €</span></div>`;
           });
           html += '</div>';
+        }
+        if (days > 2) {
+          const extraDays = days - 2;
+          html += `<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);font-size:11px;color:#10b981;">
+            📅 + ${extraDays} ${extraDays === 1 ? 'deň' : 'dni'} navyše (50% ceny)
+          </div>`;
         }
         html += '</div>';
       });
@@ -499,7 +526,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
     html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;">';
     html += `<span style="color:white;font-size:18px;font-weight:700;">Celková suma</span>`;
-    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;margin-left:24px;">${(grandTotal + packagesTotal).toFixed(2)} €</span>`;
+    html += `<span style="color:#BD20D3;font-size:24px;font-weight:900;margin-left:24px;">${grandTotal.toFixed(2)} €</span>`;
     html += '</div>';
 
     return html;
@@ -527,7 +554,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         message: formData.message || '—',
         cartSummaryHtml,
         days,
-        totalPrice: grandTotal + packagesTotal,
+        totalPrice: grandTotal,
       });
 
       await emailjs.send(
@@ -687,18 +714,21 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     </div>
                   );
                 })}
-                {packageItems.map((pkg) => (
-                  <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <img src={pkg.image} alt={pkg.name} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
-                    <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
-                    <span className="truncate flex-grow">{pkg.name}</span>
-                    <span className="text-white text-xs font-semibold shrink-0">{getPackageTotal(pkg)} €</span>
-                  </div>
-                ))}
+                {packageItems.map((pkg) => {
+                  const adjustedPkgTotal = getAdjustedPackageTotal(pkg);
+                  return (
+                    <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
+                      <img src={pkg.image} alt={pkg.name} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
+                      <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
+                      <span className="truncate flex-grow">{pkg.name}</span>
+                      <span className="text-white text-xs font-semibold shrink-0">{adjustedPkgTotal.toFixed(2)} €</span>
+                    </div>
+                  );
+                })}
               </div>
               <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
-                <span className="text-gray-400">Celkom na deň:</span>
-                <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
+                <span className="text-gray-400">Celkom:</span>
+                <span className="text-[#BD20D3] font-bold text-sm">{grandTotal.toFixed(2)} €</span>
               </div>
               <button onClick={() => setIsOpen(true)} className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1">
                 <span>Otvoriť rezerváciu</span>
@@ -754,7 +784,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       );
                     })}
 
-                    {packageItems.map((pkg) => (
+                    {packageItems.map((pkg) => {
+                      const adjustedPkgTotal = getAdjustedPackageTotal(pkg);
+                      const pkgExtraCost = pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity * days, 0);
+                      return (
                       <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
                         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40">
@@ -762,7 +795,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         <div className="flex-grow min-w-0 pr-6 sm:pr-0">
                           <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
-                          <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{getPackageTotal(pkg)} € / víkend</p>
+                          <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{adjustedPkgTotal.toFixed(2)} €{pkg.installPrice > 0 || pkg.deliveryPrice > 0 || pkgExtraCost > 0 ? ` + ${(pkg.installPrice + pkg.deliveryPrice + pkgExtraCost).toFixed(2)} €` : ''}</p>
+                          {days > 2 && (
+                            <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+                              <Calendar size={11} />
+                              + {days - 2} {days - 2 === 1 ? 'deň' : 'dni'} navyše (50% ceny)
+                            </p>
+                          )}
                           <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {pkg.hasLights && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
                             {pkg.install === 'install' && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#1A4BFF]/10 border border-[#1A4BFF]/30 rounded-lg text-[#1A4BFF] flex items-center gap-1 font-medium"><Wrench size={11} /> Inštalácia (+{pkg.installPrice} €)</span>}
@@ -773,13 +812,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             <div className="text-[11px] text-gray-400 mt-2 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
                               <p className="text-xs font-semibold text-gray-300 mb-1">Doplnkové produkty:</p>
                               {pkg.extras.map((e, i) => (
-                                <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label}</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
+                                <div key={i} className="flex items-center gap-1.5"><Plus size={10} /><span>{e.label} × {e.quantity} (na {days} {days === 1 ? 'deň' : 'dni'})</span><span className="text-[#BD20D3] font-semibold ml-auto">{(e.quantity * e.pricePerDay * days).toFixed(2)} €</span></div>
                               ))}
                             </div>
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {hasSomethingToShow && (
@@ -912,11 +952,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-[#1A4BFF] rounded-full"></span>Balíky</h4>
                         <div className="space-y-2">
-                          {packageItems.map((pkg) => (
+                          {packageItems.map((pkg) => {
+                            const adjustedPkgTotal = getAdjustedPackageTotal(pkg);
+                            const pkgExtraCost = pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity * days, 0);
+                            return (
                             <div key={pkg.id} className="bg-black/20 rounded-lg p-3 space-y-1.5">
                               <div className="flex justify-between items-start">
                                 <span className="text-white font-semibold text-sm">{pkg.name}</span>
-                                <span className="text-[#BD20D3] font-bold text-sm ml-4 shrink-0">{getPackageTotal(pkg).toFixed(2)} €</span>
+                                <span className="text-[#BD20D3] font-bold text-sm ml-4 shrink-0">{(adjustedPkgTotal + pkg.installPrice + pkg.deliveryPrice).toFixed(2)} €</span>
                               </div>
                               <div className="flex flex-wrap gap-1">
                                 {pkg.hasLights && <span className="text-[10px] px-1.5 py-0.5 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded text-[#BD20D3]">💡 So svetlami</span>}
@@ -924,19 +967,21 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                                 {pkg.install === 'install_uninstall' && <span className="text-[10px] px-1.5 py-0.5 bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 rounded text-[#1A4BFF]">🔧 Inšt.+Deinšt.</span>}
                                 {pkg.arrival && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-400">📍 {pkg.arrival.name}</span>}
                               </div>
+                              {days > 2 && <p className="text-[10px] text-emerald-400 mt-1">📅 + {days - 2} {days - 2 === 1 ? 'deň' : 'dni'} navyše (50% ceny)</p>}
                               {pkg.extras.length > 0 && (
                                 <div className="text-[11px] text-gray-500 space-y-0.5 pt-1 border-t border-white/5">
                                   {pkg.extras.map((e, i) => (
-                                    <div key={i} className="flex justify-between"><span>+ {e.label} ×{e.quantity}</span><span className="text-gray-400">{(e.quantity * e.pricePerDay).toFixed(2)} €</span></div>
+                                    <div key={i} className="flex justify-between"><span>+ {e.label} ×{e.quantity} (na {days} d.)</span><span className="text-gray-400">{(e.quantity * e.pricePerDay * days).toFixed(2)} €</span></div>
                                   ))}
                                 </div>
                               )}
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                         <div className="flex justify-between text-sm font-bold mt-2 pt-2 border-t border-white/5">
                           <span className="text-gray-300">Balíky spolu</span>
-                          <span className="text-white text-base">{packagesTotal.toFixed(2)} €</span>
+                          <span className="text-white text-base">{(packagesTotal + packagesExtrasTotal).toFixed(2)} €</span>
                         </div>
                       </div>
                     )}
@@ -971,12 +1016,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
                     <div className="border-t-2 border-[#BD20D3]/30 pt-4 flex justify-between items-end">
                       <span className="text-white font-bold text-lg">Celková suma</span>
-                      <span className="text-[#BD20D3] font-extrabold text-3xl">{(grandTotal + packagesTotal).toFixed(2)} €</span>
+                      <span className="text-[#BD20D3] font-extrabold text-3xl">{grandTotal.toFixed(2)} €</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8 lg:sticky lg:top-8 self-start">
+                  <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                    <Calendar size={16} className="text-emerald-400 shrink-0" />
+                    <p className="text-[11px] text-emerald-300">
+                      <strong className="font-bold">Cena za {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}:</strong> Prvé 2 dni sú v cene balíka, každý ďalší deň sa pripočítava +50 % z ceny balíka.
+                    </p>
+                  </div>
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
