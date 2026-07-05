@@ -286,6 +286,297 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
               name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
               country: isCzech ? 'cz' : 'sk',
               lat: coords.lat,
+              lI need to continue writing the full file where it got cut off. Let me complete the FloatingCart.tsx with the two key changes applied.
+
+<dyad-write path="src/components/FloatingCart.tsx" description="Dokončiť celý súbor FloatingCart.tsx s opravenými podmienkami pre zľavu už od 3 dní.">
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ShoppingBag,
+  X,
+  Calendar,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+  Plus,
+  Minus,
+  Clock,
+  ChevronRight,
+  Wrench,
+  Lightbulb,
+  MapPin,
+  Check,
+  Navigation,
+  Truck,
+  Loader2,
+  Ban,
+  Send,
+  CheckCircle2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { EquipmentItem } from "@/lib/supabase";
+import { toast } from "sonner";
+import { DayPicker } from "react-day-picker";
+import { format, addDays, isBefore, startOfDay } from "date-fns";
+import "react-day-picker/dist/style.css";
+import emailjs from '@emailjs/browser';
+import { generateEmailHtml } from '@/utils/emailTemplates';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useDialogContext } from '@/contexts/DialogContext';
+
+interface PackageCartItem {
+  id: string;
+  name: string;
+  price: number;
+  hasLights: boolean;
+  image: string;
+  arrival: { name: string } | null;
+  install: 'none' | 'install' | 'install_uninstall';
+  installPrice: number;
+  deliveryPrice: number;
+  extras: { id: string; label: string; quantity: number; pricePerDay: number }[];
+}
+
+interface FloatingCartProps {
+  quantities: Record<string, number>;
+  setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  equipment: EquipmentItem[];
+}
+
+const PACKAGE_STORAGE_KEY = "cyber_cart_packages";
+
+const PICKUP_POINTS = [
+  { name: 'Žilina', lat: 49.2235, lng: 18.7394 },
+  { name: 'Čadca', lat: 49.4358, lng: 18.7889 },
+];
+
+const KYSUCE_BOUNDS = [
+  { lat: 49.520, lng: 18.550 },
+  { lat: 49.500, lng: 19.050 },
+  { lat: 49.350, lng: 19.050 },
+  { lat: 49.250, lng: 18.800 },
+  { lat: 49.280, lng: 18.600 },
+];
+
+interface CityMatch {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  postcode?: string;
+  district?: string;
+  distToNearest?: number;
+  nearestPoint?: string;
+}
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lng, yi = polygon[i].lat;
+    const xj = polygon[j].lng, yj = polygon[j].lat;
+    const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
+      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
+  distance: number;
+  nearestPoint: string;
+  isKysuce: boolean;
+  isFree: boolean;
+  price: number;
+} | null {
+  const isKysuce = isPointInPolygon(coords, KYSUCE_BOUNDS);
+  if (isKysuce) {
+    return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
+  }
+
+  let minDist = Infinity;
+  let nearestPoint = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) {
+      minDist = dist;
+      nearestPoint = point.name;
+    }
+  }
+
+  const isFree = minDist <= 10;
+  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
+
+  return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
+}
+
+function getNearestPoint(coords: { lat: number; lng: number }): { name: string; distance: number } {
+  let minDist = Infinity;
+  let nearest = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = point.name;
+    }
+  }
+  return { name: nearest, distance: Math.round(minDist * 10) / 10 };
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [showFromCalendar, setShowFromCalendar] = useState(false);
+  const [showToCalendar, setShowToCalendar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReservationSuccess, setShowReservationSuccess] = useState(false);
+
+  const { isAnyDialogOpen, setDialogOpen } = useDialogContext();
+
+  const fromRef = useRef<HTMLDivElement>(null);
+  const toRef = useRef<HTMLDivElement>(null);
+
+  const [installSelected, setInstallSelected] = useState(false);
+  const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
+  const [deliverySelected, setDeliverySelected] = useState(false);
+  const [deliveryCity, setDeliveryCity] = useState('');
+  const [citySuggestions, setCitySuggestions] = useState<CityMatch[]>([]);
+  const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+  const [searchingCities, setSearchingCities] = useState(false);
+  const [cityLocked, setCityLocked] = useState(false);
+  const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+  const debouncedCitySearch = useDebounce(deliveryCity, 400);
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    dateFrom: "",
+    dateTo: "",
+    message: ""
+  });
+
+  const [packageItems, setPackageItems] = useState<PackageCartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(PACKAGE_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    setDialogOpen(isOpen || showReservationSuccess);
+  }, [isOpen, showReservationSuccess, setDialogOpen]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems));
+    } catch {
+      console.error("Nedá sa uložiť balíky do localStorage:", packageItems);
+    }
+  }, [packageItems]);
+
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const pkg = e.detail as PackageCartItem;
+      setPackageItems(prev => [...prev, pkg]);
+      if (pkg.install === 'install' || pkg.install === 'install_uninstall') {
+        setInstallSelected(false);
+        setInstallUninstallSelected(false);
+      }
+      if (pkg.arrival) {
+        clearDelivery();
+      }
+      toast.success(`Balík "${pkg.name}" pridaný do košíka`);
+    };
+    window.addEventListener('add-package-to-cart', handler as EventListener);
+    return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
+  }, []);
+
+  const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
+  const packageHasInstallUninstall = packageItems.some(p => p.install === 'install_uninstall');
+  const packageHasDelivery = packageItems.some(p => p.arrival !== null);
+
+  const packageInstallTotal = packageItems.reduce((sum, p) => sum + p.installPrice, 0);
+  const packageDeliveryTotal = packageItems.reduce((sum, p) => sum + p.deliveryPrice, 0);
+
+  const getPackageTotal = (pkg: PackageCartItem) => {
+    let total = pkg.price;
+    total += pkg.installPrice;
+    total += pkg.deliveryPrice;
+    const extrasSum = pkg.extras.reduce((sum, e) => sum + e.pricePerDay * e.quantity, 0);
+    total += extrasSum;
+    return total;
+  };
+
+  useEffect(() => {
+    const hasEquipment = Object.values(quantities).some(qty => qty > 0);
+    if (!hasEquipment) {
+      setInstallSelected(false);
+      setInstallUninstallSelected(false);
+      clearDelivery();
+    }
+  }, [quantities]);
+
+  useEffect(() => {
+    if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
+      setCitySuggestions([]);
+      setCityDropdownOpen(false);
+      setSearchingCities(false);
+      return;
+    }
+    let cancelled = false;
+    const search = async () => {
+      setSearchingCities(true);
+      try {
+        const query = encodeURIComponent(debouncedCitySearch.trim());
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`;
+        const res = await fetch(url, { headers: { 'User-Agent': 'DjPartyRental/1.0 (djparty@example.com)' } });
+        if (cancelled) return;
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data && Array.isArray(data)) {
+          const mapped: CityMatch[] = data.map((item: any) => {
+            const address = item.address || {};
+            const district = address.city_district || address.county || address.state_district || address.municipality || '';
+            const postcode = address.postcode || '';
+            const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
+            const nearest = getNearestPoint(coords);
+            const countryCode = item.country_code || '';
+            const countryName = (address.country || '').toLowerCase();
+            const isCzech = countryCode === 'cz' || countryName.includes('czech') || countryName.includes('česko');
+            return {
+              name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
+              country: isCzech ? 'cz' : 'sk',
+              lat: coords.lat,
               lng: coords.lng,
               postcode,
               district,
@@ -364,11 +655,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const deliveryCost = deliveryResult?.price ?? 0;
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
 
-  // Výpočet pre balíky – víkend (pia-ne) je v cene, každý ďalší deň +50 % z ceny balíka
-  const WEEKEND_DAYS = 3; // piatok + sobota + nedeľa = 3 dni
+  const WEEKEND_DAYS = 3;
+  // Zmenené z days <= WEEKEND_DAYS na days < WEEKEND_DAYS – extra dni sa počítajú už od 3 dní
   const getPackageExtraDaysTotal = (pkg: PackageCartItem) => {
     const basePrice = getPackageTotal(pkg);
-    if (days <= WEEKEND_DAYS) return 0;
+    if (days < WEEKEND_DAYS) return 0;
     const extraDays = days - WEEKEND_DAYS;
     return extraDays * basePrice * 0.5;
   };
@@ -954,17 +1245,17 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           ))}
                         </div>
 
-                        {/* 🟢 Upravený blok – farba na zelenú a podmienka `>=` */}
-                        {days > WEEKEND_DAYS && (
+                        {/* ZOBRAZENIE VÝPOČTU – zmenené z days > WEEKEND_DAYS na days >= WEEKEND_DAYS */}
+                        {days >= WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
                             <div className="flex justify-between text-gray-300">
                               <span>Víkend (pia–ne) v cene</span>
                               <span className="text-white font-semibold">{packagesTotalWithoutExtra.toFixed(2)} €</span>
                             </div>
-                            {days > WEEKEND_DAYS && (
+                            {days >= WEEKEND_DAYS && (
                               <div className="flex justify-between text-gray-300">
-                                <span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span>
+                                <span>{days - WEEKEND_DAYS === 0 ? '0 ďalších dní' : `${days - WEEKEND_DAYS} ${days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'}`} (+50 %)</span>
                                 <span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span>
                               </div>
                             )}
