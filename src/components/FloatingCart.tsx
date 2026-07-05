@@ -955,14 +955,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
 
                         {/* 🟢 Upravený blok – farba na zelenú a podmienka `>=` */}
-                        {days >= WEEKEND_DAYS && (
+                        {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
                             <div className="flex justify-between text-gray-300">
                               <span>Víkend (pia–ne) v cene</span>
                               <span className="text-white font-semibold">{packagesTotalWithoutExtra.toFixed(2)} €</span>
                             </div>
-                            {days >= WEEKEND_DAYS && (
+                            {days > WEEKEND_DAYS && (
                               <div className="flex justify-between text-gray-300">
                                 <span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span>
                                 <span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span>
