@@ -27,21 +27,31 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
     }
 
     setIsUploading(true);
-    const toastId = toast.loading('Nahrávam obrázky...');
+    const toastId = toast.loading(`Nahrávam ${validImageFiles.length} obrázkov...`);
 
     try {
-      const uploadPromises = validImageFiles.map(file => equipmentService.uploadImage(file));
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const successfulUrls: string[] = [];
       
-      const successfulUrls = uploadedUrls.filter(url => url !== null) as string[];
+      // Nahrávame postupne jeden po druhom, aby sme predišli problémom so súbežnosťou
+      for (const file of validImageFiles) {
+        try {
+          const url = await equipmentService.uploadImage(file);
+          if (url) {
+            successfulUrls.push(url);
+          }
+        } catch (err) {
+          console.error(`Chyba pri nahrávaní súboru ${file.name}:`, err);
+        }
+      }
       
       if (successfulUrls.length > 0) {
+        // Pridáme všetky úspešne nahrané URL k existujúcim
         onChange([...images, ...successfulUrls]);
         toast.dismiss(toastId);
         toast.success(`Úspešne nahraných ${successfulUrls.length} obrázkov!`);
       } else {
         toast.dismiss(toastId);
-        toast.error('Chyba pri nahrávaní obrázkov.');
+        toast.error('Nepodarilo sa nahrať žiadne obrázky.');
       }
     } catch (error) {
       toast.dismiss(toastId);
@@ -49,6 +59,10 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       console.error(error);
     } finally {
       setIsUploading(false);
+      // Resetujeme input, aby bolo možné znova vybrať rovnaké súbory ak treba
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -87,7 +101,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const handleCardDragStart = (e: React.DragEvent, index: number) => {
     setDragIndex(index);
     e.dataTransfer.effectAllowed = 'move';
-    // DÔLEŽITÉ pre správne fungovanie vo Firefox a Safari:
     e.dataTransfer.setData('text/plain', index.toString());
   };
 
@@ -169,7 +182,7 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
 
             return (
               <div 
-                key={index} 
+                key={`${img}-${index}`} 
                 draggable
                 onDragStart={(e) => handleCardDragStart(e, index)}
                 onDragOver={(e) => handleCardDragOver(e, index)}
