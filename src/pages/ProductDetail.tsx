@@ -379,10 +379,6 @@ const ProductDetail = () => {
                     <span>Dodanie: <span className="text-white font-semibold">1–3 pracovné dni</span></span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-[#BD20D3]" />
-                    <span>Záruka: <span className="text-white font-semibold">24 mesiacov</span></span>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <Phone size={14} className="text-[#BD20D3]" />
                     <span>Infolinka: <span className="text-white font-semibold">+421 948 070 577</span></span>
                   </div>
