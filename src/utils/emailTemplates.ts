@@ -18,6 +18,7 @@ export interface ProductInquiryData extends ContactFormData {
   productName: string;
   productPrice: string;
   productCondition: string;
+  quantity?: number;
 }
 
 export interface PackageQuestionData extends ContactFormData {
@@ -107,8 +108,18 @@ function buildContactContent(data: ContactFormData): string {
 }
 
 function buildProductContent(data: ProductInquiryData): string {
+  // Zobrazíme počet kusov namiesto dátumu
+  const contactInfoRows = `
+    <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.name)}</td></tr>
+    <tr><td style="padding:4px 0;color:#9ca3af;">E-mail:</td><td style="padding:4px 0;color:#BD20D3;">${escapeHtml(data.email)}</td></tr>
+    <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${escapeHtml(data.phone)}</td></tr>
+    <tr><td style="padding:4px 0;color:#9ca3af;">Počet kusov:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(String(data.quantity || 'Neuvedený'))}</td></tr>`;
+
   return `
-    ${buildContactInfo(data, true)}
+    <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
+    <table style="width:100%;font-size:14px;color:#d1d5db;">
+      ${contactInfoRows}
+    </table>
 
     <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">🛒 Záujem o produkt</h2>
     <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;font-size:14px;">

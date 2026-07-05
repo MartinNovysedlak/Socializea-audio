@@ -92,11 +92,12 @@ const ProductDetail = () => {
         name: `${inquiryFirstName} ${inquiryLastName}`,
         email: inquiryEmail,
         phone: inquiryPhone || 'Neuvedený',
-        date: 'Kúpa produktu',
+        date: `Počet kusov: ${inquiryQuantity}`,
         message: inquiryMessage || '—',
         productName: item?.name || 'Neznámy produkt',
         productPrice: `${item?.price ? `${item.price} €` : 'Neuvedená'}`,
         productCondition: item?.condition === 'new' ? 'new' : 'used',
+        quantity: inquiryQuantity,
       });
 
       await emailjs.send(
