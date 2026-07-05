@@ -93,17 +93,15 @@ const ProductDetail = () => {
         'service_s8kq87k',
         'template_st0hc2f',
         {
-          message: `Meno: ${inquiryFirstName} ${inquiryLastName}
-Email: ${inquiryEmail}
-Telefón: ${inquiryPhone || 'Neuvedený'}
-Produkt: ${productName}
-Cena: ${item?.price ? `${item.price} € / ks` : 'Neuvedená'}
-Počet kusov: ${inquiryQuantity}
-Celková cena: ${item?.price ? `${(item.price * inquiryQuantity).toFixed(2)} €` : '—'}
-Stav: ${item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
-
-Správa:
-${inquiryMessage || '—'}`,
+          message_html: `Meno: ${inquiryFirstName} ${inquiryLastName}<br>
+Email: ${inquiryEmail}<br>
+Telefón: ${inquiryPhone || 'Neuvedený'}<br>
+Produkt: ${productName}<br>
+Cena: ${item?.price ? `${item.price} € / ks` : 'Neuvedená'}<br>
+Počet kusov: ${inquiryQuantity}<br>
+Celková cena: ${item?.price ? `${(item.price * inquiryQuantity).toFixed(2)} €` : '—'}<br>
+Stav: ${item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}<br><br>
+Správa:<br>${(inquiryMessage || '—').replace(/\n/g, '<br>')}`,
           title: 'Kúpa produktu',
         },
         'hlWKyd9fiWgqJJT3r'
