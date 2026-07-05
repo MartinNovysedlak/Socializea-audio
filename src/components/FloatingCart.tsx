@@ -1022,12 +1022,64 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
 
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8 lg:sticky lg:top-8 self-start">
-                  <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
-                    <Calendar size={16} className="text-emerald-400 shrink-0" />
-                    <p className="text-[11px] text-emerald-300">
-                      <strong className="font-bold">Cena za {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}:</strong> Prvé 2 dni sú v cene balíka, každý ďalší deň sa pripočítava +50 % z ceny balíka.
-                    </p>
+                  {/* Prehľadný výpočet ceny na základe dní – rovnaký štýl ako pri aparatúre */}
+                  <div className="mb-4 bg-[#BD20D3]/5 border border-[#BD20D3]/20 rounded-xl p-3 space-y-1.5 text-xs">
+                    <p className="text-[#BD20D3] font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
+                    {cartItems.length > 0 && (
+                      <>
+                        <div className="flex justify-between text-gray-300"><span>Aparatúra – 1. deň (plná cena)</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
+                        {days > 1 && (
+                          <div className="flex justify-between text-gray-300"><span>Aparatúra – ďalších {days - 1} {days - 1 === 1 ? 'deň' : 'dni'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
+                        )}
+                      </>
+                    )}
+                    {packageItems.length > 0 && packageItems.map((pkg, idx) => {
+                      const baseForDayDisplay = pkg.price;
+                      const adjustedDaily = calculatePackageTotal(baseForDayDisplay, days);
+                      if (days <= 2) {
+                        return (
+                          <div key={idx} className="flex justify-between text-gray-300">
+                            <span>Balík "{pkg.name}" – 2 dni (v cene)</span>
+                            <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
+                          </div>
+                        );
+                      }
+                      const extra = days - 2;
+                      const extraCost = extra * (baseForDayDisplay * 0.5);
+                      return (
+                        <div key={idx} className="flex justify-between text-gray-300">
+                          <span>Balík "{pkg.name}" – {days} dní ({extra} {extra === 1 ? 'deň' : 'dni'} navyše +50%)</span>
+                          <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
+                        </div>
+                      );
+                    })}
+                    {packagesExtrasTotal > 0 && (
+                      <div className="flex justify-between text-gray-300 border-t border-white/5 pt-1 mt-1">
+                        <span>Extras v balíkoch (× {days} dní)</span>
+                        <span className="text-white font-semibold">{packagesExtrasTotal.toFixed(2)} €</span>
+                      </div>
+                    )}
+                    {hasAnyAdditionalService && (
+                      <div className="border-t border-white/5 pt-1 mt-1">
+                        {installSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installCost} €</span></div>}
+                        {installUninstallSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span></div>}
+                        {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
+                          <div className="flex justify-between text-gray-300"><span>Inštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
+                        )}
+                        {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
+                          <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
+                        )}
+                        {deliverySelected && deliveryResult && (
+                          <div className="flex justify-between text-gray-300"><span>Doprava ({deliveryCity})</span><span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span></div>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex justify-between text-white font-bold text-sm border-t border-[#BD20D3]/30 pt-1.5 mt-1.5">
+                      <span>Celkom</span>
+                      <span className="text-[#BD20D3]">{grandTotal.toFixed(2)} €</span>
+                    </div>
                   </div>
+
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
