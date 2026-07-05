@@ -114,7 +114,7 @@ const Admin = () => {
     name: '',
     price_no_lights: 100,
     price_with_lights: 130,
-    image: '',
+    images: [] as string[],
     description: '',
     sound_specs: [] as string[],
     light_specs: [] as string[],
@@ -630,7 +630,7 @@ const Admin = () => {
       name: '',
       price_no_lights: 100,
       price_with_lights: 130,
-      image: '',
+      images: [],
       description: '',
       sound_specs: [],
       light_specs: [],
@@ -642,11 +642,12 @@ const Admin = () => {
 
   const handleOpenPackageEdit = (pkg: PackageData) => {
     setEditingPackage(pkg);
+    const existingImages = pkg.image ? [pkg.image] : [];
     setPackageFormData({
       name: pkg.name,
       price_no_lights: pkg.price_no_lights,
       price_with_lights: pkg.price_with_lights,
-      image: pkg.image,
+      images: existingImages,
       description: pkg.description,
       sound_specs: pkg.sound_specs || [],
       light_specs: pkg.light_specs || [],
@@ -679,7 +680,7 @@ const Admin = () => {
       name: packageFormData.name.trim(),
       price_no_lights: Number(packageFormData.price_no_lights),
       price_with_lights: Number(packageFormData.price_with_lights),
-      image: packageFormData.image.trim(),
+      image: packageFormData.images[0] || '',
       description: packageFormData.description.trim(),
       sound_specs: packageFormData.sound_specs,
       light_specs: packageFormData.light_specs,
@@ -1401,25 +1402,30 @@ const Admin = () => {
                       <Input type="text" value={packageFormData.name} onChange={(e) => setPackageFormData(p => ({ ...p, name: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-300">URL obrázka</Label>
-                      <Input type="text" value={packageFormData.image} onChange={(e) => setPackageFormData(p => ({ ...p, image: e.target.value }))} placeholder="https://..." className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
+                      <Label className="text-gray-300">Cena bez svetiel (€) *</Label>
+                      <Input type="number" min="0" value={packageFormData.price_no_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_no_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Cena bez svetiel (€) *</Label>
-                      <Input type="number" min="0" value={packageFormData.price_no_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_no_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
-                    </div>
-                    <div className="space-y-2">
                       <Label className="text-gray-300">Cena so svetlami (€) *</Label>
                       <Input type="number" min="0" value={packageFormData.price_with_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_with_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Cena bez svetiel (€)</Label>
+                      <Input type="number" min="0" value={packageFormData.price_no_lights} onChange={(e) => setPackageFormData(p => ({ ...p, price_no_lights: Number(e.target.value) }))} className="bg-black/50 border-white/10 text-white rounded-xl h-12" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-gray-300">Popis balíka</Label>
                     <Textarea value={packageFormData.description} onChange={(e) => setPackageFormData(p => ({ ...p, description: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[80px]" />
+                  </div>
+
+                  <div className="p-6 bg-black/40 border border-white/10 rounded-2xl">
+                    <Label className="text-gray-300 block mb-3">Obrázok balíka</Label>
+                    <ImageManager images={packageFormData.images} onChange={(images) => setPackageFormData(p => ({ ...p, images }))} />
                   </div>
 
                   <DynamicBubbleInput label="Zvuková technika (položky)" placeholder="Pridať položku..." items={packageFormData.sound_specs} onChange={(sound_specs) => setPackageFormData(p => ({ ...p, sound_specs }))} />
