@@ -719,10 +719,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-2">{selectedPackage.description}</p>
               </div>
               <div className="pt-2 border-t border-white/5">
-                <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend:</span>
+                <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend (2 dni):</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-[#BD20D3] font-extrabold text-2xl sm:text-3xl">{totalPrice} €</span>
-                  <span className="text-gray-400 text-xs">/ víkend</span>
+                  <span className="text-gray-400 text-xs">/ víkend (2 dni)</span>
                 </div>
               </div>
             </div>
@@ -947,7 +947,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
                         </div>
                         <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
-                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold">{selectedItem.price} € / ks / víkend</span>}
+                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold">{selectedItem.price} € / ks / víkend (2 dni)</span>}
                       </div>
                       <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/[0.08] rounded-xl p-2">
                         <span className="text-[10px] text-gray-400 uppercase shrink-0">Počet:</span>
@@ -960,7 +960,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         </div>
                       </div>
                       <p className="text-[9px] text-gray-500 mt-1">
-                        {(() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts); return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend`; })()}
+                        {(() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts); return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 dni)`; })()}
                       </p>
                       <div className="flex gap-2 mt-2">
                         <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedItem(null); setItemQuantity(1); }} className="text-[10px] text-gray-400 hover:text-white h-8 flex-1">Zrušiť</Button>
@@ -993,7 +993,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             </span>
             <div className="flex justify-between text-xs text-gray-400">
               <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
-              <span className="text-white font-semibold">{activePackagePrice} € / víkend</span>
+              <span className="text-white font-semibold">{activePackagePrice} € / víkend (2 dni)</span>
             </div>
             {installSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia:</span><span className="text-[#1A4BFF] font-semibold">+20 €</span></div>}
             {installUninstallSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia a deinštalácia:</span><span className="text-[#1A4BFF] font-semibold">+40 €</span></div>}
@@ -1013,18 +1013,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         <Plus size={10} className="text-[#1A4BFF]" />
                         <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                       </span>
-                      <span className="text-white font-medium">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend</span>
+                      <span className="text-white font-medium">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend (2 dni)</span>
                     </div>
                   ))}
                   <div className="flex justify-between text-xs text-gray-400 border-t border-white/[0.06] pt-1">
                     <span className="text-[#1A4BFF] font-semibold">Medzisúčet produktov:</span>
-                    <span className="text-[#1A4BFF] font-bold">{additionalProductsCost.toFixed(2)} € / víkend</span>
+                    <span className="text-[#1A4BFF] font-bold">{additionalProductsCost.toFixed(2)} € / víkend (2 dni)</span>
                   </div>
                 </div>
               </>
             )}
             <div className="flex justify-between items-center border-t border-[#BD20D3]/20 pt-2 mt-2">
-              <span className="text-sm font-bold text-white">Celková cena na víkend:</span>
+              <span className="text-sm font-bold text-white">Celková cena na víkend (2 dni):</span>
               <span className="text-[#BD20D3] text-xl font-extrabold">{totalPrice.toFixed(2)} €</span>
             </div>
           </div>
