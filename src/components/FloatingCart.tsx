@@ -481,6 +481,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
         html += '</div>';
       });
+      // 🟢 Pridávame výpočet na dni pre balíky do HTML e-mailu (rovnako ako pre aparatúru)
+      if (days > WEEKEND_DAYS) {
+        html += '<div style="margin-top:12px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;font-size:12px;">';
+        html += `<div style="color:#10b981;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Výpočet na ${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#d1d5db;">Víkend (pia–ne) v cene</span><span style="color:white;font-weight:600;">${packagesTotalWithoutExtra.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#d1d5db;">${days - WEEKEND_DAYS} ${days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span><span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(16,185,129,0.2);padding-top:8px;margin-top:4px;"><span style="color:#10b981;font-weight:600;">Príplatok za nadštandardné dni</span><span style="color:#10b981;font-weight:700;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>`;
+        html += '</div>';
+      }
     }
 
     if (installSelected || installUninstallSelected) {
