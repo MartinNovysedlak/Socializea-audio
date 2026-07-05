@@ -127,15 +127,18 @@ interface PrenajomProps {
 }
 
 const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
-  const [loadedPackages, setLoadedPackages] = useState<PackageOption[]>([]);
-  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [displayedPackages, setDisplayedPackages] = useState<PackageOption[]>([]);
+  const [, setLoadingPackages] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Ihned zobrazíme preset balíky – žiadne čakanie
+    setDisplayedPackages(PRESET_FALLBACK);
+
+    // Na pozadí skúsime načítať z databázy (iba ak existuje)
     const fetchPackages = async () => {
-      setLoadingPackages(true);
       try {
         const dbPackages = await packagesService.getAll();
         if (dbPackages.length > 0) {
@@ -151,12 +154,10 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             otherSpecs: pkg.other_specs || [],
             warning: pkg.warning || undefined
           }));
-          setLoadedPackages(mapped);
-        } else {
-          setLoadedPackages(PRESET_FALLBACK);
+          setDisplayedPackages(mapped);
         }
       } catch {
-        setLoadedPackages(PRESET_FALLBACK);
+        // Presety už máme zobrazené, takže chyba je v pohode
       } finally {
         setLoadingPackages(false);
       }
@@ -166,7 +167,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
 
   // 🔑 Obnovenie scrollu – skryjeme obsah, scrollneme, potom zobrazíme (fade-in)
   useEffect(() => {
-    if (loadingPackages || !equipment || equipment.length === 0) return;
+    if (!equipment || equipment.length === 0) return;
 
     const saved = sessionStorage.getItem('prenajom-scroll-position');
     const el = mainRef.current;
@@ -189,9 +190,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
       // Žiadna uložená pozícia – rovno zobrazíme (sme na vrchu)
       if (el) el.style.opacity = '1';
     }
-  }, [loadingPackages, equipment]);
-
-  const presetPackages = loadedPackages;
+  }, [equipment]);
 
   const handleScrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -297,95 +296,91 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
               </p>
             </div>
 
-            {loadingPackages ? (
-              <div className="text-center py-12 text-gray-400">Načítavam balíky...</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-                {presetPackages.map((pkg, index) => {
-                  const remainingSound = pkg.soundSpecs.length - 3;
-                  const remainingLights = pkg.lightSpecs.length - 2;
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
+              {displayedPackages.map((pkg, index) => {
+                const remainingSound = pkg.soundSpecs.length - 3;
+                const remainingLights = pkg.lightSpecs.length - 2;
 
-                  return (
-                  <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
-                    <Card 
-                      className="relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer"
-                      onClick={() => handleOpenDetail(pkg)}
-                    >
-                      <div className="h-48 md:h-56 overflow-hidden relative shrink-0">
-                        <img 
-                          src={pkg.image} 
-                          alt={pkg.name} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
+                return (
+                <ScrollReveal key={pkg.id} direction="up" delay={index * 0.15}>
+                  <Card 
+                    className="relative overflow-hidden bg-[#0e122b]/80 border border-white/10 rounded-3xl flex flex-col hover:border-[#BD20D3]/50 hover:shadow-[0_0_30px_rgba(189,32,211,0.1)] hover:-translate-y-2 transition-all duration-300 group h-full cursor-pointer"
+                    onClick={() => handleOpenDetail(pkg)}
+                  >
+                    <div className="h-48 md:h-56 overflow-hidden relative shrink-0">
+                      <img 
+                        src={pkg.image} 
+                        alt={pkg.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#020721] to-transparent" />
+                    </div>
+
+                    <CardHeader className="p-6 pb-4 shrink-0">
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
+                        {pkg.name}
+                      </CardTitle>
+                      <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
+                        {pkg.description}
+                      </p>
+                      <div className="flex items-baseline gap-1.5 pt-4">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
+                        <span className="text-gray-400 text-xs">/ deň bez svetiel</span>
                       </div>
+                      <div className="flex items-baseline gap-1.5 text-sm">
+                        <span className="text-xl sm:text-2xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
+                        <span className="text-gray-400 text-xs">/ deň so svetlami</span>
+                      </div>
+                    </CardHeader>
 
-                      <CardHeader className="p-6 pb-4 shrink-0">
-                        <CardTitle className="text-xl sm:text-2xl font-bold text-white group-hover:text-[#BD20D3] transition-colors">
-                          {pkg.name}
-                        </CardTitle>
-                        <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed h-14 overflow-hidden">
-                          {pkg.description}
-                        </p>
-                        <div className="flex items-baseline gap-1.5 pt-4">
-                          <span className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
-                          <span className="text-gray-400 text-xs">/ deň bez svetiel</span>
-                        </div>
-                        <div className="flex items-baseline gap-1.5 text-sm">
-                          <span className="text-xl sm:text-2xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
-                          <span className="text-gray-400 text-xs">/ deň so svetlami</span>
-                        </div>
-                      </CardHeader>
+                    <CardContent className="px-6 pb-6 pt-0 flex-1 flex flex-col">
+                      <div className="border-t border-white/5 pt-4 space-y-2.5 flex-1">
+                        <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
+                        {pkg.soundSpecs.slice(0, 3).map((comp, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
+                            <Check size={12} className="text-[#BD20D3] shrink-0 mt-0.5" />
+                            <span>{comp}</span>
+                          </div>
+                        ))}
+                        {remainingSound > 0 && (
+                          <div className="text-xs text-gray-500 italic">
+                            + {remainingSound} {remainingSound === 1 ? 'produkt' : 'produkty'} z kategórie zvuk
+                          </div>
+                        )}
+                        {pkg.lightSpecs.length > 0 && (
+                          <div className="flex items-start gap-2.5 text-xs text-gray-300 mt-2 pt-2 border-t border-white/5">
+                            <Lightbulb size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
+                            <span className="font-medium text-white">Svetlá & efekty:</span>
+                          </div>
+                        )}
+                        {pkg.lightSpecs.slice(0, 2).map((comp, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300 ml-5">
+                            <Check size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
+                            <span>{comp}</span>
+                          </div>
+                        ))}
+                        {remainingLights > 0 && (
+                          <div className="text-xs text-gray-500 italic ml-5">
+                            + {remainingLights} {remainingLights === 1 ? 'produkt' : 'produkty'} z kategórie svetlá a efekty
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
 
-                      <CardContent className="px-6 pb-6 pt-0 flex-1 flex flex-col">
-                        <div className="border-t border-white/5 pt-4 space-y-2.5 flex-1">
-                          <p className="text-xs font-bold uppercase text-gray-400 tracking-wider">Komponenty v sete:</p>
-                          {pkg.soundSpecs.slice(0, 3).map((comp, idx) => (
-                            <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300">
-                              <Check size={12} className="text-[#BD20D3] shrink-0 mt-0.5" />
-                              <span>{comp}</span>
-                            </div>
-                          ))}
-                          {remainingSound > 0 && (
-                            <div className="text-xs text-gray-500 italic">
-                              + {remainingSound} {remainingSound === 1 ? 'produkt' : 'produkty'} z kategórie zvuk
-                            </div>
-                          )}
-                          {pkg.lightSpecs.length > 0 && (
-                            <div className="flex items-start gap-2.5 text-xs text-gray-300 mt-2 pt-2 border-t border-white/5">
-                              <Lightbulb size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
-                              <span className="font-medium text-white">Svetlá & efekty:</span>
-                            </div>
-                          )}
-                          {pkg.lightSpecs.slice(0, 2).map((comp, idx) => (
-                            <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-300 ml-5">
-                              <Check size={12} className="text-[#1A4BFF] shrink-0 mt-0.5" />
-                              <span>{comp}</span>
-                            </div>
-                          ))}
-                          {remainingLights > 0 && (
-                            <div className="text-xs text-gray-500 italic ml-5">
-                              + {remainingLights} {remainingLights === 1 ? 'produkt' : 'produkty'} z kategórie svetlá a efekty
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-
-                      <CardFooter className="p-6 pt-0 shrink-0">
-                        <Button 
-                          onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
-                          className="w-full btn-cyber rounded-xl h-14 border-none font-bold text-sm"
-                        >
-                          Detail balíka a rezervácia
-                          <ChevronRight className="ml-2" size={14} />
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </ScrollReveal>
-                  );
-                })}
-              </div>
-            )}
+                    <CardFooter className="p-6 pt-0 shrink-0">
+                      <Button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenDetail(pkg); }}
+                        className="w-full btn-cyber rounded-xl h-14 border-none font-bold text-sm"
+                      >
+                        Detail balíka a rezervácia
+                        <ChevronRight className="ml-2" size={14} />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </ScrollReveal>
+                );
+              })}
+            </div>
           </div>
         </section>
 
