@@ -513,13 +513,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         pricePerDay: itemPrice,
       };
       setAdditionalProducts(updated);
-      toast.success(`Množstvo zvýšené na ${newQty} ks (${itemPrice} € / ks / víkend)`);
+      toast.success(`Množstvo zvýšené na ${newQty} ks (${itemPrice} € / ks / víkend (2 dni))`);
     } else {
       setAdditionalProducts((prev) => [
         ...prev,
         { id: selectedItem.id, label: `${itemQuantity} x ${selectedItem.name}`, quantity: itemQuantity, pricePerDay: itemPrice },
       ]);
-      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend)`);
+      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend (2 dni))`);
     }
 
     setSelectedItem(null);
@@ -721,8 +721,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <div className="pt-2 border-t border-white/5">
                 <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend (2 dni):</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[#BD20D3] font-extrabold text-2xl sm:text-3xl">{totalPrice} €</span>
-                  <span className="text-gray-400 text-xs">/ víkend (2 dni)</span>
+                  <span className="text-[#BD20D3] font-extrabold text-2xl sm:text-3xl whitespace-nowrap">{totalPrice} €</span>
+                  <span className="text-gray-400 text-xs whitespace-nowrap">/ víkend (2 dni)</span>
                 </div>
               </div>
             </div>
@@ -947,7 +947,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
                         </div>
                         <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
-                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold">{selectedItem.price} € / ks / víkend (2 dni)</span>}
+                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold whitespace-nowrap">{selectedItem.price} € / ks / víkend (2 dni)</span>}
                       </div>
                       <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/[0.08] rounded-xl p-2">
                         <span className="text-[10px] text-gray-400 uppercase shrink-0">Počet:</span>
@@ -959,7 +959,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                             className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"><Plus size={12} /></button>
                         </div>
                       </div>
-                      <p className="text-[9px] text-gray-500 mt-1">
+                      <p className="text-[9px] text-gray-500 mt-1 whitespace-nowrap">
                         {(() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts); return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 dni)`; })()}
                       </p>
                       <div className="flex gap-2 mt-2">
@@ -993,7 +993,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             </span>
             <div className="flex justify-between text-xs text-gray-400">
               <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
-              <span className="text-white font-semibold">{activePackagePrice} € / víkend (2 dni)</span>
+              <span className="text-white font-semibold whitespace-nowrap">{activePackagePrice} € / víkend (2 dni)</span>
             </div>
             {installSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia:</span><span className="text-[#1A4BFF] font-semibold">+20 €</span></div>}
             {installUninstallSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia a deinštalácia:</span><span className="text-[#1A4BFF] font-semibold">+40 €</span></div>}
@@ -1013,19 +1013,19 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         <Plus size={10} className="text-[#1A4BFF]" />
                         <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                       </span>
-                      <span className="text-white font-medium">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend (2 dni)</span>
+                      <span className="text-white font-medium whitespace-nowrap">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend (2 dni)</span>
                     </div>
                   ))}
                   <div className="flex justify-between text-xs text-gray-400 border-t border-white/[0.06] pt-1">
                     <span className="text-[#1A4BFF] font-semibold">Medzisúčet produktov:</span>
-                    <span className="text-[#1A4BFF] font-bold">{additionalProductsCost.toFixed(2)} € / víkend (2 dni)</span>
+                    <span className="text-[#1A4BFF] font-bold whitespace-nowrap">{additionalProductsCost.toFixed(2)} € / víkend (2 dni)</span>
                   </div>
                 </div>
               </>
             )}
             <div className="flex justify-between items-center border-t border-[#BD20D3]/20 pt-2 mt-2">
               <span className="text-sm font-bold text-white">Celková cena na víkend (2 dni):</span>
-              <span className="text-[#BD20D3] text-xl font-extrabold">{totalPrice.toFixed(2)} €</span>
+              <span className="text-[#BD20D3] text-xl font-extrabold whitespace-nowrap">{totalPrice.toFixed(2)} €</span>
             </div>
           </div>
 
@@ -1097,7 +1097,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               </DialogContent>
             </Dialog>
 
-            {/* Potvrdzovací dialog po odoslaní otázky */}
             <Dialog open={showQuestionSuccess} onOpenChange={setShowQuestionSuccess}>
               <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
                 <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
