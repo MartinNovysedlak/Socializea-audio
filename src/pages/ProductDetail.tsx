@@ -15,16 +15,10 @@ import {
   Phone,
   Mail,
   ChevronLeft,
-  ChevronRight as ChevronRightIcon,
-  User,
-  Send,
-  Loader2,
-  CheckCircle2,
-  ShoppingBag,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,13 +30,10 @@ const ProductDetail = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const [inquiryName, setInquiryName] = useState('');
-  const [inquiryFirstName, setInquiryFirstName] = useState('');
-  const [inquiryLastName, setInquiryLastName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [inquiryEmail, setInquiryEmail] = useState('');
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -72,8 +63,8 @@ const ProductDetail = () => {
 
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inquiryFirstName.trim() || !inquiryLastName.trim() || !inquiryEmail.trim()) {
-      toast.error('Prosím vyplňte vaše meno, priezvisko a email!');
+    if (!inquiryName.trim() || !inquiryEmail.trim()) {
+      toast.error('Prosím vyplňte vaše meno a email!');
       return;
     }
 
@@ -89,7 +80,7 @@ const ProductDetail = () => {
         'service_s8kq87k',
         'template_st0hc2f',
         {
-          name: `${inquiryFirstName} ${inquiryLastName}`,
+          name: inquiryName,
           email: inquiryEmail,
           phone: inquiryPhone || 'Neuvedený',
           date: 'Kúpa produktu',
@@ -99,9 +90,9 @@ const ProductDetail = () => {
       );
 
       toast.dismiss(toastId);
-      setShowSuccess(true);
-      setInquiryFirstName('');
-      setInquiryLastName('');
+      toast.success('Dopyt na kúpu bol úspešne odoslaný!', {
+        description: `Budeme vás kontaktovať ohľadom produktu ${item?.name} čo najskôr.`
+      });
       setInquiryName('');
       setInquiryPhone('');
       setInquiryEmail('');
@@ -330,102 +321,64 @@ const ProductDetail = () => {
             <div className="lg:col-span-5">
               <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    <span className="text-[#BD20D3]">💳</span> Mám záujem o produkt
-                  </h3>
+                  <h3 className="text-xl font-bold text-white mb-2">Mám záujem o produkt</h3>
                   <p className="text-gray-400 text-xs leading-relaxed">
                     Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť prípadne dohodneme osobné prevzatie.
                   </p>
                 </div>
 
                 <form onSubmit={handleSendInquiry} className="space-y-4">
-                  <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-1">
-                    <ShoppingBag size={14} className="text-[#BD20D3] shrink-0" />
-                    <span className="text-xs text-white font-medium truncate">{item?.name || 'Produkt'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                        <User size={12} className="text-[#BD20D3]" /> Meno *
-                      </label>
-                      <input
-                        type="text"
-                        autoComplete="given-name"
-                        required
-                        value={inquiryFirstName}
-                        onChange={(e) => setInquiryFirstName(e.target.value)}
-                        placeholder="Napr. Ján"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                        <User size={12} className="text-[#1A4BFF]" /> Priezvisko *
-                      </label>
-                      <input
-                        type="text"
-                        autoComplete="family-name"
-                        required
-                        value={inquiryLastName}
-                        onChange={(e) => setInquiryLastName(e.target.value)}
-                        placeholder="Napr. Novák"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                      />
-                    </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-bold uppercase">Meno a priezvisko *</label>
+                    <input
+                      type="text"
+                      required
+                      value={inquiryName}
+                      onChange={(e) => setInquiryName(e.target.value)}
+                      placeholder="Napr. Ján Novák"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
+                    />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                      <Mail size={12} className="text-[#BD20D3]" /> E-mail *
-                    </label>
+                    <label className="text-xs text-gray-400 font-bold uppercase">E-mailová adresa *</label>
                     <input
                       type="email"
-                      autoComplete="email"
                       required
                       value={inquiryEmail}
                       onChange={(e) => setInquiryEmail(e.target.value)}
                       placeholder="jan.novak@email.sk"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                      <Phone size={12} className="text-[#1A4BFF]" /> Telefón (voliteľný)
-                    </label>
+                    <label className="text-xs text-gray-400 font-bold uppercase">Telefónne číslo</label>
                     <input
                       type="tel"
-                      autoComplete="tel"
                       value={inquiryPhone}
                       onChange={(e) => setInquiryPhone(e.target.value)}
-                      placeholder="+421 901 234 567"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
+                      placeholder="+421 ..."
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-12 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      Poznámka / doplňujúce otázky
-                    </label>
+                    <label className="text-xs text-gray-400 font-bold uppercase">Poznámka / doplňujúce otázky</label>
                     <textarea
                       value={inquiryMessage}
                       onChange={(e) => setInquiryMessage(e.target.value)}
                       placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[90px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed placeholder:text-gray-500"
+                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     disabled={!item.available || sending}
-                    className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2 flex items-center justify-center gap-2"
+                    className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2"
                   >
-                    {sending ? (
-                      <><Loader2 size={16} className="animate-spin" /> Odosielam...</>
-                    ) : (
-                      <><Send size={16} /> Odoslať nezáväzný dopyt</>
-                    )}
+                    {sending ? 'Odosielam...' : 'Odoslať nezáväzný dopyt'}
                   </Button>
                 </form>
 
@@ -447,29 +400,6 @@ const ProductDetail = () => {
 
         <Footer />
       </main>
-
-      {/* Success dialog after sending inquiry */}
-      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/30 flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 className="text-[#BD20D3]" size={32} />
-          </div>
-          <DialogHeader className="space-y-3">
-            <DialogTitle className="text-2xl font-bold text-white">
-              Ďakujeme za dopyt!
-            </DialogTitle>
-            <DialogDescription className="text-gray-300 text-base leading-relaxed">
-              Váš dopyt na kúpu produktu <strong className="text-white">{item?.name}</strong> bol úspešne odoslaný. Budeme vás kontaktovať čo najskôr.
-            </DialogDescription>
-          </DialogHeader>
-          <Button
-            onClick={() => setShowSuccess(false)}
-            className="btn-cyber border-none rounded-xl h-12 px-8 font-bold mt-6 w-full"
-          >
-            Zavrieť
-          </Button>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
