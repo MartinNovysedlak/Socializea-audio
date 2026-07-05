@@ -6,9 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
-// ... keep rest of imports
 import {
   ArrowLeft,
   Check,
@@ -22,10 +20,16 @@ import {
   Loader2,
   CheckCircle2,
   ShoppingBag,
+  Package,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +40,7 @@ const ProductDetail = () => {
   const [activeImage, setActiveImage] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const [inquiryName, setInquiryName] = useState('');
+  // Inquiry form states
   const [inquiryFirstName, setInquiryFirstName] = useState('');
   const [inquiryLastName, setInquiryLastName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
@@ -44,6 +48,7 @@ const ProductDetail = () => {
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showInquiryDialog, setShowInquiryDialog] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -100,10 +105,10 @@ const ProductDetail = () => {
       );
 
       toast.dismiss(toastId);
+      setShowInquiryDialog(false);
       setShowSuccess(true);
       setInquiryFirstName('');
       setInquiryLastName('');
-      setInquiryName('');
       setInquiryPhone('');
       setInquiryEmail('');
       setInquiryMessage('');
@@ -328,112 +333,58 @@ const ProductDetail = () => {
               </div>
             </div>
 
+            {/* Right column – compact info card + CTA button */}
             <div className="lg:col-span-5">
-              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 max-h-[calc(100vh-12rem)] overflow-y-auto space-y-6">
+              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    <span className="text-[#BD20D3]">💳</span> Mám záujem o produkt
+                    <span className="text-[#BD20D3]">💳</span> {item.name}
                   </h3>
-                  <p className="text-gray-400 text-xs leading-relaxed">
-                    Vyplňte formulár a my vám obratom zašleme faktúru, preveríme dostupnosť prípadne dohodneme osobné prevzatie.
-                  </p>
+                  <div className="flex items-baseline gap-2 mt-2 mb-4">
+                    <span className="text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
+                    <span className="text-xs text-gray-400">s DPH</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                      item.condition === 'new'
+                        ? 'bg-cyan-600/20 border border-cyan-400/30 text-cyan-300'
+                        : 'bg-amber-600/20 border border-amber-400/30 text-amber-300'
+                    }`}>
+                      <Sparkles size={12} />
+                      {item.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                      item.available
+                        ? 'bg-emerald-600/20 border border-emerald-400/30 text-emerald-300'
+                        : 'bg-red-600/20 border border-red-400/30 text-red-300'
+                    }`}>
+                      {item.available ? 'Skladom' : 'Vypredané'}
+                    </span>
+                  </div>
                 </div>
 
-                <form onSubmit={handleSendInquiry} className="space-y-4">
-                  <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5 mb-1">
-                    <ShoppingBag size={14} className="text-[#BD20D3] shrink-0" />
-                    <span className="text-xs text-white font-medium truncate">{item?.name || 'Produkt'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                        <User size={12} className="text-[#BD20D3]" /> Meno *
-                      </label>
-                      <input
-                        type="text"
-                        autoComplete="given-name"
-                        required
-                        value={inquiryFirstName}
-                        onChange={(e) => setInquiryFirstName(e.target.value)}
-                        placeholder="Napr. Ján"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                        <User size={12} className="text-[#1A4BFF]" /> Priezvisko *
-                      </label>
-                      <input
-                        type="text"
-                        autoComplete="family-name"
-                        required
-                        value={inquiryLastName}
-                        onChange={(e) => setInquiryLastName(e.target.value)}
-                        placeholder="Napr. Novák"
-                        className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                      <Mail size={12} className="text-[#BD20D3]" /> E-mail *
-                    </label>
-                    <input
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={inquiryEmail}
-                      onChange={(e) => setInquiryEmail(e.target.value)}
-                      placeholder="jan.novak@email.sk"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
-                      <Phone size={12} className="text-[#1A4BFF]" /> Telefón (voliteľný)
-                    </label>
-                    <input
-                      type="tel"
-                      autoComplete="tel"
-                      value={inquiryPhone}
-                      onChange={(e) => setInquiryPhone(e.target.value)}
-                      placeholder="+421 901 234 567"
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm placeholder:text-gray-500"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-gray-400 font-bold uppercase">
-                      Poznámka / doplňujúce otázky
-                    </label>
-                    <textarea
-                      value={inquiryMessage}
-                      onChange={(e) => setInquiryMessage(e.target.value)}
-                      placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
-                      className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[90px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed placeholder:text-gray-500"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={!item.available || sending}
-                    className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2 flex items-center justify-center gap-2"
-                  >
-                    {sending ? (
-                      <><Loader2 size={16} className="animate-spin" /> Odosielam...</>
-                    ) : (
-                      <><Send size={16} /> Odoslať nezáväzný dopyt</>
-                    )}
-                  </Button>
-                </form>
+                <Button
+                  onClick={() => setShowInquiryDialog(true)}
+                  disabled={!item.available}
+                  className="w-full btn-cyber h-14 rounded-xl font-bold border-none text-base flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(189,32,211,0.3)]"
+                >
+                  <ShoppingBag size={18} />
+                  Mám záujem o produkt
+                </Button>
 
                 <div className="pt-4 border-t border-white/5 flex flex-col gap-2 text-xs text-gray-400">
                   <div className="flex items-center gap-2">
+                    <Package size={14} className="text-[#BD20D3]" />
+                    <span>Dodanie: <span className="text-white font-semibold">1–3 pracovné dni</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock size={14} className="text-[#BD20D3]" />
+                    <span>Záruka: <span className="text-white font-semibold">24 mesiacov</span></span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Phone size={14} className="text-[#BD20D3]" />
-                    <span>Rýchla infolinka: <span className="text-white font-semibold">+421 948 070 577</span></span>
+                    <span>Infolinka: <span className="text-white font-semibold">+421 948 070 577</span></span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail size={14} className="text-[#1A4BFF]" />
@@ -448,6 +399,113 @@ const ProductDetail = () => {
 
         <Footer />
       </main>
+
+      {/* Inquiry Dialog – pop-up with order form */}
+      <Dialog open={showInquiryDialog} onOpenChange={setShowInquiryDialog}>
+        <DialogContent className="bg-[#0a0d1f] border border-white/10 text-white rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto p-6 md:p-8 custom-scrollbar">
+          <DialogHeader className="space-y-3 mb-2">
+            <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
+              <ShoppingBag size={20} className="text-[#BD20D3]" />
+              Mám záujem o produkt
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 text-sm leading-relaxed">
+              Vyplňte formulár a my vám obratom zašleme faktúru, prípadne dohodneme osobné prevzatie.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSendInquiry} className="space-y-4">
+            <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5">
+              <ShoppingBag size={14} className="text-[#BD20D3] shrink-0" />
+              <span className="text-xs text-white font-medium truncate">{item?.name || 'Produkt'}</span>
+              <span className="text-xs text-[#BD20D3] font-bold ml-auto">{item?.price} €</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                  <User size={12} className="text-[#BD20D3]" /> Meno *
+                </Label>
+                <Input
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  value={inquiryFirstName}
+                  onChange={(e) => setInquiryFirstName(e.target.value)}
+                  placeholder="Napr. Ján"
+                  className="bg-black/40 border-white/10 text-white rounded-xl h-11"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                  <User size={12} className="text-[#1A4BFF]" /> Priezvisko *
+                </Label>
+                <Input
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  value={inquiryLastName}
+                  onChange={(e) => setInquiryLastName(e.target.value)}
+                  placeholder="Napr. Novák"
+                  className="bg-black/40 border-white/10 text-white rounded-xl h-11"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                <Mail size={12} className="text-[#BD20D3]" /> E-mail *
+              </Label>
+              <Input
+                type="email"
+                autoComplete="email"
+                required
+                value={inquiryEmail}
+                onChange={(e) => setInquiryEmail(e.target.value)}
+                placeholder="jan.novak@email.sk"
+                className="bg-black/40 border-white/10 text-white rounded-xl h-11"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                <Phone size={12} className="text-[#1A4BFF]" /> Telefón (voliteľný)
+              </Label>
+              <Input
+                type="tel"
+                autoComplete="tel"
+                value={inquiryPhone}
+                onChange={(e) => setInquiryPhone(e.target.value)}
+                placeholder="+421 901 234 567"
+                className="bg-black/40 border-white/10 text-white rounded-xl h-11"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-400 font-bold uppercase">
+                Poznámka / doplňujúce otázky
+              </Label>
+              <Textarea
+                value={inquiryMessage}
+                onChange={(e) => setInquiryMessage(e.target.value)}
+                placeholder="Mám záujem o zaslanie kuriérom / osobný odber..."
+                className="bg-black/40 border-white/10 text-white rounded-xl min-h-[90px]"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={sending}
+              className="w-full btn-cyber h-12 rounded-xl font-bold border-none text-base mt-2 flex items-center justify-center gap-2"
+            >
+              {sending ? (
+                <><Loader2 size={16} className="animate-spin" /> Odosielam...</>
+              ) : (
+                <><Send size={16} /> Odoslať nezáväzný dopyt</>
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Success dialog after sending inquiry */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
