@@ -12,7 +12,7 @@ import BlogPostDetail from './pages/BlogPostDetail';
 import Predaj from './pages/Predaj';
 import ProductDetail from './pages/ProductDetail';
 import NotFound from './pages/NotFound';
-import FloatingCart from './components/FloatingCart';
+import { FloatingCart } from './components/FloatingCart';
 import ScrollToTop from './components/ScrollToTop';
 import { useEquipment } from './hooks/useEquipment';
 import AmbientBackground from './components/AmbientBackground';
