@@ -158,6 +158,7 @@ const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
                 <label className="text-xs text-gray-400 font-bold uppercase">Meno *</label>
                 <input
                   type="text"
+                  autoComplete="given-name"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -169,6 +170,7 @@ const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
                 <label className="text-xs text-gray-400 font-bold uppercase">Priezvisko *</label>
                 <input
                   type="text"
+                  autoComplete="family-name"
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -182,6 +184,7 @@ const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
               <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
               <input
                 type="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
