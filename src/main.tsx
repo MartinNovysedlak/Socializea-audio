@@ -1,12 +1,17 @@
 "use client";
 
-import { createRoot } from "react-dom/client";
-import { HelmetProvider } from "react-helmet-async";
-import App from "./App";
-import "./globals.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { Toaster } from "sonner";
+import { DialogProvider } from './contexts/DialogContext';
+import './index.css';
 
-createRoot(document.getElementById("root")!).render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <DialogProvider>
+      <Toaster position="top-right" />
+      <App />
+    </DialogProvider>
+  </React.StrictMode>
 );

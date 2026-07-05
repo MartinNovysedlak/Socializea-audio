@@ -36,6 +36,7 @@ import "react-day-picker/dist/style.css";
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useDialogContext } from '@/contexts/DialogContext';
 
 interface PackageCartItem {
   id: string;
@@ -163,6 +164,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReservationSuccess, setShowReservationSuccess] = useState(false);
 
+  const { isAnyDialogOpen, setDialogOpen } = useDialogContext();
+
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
 
@@ -196,6 +199,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       return [];
     }
   });
+
+  useEffect(() => {
+    setDialogOpen(isOpen || showReservationSuccess);
+  }, [isOpen, showReservationSuccess, setDialogOpen]);
 
   useEffect(() => {
     try {
@@ -659,7 +666,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         .cart-qty-value { width: 24px; text-align: center; color: white; font-weight: 600; font-size: 0.875rem; }
       `}</style>
 
-      {totalItems > 0 && (
+      {totalItems > 0 && !isAnyDialogOpen && (
         <div
           className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
           onMouseEnter={() => setIsHovered(true)}

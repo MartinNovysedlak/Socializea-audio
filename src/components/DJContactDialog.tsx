@@ -12,6 +12,7 @@ import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
+import { useDialogContext } from '@/contexts/DialogContext';
 
 const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [firstName, setFirstName] = useState("");
@@ -24,6 +25,12 @@ const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
+
+  const { setDialogOpen } = useDialogContext();
+
+  useEffect(() => {
+    setDialogOpen(open || showSuccess);
+  }, [open, showSuccess, setDialogOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
