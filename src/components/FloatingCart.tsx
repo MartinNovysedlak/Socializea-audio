@@ -962,7 +962,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               <span>Víkend (pia–ne) v cene</span>
                               <span className="text-white font-semibold">{packagesTotalWithoutExtra.toFixed(2)} €</span>
                             </div>
-                            {days > WEEKEND_DAYS && (
+                            {days >= WEEKEND_DAYS && (
                               <div className="flex justify-between text-gray-300">
                                 <span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span>
                                 <span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span>
