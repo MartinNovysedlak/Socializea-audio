@@ -1,186 +1,226 @@
 "use client";
 
 import React, { useRef, useState } from 'react';
-import { Upload, X, Loader2, Star, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
-import { equipmentService } from '@/lib/equipmentService';
+import { Label } from '@/components/ui/label';
+import { Upload, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
+import { equipmentService } from '@/lib/equipmentService';
 
 interface ImageManagerProps {
   images: string[];
   onChange: (images: string[]) => void;
 }
 
-interface UploadTask {
-  file: File;
-  status: 'pending' | 'uploading' | 'done' | 'error';
-  url?: string;
-}
-
-const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
+const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [tasks, setTasks] = useState<UploadTask[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const fileArray = Array.from(files);
+  const handleFiles = async (files: FileList) => {
+    const validImageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
     
-    // Vytvoríme úlohy pre každý súbor
-    const newTasks: UploadTask[] = fileArray.map(file => ({
-      file,
-      status: 'pending',
-    }));
-    
-    setTasks(newTasks);
-    setUploading(true);
+    if (validImageFiles.length === 0) {
+      toast.error('Zvoľte prosím iba obrázky!');
+      return;
+    }
 
-    // Nahrávame postupne, aby sme mali prehľad
-    for (let i = 0; i < newTasks.length; i++) {
-      setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'uploading' } : t));
+    setIsUploading(true);
+    const toastId = toast.loading(`Nahrávam ${validImageFiles.length} obrázkov...`);
+
+    try {
+      const successfulUrls: string[] = [];
       
-      try {
-        const url = await equipmentService.uploadImage(newTasks[i].file);
-        if (url) {
-          setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'done', url } : t));
-        } else {
-          setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'error' } : t));
-          toast.error(`Nepodarilo sa nahrať ${newTasks[i].file.name}`);
+      // Nahrávame postupne jeden po druhom, aby sme predišli problémom so súbežnosťou
+      for (const file of validImageFiles) {
+        try {
+          const url = await equipmentService.uploadImage(file);
+          if (url) {
+            successfulUrls.push(url);
+          }
+        } catch (err) {
+          console.error(`Chyba pri nahrávaní súboru ${file.name}:`, err);
         }
-      } catch (err) {
-        console.error('Unexpected upload error:', err);
-        setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'error' } : t));
-        toast.error(`Chyba pri nahrávaní ${newTasks[i].file.name}`);
+      }
+      
+      if (successfulUrls.length > 0) {
+        // Pridáme všetky úspešne nahrané URL k existujúcim
+        onChange([...images, ...successfulUrls]);
+        toast.dismiss(toastId);
+        toast.success(`Úspešne nahraných ${successfulUrls.length} obrázkov!`);
+      } else {
+        toast.dismiss(toastId);
+        toast.error('Nepodarilo sa nahrať žiadne obrázky.');
+      }
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error('Chyba pri spracovaní obrázkov.');
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+      // Resetujeme input, aby bolo možné znova vybrať rovnaké súbory ak treba
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     }
+  };
 
-    // Po dokončení všetkých úloh pridáme len úspešné URL k existujúcim obrázkom
-    const successfulUrls = tasks
-      .filter(t => t.status === 'done' && t.url)
-      .map(t => t.url!);
-
-    if (successfulUrls.length > 0) {
-      onChange([...images, ...successfulUrls]);
-    }
-
-    // Reset
-    setTasks([]);
-    setUploading(false);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(e.target.files);
     }
   };
 
-  const removeImage = (index: number) => {
-    const updated = images.filter((_, i) => i !== index);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleRemove = async (indexToRemove: number) => {
+    const imageUrl = images[indexToRemove];
+    await equipmentService.deleteImage(imageUrl);
+    
+    const updated = images.filter((_, idx) => idx !== indexToRemove);
     onChange(updated);
+    toast.success('Obrázok odstránený.');
   };
 
-  const moveImage = (index: number, direction: 'left' | 'right') => {
-    const newIndex = direction === 'left' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= images.length) return;
+  const handleCardDragStart = (e: React.DragEvent, index: number) => {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleCardDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setOverIndex(index);
+  };
+
+  const handleCardDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === targetIndex) {
+      setDragIndex(null);
+      setOverIndex(null);
+      return;
+    }
 
     const updated = [...images];
-    const temp = updated[index];
-    updated[index] = updated[newIndex];
-    updated[newIndex] = temp;
+    const [moved] = updated.splice(dragIndex, 1);
+    updated.splice(targetIndex, 0, moved);
     onChange(updated);
+
+    setDragIndex(null);
+    setOverIndex(null);
   };
 
-  const totalFiles = tasks.length;
-  const doneCount = tasks.filter(t => t.status === 'done').length;
-  const errorCount = tasks.filter(t => t.status === 'error').length;
+  const handleCardDragEnd = () => {
+    setDragIndex(null);
+    setOverIndex(null);
+  };
 
   return (
     <div className="space-y-4">
-      {/* Ukáž prebiehajúce nahrávanie */}
-      {uploading && tasks.length > 0 && (
-        <div className="bg-black/40 border border-white/10 rounded-xl p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">
-              Nahrávam {doneCount + errorCount}/{totalFiles}
-              {errorCount > 0 && <span className="text-red-400 ml-1">({errorCount} chýb)</span>}
-            </span>
-            <Loader2 size={14} className="animate-spin text-[#BD20D3]" />
-          </div>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
-            {tasks.map((task, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-xs">
-                {task.status === 'uploading' && <Loader2 size={12} className="animate-spin text-[#BD20D3]" />}
-                {task.status === 'done' && <div className="w-3 h-3 rounded-full bg-emerald-500" />}
-                {task.status === 'error' && <AlertCircle size={12} className="text-red-400" />}
-                <span className="truncate text-gray-300">{task.file.name}</span>
-                {task.status === 'done' && <span className="text-emerald-400 ml-auto">OK</span>}
-                {task.status === 'error' && <span className="text-red-400 ml-auto">Chyba</span>}
-              </div>
-            ))}
-          </div>
+      <div>
+        <Label className="text-gray-300 text-base font-semibold">Fotografie produktu</Label>
+        <p className="text-xs text-gray-400 mt-1">
+          Nahrajte fotky a zmeňte ich poradie presunutím. Prvá fotka bude automaticky nastavená ako hlavná.
+        </p>
+      </div>
+
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => !isUploading && fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
+          isUploading 
+            ? 'border-[#BD20D3]/50 bg-[#BD20D3]/5 cursor-wait' 
+            : isDragging 
+              ? 'border-[#BD20D3] bg-[#BD20D3]/10 cursor-pointer' 
+              : 'border-white/10 bg-black/30 hover:border-[#BD20D3]/50 hover:bg-white/5 cursor-pointer'
+        }`}
+      >
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          multiple
+          accept="image/*"
+          className="hidden"
+          disabled={isUploading}
+        />
+        <div className="w-12 h-12 rounded-full bg-[#BD20D3]/10 flex items-center justify-center text-[#BD20D3]">
+          <Upload size={24} />
         </div>
-      )}
+        <div>
+          <p className="text-white font-medium">
+            {isUploading ? 'Nahrávam...' : 'Kliknite sem alebo pretiahnite súbory'}
+          </p>
+        </div>
+      </div>
 
-      {/* Galéria existujúcich obrázkov */}
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {images.map((url, idx) => {
-            const isFirst = idx === 0;
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
+          {images.map((img, index) => {
+            const isMain = index === 0;
+            const isBeingDragged = dragIndex === index;
+            const isDragOver = overIndex === index;
+
             return (
-              <div
-                key={`${idx}-${url.substring(url.lastIndexOf('/') + 1).substring(0, 8)}`}
-                className="relative group aspect-square rounded-xl overflow-hidden border-2 transition-all"
-                style={{
-                  borderColor: isFirst ? '#BD20D3' : 'rgba(255,255,255,0.1)',
-                  boxShadow: isFirst ? '0 0 12px rgba(189,32,211,0.3)' : 'none',
-                }}
+              <div 
+                key={`${img}-${index}`} 
+                draggable
+                onDragStart={(e) => handleCardDragStart(e, index)}
+                onDragOver={(e) => handleCardDragOver(e, index)}
+                onDrop={(e) => handleCardDrop(e, index)}
+                onDragEnd={handleCardDragEnd}
+                className={`relative group rounded-xl overflow-hidden border bg-black/40 flex flex-col cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                  isMain ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]' : 'border-white/10'
+                } ${isBeingDragged ? 'opacity-40 scale-95' : ''} ${
+                  isDragOver ? 'border-[#BD20D3] bg-[#BD20D3]/10 scale-105' : ''
+                }`}
               >
-                <img
-                  src={url}
-                  alt={`Fotka ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200';
-                  }}
-                />
-
-                {isFirst && (
-                  <div className="absolute top-2 left-2 bg-[#BD20D3] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
-                    <Star size={10} fill="white" />
-                    Hlavná
-                  </div>
-                )}
-
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => moveImage(idx, 'left')}
-                      disabled={idx === 0}
-                      className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      title="Posunúť doľava"
-                    >
-                      <ChevronLeft size={14} className="text-white" />
-                    </button>
-                    <span className="text-xs text-white font-medium w-6 text-center">{idx + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => moveImage(idx, 'right')}
-                      disabled={idx === images.length - 1}
-                      className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      title="Posunúť doprava"
-                    >
-                      <ChevronRight size={14} className="text-white" />
-                    </button>
+                <div className="aspect-video w-full bg-zinc-900 relative">
+                  <img
+                    src={img}
+                    alt={`Náhľad ${index + 1}`}
+                    className="w-full h-full object-cover pointer-events-none"
+                    draggable={false}
+                  />
+                  
+                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white/80 p-1.5 rounded-lg">
+                    <GripVertical size={14} />
                   </div>
 
+                  {isMain && (
+                    <span className="absolute bottom-2 left-2 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-md">
+                      Hlavná
+                    </span>
+                  )}
+                  
                   <button
                     type="button"
-                    onClick={() => removeImage(idx)}
-                    className="w-7 h-7 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center transition-colors"
-                    title="Odstrániť"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(index);
+                    }}
+                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <X size={14} className="text-white" />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -188,28 +228,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
           })}
         </div>
       )}
-
-      {/* Tlačidlo pre nahratie */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="flex items-center gap-2 bg-[#BD20D3]/10 hover:bg-[#BD20D3]/20 text-[#BD20D3] border border-[#BD20D3]/30 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          <Upload size={16} />
-          {uploading ? 'Prebieha nahrávanie...' : images.length === 0 ? 'Pridať fotky' : 'Pridať ďalšie fotky'}
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-      </div>
     </div>
   );
 };
