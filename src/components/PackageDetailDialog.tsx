@@ -22,6 +22,10 @@ import {
   MapPin,
   Navigation,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Expand,
+  Minimize2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
@@ -38,6 +42,7 @@ export interface PackageOption {
   lightSpecs: string[];
   otherSpecs?: string[];
   warning?: string;
+  images?: string[];
 }
 
 interface AdditionalProduct {
@@ -227,6 +232,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const [packageUsedCounts, setPackageUsedCounts] = useState<Record<string, number>>({});
 
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   // Question dialog state
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
   const [questionFirstName, setQuestionFirstName] = useState("");
@@ -252,6 +261,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSelectedItem(null);
       setItemQuantity(1);
       setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
+      setLightboxOpen(false);
+      setLightboxIndex(0);
       setQuestionDialogOpen(false);
       setQuestionFirstName("");
       setQuestionLastName("");
@@ -386,6 +397,22 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     search();
     return () => { cancelled = true; };
   }, [debouncedCitySearch, deliverySelected, cityLocked]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const images = selectedPackage?.images || (selectedPackage?.image ? [selectedPackage.image] : []);
+      if (e.key === 'ArrowLeft') {
+        setLightboxIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        setLightboxIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+      } else if (e.key === 'Escape') {
+        setLightboxOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, selectedPackage]);
 
   const toggleDelivery = () => {
     if (deliverySelected) {
@@ -596,6 +623,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     selectedPackage.lightSpecs.length > 0 ||
     (selectedPackage.otherSpecs && selectedPackage.otherSpecs.length > 0);
 
+  // Images for lightbox
+  const allImages: string[] = (selectedPackage.images && selectedPackage.images.length > 0)
+    ? selectedPackage.images
+    : selectedPackage.image
+      ? [selectedPackage.image]
+      : [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-4 md:p-6 lg:p-8 shadow-2xl shadow-[#BD20D3]/20 overflow-y-auto max-h-[90vh] custom-scrollbar">
@@ -615,12 +649,64 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-3xl overflow-hidden p-5">
-            <div className="md:col-span-4 aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5">
-              <img
-                src={selectedPackage.image}
-                alt={selectedPackage.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="md:col-span-4">
+              {allImages.length > 0 ? (
+                <>
+                  {/* Main clickable image */}
+                  <div
+                    onClick={() => {
+                      setLightboxIndex(0);
+                      setLightboxOpen(true);
+                    }}
+                    className="aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer group relative"
+                  >
+                    <img
+                      src={allImages[0]}
+                      alt={selectedPackage.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                      <Expand className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                    </div>
+                  </div>
+                  {/* Thumbnails */}
+                  {allImages.length > 1 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                      {allImages.slice(0, 5).map((img, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setLightboxIndex(idx);
+                            setLightboxOpen(true);
+                          }}
+                          className={`w-12 h-12 rounded-lg overflow-hidden shrink-0 border transition-all hover:border-[#BD20D3]/50 ${
+                            idx === lightboxIndex && lightboxOpen ? 'border-[#BD20D3]' : 'border-white/10'
+                          }`}
+                        >
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                      {allImages.length > 5 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLightboxIndex(5);
+                            setLightboxOpen(true);
+                          }}
+                          className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-zinc-800 flex items-center justify-center text-[10px] text-gray-400 hover:text-white transition-colors"
+                        >
+                          +{allImages.length - 5}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 flex items-center justify-center">
+                  <Package size={40} className="text-gray-600" />
+                </div>
+              )}
             </div>
             <div className="md:col-span-8 flex flex-col justify-between space-y-4">
               <div>
@@ -1036,6 +1122,80 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           </div>
         </div>
       </DialogContent>
+
+      {/* Lightbox dialog */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="bg-black/95 border-white/10 max-w-4xl rounded-3xl p-0 overflow-hidden shadow-2xl shadow-black/80">
+          <div className="relative flex items-center justify-center min-h-[50vh] md:min-h-[70vh]">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute top-4 left-4 z-20 bg-black/60 border border-white/10 rounded-full px-3 py-1 text-xs text-white">
+              {lightboxIndex + 1} / {allImages.length}
+            </div>
+
+            {/* Previous button */}
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+                }}
+                className="absolute left-3 z-20 w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+
+            {/* Image */}
+            <img
+              src={allImages[lightboxIndex]}
+              alt={`${selectedPackage.name} – obrázok ${lightboxIndex + 1}`}
+              className="w-full h-full object-contain max-h-[80vh]"
+            />
+
+            {/* Next button */}
+            {allImages.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+                }}
+                className="absolute right-3 z-20 w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
+
+            {/* Thumbnail strip at bottom */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/60 border border-white/10 rounded-xl px-3 py-2 max-w-[90%] overflow-x-auto">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setLightboxIndex(idx)}
+                    className={`w-10 h-10 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                      idx === lightboxIndex ? 'border-[#BD20D3]' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
