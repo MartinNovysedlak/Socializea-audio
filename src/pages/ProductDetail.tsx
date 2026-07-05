@@ -21,7 +21,6 @@ import {
   CheckCircle2,
   ShoppingBag,
   Package,
-  Clock,
   Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -89,20 +88,23 @@ const ProductDetail = () => {
 
     try {
       const productName = item?.name || 'Neznámy produkt';
-      const productPrice = item?.price ? `${item.price} € / ks` : 'Neuvedená';
-      const productCondition = item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Bazár';
-      const quantity = inquiryQuantity > 0 ? inquiryQuantity : 1;
-      const totalPrice = item?.price ? `${(item.price * quantity).toFixed(2)} €` : '—';
 
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
         {
-          name: `${inquiryFirstName} ${inquiryLastName}`,
-          email: inquiryEmail,
-          phone: inquiryPhone || 'Neuvedený',
-          date: 'Kúpa produktu',
-          message: `${inquiryMessage || '—'}\n\nProdukt: ${productName}\nCena za kus: ${productPrice}\nPočet kusov: ${quantity}\nCelková cena: ${totalPrice}\nStav: ${productCondition}`,
+          message: `Meno: ${inquiryFirstName} ${inquiryLastName}
+Email: ${inquiryEmail}
+Telefón: ${inquiryPhone || 'Neuvedený'}
+Produkt: ${productName}
+Cena: ${item?.price ? `${item.price} € / ks` : 'Neuvedená'}
+Počet kusov: ${inquiryQuantity}
+Celková cena: ${item?.price ? `${(item.price * inquiryQuantity).toFixed(2)} €` : '—'}
+Stav: ${item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}
+
+Správa:
+${inquiryMessage || '—'}`,
+          title: 'Kúpa produktu',
         },
         'hlWKyd9fiWgqJJT3r'
       );
