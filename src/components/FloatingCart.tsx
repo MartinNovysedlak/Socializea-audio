@@ -351,7 +351,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const end = new Date(formData.dateTo);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 1;
+    // Vrátane oboch koncových dní: pi–po = 4 dni
+    return diffDays + 1;
   };
 
   const days = calculateDays();
