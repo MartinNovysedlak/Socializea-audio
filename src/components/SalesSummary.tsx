@@ -41,8 +41,8 @@ const SalesSummary = () => {
                   ))}
                 </ul>
 
-                <Link to="/predaj" className="inline-block">
-                  <Button className="btn-cyber h-14 px-8 rounded-xl text-lg group border-none">
+                <Link to="/predaj" className="block sm:inline-block">
+                  <Button className="btn-cyber h-14 w-full sm:w-auto px-4 sm:px-8 rounded-xl text-lg group border-none">
                     <ShoppingBag className="mr-2 w-5 h-5" />
                     Prejsť do ponuky predaja
                   </Button>

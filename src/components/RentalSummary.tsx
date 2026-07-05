@@ -60,8 +60,8 @@ const RentalSummary = () => {
                   </div>
                 </div>
 
-                <Link to="/prenajom" className="inline-block">
-                  <Button className="btn-cyber h-14 px-8 rounded-xl text-lg group border-none">
+                <Link to="/prenajom" className="block sm:inline-block">
+                  <Button className="btn-cyber h-14 w-full sm:w-auto px-4 sm:px-8 rounded-xl text-lg group border-none">
                     Objaviť možnosti prenájmu
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
