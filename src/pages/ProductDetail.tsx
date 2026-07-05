@@ -29,6 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { generateEmailHtml } from '@/utils/emailTemplates';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -87,23 +88,21 @@ const ProductDetail = () => {
     const toastId = toast.loading('Odosielam dopyt...');
 
     try {
-      const productName = item?.name || 'Neznámy produkt';
+      const htmlContent = generateEmailHtml('produkt', {
+        name: `${inquiryFirstName} ${inquiryLastName}`,
+        email: inquiryEmail,
+        phone: inquiryPhone || 'Neuvedený',
+        date: 'Kúpa produktu',
+        message: inquiryMessage || '—',
+        productName: item?.name || 'Neznámy produkt',
+        productPrice: `${item?.price ? `${item.price} €` : 'Neuvedená'}`,
+        productCondition: item?.condition === 'new' ? 'new' : 'used',
+      });
 
       await emailjs.send(
         'service_s8kq87k',
         'template_st0hc2f',
-        {
-          message_html: `Meno: ${inquiryFirstName} ${inquiryLastName}<br>
-Email: ${inquiryEmail}<br>
-Telefón: ${inquiryPhone || 'Neuvedený'}<br>
-Produkt: ${productName}<br>
-Cena: ${item?.price ? `${item.price} € / ks` : 'Neuvedená'}<br>
-Počet kusov: ${inquiryQuantity}<br>
-Celková cena: ${item?.price ? `${(item.price * inquiryQuantity).toFixed(2)} €` : '—'}<br>
-Stav: ${item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}<br><br>
-Správa:<br>${(inquiryMessage || '—').replace(/\n/g, '<br>')}`,
-          title: 'Kúpa produktu',
-        },
+        { message_html: htmlContent, title: '🛒 Dopyt na kúpu produktu' },
         'hlWKyd9fiWgqJJT3r'
       );
 
