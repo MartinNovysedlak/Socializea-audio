@@ -45,6 +45,7 @@ const ProductDetail = () => {
   const [inquiryLastName, setInquiryLastName] = useState('');
   const [inquiryPhone, setInquiryPhone] = useState('');
   const [inquiryEmail, setInquiryEmail] = useState('');
+  const [inquiryQuantity, setInquiryQuantity] = useState(1);
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -88,8 +89,10 @@ const ProductDetail = () => {
 
     try {
       const productName = item?.name || 'Neznámy produkt';
-      const productPrice = item?.price ? `${item.price} €` : 'Neuvedená';
+      const productPrice = item?.price ? `${item.price} € / ks` : 'Neuvedená';
       const productCondition = item?.condition === 'new' ? 'Nový kus' : 'B-Stock / Bazár';
+      const quantity = inquiryQuantity > 0 ? inquiryQuantity : 1;
+      const totalPrice = item?.price ? `${(item.price * quantity).toFixed(2)} €` : '—';
 
       await emailjs.send(
         'service_s8kq87k',
@@ -99,7 +102,7 @@ const ProductDetail = () => {
           email: inquiryEmail,
           phone: inquiryPhone || 'Neuvedený',
           date: 'Kúpa produktu',
-          message: `${inquiryMessage || '—'}\n\nProdukt: ${productName}\nCena: ${productPrice}\nStav: ${productCondition}`,
+          message: `${inquiryMessage || '—'}\n\nProdukt: ${productName}\nCena za kus: ${productPrice}\nPočet kusov: ${quantity}\nCelková cena: ${totalPrice}\nStav: ${productCondition}`,
         },
         'hlWKyd9fiWgqJJT3r'
       );
@@ -111,6 +114,7 @@ const ProductDetail = () => {
       setInquiryLastName('');
       setInquiryPhone('');
       setInquiryEmail('');
+      setInquiryQuantity(1);
       setInquiryMessage('');
     } catch {
       toast.dismiss(toastId);
@@ -164,11 +168,11 @@ const ProductDetail = () => {
     <>
       <Helmet>
         <title>{pageTitle}</title>
-        <meta name="description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € s DPH. Stav: ${conditionLabel}.`} />
+        <meta name="description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € / ks s DPH. Stav: ${conditionLabel}.`} />
         <meta name="keywords" content={`predaj ${item.name}, kúpa audio techniky, ${item.condition === 'new' ? 'nová technika' : 'bazár technika'}, Socializea, Čadca, Žilina`} />
         <link rel="canonical" href={`https://socializea.sk/predaj/${item.id}`} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € s DPH.`} />
+        <meta property="og:description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € / ks s DPH.`} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={`https://socializea.sk/predaj/${item.id}`} />
         <meta property="og:image" content={imagesList[0] || 'https://socializea.sk/logo.png'} />
@@ -178,7 +182,7 @@ const ProductDetail = () => {
         <meta property="product:condition" content={item.condition === 'new' ? 'new' : 'used'} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € s DPH.`} />
+        <meta name="twitter:description" content={`Kúpte si ${item.name} – ${item.description?.substring(0, 155) || ''}. Cena: ${item.price} € / ks s DPH.`} />
         <meta name="twitter:image" content={imagesList[0] || 'https://socializea.sk/logo.png'} />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -285,7 +289,7 @@ const ProductDetail = () => {
                   {item.name}
                 </h1>
                 <div className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3] flex items-baseline gap-2">
-                  {item.price} € <span className="text-xs text-gray-400 font-normal">s DPH</span>
+                  {item.price} € <span className="text-xs text-gray-400 font-normal">/ ks s DPH</span>
                 </div>
                 <p className="text-gray-300 text-base leading-relaxed whitespace-pre-line">
                   {item.description}
@@ -342,7 +346,7 @@ const ProductDetail = () => {
                   </h3>
                   <div className="flex items-baseline gap-2 mt-2 mb-4">
                     <span className="text-3xl font-extrabold text-[#BD20D3]">{item.price} €</span>
-                    <span className="text-xs text-gray-400">s DPH</span>
+                    <span className="text-xs text-gray-400">/ ks s DPH</span>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-5">
@@ -413,7 +417,7 @@ const ProductDetail = () => {
             <div className="flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/20 rounded-full px-3 py-1.5">
               <ShoppingBag size={14} className="text-[#BD20D3] shrink-0" />
               <span className="text-xs text-white font-medium truncate">{item?.name || 'Produkt'}</span>
-              <span className="text-xs text-[#BD20D3] font-bold ml-auto">{item?.price} €</span>
+              <span className="text-xs text-[#BD20D3] font-bold ml-auto">{item?.price} € / ks</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -472,6 +476,21 @@ const ProductDetail = () => {
                 value={inquiryPhone}
                 onChange={(e) => setInquiryPhone(e.target.value)}
                 placeholder="+421 901 234 567"
+                className="bg-black/40 border-white/10 text-white rounded-xl h-11"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1.5">
+                <ShoppingBag size={12} className="text-[#BD20D3]" /> Počet kusov *
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                max={99}
+                required
+                value={inquiryQuantity}
+                onChange={(e) => setInquiryQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 className="bg-black/40 border-white/10 text-white rounded-xl h-11"
               />
             </div>
