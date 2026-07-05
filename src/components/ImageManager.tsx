@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from 'react';
-import { Upload, X, Loader2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, X, Loader2, Star, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { equipmentService } from '@/lib/equipmentService';
 import { toast } from 'sonner';
 
@@ -10,38 +10,67 @@ interface ImageManagerProps {
   onChange: (images: string[]) => void;
 }
 
+interface UploadTask {
+  file: File;
+  status: 'pending' | 'uploading' | 'done' | 'error';
+  url?: string;
+}
+
 const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadCount, setUploadCount] = useState(0);
-  const [totalFiles, setTotalFiles] = useState(0);
+  const [tasks, setTasks] = useState<UploadTask[]>([]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const fileArray = Array.from(files);
+    
+    // Vytvoríme úlohy pre každý súbor
+    const newTasks: UploadTask[] = fileArray.map(file => ({
+      file,
+      status: 'pending',
+    }));
+    
+    setTasks(newTasks);
     setUploading(true);
-    setTotalFiles(files.length);
-    setUploadCount(0);
 
-    const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
-      const url = await equipmentService.uploadImage(file);
-      if (url) {
-        newUrls.push(url);
-      } else {
-        toast.error(`Nepodarilo sa nahrať súbor ${file.name}.`);
+    // Nahrávame postupne, aby sme mali prehľad
+    for (let i = 0; i < newTasks.length; i++) {
+      setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'uploading' } : t));
+      
+      try {
+        const url = await equipmentService.uploadImage(newTasks[i].file);
+        if (url) {
+          setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'done', url } : t));
+        } else {
+          setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'error' } : t));
+          toast.error(`Nepodarilo sa nahrať ${newTasks[i].file.name}`);
+        }
+      } catch (err) {
+        console.error('Unexpected upload error:', err);
+        setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'error' } : t));
+        toast.error(`Chyba pri nahrávaní ${newTasks[i].file.name}`);
       }
-      setUploadCount((prev) => prev + 1);
     }
 
-    onChange([...images, ...newUrls]);
+    // Po dokončení všetkých úloh pridáme len úspešné URL k existujúcim obrázkom
+    const successfulUrls = tasks
+      .filter(t => t.status === 'done' && t.url)
+      .map(t => t.url!);
+
+    if (successfulUrls.length > 0) {
+      onChange([...images, ...successfulUrls]);
+    }
+
+    // Reset
+    setTasks([]);
+    setUploading(false);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-
-    setUploading(false);
   };
 
   const removeImage = (index: number) => {
@@ -60,8 +89,38 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
     onChange(updated);
   };
 
+  const totalFiles = tasks.length;
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const errorCount = tasks.filter(t => t.status === 'error').length;
+
   return (
     <div className="space-y-4">
+      {/* Ukáž prebiehajúce nahrávanie */}
+      {uploading && tasks.length > 0 && (
+        <div className="bg-black/40 border border-white/10 rounded-xl p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">
+              Nahrávam {doneCount + errorCount}/{totalFiles}
+              {errorCount > 0 && <span className="text-red-400 ml-1">({errorCount} chýb)</span>}
+            </span>
+            <Loader2 size={14} className="animate-spin text-[#BD20D3]" />
+          </div>
+          <div className="space-y-1 max-h-32 overflow-y-auto">
+            {tasks.map((task, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-xs">
+                {task.status === 'uploading' && <Loader2 size={12} className="animate-spin text-[#BD20D3]" />}
+                {task.status === 'done' && <div className="w-3 h-3 rounded-full bg-emerald-500" />}
+                {task.status === 'error' && <AlertCircle size={12} className="text-red-400" />}
+                <span className="truncate text-gray-300">{task.file.name}</span>
+                {task.status === 'done' && <span className="text-emerald-400 ml-auto">OK</span>}
+                {task.status === 'error' && <span className="text-red-400 ml-auto">Chyba</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Galéria existujúcich obrázkov */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {images.map((url, idx) => {
@@ -85,7 +144,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
                   }}
                 />
 
-                {/* Hlavná fotografia odznak */}
                 {isFirst && (
                   <div className="absolute top-2 left-2 bg-[#BD20D3] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
                     <Star size={10} fill="white" />
@@ -93,9 +151,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
                   </div>
                 )}
 
-                {/* Ovládacie prvky pri hoveri */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5">
-                  {/* Poradie */}
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
@@ -118,7 +174,6 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
                     </button>
                   </div>
 
-                  {/* Zmazať */}
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}
@@ -134,7 +189,7 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
         </div>
       )}
 
-      {/* Upload tlačidlo */}
+      {/* Tlačidlo pre nahratie */}
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -143,17 +198,8 @@ const ImageManager: React.FC<ImageManagerProps> = ({ images, onChange }) => {
           className="flex items-center gap-2 bg-[#BD20D3]/10 hover:bg-[#BD20D3]/20 text-[#BD20D3] border border-[#BD20D3]/30 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <Upload size={16} />
-          {uploading ? 'Nahrávam...' : images.length === 0 ? 'Pridať fotky' : 'Pridať ďalšie fotky'}
+          {uploading ? 'Prebieha nahrávanie...' : images.length === 0 ? 'Pridať fotky' : 'Pridať ďalšie fotky'}
         </button>
-
-        {uploading && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <Loader2 size={16} className="animate-spin text-[#BD20D3]" />
-            <span>
-              Nahrávam {uploadCount}/{totalFiles} súborov…
-            </span>
-          </div>
-        )}
 
         <input
           ref={fileInputRef}

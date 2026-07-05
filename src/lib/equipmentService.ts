@@ -1,186 +1,96 @@
-import { supabase, EquipmentItem } from './supabase';
+import { supabase } from './supabase';
 
 export const equipmentService = {
-  async getAll(): Promise<EquipmentItem[]> {
+  async getAll() {
     const { data, error } = await supabase
       .from('equipment')
       .select('*')
-      .order('order_index', { ascending: true })
-      .order('created_at', { ascending: false });
+      .order('order_index', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching equipment:', error);
-      return [];
-    }
-
+    if (error) throw error;
     return data || [];
   },
 
-  async getById(id: string): Promise<EquipmentItem | null> {
+  async getById(id: string) {
     const { data, error } = await supabase
       .from('equipment')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (error) {
-      console.error('Error fetching equipment:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   },
 
-  async create(item: {
-    name: string;
-    category: 'sound' | 'lighting' | 'other';
-    pricePerDay: number;
-    available: number;
-    description: string;
-    mainImage?: string;
-    images: string[];
-    specifications: string[];
-    features: string[];
-  }): Promise<EquipmentItem | null> {
-    const { data: maxOrderData } = await supabase
-      .from('equipment')
-      .select('order_index')
-      .order('order_index', { ascending: false })
-      .limit(1)
-      .single();
-
-    const newOrderIndex = (maxOrderData?.order_index ?? -1) + 1;
-
+  async create(item: any) {
     const { data, error } = await supabase
       .from('equipment')
-      .insert({
-        name: item.name,
-        category: item.category,
-        price_per_day: item.pricePerDay,
-        available: item.available,
-        description: item.description,
-        main_image: item.mainImage || null,
-        images: item.images,
-        specifications: item.specifications,
-        features: item.features,
-        order_index: newOrderIndex
-      })
+      .insert(item)
       .select()
       .single();
 
-    if (error) {
-      console.error('Error creating equipment:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   },
 
-  async update(id: string, item: {
-    name?: string;
-    category?: 'sound' | 'lighting' | 'other';
-    pricePerDay?: number;
-    available?: number;
-    description?: string;
-    mainImage?: string;
-    images?: string[];
-    specifications?: string[];
-    features?: string[];
-  }): Promise<EquipmentItem | null> {
-    const updateData: any = {};
-    
-    if (item.name !== undefined) updateData.name = item.name;
-    if (item.category !== undefined) updateData.category = item.category;
-    if (item.pricePerDay !== undefined) updateData.price_per_day = item.pricePerDay;
-    if (item.available !== undefined) updateData.available = item.available;
-    if (item.description !== undefined) updateData.description = item.description;
-    if (item.mainImage !== undefined) updateData.main_image = item.mainImage;
-    if (item.images !== undefined) updateData.images = item.images;
-    if (item.specifications !== undefined) updateData.specifications = item.specifications;
-    if (item.features !== undefined) updateData.features = item.features;
-
+  async update(id: string, updates: any) {
     const { data, error } = await supabase
       .from('equipment')
-      .update(updateData)
+      .update(updates)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) {
-      console.error('Error updating equipment:', error);
-      return null;
-    }
-
+    if (error) throw error;
     return data;
   },
 
-  async updateOrder(updates: { id: string; order_index: number }[]): Promise<boolean> {
-    const promises = updates.map(({ id, order_index }) =>
-      supabase
-        .from('equipment')
-        .update({ order_index })
-        .eq('id', id)
-    );
-
-    const results = await Promise.all(promises);
-    const hasError = results.some(r => r.error);
-
-    if (hasError) {
-      console.error('Error updating order:', results);
-      return false;
-    }
-
-    return true;
-  },
-
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string) {
     const { error } = await supabase
       .from('equipment')
       .delete()
       .eq('id', id);
 
-    if (error) {
-      console.error('Error deleting equipment:', error);
-      return false;
-    }
+    return !error;
+  },
 
-    return true;
+  async updateOrder(updates: { id: string; order_index: number }[]) {
+    const promises = updates.map(({ id, order_index }) =>
+      supabase.from('equipment').update({ order_index }).eq('id', id)
+    );
+
+    const results = await Promise.all(promises);
+    return results.every((r) => !r.error);
   },
 
   async uploadImage(file: File): Promise<string | null> {
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substring(2);
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const fileName = `${timestamp}-${random}-${file.size}.${fileExt}`;
     const filePath = `${fileName}`;
+
+    console.log(`[Upload] Začínam nahrávať: ${fileName} (${(file.size / 1024).toFixed(1)} KB)`);
 
     const { error: uploadError } = await supabase.storage
       .from('equipment-images')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
     if (uploadError) {
-      console.error('Error uploading image:', uploadError);
+      console.error('[Upload] Chyba pri nahrávaní:', uploadError);
       return null;
     }
+
+    console.log('[Upload] Úspešne nahrané:', fileName);
 
     const { data } = supabase.storage
       .from('equipment-images')
       .getPublicUrl(filePath);
 
+    console.log('[Upload] Verejná URL:', data.publicUrl);
     return data.publicUrl;
   },
-
-  async deleteImage(url: string): Promise<boolean> {
-    const path = url.split('/').pop();
-    if (!path) return false;
-
-    const { error } = await supabase.storage
-      .from('equipment-images')
-      .remove([path]);
-
-    if (error) {
-      console.error('Error deleting image:', error);
-      return false;
-    }
-
-    return true;
-  }
 };
