@@ -1,4 +1,3 @@
-WEEKEND_DAYS to >= WEEKEND_DAYS so the calculation block appears one day earlier.">
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -369,7 +368,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const WEEKEND_DAYS = 3; // piatok + sobota + nedeľa = 3 dni
   const getPackageExtraDaysTotal = (pkg: PackageCartItem) => {
     const basePrice = getPackageTotal(pkg);
-    if (days < WEEKEND_DAYS) return 0;
+    if (days <= WEEKEND_DAYS) return 0;
     const extraDays = days - WEEKEND_DAYS;
     return extraDays * basePrice * 0.5;
   };
@@ -915,7 +914,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
                             <div className="flex justify-between text-gray-300"><span>1. deň (plná cena)</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
-                            <div className="flex justify-between text-gray-300"><span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : 'ďalšie dni'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Zľava za dlhodobý prenájom</span><span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>
                           </div>
                         )}
@@ -955,7 +954,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           ))}
                         </div>
 
-                        {days >= WEEKEND_DAYS && (
+                        {/* 🟢 Upravený blok – farba na zelenú a podmienka `>=` */}
+                        {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
                             <div className="flex justify-between text-gray-300">
