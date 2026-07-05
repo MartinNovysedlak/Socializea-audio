@@ -66,7 +66,7 @@ const InteractiveQuiz = () => {
             name: pkg.name,
             priceNoLights: pkg.price_no_lights,
             priceWithLights: pkg.price_with_lights,
-            image: (pkg.images && pkg.images.length > 0 ? pkg.images[0] : 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800'),
+            image: pkg.image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
             description: pkg.description,
             soundSpecs: pkg.sound_specs || [],
             lightSpecs: pkg.light_specs || [],

@@ -1,5 +1,3 @@
-"use client";
-
 import { supabase } from './supabase';
 
 export interface PackageData {
@@ -7,39 +5,33 @@ export interface PackageData {
   name: string;
   price_no_lights: number;
   price_with_lights: number;
-  images: string[];
+  image: string;
   description: string;
   sound_specs: string[];
   light_specs: string[];
   other_specs: string[];
   warning: string;
   created_at?: string;
+  updated_at?: string;
 }
 
-const TABLE = 'packages';
-
 export const packagesService = {
-  getAll: async (): Promise<PackageData[]> => {
+  async getAll(): Promise<PackageData[]> {
     const { data, error } = await supabase
-      .from(TABLE)
+      .from('packages')
       .select('*')
-      .order('id', { ascending: true });
+      .order('created_at', { ascending: true });
+
     if (error) {
       console.error('Error fetching packages:', error);
       return [];
     }
-    return (data || []).map(item => ({
-      ...item,
-      images: item.images || [],
-      sound_specs: item.sound_specs || [],
-      light_specs: item.light_specs || [],
-      other_specs: item.other_specs || [],
-    })) as PackageData[];
+    return data || [];
   },
 
-  getById: async (id: string): Promise<PackageData | null> => {
+  async getById(id: string): Promise<PackageData | null> {
     const { data, error } = await supabase
-      .from(TABLE)
+      .from('packages')
       .select('*')
       .eq('id', id)
       .single();
@@ -47,83 +39,69 @@ export const packagesService = {
       console.error('Error fetching package:', error);
       return null;
     }
-    return {
-      ...data,
-      images: data.images || [],
-      sound_specs: data.sound_specs || [],
-      light_specs: data.light_specs || [],
-      other_specs: data.other_specs || [],
-    } as PackageData;
+    return data;
   },
 
-  create: async (data: Omit<PackageData, 'id' | 'created_at'>): Promise<PackageData | null> => {
-    const { data: created, error } = await supabase
-      .from(TABLE)
+  async create(pkg: Omit<PackageData, 'id' | 'created_at' | 'updated_at'>): Promise<PackageData | null> {
+    const { data, error } = await supabase
+      .from('packages')
       .insert({
-        name: data.name,
-        price_no_lights: data.price_no_lights,
-        price_with_lights: data.price_with_lights,
-        images: data.images,
-        description: data.description,
-        sound_specs: data.sound_specs,
-        light_specs: data.light_specs,
-        other_specs: data.other_specs,
-        warning: data.warning,
+        name: pkg.name,
+        price_no_lights: pkg.price_no_lights,
+        price_with_lights: pkg.price_with_lights,
+        image: pkg.image,
+        description: pkg.description,
+        sound_specs: pkg.sound_specs,
+        light_specs: pkg.light_specs,
+        other_specs: pkg.other_specs,
+        warning: pkg.warning
       })
       .select()
       .single();
+
     if (error) {
       console.error('Error creating package:', error);
       return null;
     }
-    return {
-      ...created,
-      images: created.images || [],
-      sound_specs: created.sound_specs || [],
-      light_specs: created.light_specs || [],
-      other_specs: created.other_specs || [],
-    } as PackageData;
+    return data;
   },
 
-  update: async (id: string, data: Partial<Omit<PackageData, 'id' | 'created_at'>>): Promise<PackageData | null> => {
-    const { data: updated, error } = await supabase
-      .from(TABLE)
-      .update({
-        name: data.name,
-        price_no_lights: data.price_no_lights,
-        price_with_lights: data.price_with_lights,
-        images: data.images,
-        description: data.description,
-        sound_specs: data.sound_specs,
-        light_specs: data.light_specs,
-        other_specs: data.other_specs,
-        warning: data.warning,
-      })
+  async update(id: string, pkg: Partial<Omit<PackageData, 'id' | 'created_at' | 'updated_at'>>): Promise<PackageData | null> {
+    const updateData: any = {};
+    if (pkg.name !== undefined) updateData.name = pkg.name;
+    if (pkg.price_no_lights !== undefined) updateData.price_no_lights = pkg.price_no_lights;
+    if (pkg.price_with_lights !== undefined) updateData.price_with_lights = pkg.price_with_lights;
+    if (pkg.image !== undefined) updateData.image = pkg.image;
+    if (pkg.description !== undefined) updateData.description = pkg.description;
+    if (pkg.sound_specs !== undefined) updateData.sound_specs = pkg.sound_specs;
+    if (pkg.light_specs !== undefined) updateData.light_specs = pkg.light_specs;
+    if (pkg.other_specs !== undefined) updateData.other_specs = pkg.other_specs;
+    if (pkg.warning !== undefined) updateData.warning = pkg.warning;
+
+    const { data, error } = await supabase
+      .from('packages')
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
+
     if (error) {
       console.error('Error updating package:', error);
       return null;
     }
-    return {
-      ...updated,
-      images: updated.images || [],
-      sound_specs: updated.sound_specs || [],
-      light_specs: updated.light_specs || [],
-      other_specs: updated.other_specs || [],
-    } as PackageData;
+    return data;
   },
 
-  delete: async (id: string): Promise<boolean> => {
+  async delete(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from(TABLE)
+      .from('packages')
       .delete()
       .eq('id', id);
+
     if (error) {
       console.error('Error deleting package:', error);
       return false;
     }
     return true;
-  },
+  }
 };
