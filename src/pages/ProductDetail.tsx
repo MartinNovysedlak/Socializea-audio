@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { salesService, SalesItem } from '@/lib/salesService';
+// ... keep rest of imports
 import {
   ArrowLeft,
   Check,
@@ -328,7 +329,7 @@ const ProductDetail = () => {
             </div>
 
             <div className="lg:col-span-5">
-              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 space-y-6">
+              <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl p-6 md:p-8 sticky top-32 max-h-[calc(100vh-12rem)] overflow-y-auto space-y-6">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-2">
                     <span className="text-[#BD20D3]">💳</span> Mám záujem o produkt
