@@ -822,6 +822,99 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     })}
                   </div>
 
+                  {hasSomethingToShow && (
+                    <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
+
+                      <div
+                        onClick={() => { if (packageHasInstall) return; setInstallSelected(!installSelected); if (!installSelected) setInstallUninstallSelected(false); }}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${packageHasInstall ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : installSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${packageHasInstall ? 'border-gray-600 bg-gray-700' : installSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
+                            {packageHasInstall && <Ban size={10} className="text-gray-400" />}
+                            {!packageHasInstall && installSelected && <Check size={12} className="text-white stroke-[3]" />}
+                          </div>
+                          <span className={`text-xs font-medium ${packageHasInstall ? 'text-gray-500' : 'text-gray-300'}`}>{packageHasInstall ? 'Inštalácia (už v balíku)' : 'Inštalácia'}</span>
+                        </div>
+                        <span className={`text-xs font-bold ${packageHasInstall ? 'text-gray-600' : installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>{packageHasInstall ? '—' : '+20 €'}</span>
+                      </div>
+
+                      <div
+                        onClick={() => { if (packageHasInstall) return; setInstallUninstallSelected(!installUninstallSelected); if (!installUninstallSelected) setInstallSelected(false); }}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${packageHasInstall ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : installUninstallSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${packageHasInstall ? 'border-gray-600 bg-gray-700' : installUninstallSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
+                            {packageHasInstall && <Ban size={10} className="text-gray-400" />}
+                            {!packageHasInstall && installUninstallSelected && <Check size={12} className="text-white stroke-[3]" />}
+                          </div>
+                          <span className={`text-xs font-medium ${packageHasInstall ? 'text-gray-500' : 'text-gray-300'}`}>{packageHasInstall ? 'Inštalácia a deinštalácia (už v balíku)' : 'Inštalácia a deinštalácia'}</span>
+                        </div>
+                        <span className={`text-xs font-bold ${packageHasInstall ? 'text-gray-600' : installUninstallSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>{packageHasInstall ? '—' : '+40 €'}</span>
+                      </div>
+
+                      <div className="border-t border-white/[0.06] pt-2 space-y-2">
+                        <div className="relative" ref={cityRef}>
+                          <div
+                            onClick={() => { if (packageHasDelivery) return; toggleDelivery(); }}
+                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${packageHasDelivery ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+                          >
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${packageHasDelivery ? 'border-gray-600 bg-gray-700' : deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
+                              {packageHasDelivery && <Ban size={10} className="text-gray-400" />}
+                              {!packageHasDelivery && deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
+                            </div>
+                            <MapPin size={14} className={`shrink-0 ${packageHasDelivery ? 'text-gray-600' : deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
+                            <div className="flex-1 min-w-0">
+                              {packageHasDelivery ? (
+                                <span className="text-xs text-gray-500">Doprava (už v balíku)</span>
+                              ) : (
+                                <Input id="cart-city-input" type="text" value={deliveryCity} onChange={(e) => { setDeliveryCity(e.target.value); setDeliveryResult(null); setCityLocked(false); }} onKeyDown={handleCityKeyDown} onFocus={() => { if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true); }} placeholder="Mesto odberu (SK/CZ)..." readOnly={!deliverySelected} className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500" />
+                              )}
+                            </div>
+                            <div className="shrink-0 min-w-[70px] text-right">
+                              {packageHasDelivery ? <span className="text-xs text-gray-600">—</span> : deliverySelected && deliveryResult ? <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span> : <span className="text-xs text-gray-500">Vybrať</span>}
+                            </div>
+                            {!packageHasDelivery && deliverySelected && (
+                              <button type="button" onClick={(e) => { e.stopPropagation(); clearDelivery(); }} className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0"><X size={10} /></button>
+                            )}
+                          </div>
+                          {!packageHasDelivery && cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && !cityLocked && (
+                            <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-60 overflow-y-auto">
+                              {searchingCities && <div className="flex items-center justify-center gap-2 p-3 border-b border-white/[0.06] text-gray-500"><Loader2 size={14} className="animate-spin" /><span className="text-xs">Vyhľadávam...</span></div>}
+                              {citySuggestions.map((city, i) => (
+                                <button key={i} type="button" onClick={() => selectCity(city.name, city.lat, city.lng)} className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer">
+                                  <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-white truncate">{city.name}</p>
+                                    <span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">{city.postcode ? `${city.postcode}, ` : ''}{city.district || ''}</span>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>
+                                    {city.distToNearest !== undefined && city.distToNearest > 0 && (
+                                      <span className="text-[10px] text-gray-600 mt-0.5 block whitespace-nowrap">~{city.distToNearest} km od {city.nearestPoint}</span>
+                                    )}
+                                    {city.distToNearest !== undefined && city.distToNearest <= 0 && (
+                                      <span className="text-[10px] text-emerald-500/60 mt-0.5 block">v mieste odberu</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {!packageHasDelivery && deliverySelected && deliveryResult && (
+                            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                              <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>{deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price} €`}</span>
+                              {!deliveryResult.isFree && <span className="text-gray-400 flex items-center gap-1"><Navigation size={10} /> {deliveryResult.distance} km od {deliveryResult.nearestPoint}</span>}
+                              {deliveryResult.isKysuce && <span className="text-gray-500">(Kysuce – zadarmo)</span>}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-gray-500 leading-relaxed">Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="border-t border-white/10 pt-4 space-y-4">
                     {cartItems.length > 0 && (
                       <div>
@@ -893,66 +986,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       </div>
                     )}
 
-                    {/* Presunutý prehľadný výpočet – zobrazí sa len pri viac ako 2 dňoch */}
-                    {days > 2 && (
-                      <div className="mb-4 bg-[#BD20D3]/5 border border-[#BD20D3]/20 rounded-xl p-3 space-y-1.5 text-xs">
-                        <p className="text-[#BD20D3] font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
-                        {cartItems.length > 0 && (
-                          <>
-                            <div className="flex justify-between text-gray-300"><span>Aparatúra – 1. deň (plná cena)</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
-                            {days > 1 && (
-                              <div className="flex justify-between text-gray-300"><span>Aparatúra – ďalších {days - 1} {days - 1 === 1 ? 'deň' : 'dni'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
-                            )}
-                          </>
-                        )}
-                        {packageItems.length > 0 && packageItems.map((pkg, idx) => {
-                          const baseForDayDisplay = pkg.price;
-                          const adjustedDaily = calculatePackageTotal(baseForDayDisplay, days);
-                          if (days <= 2) {
-                            return (
-                              <div key={idx} className="flex justify-between text-gray-300">
-                                <span>Balík "{pkg.name}" – 2 dni (v cene)</span>
-                                <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
-                              </div>
-                            );
-                          }
-                          const extra = days - 2;
-                          const extraCost = extra * (baseForDayDisplay * 0.5);
-                          return (
-                            <div key={idx} className="flex justify-between text-gray-300">
-                              <span>Balík "{pkg.name}" – {days} dní ({extra} {extra === 1 ? 'deň' : 'dni'} navyše +50%)</span>
-                              <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
-                            </div>
-                          );
-                        })}
-                        {packagesExtrasTotal > 0 && (
-                          <div className="flex justify-between text-gray-300 border-t border-white/5 pt-1 mt-1">
-                            <span>Extras v balíkoch (× {days} dní)</span>
-                            <span className="text-white font-semibold">{packagesExtrasTotal.toFixed(2)} €</span>
-                          </div>
-                        )}
-                        {hasAnyAdditionalService && (
-                          <div className="border-t border-white/5 pt-1 mt-1">
-                            {installSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installCost} €</span></div>}
-                            {installUninstallSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span></div>}
-                            {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
-                              <div className="flex justify-between text-gray-300"><span>Inštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
-                            )}
-                            {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
-                              <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
-                            )}
-                            {deliverySelected && deliveryResult && (
-                              <div className="flex justify-between text-gray-300"><span>Doprava ({deliveryCity})</span><span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span></div>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex justify-between text-white font-bold text-sm border-t border-[#BD20D3]/30 pt-1.5 mt-1.5">
-                          <span>Celkom</span>
-                          <span className="text-[#BD20D3]">{grandTotal.toFixed(2)} €</span>
-                        </div>
-                      </div>
-                    )}
-
                     {((packageItems.length > 0 && hasAnyAdditionalService) || (cartItems.length > 0 && !packageItems.length && hasAnyAdditionalService)) && <div className="border-t border-white/10"></div>}
 
                     {hasAnyAdditionalService && (
@@ -989,6 +1022,64 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                 </div>
 
                 <div className="lg:col-span-7 bg-black/20 border border-white/10 rounded-2xl p-4 md:p-6 lg:p-8 lg:sticky lg:top-8 self-start">
+                  {/* Prehľadný výpočet ceny na základe dní – rovnaký štýl ako pri aparatúre */}
+                  <div className="mb-4 bg-[#BD20D3]/5 border border-[#BD20D3]/20 rounded-xl p-3 space-y-1.5 text-xs">
+                    <p className="text-[#BD20D3] font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
+                    {cartItems.length > 0 && (
+                      <>
+                        <div className="flex justify-between text-gray-300"><span>Aparatúra – 1. deň (plná cena)</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
+                        {days > 1 && (
+                          <div className="flex justify-between text-gray-300"><span>Aparatúra – ďalších {days - 1} {days - 1 === 1 ? 'deň' : 'dni'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
+                        )}
+                      </>
+                    )}
+                    {packageItems.length > 0 && packageItems.map((pkg, idx) => {
+                      const baseForDayDisplay = pkg.price;
+                      const adjustedDaily = calculatePackageTotal(baseForDayDisplay, days);
+                      if (days <= 2) {
+                        return (
+                          <div key={idx} className="flex justify-between text-gray-300">
+                            <span>Balík "{pkg.name}" – 2 dni (v cene)</span>
+                            <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
+                          </div>
+                        );
+                      }
+                      const extra = days - 2;
+                      const extraCost = extra * (baseForDayDisplay * 0.5);
+                      return (
+                        <div key={idx} className="flex justify-between text-gray-300">
+                          <span>Balík "{pkg.name}" – {days} dní ({extra} {extra === 1 ? 'deň' : 'dni'} navyše +50%)</span>
+                          <span className="text-white font-semibold">{adjustedDaily.toFixed(2)} €</span>
+                        </div>
+                      );
+                    })}
+                    {packagesExtrasTotal > 0 && (
+                      <div className="flex justify-between text-gray-300 border-t border-white/5 pt-1 mt-1">
+                        <span>Extras v balíkoch (× {days} dní)</span>
+                        <span className="text-white font-semibold">{packagesExtrasTotal.toFixed(2)} €</span>
+                      </div>
+                    )}
+                    {hasAnyAdditionalService && (
+                      <div className="border-t border-white/5 pt-1 mt-1">
+                        {installSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installCost} €</span></div>}
+                        {installUninstallSelected && <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia</span><span className="text-[#1A4BFF] font-semibold">+{installUninstallCost} €</span></div>}
+                        {!installSelected && !installUninstallSelected && packageInstallCount > 0 && (
+                          <div className="flex justify-between text-gray-300"><span>Inštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
+                        )}
+                        {!installSelected && !installUninstallSelected && packageInstallUninstallCount > 0 && (
+                          <div className="flex justify-between text-gray-300"><span>Inštalácia a deinštalácia (z balíkov)</span><span className="text-[#1A4BFF] font-semibold">+{packageItems.filter(p => p.install === 'install_uninstall').reduce((s, p) => s + p.installPrice, 0)} €</span></div>
+                        )}
+                        {deliverySelected && deliveryResult && (
+                          <div className="flex justify-between text-gray-300"><span>Doprava ({deliveryCity})</span><span className={deliveryResult.isFree ? 'text-emerald-400 font-semibold' : 'text-[#1A4BFF] font-semibold'}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span></div>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex justify-between text-white font-bold text-sm border-t border-[#BD20D3]/30 pt-1.5 mt-1.5">
+                      <span>Celkom</span>
+                      <span className="text-[#BD20D3]">{grandTotal.toFixed(2)} €</span>
+                    </div>
+                  </div>
+
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
