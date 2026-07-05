@@ -351,7 +351,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     const end = new Date(formData.dateTo);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1;
+    return diffDays > 0 ? diffDays : 1;
   };
 
   const days = calculateDays();
@@ -364,7 +364,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const deliveryCost = deliveryResult?.price ?? 0;
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
 
-  const WEEKEND_DAYS = 3;
+  // Výpočet pre balíky – víkend (pia-ne) je v cene, každý ďalší deň +50 % z ceny balíka
+  const WEEKEND_DAYS = 3; // piatok + sobota + nedeľa = 3 dni
   const getPackageExtraDaysTotal = (pkg: PackageCartItem) => {
     const basePrice = getPackageTotal(pkg);
     if (days <= WEEKEND_DAYS) return 0;
@@ -481,15 +482,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
         html += '</div>';
       });
-      // 🟢 Pridávame výpočet na dni pre balíky do HTML e-mailu (rovnako ako pre aparatúru)
-      if (days > WEEKEND_DAYS) {
-        html += '<div style="margin-top:12px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;font-size:12px;">';
-        html += `<div style="color:#10b981;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Výpočet na ${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</div>`;
-        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#d1d5db;">Víkend (pia–ne) v cene</span><span style="color:white;font-weight:600;">${packagesTotalWithoutExtra.toFixed(2)} €</span></div>`;
-        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:#d1d5db;">${days - WEEKEND_DAYS} ${days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span><span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>`;
-        html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(16,185,129,0.2);padding-top:8px;margin-top:4px;"><span style="color:#10b981;font-weight:600;">Príplatok za nadštandardné dni</span><span style="color:#10b981;font-weight:700;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>`;
-        html += '</div>';
-      }
     }
 
     if (installSelected || installUninstallSelected) {
@@ -962,6 +954,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           ))}
                         </div>
 
+                        {/* 🟢 Upravený blok – farba na zelenú a podmienka `>=` */}
                         {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
@@ -969,10 +962,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                               <span>Víkend (pia–ne) v cene</span>
                               <span className="text-white font-semibold">{packagesTotalWithoutExtra.toFixed(2)} €</span>
                             </div>
-                            <div className="flex justify-between text-gray-300">
-                              <span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span>
-                              <span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span>
-                            </div>
+                            {days > WEEKEND_DAYS && (
+                              <div className="flex justify-between text-gray-300">
+                                <span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span>
+                                <span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span>
+                              </div>
+                            )}
                             <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1">
                               <span>Príplatok za nadštandardné dni</span>
                               <span>+{packagesExtraDaysTotal.toFixed(2)} €</span>
