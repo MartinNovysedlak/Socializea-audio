@@ -66,10 +66,6 @@ const DJSection = () => {
                   <Button className="btn-cyber h-14 px-10 rounded-xl text-lg group border-none">
                     Kontaktujte nás
                   </Button>
-                  <div className="flex items-center gap-4 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium">
-                    <Disc className="animate-spin-slow text-[#BD20D3]" size={20} />
-                    Všetky žánre
-                  </div>
                 </div>
               </div>
             </div>
