@@ -171,6 +171,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     try { const saved = localStorage.getItem(PACKAGE_STORAGE_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
+  // 🟢 Must be declared early because useEffect below references it
   const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalItems = totalEquipmentQty + packageItems.length;
   const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => { const item = equipment.find((e) => e.id === id); return { item, qty }; }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
@@ -238,6 +239,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   useEffect(() => { if (isOpen) document.body.style.overflow = "hidden"; else document.body.style.overflow = "unset"; return () => { document.body.style.overflow = "unset"; }; }, [isOpen]);
   useEffect(() => { if (totalItems === 0 && isOpen) { setIsOpen(false); document.body.style.overflow = "unset"; } }, [totalItems, isOpen]);
 
+  // ... rest of component remains the same
   const calculateDays = () => {
     if (!formData.dateFrom || !formData.dateTo) return 1;
     const start = new Date(formData.dateFrom);
@@ -301,27 +303,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const buildCartSummaryHtml = () => {
     let html = '';
-    let equipmentTotal = 0;
-    let packagesSubtotal = 0;
-    let servicesTotal = 0;
-
     if (cartItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🎧 Aparatúra</h3>';
       html += '<table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:rgba(189,32,211,0.1);"><th style="padding:8px 12px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th><th style="padding:8px 12px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th><th style="padding:8px 12px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th></tr></thead><tbody>';
       cartItems.forEach(({ item, qty }) => {
-        const rowTotal = item.price_per_day * qty;
-        equipmentTotal += rowTotal;
-        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:8px 12px;color:white;">${item.name}</td><td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td><td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td><td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${rowTotal.toFixed(2)} €</td></tr>`;
+        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);"><td style="padding:8px 12px;color:white;">${item.name}</td><td style="padding:8px 12px;text-align:center;color:#BD20D3;font-weight:700;">${qty}x</td><td style="padding:8px 12px;text-align:right;color:#9ca3af;">${item.price_per_day.toFixed(2)} €</td><td style="padding:8px 12px;text-align:right;color:white;font-weight:600;">${(item.price_per_day * qty).toFixed(2)} €</td></tr>`;
       });
       html += '</tbody></table>';
-      html += `<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;"><span style="color:white;">Aparatúra spolu:</span><span style="color:#BD20D3;">${equipmentTotal.toFixed(2)} €</span></div>`;
     }
-
     if (packageItems.length > 0) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📦 Balíky</h3>';
       packageItems.forEach((pkg) => {
         const displayTotal = getPackageDisplayTotal(pkg);
-        packagesSubtotal += displayTotal;
         html += `<div style="background:rgba(189,32,211,0.05);border:1px solid rgba(189,32,211,0.2);border-radius:12px;padding:12px 16px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:white;font-size:14px;">${pkg.name}</strong><span style="color:#BD20D3;font-weight:700;font-size:14px;margin-left:24px;white-space:nowrap;">${displayTotal.toFixed(2)} €</span></div>`;
         if (pkg.hasLights) html += `<span style="display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.3);border-radius:8px;color:#BD20D3;font-size:11px;font-weight:600;">💡 So svetlami</span>`;
         if (pkg.install === 'install') html += `<span style="display:inline-block;margin-top:6px;margin-left:6px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inštalácia (+${pkg.installPrice} €)</span>`;
@@ -334,36 +327,33 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         }
         html += '</div>';
       });
-      html += `<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;"><span style="color:white;">Balíky spolu:</span><span style="color:#BD20D3;">${packagesSubtotal.toFixed(2)} €</span></div>`;
+      if (days > WEEKEND_DAYS && packagesExtraDaysTotal > 0) {
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-top:6px;"><span style="color:#10b981;">🌟 Príplatok za nadštandardné dni (balíky):</span><span style="color:#10b981;font-weight:600;white-space:nowrap;margin-left:24px;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>`;
+      }
     }
-
-    // Doplnkové služby
-    let servicesHtml = '';
-    let hasServices = false;
-    if (installSelected) { servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;white-space:nowrap;">+20 €</span></div>`; servicesTotal += 20; hasServices = true; }
-    if (installUninstallSelected) { servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;white-space:nowrap;">+40 €</span></div>`; servicesTotal += 40; hasServices = true; }
-    packageItems.filter(p => p.install === 'install').forEach(p => { servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia (z balíka ${p.name})</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;white-space:nowrap;">+${p.installPrice} €</span></div>`; servicesTotal += p.installPrice; hasServices = true; });
-    packageItems.filter(p => p.install === 'install_uninstall').forEach(p => { servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inšt.+Deinšt. (z balíka ${p.name})</span><span style="color:#1A4BFF;font-weight:700;margin-left:24px;white-space:nowrap;">+${p.installPrice} €</span></div>`; servicesTotal += p.installPrice; hasServices = true; });
-    if (deliveryResult) {
-      const label = deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`;
-      servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span><span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;margin-left:24px;white-space:nowrap;">${label}</span></div>`;
-      if (!deliveryResult.isFree) servicesTotal += deliveryResult.price;
-      hasServices = true;
-    }
-    packageItems.filter(p => p.arrival).forEach(p => {
-      const label = p.deliveryPrice > 0 ? `+${p.deliveryPrice} €` : 'Zdarma';
-      servicesHtml += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Doprava (${p.arrival?.name})</span><span style="color:${p.deliveryPrice > 0 ? '#1A4BFF' : '#10b981'};font-weight:700;margin-left:24px;white-space:nowrap;">${label}</span></div>`;
-      if (p.deliveryPrice > 0) servicesTotal += p.deliveryPrice;
-      hasServices = true;
-    });
-
-    if (hasServices) {
+    if (installSelected || installUninstallSelected) {
       html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🔧 Doplnkové služby</h3>';
-      html += servicesHtml;
-      html += `<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;"><span style="color:white;">Doplnkové služby spolu:</span><span style="color:#BD20D3;">${servicesTotal.toFixed(2)} €</span></div>`;
+      if (installSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;white-space:nowrap;margin-left:24px;">+20 €</span></div>`;
+      if (installUninstallSelected) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;white-space:nowrap;margin-left:24px;">+40 €</span></div>`;
     }
-
-    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;"><span style="color:white;font-size:18px;font-weight:700;">Celková suma</span><span style="color:#BD20D3;font-size:24px;font-weight:900;margin-left:24px;white-space:nowrap;">' + (equipmentTotal + packagesSubtotal + servicesTotal).toFixed(2) + ' €</span></div>';
+    if (deliveryResult) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">🚚 Doprava</h3>';
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Doprava do <strong style="color:white;">${deliveryCity}</strong></span><span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;white-space:nowrap;margin-left:24px;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span></div>`;
+      if (!deliveryResult.isFree) html += `<div style="color:#6b7280;font-size:11px;padding-bottom:4px;">~${deliveryResult.distance} km od ${deliveryResult.nearestPoint}, 0,70 €/km</div>`;
+      if (deliveryResult.isKysuce) html += `<div style="color:#10b981;font-size:11px;padding-bottom:4px;">✅ Kysuce – doprava zdarma</div>`;
+    }
+    if (totalEquipmentQty > 0) {
+      html += '<h3 style="color:#BD20D3;font-size:16px;margin:20px 0 10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">📅 Obdobie prenájmu</h3>';
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;white-space:nowrap;margin-left:24px;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Do:</span><span style="color:white;font-weight:600;white-space:nowrap;margin-left:24px;">${formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : 'Neuvedené'}</span></div>`;
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;white-space:nowrap;margin-left:24px;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>`;
+      if (days > 1) {
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">1. deň (plná cena):</span><span style="color:white;font-weight:600;white-space:nowrap;margin-left:24px;">${firstDayTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;"><span style="color:#9ca3af;">${days - 1} ${days - 1 === 1 ? 'ďalší deň' : days - 1 < 5 ? 'ďalšie dni' : 'ďalších dní'} (50% cena):</span><span style="color:white;font-weight:600;white-space:nowrap;margin-left:24px;">${additionalDaysTotal.toFixed(2)} €</span></div>`;
+        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px;margin-top:6px;"><span style="color:#10b981;">🌟 Zľava za dlhodobý prenájom:</span><span style="color:#10b981;font-weight:600;white-space:nowrap;margin-left:24px;">– ${((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>`;
+      }
+    }
+    html += '<div style="margin-top:20px;padding-top:16px;border-top:2px solid #BD20D3;display:flex;justify-content:space-between;align-items:center;"><span style="color:white;font-size:18px;font-weight:700;">Celková suma</span><span style="color:#BD20D3;font-size:24px;font-weight:900;white-space:nowrap;margin-left:24px;">' + (grandTotal + packagesTotal).toFixed(2) + ' €</span></div>';
     return html;
   };
 
