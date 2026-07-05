@@ -248,15 +248,15 @@ const ContactMap = () => {
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
             
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-white/5 pt-6 text-sm">
-              <div className="flex items-start gap-3 justify-center md:justify-start">
-                <span className="w-3 h-3 rounded-full bg-[#BD20D3] shrink-0 mt-1"></span>
+              <div className="flex items-start gap-3 mx-auto md:mx-0 max-w-[320px] md:max-w-none">
+                <span className="w-3 h-3 rounded-full bg-[#BD20D3] shrink-0 mt-1.5"></span>
                 <p className="text-gray-300">
                   <strong className="text-white block">Hlavný sklad a sídlo:</strong>
                   Čadečka 1924, 022 01 Čadca, Slovensko
                 </p>
               </div>
-              <div className="flex items-start gap-3 justify-center md:justify-start">
-                <span className="w-3 h-3 rounded-full bg-[#1A4BFF] shrink-0 mt-1"></span>
+              <div className="flex items-start gap-3 mx-auto md:mx-0 max-w-[320px] md:max-w-none">
+                <span className="w-3 h-3 rounded-full bg-[#1A4BFF] shrink-0 mt-1.5"></span>
                 <p className="text-gray-300">
                   <strong className="text-white block">Odberné miesto Žilina:</strong>
                   Vysokoškolská 4, 010 01 Žilina, Slovensko (Budova SADOP)
