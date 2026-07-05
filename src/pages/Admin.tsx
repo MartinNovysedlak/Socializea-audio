@@ -642,7 +642,12 @@ const Admin = () => {
 
   const handleOpenPackageEdit = (pkg: PackageData) => {
     setEditingPackage(pkg);
-    const existingImages = pkg.image ? [pkg.image] : [];
+    // ✅ DÔLEŽITÉ: načítame všetky existujúce obrázky z poľa images
+    const existingImages = pkg.images && pkg.images.length > 0
+      ? pkg.images
+      : pkg.image
+        ? [pkg.image]
+        : [];
     setPackageFormData({
       name: pkg.name,
       price_no_lights: pkg.price_no_lights,
@@ -676,11 +681,13 @@ const Admin = () => {
       return;
     }
 
+    // ✅ Vytvoríme payload s oboma poľami: image (prvý obrázok) aj images (všetky)
     const payload = {
       name: packageFormData.name.trim(),
       price_no_lights: Number(packageFormData.price_no_lights),
       price_with_lights: Number(packageFormData.price_with_lights),
       image: packageFormData.images[0] || '',
+      images: packageFormData.images,
       description: packageFormData.description.trim(),
       sound_specs: packageFormData.sound_specs,
       light_specs: packageFormData.light_specs,
