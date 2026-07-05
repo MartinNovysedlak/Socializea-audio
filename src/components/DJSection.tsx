@@ -1,10 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Music, Headphones, Mic2, Disc, Zap } from 'lucide-react';
+import DJContactDialog from './DJContactDialog';
 
 const DJSection = () => {
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+
   return (
     <section className="py-12 bg-transparent relative">
       <div className="container mx-auto px-4">
@@ -63,7 +66,10 @@ const DJSection = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <Button className="btn-cyber h-14 px-10 rounded-xl text-lg group border-none">
+                  <Button
+                    onClick={() => setContactDialogOpen(true)}
+                    className="btn-cyber h-14 px-10 rounded-xl text-lg group border-none"
+                  >
                     Kontaktujte nás
                   </Button>
                 </div>
@@ -74,6 +80,8 @@ const DJSection = () => {
           </div>
         </div>
       </div>
+
+      <DJContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
     </section>
   );
 };
