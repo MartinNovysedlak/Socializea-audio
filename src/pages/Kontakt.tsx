@@ -1,15 +1,23 @@
+"use client";
+
+import React from 'react';
 import Navbar from '@/components/Navbar';
 import ContactForm from '@/components/ContactForm';
 import ContactMap from '@/components/ContactMap';
 import Footer from '@/components/Footer';
+import ScrollReveal from '@/components/ScrollReveal';
 
 const Kontakt = () => {
   return (
     <>
       <Navbar />
       <div className="pt-24">
-        <ContactForm />
-        <ContactMap />
+        <ScrollReveal direction="up" delay={0.1}>
+          <ContactForm />
+        </ScrollReveal>
+        <ScrollReveal direction="up" delay={0.15}>
+          <ContactMap />
+        </ScrollReveal>
       </div>
       <Footer />
     </>
