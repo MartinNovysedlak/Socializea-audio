@@ -30,28 +30,27 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
     const toastId = toast.loading(`Nahrávam ${validImageFiles.length} obrázkov...`);
 
     try {
+      // Nahrať všetky súbory paralelne
+      const uploadPromises = validImageFiles.map(file => equipmentService.uploadImage(file));
+      const results = await Promise.allSettled(uploadPromises);
+      
       const successfulUrls: string[] = [];
       
-      // Nahrávame postupne jeden po druhom, aby sme predišli problémom so súbežnosťou
-      for (const file of validImageFiles) {
-        try {
-          const url = await equipmentService.uploadImage(file);
-          if (url) {
-            successfulUrls.push(url);
-          }
-        } catch (err) {
-          console.error(`Chyba pri nahrávaní súboru ${file.name}:`, err);
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value) {
+          successfulUrls.push(result.value);
+        } else {
+          console.error('Nepodarilo sa nahrať obrázok:', result.status === 'rejected' ? result.reason : 'neplatná URL');
         }
       }
       
       if (successfulUrls.length > 0) {
-        // Pridáme všetky úspešne nahrané URL k existujúcim
         onChange([...images, ...successfulUrls]);
         toast.dismiss(toastId);
-        toast.success(`Úspešne nahraných ${successfulUrls.length} obrázkov!`);
+        toast.success(`Úspešne nahraných ${successfulUrls.length} z ${validImageFiles.length} obrázkov!`);
       } else {
         toast.dismiss(toastId);
-        toast.error('Nepodarilo sa nahrať žiadne obrázky.');
+        toast.error('Nepodarilo sa nahrať žiadne obrázky. Skontrolujte pripojenie a skúste znova.');
       }
     } catch (error) {
       toast.dismiss(toastId);
@@ -59,7 +58,6 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       console.error(error);
     } finally {
       setIsUploading(false);
-      // Resetujeme input, aby bolo možné znova vybrať rovnaké súbory ak treba
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
