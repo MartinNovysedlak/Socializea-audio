@@ -1,4 +1,3 @@
-// Celý súbor FloatingCart.tsx – upravená funkcia getPackageExtraDaysTotal, packagesTotalWithoutExtra, texty v UI aj v buildCartSummaryHtml
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -397,7 +396,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       if (days > WEEKEND_DAYS && packagesExtraDaysTotal > 0) {
         html += `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;">
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
-            <span style="color:#9ca3af;">Víkend (pia–ne) v cene</span>
+            <span style="color:#9ca3af;">Víkend (2 noci) – všetky položky v cene</span>
             <span style="color:white;font-weight:600;">${packagesWeekendTotal.toFixed(2)} €</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
@@ -780,7 +779,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
-                            <div className="flex justify-between text-gray-300"><span>Víkend (pia–ne) – všetky položky v cene</span><span className="text-white font-semibold">{packagesWeekendTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>Víkend (2 noci) – všetky položky v cene</span><span className="text-white font-semibold">{packagesWeekendTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-gray-300"><span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 % základnej ceny)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Príplatok za nadštandardné dni (len základ balíka)</span><span>+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                           </div>
