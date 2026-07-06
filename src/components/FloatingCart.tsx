@@ -281,10 +281,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const hasSomethingToShow = totalEquipmentQty > 0 || packageItems.length > 0;
 
   const getPackageDisplayTotal = (pkg: PackageCartItem) => {
-    // Základná cena za víkend (všetky služby vrátane) + príplatok za ďalšie dni (len zo základu)
-    const baseWeekend = pkg.price + pkg.installPrice + pkg.deliveryPrice + pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0);
-    const extra = getPackageExtraDaysTotal(pkg);
-    return baseWeekend + extra;
+    // Len základná cena balíka (podľa svetiel/bez) + príplatok za ďalšie dni, bez služieb a doplnkov
+    return pkg.price + getPackageExtraDaysTotal(pkg);
   };
 
   const handleQuantityChange = (id: string, delta: number) => {
@@ -700,7 +698,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           </div>
                           {!packageHasDelivery && cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && !cityLocked && (
                             <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-60 overflow-y-auto">
-                              {searchingCities && <div className="flex items-center justify-center gap-2 p-3 border-b border-white/[0.06] text-gray-500"><Loader2 size={14} className="animate-spin" /><span className="text-xs">Vyhľadávam...</span></div>}
+                              {searchingCities && <div className="flex items-center justify-center gap-2 p-3 border-b border-white/[0.06] text-gray-500"><Loader2 size={14} className="animate-spin" /><span className="text-xs">Vyhľadávám...</span></div>}
                               {citySuggestions.map((city, i) => (
                                 <button key={i} type="button" onClick={() => selectCity(city.name, city.lat, city.lng)} className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer">
                                   <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
