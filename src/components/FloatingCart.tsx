@@ -1,3 +1,4 @@
+// Celý súbor FloatingCart.tsx – upravená len časť buildCartSummaryHtml v časti "💰 Súhrn objednávky" pre lepšie zarovnanie cien
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -447,22 +448,22 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>
       </div>`;
 
-    // 💰 Celková suma – veľký prehľadný blok
+    // 💰 Celková suma – veľký prehľadný blok (upravené zarovnanie cien)
     const totalPrice = grandTotal + packagesTotal;
     const equipSubtotalBase = firstDayTotal + additionalDaysTotal;
     html += `
       <div style="background:linear-gradient(135deg,rgba(189,32,211,0.08),rgba(26,75,255,0.05));border:2px solid rgba(189,32,211,0.3);border-radius:18px;padding:20px 24px;">
         <h3 style="margin:0 0 14px 0;color:#BD20D3;font-size:16px;font-weight:700;text-align:center;border-bottom:1px solid rgba(189,32,211,0.15);padding-bottom:10px;">💰 Súhrn objednávky</h3>`;
-    if (cartItems.length > 0) html += `<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🎧 Aparatúra</span><span style="color:white;font-weight:600;">${equipSubtotalBase.toFixed(2)} €</span></div>`;
-    if (packageItems.length > 0) html += `<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">📦 Balíky</span><span style="color:white;font-weight:600;">${packagesTotal.toFixed(2)} €</span></div>`;
+    if (cartItems.length > 0) html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🎧 Aparatúra</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${equipSubtotalBase.toFixed(2)} €</span></div>`;
+    if (packageItems.length > 0) html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">📦 Balíky</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${packagesTotal.toFixed(2)} €</span></div>`;
     if (hasServices) {
       const servicesTotalCalc = (installSelected ? 20 : 0) + (installUninstallSelected ? 40 : 0) + (deliveryResult?.price ?? 0) +
         packageItems.reduce((s, p) => s + p.installPrice + (p.arrival ? p.deliveryPrice : 0), 0);
-      html += `<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🔧 Doplnkové služby</span><span style="color:white;font-weight:600;">${servicesTotalCalc.toFixed(2)} €</span></div>`;
+      html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🔧 Doplnkové služby</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${servicesTotalCalc.toFixed(2)} €</span></div>`;
     }
-    html += `<div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:2px solid #BD20D3;align-items:center;">
+    html += `<div style="display:flex;align-items:center;margin-top:14px;padding-top:14px;border-top:2px solid #BD20D3;">
       <span style="color:white;font-size:18px;font-weight:800;">Celková suma</span>
-      <span style="color:#BD20D3;font-size:26px;font-weight:900;">${totalPrice.toFixed(2)} €</span>
+      <span style="margin-left:auto;color:#BD20D3;font-size:26px;font-weight:900;min-width:120px;text-align:right;">${totalPrice.toFixed(2)} €</span>
     </div></div>`;
 
     return html;

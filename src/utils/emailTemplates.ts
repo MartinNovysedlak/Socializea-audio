@@ -143,11 +143,6 @@ function buildReservationContent(data: ReservationFormData): string {
       ${data.cartSummaryHtml}
     </div>
 
-    <div style="margin-top:16px;padding:12px;background:rgba(189,32,211,0.1);border:1px solid rgba(189,32,211,0.2);border-radius:12px;text-align:center;">
-      <p style="color:#9ca3af;font-size:13px;margin:0 0 4px;">Počet dní prenájmu: <strong style="color:white;">${data.days}</strong></p>
-      <p style="color:white;font-size:20px;font-weight:900;margin:0;">Celková suma: <span style="color:#BD20D3;">${data.totalPrice.toFixed(2)} €</span></p>
-    </div>
-
     ${buildMessageBlock(data.message)}
   `;
 }
