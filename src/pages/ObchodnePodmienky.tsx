@@ -10,8 +10,8 @@ const ObchodnePodmienky = () => {
   return (
     <>
       <Helmet>
-        <title>Obchodné podmienky | Socializea Audio – Prenájom & Predaj Techniky</title>
-        <meta name="description" content="Úplné obchodné podmienky prenájmu a predaja profesionálnej zvukovej a svetelnej techniky Socializea Audio. Podmienky rezervácie, dodania, zodpovednosti za škodu." />
+        <title>Obchodné podmienky | Socializea-audio – Prenájom & Predaj Techniky</title>
+        <meta name="description" content="Úplné obchodné podmienky prenájmu a predaja profesionálnej zvukovej a svetelnej techniky Socializea-audio. Podmienky rezervácie, dodania, zodpovednosti za škodu." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://socializea.sk/obchodne-podmienky" />
       </Helmet>
@@ -29,18 +29,19 @@ const ObchodnePodmienky = () => {
 
             <p className="text-gray-400 text-sm border-b border-white/5 pb-4">
               <strong className="text-white">Dátum účinnosti:</strong> 1. 1. 2025 | 
-              <strong className="text-white ml-3">Verzia:</strong> 1.4
+              <strong className="text-white ml-3">Verzia:</strong> 1.5
             </p>
 
             <div className="text-gray-300 space-y-6 text-sm md:text-base leading-relaxed">
 
               <h2 className="text-xl font-bold text-white">1. Identifikačné údaje a rozsah platnosti</h2>
               <p>
-                1.1. Tieto obchodné podmienky (ďalej len „Podmienky") v zmysle § 273 ods. 1 zákona č. 513/1991 Zb. Obchodného zákonníka v platnom znení upravujú vzájomné práva a povinnosti medzi <strong className="text-white">Prenajímateľom / Predávajúcim</strong> – podnikateľom fyzickou osobou (ďalej len „Prenajímateľ" alebo „Predávajúci") a fyzickou alebo právnickou osobou (ďalej len „Nájomca" alebo „Kupujúci") pri poskytovaní služieb prenájmu a predaja zvukovej, svetelnej a súvisiacej techniky, ako aj súvisiacich doplnkových služieb (inštalácia, doprava, obsluha).
+                1.1. Tieto obchodné podmienky (ďalej len „Podmienky") v zmysle § 273 ods. 1 zákona č. 513/1991 Zb. Obchodného zákonníka v platnom znení upravujú vzájomné práva a povinnosti medzi <strong className="text-white">Prenajímateľom / Predávajúcim</strong> – podnikateľom fyzickou osobou pod obchodným menom Socializea-audio (ďalej len „Prenajímateľ" alebo „Predávajúci") a fyzickou alebo právnickou osobou (ďalej len „Nájomca" alebo „Kupujúci") pri poskytovaní služieb prenájmu a predaja zvukovej, svetelnej a súvisiacej techniky, ako aj súvisiacich doplnkových služieb (inštalácia, doprava, obsluha).
               </p>
               <p>
                 1.2. <strong className="text-white">Prenajímateľ / Predávajúci:</strong><br />
-                Meno a priezvisko: Matej Novysedlák<br />
+                Obchodné meno: Socializea-audio<br />
+                Meno a priezvisko: Martin Novysedlák<br />
                 Miesto podnikania: Čadečka 1924, 022 01 Čadca, Slovenská republika<br />
                 Kontaktný e-mail: socializea@socializea.com<br />
                 Telefón: +421 948 070 577<br />
@@ -296,7 +297,7 @@ const ObchodnePodmienky = () => {
               </p>
 
               <div className="border-t border-white/5 pt-6 mt-6 text-xs text-gray-500">
-                <p>Matej Novysedlák | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
+                <p>Socializea-audio (Martin Novysedlák) | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
                 <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea.sk</p>
               </div>
             </div>

@@ -10,7 +10,7 @@ const PodmienkyPouzivania = () => {
   return (
     <>
       <Helmet>
-        <title>Podmienky používania a Ochrana súkromia | Socializea Audio</title>
+        <title>Podmienky používania a Ochrana súkromia | Socializea-audio</title>
         <meta name="description" content="Podmienky používania webovej stránky socializea.sk vrátane ochrany osobných údajov (GDPR), cookies politiky a autorských práv." />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://socializea.sk/podmienky-pouzivania" />
@@ -29,7 +29,7 @@ const PodmienkyPouzivania = () => {
 
             <p className="text-gray-400 text-sm border-b border-white/5 pb-4">
               <strong className="text-white">Dátum účinnosti:</strong> 1. 1. 2025 | 
-              <strong className="text-white ml-3">Verzia:</strong> 2.1
+              <strong className="text-white ml-3">Verzia:</strong> 2.2
             </p>
 
             <div className="text-gray-300 space-y-6 text-sm md:text-base leading-relaxed">
@@ -39,7 +39,7 @@ const PodmienkyPouzivania = () => {
                 1.1. Tieto Podmienky používania a ochrany súkromia (ďalej len „Podmienky používania") upravujú pravidlá, za ktorých môžete používať webovú stránku <strong className="text-white">socializea.sk</strong> (ďalej len „Webová stránka") a všetky jej podstránky, služby a funkcionality.
               </p>
               <p>
-                1.2. Prevádzkovateľom Webovej stránky je <strong className="text-white">Matej Novysedlák</strong>, miesto podnikania Čadečka 1924, 022 01 Čadca, živnosť zapísaná v živnostenskom registri Okresného úradu Čadca (ďalej len „Prevádzkovateľ").
+                1.2. Prevádzkovateľom Webovej stránky je <strong className="text-white">Socializea-audio (Martin Novysedlák)</strong>, miesto podnikania Čadečka 1924, 022 01 Čadca, živnosť zapísaná v živnostenskom registri Okresného úradu Čadca (ďalej len „Prevádzkovateľ").
               </p>
               <p>
                 1.3. Používaním Webovej stránky vyjadrujete súhlas s týmito Podmienkami používania. Ak s nimi nesúhlasíte, Webovú stránku nepoužívajte a neposkytujte prostredníctvom nej žiadne osobné údaje.
@@ -109,7 +109,7 @@ const PodmienkyPouzivania = () => {
 
               <h3 className="text-lg font-bold text-white mt-6">6.2. Správca osobných údajov</h3>
               <p>
-                Správcom osobných údajov je Matej Novysedlák, Čadečka 1924, 022 01 Čadca, e-mail: socializea@socializea.com. Prevádzkovateľ nemenoval zodpovednú osobu (DPO), keďže na to nie je zo zákona povinný.
+                Správcom osobných údajov je Socializea-audio (Martin Novysedlák), Čadečka 1924, 022 01 Čadca, e-mail: socializea@socializea.com. Prevádzkovateľ nemenoval zodpovednú osobu (DPO), keďže na to nie je zo zákona povinný.
               </p>
 
               <h3 className="text-lg font-bold text-white mt-6">6.3. Aké osobné údaje spracúvame a na aký účel</h3>
@@ -223,7 +223,7 @@ const PodmienkyPouzivania = () => {
               </p>
 
               <div className="border-t border-white/5 pt-6 mt-6 text-xs text-gray-500">
-                <p>Matej Novysedlák | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
+                <p>Socializea-audio (Martin Novysedlák) | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
                 <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea.sk</p>
               </div>
             </div>
