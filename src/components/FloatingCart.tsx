@@ -1,4 +1,4 @@
-// Celý súbor FloatingCart.tsx – upravená len časť buildCartSummaryHtml v časti "💰 Súhrn objednávky" pre lepšie zarovnanie cien
+// Celý súbor FloatingCart.tsx – upravená funkcia getPackageExtraDaysTotal, packagesTotalWithoutExtra, texty v UI aj v buildCartSummaryHtml
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -255,14 +255,24 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
 
   const WEEKEND_DAYS = 3;
+
+  // Príplatok za ďalšie dni (nad rámec víkendu) – iba zo základnej ceny balíka, bez inštalácie, dopravy a doplnkov
   const getPackageExtraDaysTotal = (pkg: PackageCartItem) => {
-    const basePrice = pkg.price + pkg.installPrice + pkg.deliveryPrice + pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0);
     if (days <= WEEKEND_DAYS) return 0;
-    return (days - WEEKEND_DAYS) * basePrice * 0.5;
+    return (days - WEEKEND_DAYS) * pkg.price * 0.5;
   };
-  const packagesTotalWithoutExtra = packageItems.reduce((sum, p) => sum + p.price + p.installPrice + p.deliveryPrice + p.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0), 0);
+
+  // Celková cena balíka za víkendové obdobie (vrátane všetkých služieb a doplnkov)
+  const packagesWeekendTotal = packageItems.reduce((sum, p) =>
+    sum + p.price + p.installPrice + p.deliveryPrice + p.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0), 0
+  );
+
+  // Príplatok za ďalšie dni pre všetky balíky
   const packagesExtraDaysTotal = packageItems.reduce((sum, p) => sum + getPackageExtraDaysTotal(p), 0);
-  const packagesTotal = packagesTotalWithoutExtra + packagesExtraDaysTotal;
+
+  // Celková cena všetkých balíkov
+  const packagesTotal = packagesWeekendTotal + packagesExtraDaysTotal;
+
   const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
   const packageHasDelivery = packageItems.some(p => p.arrival !== null);
   const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
@@ -271,9 +281,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const hasSomethingToShow = totalEquipmentQty > 0 || packageItems.length > 0;
 
   const getPackageDisplayTotal = (pkg: PackageCartItem) => {
-    const base = pkg.price + pkg.installPrice + pkg.deliveryPrice + pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0);
+    // Základná cena za víkend (všetky služby vrátane) + príplatok za ďalšie dni (len zo základu)
+    const baseWeekend = pkg.price + pkg.installPrice + pkg.deliveryPrice + pkg.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0);
     const extra = getPackageExtraDaysTotal(pkg);
-    return base + extra;
+    return baseWeekend + extra;
   };
 
   const handleQuantityChange = (id: string, delta: number) => {
@@ -386,9 +397,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         html += `</div>`;
       });
       if (days > WEEKEND_DAYS && packagesExtraDaysTotal > 0) {
-        html += `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:10px 14px;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0;"><span style="color:#9ca3af;">Víkend (pia–ne) v cene</span><span style="color:white;font-weight:600;">${packagesTotalWithoutExtra.toFixed(2)} €</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0;"><span style="color:#9ca3af;">Ďalšie dni (nad rámec víkendu, +50%)</span><span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>
+        html += `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
+            <span style="color:#9ca3af;">Víkend (pia–ne) v cene</span>
+            <span style="color:white;font-weight:600;">${packagesWeekendTotal.toFixed(2)} €</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
+            <span style="color:#9ca3af;">Ďalšie dni (+50 % zo základnej ceny balíka)</span>
+            <span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span>
+          </div>
         </div>`;
       }
       html += `<div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
@@ -448,7 +465,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>
       </div>`;
 
-    // 💰 Celková suma – veľký prehľadný blok (upravené zarovnanie cien)
+    // 💰 Celková suma – veľký prehľadný blok
     const totalPrice = grandTotal + packagesTotal;
     const equipSubtotalBase = firstDayTotal + additionalDaysTotal;
     html += `
@@ -765,9 +782,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
-                            <div className="flex justify-between text-gray-300"><span>Víkend (pia–ne) v cene</span><span className="text-white font-semibold">{packagesTotalWithoutExtra.toFixed(2)} €</span></div>
-                            <div className="flex justify-between text-gray-300"><span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 %)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
-                            <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Príplatok za nadštandardné dni</span><span>+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>Víkend (pia–ne) – všetky položky v cene</span><span className="text-white font-semibold">{packagesWeekendTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 % základnej ceny)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Príplatok za nadštandardné dni (len základ balíka)</span><span>+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                           </div>
                         )}
 
