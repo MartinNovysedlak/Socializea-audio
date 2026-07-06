@@ -29,26 +29,23 @@ const ObchodnePodmienky = () => {
 
             <p className="text-gray-400 text-sm border-b border-white/5 pb-4">
               <strong className="text-white">Dátum účinnosti:</strong> 1. 1. 2025 | 
-              <strong className="text-white ml-3">Verzia:</strong> 1.3
+              <strong className="text-white ml-3">Verzia:</strong> 1.4
             </p>
 
             <div className="text-gray-300 space-y-6 text-sm md:text-base leading-relaxed">
 
               <h2 className="text-xl font-bold text-white">1. Identifikačné údaje a rozsah platnosti</h2>
               <p>
-                1.1. Tieto obchodné podmienky (ďalej len „Podmienky") v zmysle § 273 ods. 1 zákona č. 513/1991 Zb. Obchodného zákonníka v platnom znení upravujú vzájomné práva a povinnosti medzi <strong className="text-white">Societate</strong> – podnikateľom fyzickou osobou (ďalej len „Prenajímateľ" alebo „Predávajúci") a fyzickou alebo právnickou osobou (ďalej len „Nájomca" alebo „Kupujúci") pri poskytovaní služieb prenájmu a predaja zvukovej, svetelnej a súvisiacej techniky, ako aj súvisiacich doplnkových služieb (inštalácia, doprava, obsluha).
+                1.1. Tieto obchodné podmienky (ďalej len „Podmienky") v zmysle § 273 ods. 1 zákona č. 513/1991 Zb. Obchodného zákonníka v platnom znení upravujú vzájomné práva a povinnosti medzi <strong className="text-white">Prenajímateľom / Predávajúcim</strong> – podnikateľom fyzickou osobou (ďalej len „Prenajímateľ" alebo „Predávajúci") a fyzickou alebo právnickou osobou (ďalej len „Nájomca" alebo „Kupujúci") pri poskytovaní služieb prenájmu a predaja zvukovej, svetelnej a súvisiacej techniky, ako aj súvisiacich doplnkových služieb (inštalácia, doprava, obsluha).
               </p>
               <p>
                 1.2. <strong className="text-white">Prenajímateľ / Predávajúci:</strong><br />
-                Obchodné meno: Societate<br />
-                Sídlo: Čadečka 1924, 022 01 Čadca, Slovenská republika<br />
-                IČO: 56 375 383<br />
-                DIČ: 1084450218<br />
-                IČ DPH: SK1084450218<br />
+                Meno a priezvisko: Matej Novysedlák<br />
+                Miesto podnikania: Čadečka 1924, 022 01 Čadca, Slovenská republika<br />
                 Kontaktný e-mail: socializea@socializea.com<br />
                 Telefón: +421 948 070 577<br />
                 Web: socializea.sk<br />
-                Zápis: Živnostenský register Okresného úradu Čadca
+                Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca
               </p>
               <p>
                 1.3. Tieto Podmienky sú záväzné pre všetky právne vzťahy vzniknuté medzi zmluvnými stranami v súvislosti s používaním webovej stránky socializea.sk, odoslaním objednávky, rezervácie alebo dopytu prostredníctvom formulárov na webovej stránke, e-mailovej komunikácie alebo telefonickej dohody.
@@ -76,7 +73,7 @@ const ObchodnePodmienky = () => {
 
               <h2 className="text-xl font-bold text-white">3. Rezervácia a vznik zmluvného vzťahu</h2>
               <p>
-                3.1. Rezervácia Techniky sa vykonáva prostredníctvom rezervačného formulára na webovej stránke socializea.sk, e-mailom na adresu socializea@socializea.com, telefonicky na čísle +421 948 070 577 alebo osobnou návštevou v sídle spoločnosti.
+                3.1. Rezervácia Techniky sa vykonáva prostredníctvom rezervačného formulára na webovej stránke socializea.sk, e-mailom na adresu socializea@socializea.com, telefonicky na čísle +421 948 070 577 alebo osobnou návštevou v mieste podnikania.
               </p>
               <p>
                 3.2. Zaslaním rezervácie alebo objednávky Nájomca potvrdzuje, že sa oboznámil s týmito Podmienkami a bez výhrad s nimi súhlasí.
@@ -106,7 +103,7 @@ const ObchodnePodmienky = () => {
                 <br />- Každá ďalšia noc nad rámec 3 dní: 50 % zo základnej ceny balíka (bez príplatkov za svetlá, inštaláciu alebo dopravu).
               </p>
               <p>
-                4.5. Platba za prenájom je splatná pri prevzatí Techniky. Spôsoby platby: hotovosť, bankový prevod (faktúra so splatnosťou), platba kartou na mieste (ak je technicky možné).
+                4.5. Platba za prenájom je splatná pri prevzatí Techniky. Spôsoby platby: hotovosť, bankový prevod, platba kartou na mieste (ak je technicky možné).
               </p>
               <p>
                 4.6. Na základe dohody je možné vystaviť zálohovú faktúru. Záloha je v takom prípade splatná do 7 dní od vystavenia faktúry.
@@ -120,7 +117,7 @@ const ObchodnePodmienky = () => {
                 5.1. Ceny pri predaji Techniky sú uvedené na webovej stránke a sú konečné vrátane DPH, pokiaľ nie je uvedené inak.
               </p>
               <p>
-                5.2. Kupujúci je povinný uhradiť kúpnu cenu v plnej výške pred odovzdaním Techniky, a to buď v hotovosti pri osobnom odbere, alebo bankovým prevodom (faktúra so splatnosťou).
+                5.2. Kupujúci je povinný uhradiť kúpnu cenu v plnej výške pred odovzdaním Techniky, a to buď v hotovosti pri osobnom odbere, alebo bankovým prevodom.
               </p>
               <p>
                 5.3. Vlastnícke právo k Technike prechádza na Kupujúceho až po úplnom zaplatení kúpnej ceny. Do tohto okamihu zostáva Technika majetkom Predávajúceho.
@@ -128,13 +125,13 @@ const ObchodnePodmienky = () => {
 
               <h2 className="text-xl font-bold text-white">6. Dodacie a prevádzacie podmienky</h2>
               <p>
-                6.1. Miesto odovzdania Techniky je spravidla v sídle Prenajímateľa (Čadečka 1924, 022 01 Čadca) alebo na odbernom mieste v Žiline (Vysokoškolská 4, Budova SADOP), pokiaľ nie je dohodnuté inak.
+                6.1. Miesto odovzdania Techniky je spravidla v mieste podnikania Prenajímateľa (Čadečka 1924, 022 01 Čadca) alebo na odbernom mieste v Žiline (Vysokoškolská 4, Budova SADOP), pokiaľ nie je dohodnuté inak.
               </p>
               <p>
                 6.2. Doprava Techniky:
                 <br />a) Osobný odber v Žiline alebo Čadci – bezplatný.
                 <br />b) Doprava do 10 km vzdušnou čiarou od výdajných miest – bezplatná.
-                <br />c) Doprava na území Kysúc (vymedzené polygónom: Horný Vadičov, Staškov, Turzovka, Čadca, Svrčinovec, Skalité, Oščadnica) – bezplatná.
+                <br />c) Doprava na území Kysúc – bezplatná.
                 <br />d) Doprava nad 10 km vzdušnou čiarou od výdajných miest – spoplatnená sadzbou 0,70 € za každý ďalší kilometer (cesta tam aj naspäť). Presná cena je vždy vopred odkonzultovaná a odsúhlasená.
                 <br />e) Doprava do Českej republiky a vzdialenejších lokalít Slovenska – cena je stanovená individuálne na základe vzdialenosti a množstva techniky.
               </p>
@@ -163,9 +160,6 @@ const ObchodnePodmienky = () => {
               </p>
               <p>
                 7.4. Nájomca zodpovedá za kompletnosť Techniky – všetky súčasti, príslušenstvo, káble, diaľkové ovládače a dokumentácia musia byť vrátené spolu s Technikou.
-              </p>
-              <p>
-                7.5. V prípade oneskoreného odovzdania Techniky o viac ako 24 hodín, alebo ak došlo k zjavnému poškodeniu, Prenajímateľ si vyhradzuje právo neuvoľniť vrátenie záruky do vyriešenia škody (pokiaľ bola záruka dohodnutá).
               </p>
 
               <h2 className="text-xl font-bold text-white">8. Zodpovednosť za škodu a poistenie</h2>
@@ -250,7 +244,7 @@ const ObchodnePodmienky = () => {
                 <br />e) Softvérové chyby, ktoré nie sú spôsobené výrobnou chybou.
               </p>
               <p>
-                11.5. <strong className="text-white">Postup pri reklamácii (predaj):</strong> Reklamáciu je potrebné uplatniť bez zbytočného odkladu po zistení vady, najneskôr do konca záručnej doby, e-mailom na adrese socializea@socializea.com alebo osobne v sídle spoločnosti. Reklamácia bude vybavená v súlade s platnými právnymi predpismi najneskôr do 30 dní od jej uplatnenia.
+                11.5. <strong className="text-white">Postup pri reklamácii (predaj):</strong> Reklamáciu je potrebné uplatniť bez zbytočného odkladu po zistení vady, najneskôr do konca záručnej doby, e-mailom na adrese socializea@socializea.com alebo osobne v mieste podnikania. Reklamácia bude vybavená v súlade s platnými právnymi predpismi najneskôr do 30 dní od jej uplatnenia.
               </p>
               <p>
                 11.6. <strong className="text-white">Vrátenie tovaru (predaj):</strong> Pri predaji tovaru podnikateľom (B2B) sa právo na odstúpenie od zmluvy bez udania dôvodu (§ 7 zákona č. 102/2014 Z.z.) nevzťahuje. Pri predaji spotrebiteľovi (B2C) má spotrebiteľ právo odstúpiť od zmluvy do 14 dní od prevzatia tovaru v súlade s § 7 a nasl. zákona č. 102/2014 Z.z. o ochrane spotrebiteľa pri predaji tovaru na diaľku. Z tohto práva sú vylúčené veci, ktoré boli upravené podľa požiadaviek spotrebiteľa (napr. špeciálna konfigurácia techniky) a veci, ktoré podliehajú rýchlemu zníženiu hodnoty. V prípade odstúpenia od zmluvy znáša spotrebiteľ náklady na vrátenie tovaru.
@@ -278,7 +272,7 @@ const ObchodnePodmienky = () => {
                 13.1. Všetky spory vzniknuté z tohto zmluvného vzťahu sa budú riešiť predovšetkým mimosúdnou cestou – vzájomným rokovaním.
               </p>
               <p>
-                13.2. Ak nedôjde k mimosúdnemu vyriešeniu sporu, vec bude predložená na rozhodnutie príslušnému súdu Slovenskej republiky, a to miestne a vecne príslušnému súdu podľa sídla Prenajímateľa.
+                13.2. Ak nedôjde k mimosúdnemu vyriešeniu sporu, vec bude predložená na rozhodnutie príslušnému súdu Slovenskej republiky, a to miestne a vecne príslušnému súdu podľa miesta podnikania Prenajímateľa.
               </p>
               <p>
                 13.3. Vzťahy medzi zmluvnými stranami sa riadia právnym poriadkom Slovenskej republiky, najmä zákonom č. 513/1991 Zb. (Obchodný zákonník), zákonom č. 40/1964 Zb. (Občiansky zákonník) a zákonom č. 250/2007 Z.z. o ochrane spotrebiteľa (pokiaľ je Nájomca/Kupujúci spotrebiteľom).
@@ -302,7 +296,7 @@ const ObchodnePodmienky = () => {
               </p>
 
               <div className="border-t border-white/5 pt-6 mt-6 text-xs text-gray-500">
-                <p>Spoločnosť Societate | Čadečka 1924, 022 01 Čadca | IČO: 56 375 383 | DIČ: 1084450218 | IČ DPH: SK1084450218</p>
+                <p>Matej Novysedlák | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
                 <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea.sk</p>
               </div>
             </div>

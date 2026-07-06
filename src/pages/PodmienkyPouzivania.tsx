@@ -29,7 +29,7 @@ const PodmienkyPouzivania = () => {
 
             <p className="text-gray-400 text-sm border-b border-white/5 pb-4">
               <strong className="text-white">Dátum účinnosti:</strong> 1. 1. 2025 | 
-              <strong className="text-white ml-3">Verzia:</strong> 2.0
+              <strong className="text-white ml-3">Verzia:</strong> 2.1
             </p>
 
             <div className="text-gray-300 space-y-6 text-sm md:text-base leading-relaxed">
@@ -39,7 +39,7 @@ const PodmienkyPouzivania = () => {
                 1.1. Tieto Podmienky používania a ochrany súkromia (ďalej len „Podmienky používania") upravujú pravidlá, za ktorých môžete používať webovú stránku <strong className="text-white">socializea.sk</strong> (ďalej len „Webová stránka") a všetky jej podstránky, služby a funkcionality.
               </p>
               <p>
-                1.2. Prevádzkovateľom Webovej stránky je spoločnosť <strong className="text-white">Societate</strong>, so sídlom Čadečka 1924, 022 01 Čadca, IČO: 56 375 383, DIČ: 1084450218, IČ DPH: SK1084450218, zapísaná v Živnostenskom registri Okresného úradu Čadca (ďalej len „Prevádzkovateľ").
+                1.2. Prevádzkovateľom Webovej stránky je <strong className="text-white">Matej Novysedlák</strong>, miesto podnikania Čadečka 1924, 022 01 Čadca, živnosť zapísaná v živnostenskom registri Okresného úradu Čadca (ďalej len „Prevádzkovateľ").
               </p>
               <p>
                 1.3. Používaním Webovej stránky vyjadrujete súhlas s týmito Podmienkami používania. Ak s nimi nesúhlasíte, Webovú stránku nepoužívajte a neposkytujte prostredníctvom nej žiadne osobné údaje.
@@ -109,7 +109,7 @@ const PodmienkyPouzivania = () => {
 
               <h3 className="text-lg font-bold text-white mt-6">6.2. Správca osobných údajov</h3>
               <p>
-                Správcom osobných údajov je Societate, Čadečka 1924, 022 01 Čadca, e-mail: socializea@socializea.com. Prevádzkovateľ nemenoval zodpovednú osobu (DPO), keďže na to nie je zo zákona povinný.
+                Správcom osobných údajov je Matej Novysedlák, Čadečka 1924, 022 01 Čadca, e-mail: socializea@socializea.com. Prevádzkovateľ nemenoval zodpovednú osobu (DPO), keďže na to nie je zo zákona povinný.
               </p>
 
               <h3 className="text-lg font-bold text-white mt-6">6.3. Aké osobné údaje spracúvame a na aký účel</h3>
@@ -126,7 +126,6 @@ const PodmienkyPouzivania = () => {
                 <br />Spracúvané údaje: E-mail, meno (ak je poskytnuté).
                 <br />Právny základ: Súhlas (čl. 6 ods. 1 písm. a) GDPR).
                 <br />Doba uchovávania: Do odvolania súhlasu.
-                <br />Súhlas môžete kedykoľvek odvolať kliknutím na odkaz v pätičke každého newsletteru alebo e-mailom.
               </p>
               <p>
                 <strong className="text-white">c) Súbory cookies (pozri samostatnú sekciu nižšie).</strong>
@@ -135,7 +134,7 @@ const PodmienkyPouzivania = () => {
               <h3 className="text-lg font-bold text-white mt-6">6.4. Príjemcovia osobných údajov</h3>
               <p>
                 Vaše osobné údaje sú sprístupnené výhradne:
-                <br />a) Zamestnancom a spolupracovníkom Prevádzkovateľa v nevyhnutnom rozsahu.
+                <br />a) Prevádzkovateľovi v nevyhnutnom rozsahu.
                 <br />b) Poskytovateľovi e-mailovej služby (EmailJS) pre účely odosielania správ – EmailJS spracúva údaje na základe spracovateľskej zmluvy v súlade s GDPR.
                 <br />c) Poskytovateľovi webhostingu a cloudových služieb.
                 <br />d) Príslušným orgánom štátnej správy (napr. daňový úrad, súd) v rozsahu a prípadoch stanovených zákonom.
@@ -160,9 +159,6 @@ const PodmienkyPouzivania = () => {
                 <br />f) <strong className="text-white">Právo na prenosnosť údajov</strong> – máte právo získať svoje údaje v štruktúrovanom, bežne používanom a strojovo čitateľnom formáte a preniesť ich inému správcovi.
                 <br />g) <strong className="text-white">Právo podať sťažnosť</strong> – ak sa domnievate, že spracúvanie vašich údajov je v rozpore s GDPR, máte právo podať sťažnosť dozornému orgánu – Úradu na ochranu osobných údajov Slovenskej republiky (www.dataprotection.gov.sk).
               </p>
-              <p>
-                Svoje práva môžete uplatniť kedykoľvek e-mailom na adrese: socializea@socializea.com. Odpovieme vám bez zbytočného odkladu, najneskôr do 30 dní.
-              </p>
 
               <h2 className="text-xl font-bold text-white">7. Cookies a podobné technológie</h2>
               <p>
@@ -172,19 +168,16 @@ const PodmienkyPouzivania = () => {
                 7.2. <strong className="text-white">Aké cookies používame:</strong>
               </p>
               <p>
-                <strong className="text-white">a) Nevyhnutné cookies:</strong> Sú potrebné na fungovanie Webovej stránky. Bez nich by stránka nefungovala správne. Patria sem napr. cookies na zapamätanie obsahu košíka, prihlasovacieho stavu. Nie je možné ich odmietnuť.
+                <strong className="text-white">a) Nevyhnutné cookies:</strong> Sú potrebné na fungovanie Webovej stránky. Bez nich by stránka nefungovala správne. Nie je možné ich odmietnuť.
               </p>
               <p>
-                <strong className="text-white">b) Analytické cookies:</strong> Používame ich na zber anonymných štatistík o návštevnosti (napr. Google Analytics 4, dáta sú anonymizované). Tieto cookies nám pomáhajú pochopiť, ako používatelia stránku používajú, a umožňujú nám ju zlepšovať. Údaje sú agregované a nie je možné identifikovať konkrétneho používateľa.
+                <strong className="text-white">b) Analytické cookies:</strong> Používame ich na zber anonymných štatistík o návštevnosti (napr. Google Analytics 4, dáta sú anonymizované). Údaje sú agregované a nie je možné identifikovať konkrétneho používateľa.
               </p>
               <p>
-                <strong className="text-white">c) Marketingové cookies:</strong> Používajú sa na sledovanie používateľov naprieč webovými stránkami za účelom zobrazovania relevantných reklám. V súčasnosti tieto cookies nepoužívame.
+                <strong className="text-white">c) Marketingové cookies:</strong> V súčasnosti tieto cookies nepoužívame.
               </p>
               <p>
-                7.3. Prvou návštevou Webovej stránky sa zobrazí banner s možnosťou nastavenia cookies. Súhlas s používaním cookies môžete kedykoľvek odvolať zmenou nastavení vášho prehliadača.
-              </p>
-              <p>
-                7.4. Váš prehliadač vám umožňuje cookies spravovať, blokovať alebo mazať. Návody nájdete v nastaveniach konkrétneho prehliadača (Chrome, Firefox, Safari, Edge).
+                7.3. Váš prehliadač vám umožňuje cookies spravovať, blokovať alebo mazať. Návody nájdete v nastaveniach konkrétneho prehliadača (Chrome, Firefox, Safari, Edge).
               </p>
 
               <h2 className="text-xl font-bold text-white">8. Obmedzenie zodpovednosti</h2>
@@ -192,28 +185,22 @@ const PodmienkyPouzivania = () => {
                 8.1. Webová stránka je poskytovaná „tak, ako je" (as is). Prevádzkovateľ nezodpovedá za:
                 <br />a) Prípadné chyby, nepresnosti alebo opomenutia v obsahu.
                 <br />b) Dočasnú nedostupnosť stránky z technických príčin.
-                <br />c) Škody spôsobené vírusmi, malvérom alebo iným škodlivým kódom, ktorý by mohol byť prenesený na zariadenie používateľa pri prehliadaní stránky.
+                <br />c) Škody spôsobené vírusmi, malvérom alebo iným škodlivým kódom.
                 <br />d) Obsah externých webových stránok, na ktoré Webová stránka odkazuje.
                 <br />e) Škody vzniknuté v dôsledku použitia informácií zverejnených na Webovej stránke.
-              </p>
-              <p>
-                8.2. Prevádzkovateľ vynakladá maximálne úsilie na to, aby boli informácie na Webovej stránke aktuálne a presné, avšak v žiadnom prípade nezodpovedá za prípadné škody spôsobené nesprávnym alebo neúplným údajom.
               </p>
 
               <h2 className="text-xl font-bold text-white">9. Odkazy na tretie strany</h2>
               <p>
-                9.1. Webová stránka môže obsahovať odkazy na externé webové stránky (napr. sociálne siete, mapové podklady, platobné brány). Prevádzkovateľ nemá kontrolu nad obsahom a postupmi týchto stránok a nezodpovedá za ne.
-              </p>
-              <p>
-                9.2. Používanie externých stránok sa riadi ich vlastnými podmienkami používania a zásadami ochrany súkromia. Odporúčame vám sa s nimi oboznámiť.
+                9.1. Webová stránka môže obsahovať odkazy na externé webové stránky (napr. sociálne siete, mapové podklady). Prevádzkovateľ nemá kontrolu nad obsahom a postupmi týchto stránok a nezodpovedá za ne.
               </p>
 
               <h2 className="text-xl font-bold text-white">10. Zmluva uzatváraná na diaľku</h2>
               <p>
-                10.1. Webová stránka umožňuje uzatváranie zmlúv na diaľku (rezervácia prenájmu, objednávka predaja). Vzťahuje sa na ne zákon č. 102/2014 Z.z. o ochrane spotrebiteľa pri predaji tovaru na diaľku a zmluvách uzatváraných na diaľku v platnom znení.
+                10.1. Webová stránka umožňuje uzatváranie zmlúv na diaľku (rezervácia prenájmu, objednávka predaja). Vzťahuje sa na ne zákon č. 102/2014 Z.z. o ochrane spotrebiteľa pri predaji tovaru na diaľku.
               </p>
               <p>
-                10.2. Spotrebiteľ (fyzická osoba, ktorá nekoná v rámci svojej podnikateľskej činnosti) má právo odstúpiť od zmluvy uzatvorenej na diaľku bez udania dôvodu do 14 dní. Toto právo sa nevzťahuje na zmluvy o poskytovaní služieb (prenájom), ktoré sa začali poskytovať so súhlasom spotrebiteľa pred uplynutím lehoty na odstúpenie. Pri predaji tovaru platia výnimky stanovené v § 7 ods. 6 zákona č. 102/2014 Z.z.
+                10.2. Pri predaji tovaru platia výnimky stanovené v § 7 ods. 6 zákona č. 102/2014 Z.z.
               </p>
 
               <h2 className="text-xl font-bold text-white">11. Riešenie sporov</h2>
@@ -221,10 +208,7 @@ const PodmienkyPouzivania = () => {
                 11.1. Všetky spory medzi Prevádzkovateľom a používateľom sa budú riešiť prednostne mimosúdnou cestou.
               </p>
               <p>
-                11.2. Spotrebiteľ (fyzická osoba – nepodnikateľ) má právo obrátiť sa na Slovenskú obchodnú inšpekciu (SOI) so sídlom v Bratislave, Prievozská 32, www.soi.sk, alebo na iný príslušný orgán mimosúdneho riešenia sporov.
-              </p>
-              <p>
-                11.3. Prípadné súdne spory bude riešiť miestne a vecne príslušný súd Slovenskej republiky.
+                11.2. Prípadné súdne spory bude riešiť miestne a vecne príslušný súd Slovenskej republiky.
               </p>
 
               <h2 className="text-xl font-bold text-white">12. Záverečné ustanovenia</h2>
@@ -232,20 +216,14 @@ const PodmienkyPouzivania = () => {
                 12.1. Tieto Podmienky používania nadobúdajú účinnosť dňom 1. 1. 2025.
               </p>
               <p>
-                12.2. Prevádzkovateľ si vyhradzuje právo jednostranne meniť tieto Podmienky používania. Zmeny sú účinné dňom ich zverejnenia na tejto stránke. O podstatných zmenách budeme používateľov informovať prostredníctvom banneru na Webovej stránke.
+                12.2. Prevádzkovateľ si vyhradzuje právo jednostranne meniť tieto Podmienky používania.
               </p>
               <p>
-                12.3. Ak sa niektoré ustanovenie týchto Podmienok používania stane neplatným alebo nevymáhateľným, nedotýka sa to platnosti ostatných ustanovení.
-              </p>
-              <p>
-                12.4. Tieto Podmienky používania sa riadia právnym poriadkom Slovenskej republiky.
-              </p>
-              <p>
-                12.5. V prípade akýchkoľvek otázok týkajúcich sa týchto Podmienok používania nás kontaktujte na e-mailovej adrese: socializea@socializea.com.
+                12.3. V prípade akýchkoľvek otázok nás kontaktujte na e-mailovej adrese: socializea@socializea.com.
               </p>
 
               <div className="border-t border-white/5 pt-6 mt-6 text-xs text-gray-500">
-                <p>Spoločnosť Societate | Čadečka 1924, 022 01 Čadca | IČO: 56 375 383 | DIČ: 1084450218 | IČ DPH: SK1084450218</p>
+                <p>Matej Novysedlák | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
                 <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea.sk</p>
               </div>
             </div>
