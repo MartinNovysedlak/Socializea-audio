@@ -7,8 +7,8 @@ export default defineConfig(() => ({
   server: {
     allowedHosts: [
       'clarity-outer-celtic.ngrok-free.dev'
-    ]
-  }
+    ],
+  },
   plugins: [dyadComponentTagger(), react()],
   resolve: {
     alias: {
