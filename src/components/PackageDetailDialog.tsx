@@ -25,7 +25,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Expand,
-  Minimize2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
@@ -77,7 +76,7 @@ const PICKUP_POINTS = [
   { name: 'Čadca', lat: 49.4358, lng: 18.7889 },
 ];
 
-const KYSUCE_BOUNDS = [
+const KYSUCE_BOUNDS: { lat: number; lng: number }[] = [
   { lat: 49.520, lng: 18.550 },
   { lat: 49.500, lng: 19.050 },
   { lat: 49.350, lng: 19.050 },
@@ -232,11 +231,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const [packageUsedCounts, setPackageUsedCounts] = useState<Record<string, number>>({});
 
-  // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Question dialog state
   const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
   const [questionFirstName, setQuestionFirstName] = useState("");
   const [questionLastName, setQuestionLastName] = useState("");
@@ -513,13 +510,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         pricePerDay: itemPrice,
       };
       setAdditionalProducts(updated);
-      toast.success(`Množstvo zvýšené na ${newQty} ks (${itemPrice} € / ks / víkend (2 dni))`);
+      toast.success(`Množstvo zvýšené na ${newQty} ks (${itemPrice} € / ks / víkend (2 noci))`);
     } else {
       setAdditionalProducts((prev) => [
         ...prev,
         { id: selectedItem.id, label: `${itemQuantity} x ${selectedItem.name}`, quantity: itemQuantity, pricePerDay: itemPrice },
       ]);
-      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend (2 dni))`);
+      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend (2 noci))`);
     }
 
     setSelectedItem(null);
@@ -615,15 +612,14 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const lightsUpgradePrice = selectedPackage.priceWithLights - selectedPackage.priceNoLights;
   const additionalProductsCost = additionalProducts.reduce((sum, p) => sum + p.pricePerDay * p.quantity, 0);
   const deliveryCost = deliveryResult?.price ?? 0;
-  const installCost = installSelected ? 20 : 0;
-  const installUninstallCost = installUninstallSelected ? 40 : 0;
-  const totalPrice = activePackagePrice + additionalProductsCost + deliveryCost + installCost + installUninstallCost;
+  const installCostVal = installSelected ? 20 : 0;
+  const installUninstallCostVal = installUninstallSelected ? 40 : 0;
+  const totalPrice = activePackagePrice + additionalProductsCost + deliveryCost + installCostVal + installUninstallCostVal;
 
   const hasLightSection =
     selectedPackage.lightSpecs.length > 0 ||
     (selectedPackage.otherSpecs && selectedPackage.otherSpecs.length > 0);
 
-  // Images for lightbox
   const allImages: string[] = (selectedPackage.images && selectedPackage.images.length > 0)
     ? selectedPackage.images
     : selectedPackage.image
@@ -719,10 +715,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <p className="text-gray-300 text-xs md:text-sm leading-relaxed mt-2">{selectedPackage.description}</p>
               </div>
               <div className="pt-2 border-t border-white/5">
-                <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend (2 dni):</span>
+                <span className="text-xs text-gray-400 uppercase font-bold block">Cena na víkend (2 noci):</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-[#BD20D3] font-extrabold text-2xl sm:text-3xl whitespace-nowrap">{totalPrice} €</span>
-                  <span className="text-gray-400 text-xs whitespace-nowrap">/ víkend (2 dni)</span>
+                  <span className="text-gray-400 text-xs whitespace-nowrap">/ víkend (2 noci)</span>
                 </div>
               </div>
             </div>
@@ -789,8 +785,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <Wrench size={16} /> Doplnkové služby
             </span>
 
-            <div onClick={() => { setInstallSelected(!installSelected); if (!installSelected) setInstallUninstallSelected(false); }}
-              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${installSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}>
+            <div
+              onClick={() => { setInstallSelected(!installSelected); if (!installSelected) setInstallUninstallSelected(false); }}
+              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${installSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+            >
               <div className="flex items-center gap-2.5">
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${installSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
                   {installSelected && <Check size={12} className="text-white stroke-[3]" />}
@@ -800,8 +798,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <span className={`text-xs font-bold ${installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>+20 €</span>
             </div>
 
-            <div onClick={() => { setInstallUninstallSelected(!installUninstallSelected); if (!installUninstallSelected) setInstallSelected(false); }}
-              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${installUninstallSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}>
+            <div
+              onClick={() => { setInstallUninstallSelected(!installUninstallSelected); if (!installUninstallSelected) setInstallSelected(false); }}
+              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${installUninstallSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
+            >
               <div className="flex items-center gap-2.5">
                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${installUninstallSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
                   {installUninstallSelected && <Check size={12} className="text-white stroke-[3]" />}
@@ -813,16 +813,26 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
             <div className="border-t border-white/[0.06] pt-3 space-y-2">
               <div className="relative" ref={cityRef}>
-                <div onClick={toggleDelivery} className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20">
+                <div
+                  onClick={toggleDelivery}
+                  className="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all bg-black/20 border-white/5 hover:border-white/20"
+                >
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
                     {deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
                   </div>
                   <MapPin size={14} className={`shrink-0 ${deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
                   <div className="flex-1 min-w-0">
-                    <Input id="city-input" type="text" value={deliveryCity} onChange={(e) => { setDeliveryCity(e.target.value); setDeliveryResult(null); setCityLocked(false); }}
-                      onKeyDown={handleCityKeyDown} onFocus={() => { if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true); }}
-                      placeholder="Mesto odberu (SK/CZ)..." readOnly={!deliverySelected}
-                      className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500" />
+                    <Input
+                      id="city-input"
+                      type="text"
+                      value={deliveryCity}
+                      onChange={(e) => { setDeliveryCity(e.target.value); setDeliveryResult(null); setCityLocked(false); }}
+                      onKeyDown={handleCityKeyDown}
+                      onFocus={() => { if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true); }}
+                      placeholder="Mesto odberu (SK/CZ)..."
+                      readOnly={!deliverySelected}
+                      className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500"
+                    />
                   </div>
                   <div className="shrink-0 min-w-[70px] text-right">
                     {deliverySelected && deliveryResult ? (
@@ -849,8 +859,12 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       </div>
                     )}
                     {citySuggestions.map((city, i) => (
-                      <button key={i} type="button" onClick={() => selectCity(city.name, city.lat, city.lng)}
-                        className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer">
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selectCity(city.name, city.lat, city.lng)}
+                        className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer"
+                      >
                         <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-white truncate">{city.name}</p>
@@ -893,13 +907,31 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <Input ref={searchInputRef} type="text" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setSearchOpen(true); setSelectedItem(null); }}
-                    onFocus={() => setSearchOpen(true)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (selectedItem) confirmRentalItem(); else if (filteredItems.length > 0) setSelectedItem(filteredItems[0]); else if (searchTerm.trim()) addCustomProduct(); } }}
+                  <Input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => { setSearchTerm(e.target.value); setSearchOpen(true); setSelectedItem(null); }}
+                    onFocus={() => setSearchOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (selectedItem) confirmRentalItem();
+                        else if (filteredItems.length > 0) setSelectedItem(filteredItems[0]);
+                        else if (searchTerm.trim()) addCustomProduct();
+                      }
+                    }}
                     placeholder="Hľadať v databáze alebo napísať vlastnú položku..."
-                    className="bg-black/40 border-white/[0.12] text-white rounded-xl h-10 pl-9 text-xs placeholder:text-gray-500 focus:border-[#1A4BFF]/50 focus:ring-[#1A4BFF]/20" />
+                    className="bg-black/40 border-white/[0.12] text-white rounded-xl h-10 pl-9 text-xs placeholder:text-gray-500 focus:border-[#1A4BFF]/50 focus:ring-[#1A4BFF]/20"
+                  />
                 </div>
-                <Button type="button" size="sm" onClick={() => { if (selectedItem) confirmRentalItem(); else if (searchTerm.trim()) addCustomProduct(); }}
-                  disabled={!searchTerm.trim()} className="bg-[#1A4BFF]/15 hover:bg-[#1A4BFF]/30 border border-[#1A4BFF]/25 text-white rounded-xl h-10 px-3 text-xs disabled:opacity-30 transition-all">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => { if (selectedItem) confirmRentalItem(); else if (searchTerm.trim()) addCustomProduct(); }}
+                  disabled={!searchTerm.trim()}
+                  className="bg-[#1A4BFF]/15 hover:bg-[#1A4BFF]/30 border border-[#1A4BFF]/25 text-white rounded-xl h-10 px-3 text-xs disabled:opacity-30 transition-all"
+                >
                   <Plus size={14} className="mr-1" /> Pridať
                 </Button>
               </div>
@@ -921,8 +953,19 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       {filteredItems.map((item) => {
                         const remaining = getAvailableForItem(item.name, item.availableCount);
                         return (
-                          <button key={item.id} type="button" onClick={() => { if (remaining <= 0) { toast.error(`Pre položku "${item.name}" nie sú k dispozícii ďalšie kusy.`); return; } setSelectedItem(item); setItemQuantity(1); }}
-                            className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 ${remaining > 0 ? 'hover:bg-[#1A4BFF]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}>
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              if (remaining <= 0) {
+                                toast.error(`Pre položku "${item.name}" nie sú k dispozícii ďalšie kusy.`);
+                                return;
+                              }
+                              setSelectedItem(item);
+                              setItemQuantity(1);
+                            }}
+                            className={`flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 ${remaining > 0 ? 'hover:bg-[#1A4BFF]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}
+                          >
                             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             </div>
@@ -947,20 +990,27 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
                         </div>
                         <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
-                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold whitespace-nowrap">{selectedItem.price} € / ks / víkend (2 dni)</span>}
+                        {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold whitespace-nowrap">{selectedItem.price} € / ks / víkend (2 noci)</span>}
                       </div>
                       <div className="flex items-center justify-between gap-3 bg-black/40 border border-white/[0.08] rounded-xl p-2">
                         <span className="text-[10px] text-gray-400 uppercase shrink-0">Počet:</span>
                         <div className="flex items-center gap-1.5">
                           <button type="button" onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))} className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all"><Minus size={12} /></button>
                           <span className="w-8 text-center text-white font-bold text-sm">{itemQuantity}</span>
-                          <button type="button" onClick={() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); setItemQuantity(Math.min(maxAvailable, itemQuantity + 1)); }}
+                          <button
+                            type="button"
+                            onClick={() => { const maxAvail = getAvailableForItem(selectedItem.name, selectedItem.availableCount); setItemQuantity(Math.min(maxAvail, itemQuantity + 1)); }}
                             disabled={itemQuantity >= getAvailableForItem(selectedItem.name, selectedItem.availableCount)}
-                            className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"><Plus size={12} /></button>
+                            className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                          ><Plus size={12} /></button>
                         </div>
                       </div>
                       <p className="text-[9px] text-gray-500 mt-1 whitespace-nowrap">
-                        {(() => { const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount); const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts); return `Maximálne ${maxAvailable} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 dni)`; })()}
+                        {(() => {
+                          const maxAvail = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
+                          const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
+                          return `Maximálne ${maxAvail} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 noci)`;
+                        })()}
                       </p>
                       <div className="flex gap-2 mt-2">
                         <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedItem(null); setItemQuantity(1); }} className="text-[10px] text-gray-400 hover:text-white h-8 flex-1">Zrušiť</Button>
@@ -993,7 +1043,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             </span>
             <div className="flex justify-between text-xs text-gray-400">
               <span>Balík ({includeLights ? 'so svetlami' : 'bez svetiel'}):</span>
-              <span className="text-white font-semibold whitespace-nowrap">{activePackagePrice} € / víkend (2 dni)</span>
+              <span className="text-white font-semibold whitespace-nowrap">{activePackagePrice} € / víkend (2 noci)</span>
             </div>
             {installSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia:</span><span className="text-[#1A4BFF] font-semibold">+20 €</span></div>}
             {installUninstallSelected && <div className="flex justify-between text-xs text-gray-400"><span>Inštalácia a deinštalácia:</span><span className="text-[#1A4BFF] font-semibold">+40 €</span></div>}
@@ -1013,18 +1063,18 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                         <Plus size={10} className="text-[#1A4BFF]" />
                         <span>{p.label.replace(/^\d+\s*x\s*/, '')} × {p.quantity}</span>
                       </span>
-                      <span className="text-white font-medium whitespace-nowrap">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend (2 dni)</span>
+                      <span className="text-white font-medium whitespace-nowrap">{(p.pricePerDay * p.quantity).toFixed(2)} € / víkend (2 noci)</span>
                     </div>
                   ))}
                   <div className="flex justify-between text-xs text-gray-400 border-t border-white/[0.06] pt-1">
                     <span className="text-[#1A4BFF] font-semibold">Medzisúčet produktov:</span>
-                    <span className="text-[#1A4BFF] font-bold whitespace-nowrap">{additionalProductsCost.toFixed(2)} € / víkend (2 dni)</span>
+                    <span className="text-[#1A4BFF] font-bold whitespace-nowrap">{additionalProductsCost.toFixed(2)} € / víkend (2 noci)</span>
                   </div>
                 </div>
               </>
             )}
             <div className="flex justify-between items-center border-t border-[#BD20D3]/20 pt-2 mt-2">
-              <span className="text-sm font-bold text-white">Celková cena na víkend (2 dni):</span>
+              <span className="text-sm font-bold text-white">Celková cena na víkend (2 noci):</span>
               <span className="text-[#BD20D3] text-xl font-extrabold whitespace-nowrap">{totalPrice.toFixed(2)} €</span>
             </div>
           </div>
