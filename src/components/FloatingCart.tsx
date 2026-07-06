@@ -245,6 +245,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     return Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   };
   const days = calculateDays();
+  const nights = days - 1;
   const subtotalPerDay = cartItems.reduce((sum, { item, qty }) => sum + item.price_per_day * qty, 0);
   const firstDayTotal = subtotalPerDay;
   const additionalDaysTotal = days > 1 ? (days - 1) * subtotalPerDay * 0.5 : 0;
@@ -349,7 +350,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       if (days > 1) {
         html += `<div style="margin-top:12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;">
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:#9ca3af;">1. deň (plná cena)</span><span style="color:white;font-weight:600;">${firstDayTotal.toFixed(2)} €</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:#9ca3af;">${days-1} ďalších dní (50%)</span><span style="color:white;font-weight:600;">${additionalDaysTotal.toFixed(2)} €</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:#9ca3af;">${nights} ${nights === 1 ? 'ďalšia noc' : 'ďalšie noci'} (50%)</span><span style="color:white;font-weight:600;">${additionalDaysTotal.toFixed(2)} €</span></div>
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-top:1px solid rgba(16,185,129,0.15);padding-top:6px;margin-top:3px;">
             <span style="color:#10b981;font-weight:600;">🌟 Zľava za dlhodobý prenájom</span>
             <span style="color:#10b981;font-weight:600;">− ${((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span>
@@ -394,13 +395,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         html += `</div>`;
       });
       if (days > WEEKEND_DAYS && packagesExtraDaysTotal > 0) {
+        const extraNights = nights - WEEKEND_DAYS + 1;
         html += `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;">
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
             <span style="color:#9ca3af;">Víkend (2 noci) – všetky položky v cene</span>
             <span style="color:white;font-weight:600;">${packagesWeekendTotal.toFixed(2)} €</span>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
-            <span style="color:#9ca3af;">Ďalšie dni (+50 % zo základnej ceny balíka)</span>
+            <span style="color:#9ca3af;">${extraNights} ${extraNights === 1 ? 'ďalšia noc' : 'ďalšie noci'} (+50 % zo základnej ceny balíka)</span>
             <span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span>
           </div>
         </div>`;
@@ -459,7 +461,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         <h3 style="margin:0 0 10px 0;color:#9ca3af;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">📅 Obdobie prenájmu</h3>
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Od:</span><span style="color:white;font-weight:600;">${formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : 'Neuvedené'}</span></div>
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Do:</span><span style="color:white;font-weight:600;">${formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : 'Neuvedené'}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Počet dní:</span><span style="color:white;font-weight:600;">${days} ${days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Počet nocí:</span><span style="color:white;font-weight:600;">${nights} ${nights === 1 ? 'noc' : 'noci'}</span></div>
       </div>`;
 
     // 💰 Celková suma – veľký prehľadný blok
@@ -737,9 +739,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         {days > 1 && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
-                            <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
+                            <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {nights} {nights === 1 ? 'noc' : 'noci'}</p>
                             <div className="flex justify-between text-gray-300"><span>1. deň (plná cena)</span><span className="text-white font-semibold">{firstDayTotal.toFixed(2)} €</span></div>
-                            <div className="flex justify-between text-gray-300"><span>{days - 1} {days - 1 === 1 ? 'ďalší deň' : 'ďalšie dni'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>{nights} {nights === 1 ? 'ďalšia noc' : 'ďalšie noci'} (50%)</span><span className="text-white font-semibold">{additionalDaysTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Zľava za dlhodobý prenájom</span><span>- {((days - 1) * subtotalPerDay * 0.5).toFixed(2)} €</span></div>
                           </div>
                         )}
@@ -778,9 +780,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
                         {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
-                            <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {days} {days === 1 ? 'deň' : days < 5 ? 'dni' : 'dní'}</p>
+                            <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {nights} {nights === 1 ? 'noc' : 'noci'}</p>
                             <div className="flex justify-between text-gray-300"><span>Víkend (2 noci) – všetky položky v cene</span><span className="text-white font-semibold">{packagesWeekendTotal.toFixed(2)} €</span></div>
-                            <div className="flex justify-between text-gray-300"><span>{days - WEEKEND_DAYS} {days - WEEKEND_DAYS === 1 ? 'ďalší deň' : 'ďalšie dni'} (+50 % základnej ceny)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-gray-300"><span>{nights - 2} {nights - 2 === 1 ? 'ďalšia noc' : 'ďalšie noci'} (+50 % základnej ceny)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Príplatok za nadštandardné dni (len základ balíka)</span><span>+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                           </div>
                         )}
