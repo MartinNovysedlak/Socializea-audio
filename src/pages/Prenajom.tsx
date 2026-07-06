@@ -325,11 +325,11 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                       </p>
                       <div className="flex items-baseline gap-1.5 pt-4">
                         <span className="text-2xl sm:text-3xl font-extrabold text-[#BD20D3]">{pkg.priceNoLights} €</span>
-                        <span className="text-gray-400 text-xs">/ víkend (2 dni) bez svetiel</span>
+                        <span className="text-gray-400 text-xs">/ víkend (2 noci) bez svetiel</span>
                       </div>
                       <div className="flex items-baseline gap-1.5 text-sm">
                         <span className="text-xl sm:text-2xl font-bold text-[#1A4BFF]">{pkg.priceWithLights} €</span>
-                        <span className="text-gray-400 text-xs">/ víkend (2 dni) so svetlami</span>
+                        <span className="text-gray-400 text-xs">/ víkend (2 noci) so svetlami</span>
                       </div>
                     </CardHeader>
 
