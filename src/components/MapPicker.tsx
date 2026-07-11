@@ -301,7 +301,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
           </div>
 
           {/* Legenda – now positioned at top-left inside the map */}
-          <div className="absolute top-3 left-3 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[160px]">
+          <div className="absolute top-3 left-3 z-[9999] pointer-events-auto bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[160px]">
             <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
