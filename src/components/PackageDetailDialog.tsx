@@ -25,10 +25,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Expand,
+  Map,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
+import MapPicker from './MapPicker';
 
 export interface PackageOption {
   id: string;
@@ -243,6 +245,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [sendingQuestion, setSendingQuestion] = useState(false);
   const [showQuestionSuccess, setShowQuestionSuccess] = useState(false);
 
+  const [mapPickerOpen, setMapPickerOpen] = useState(false);
+
   useEffect(() => {
     if (open && selectedPackage) {
       setIncludeLights(true);
@@ -267,6 +271,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setQuestionPhone("");
       setQuestionMessage("");
       setSendingQuestion(false);
+      setMapPickerOpen(false);
     }
   }, [open, selectedPackage]);
 
@@ -436,6 +441,24 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       } else {
         toast.info(
           `Doprava do ${cityName}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
+        );
+      }
+    }
+  };
+
+  const handleMapLocationSelect = (lat: number, lng: number, name: string) => {
+    setDeliveryCity(name);
+    setCityLocked(true);
+    setCityDropdownOpen(false);
+    setCitySuggestions([]);
+    const result = calculateDelivery({ lat, lng }, name);
+    setDeliveryResult(result);
+    if (result) {
+      if (result.isFree) {
+        toast.success(`Doprava do ${name} je zadarmo!`);
+      } else {
+        toast.info(
+          `Doprava do ${name}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
         );
       }
     }
@@ -894,6 +917,19 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                   </div>
                 )}
               </div>
+
+              {/* Map picker button */}
+              {deliverySelected && (
+                <button
+                  type="button"
+                  onClick={() => setMapPickerOpen(true)}
+                  className="flex items-center gap-2 text-xs text-[#1A4BFF] hover:text-[#1A4BFF]/80 transition-colors py-1.5 px-3 rounded-lg bg-[#1A4BFF]/5 hover:bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 w-full justify-center"
+                >
+                  <Map size={14} />
+                  Vybrať na mape
+                </button>
+              )}
+
               <p className="text-[10px] text-gray-500 leading-relaxed">Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.</p>
             </div>
           </div>
@@ -1245,6 +1281,13 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Map picker dialog */}
+      <MapPicker
+        open={mapPickerOpen}
+        onOpenChange={setMapPickerOpen}
+        onLocationSelect={handleMapLocationSelect}
+      />
     </Dialog>
   );
 };
