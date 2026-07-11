@@ -3,14 +3,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ArrowRight, ShoppingBag } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
+import { Menu, X, ArrowRight } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const location = useLocation();
-  const { totalItems, openCart } = useCart();
 
   const navLinks = [
     { name: 'Domov', href: '/' },
@@ -63,21 +61,6 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
-
-          {/* IKONA KOŠÍKA – desktop */}
-          {totalItems > 0 && (
-            <button
-              onClick={openCart}
-              className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/40 hover:bg-[#BD20D3]/40 transition-all text-[#BD20D3] group"
-              aria-label="Otvoriť košík"
-            >
-              <ShoppingBag size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border border-[#020721] shadow-md">
-                {totalItems}
-              </span>
-            </button>
-          )}
-
           <Link to="/kontakt">
             <Button className="btn-cyber rounded-full px-6 border-none transition-colors duration-200">
               Napíšte nám
@@ -85,20 +68,8 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* MOBILE BURGER TOGGLE + KOŠÍK */}
+        {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3">
-          {totalItems > 0 && (
-            <button
-              onClick={openCart}
-              className="relative w-10 h-10 rounded-xl bg-[#BD20D3]/20 border border-[#BD20D3]/40 flex items-center justify-center text-[#BD20D3] hover:bg-[#BD20D3]/40 transition-all"
-              aria-label="Otvoriť košík"
-            >
-              <ShoppingBag size={20} />
-              <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border border-[#020721] shadow-md">
-                {totalItems}
-              </span>
-            </button>
-          )}
           <button
             onClick={isMobileMenuOpen ? closeMenu : openMenu}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"
@@ -136,27 +107,13 @@ const Navbar = () => {
                   Socializea<span className="text-[#BD20D3]">-audio</span>
                 </span>
               </Link>
-              <div className="flex items-center gap-2">
-                {totalItems > 0 && (
-                  <button
-                    onClick={() => { closeMenu(); setTimeout(() => openCart(), 350); }}
-                    className="relative w-9 h-9 rounded-full bg-[#BD20D3]/20 border border-[#BD20D3]/40 flex items-center justify-center text-[#BD20D3] hover:bg-[#BD20D3]/40 transition-all"
-                    aria-label="Otvoriť košík"
-                  >
-                    <ShoppingBag size={18} />
-                    <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-[#020721]">
-                      {totalItems}
-                    </span>
-                  </button>
-                )}
-                <button
-                  onClick={closeMenu}
-                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
-                  aria-label="Zavrieť menu"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+              <button
+                onClick={closeMenu}
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                aria-label="Zavrieť menu"
+              >
+                <X size={20} />
+              </button>
             </div>
 
             {/* Navigačné linky – posunuté nižšie od vrchu */}
