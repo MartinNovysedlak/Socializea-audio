@@ -2,9 +2,25 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
-  ShoppingBag, X, Calendar, User, Mail, Phone, MessageSquare,
-  Plus, Minus, ChevronRight, Wrench, Lightbulb, MapPin, Check,
-  Navigation, Loader2, Send, CheckCircle2,
+  ShoppingBag,
+  X,
+  Calendar,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+  Plus,
+  Minus,
+  ChevronRight,
+  Wrench,
+  Lightbulb,
+  MapPin,
+  Check,
+  Navigation,
+  Loader2,
+  Ban,
+  Send,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +43,7 @@ interface PackageCartItem {
   price: number;
   hasLights: boolean;
   image: string;
-  arrival: { name: string; lat: number; lng: number } | null;
+  arrival: { name: string } | null;
   install: 'none' | 'install' | 'install_uninstall';
   installPrice: number;
   deliveryPrice: number;
@@ -48,14 +64,22 @@ const PICKUP_POINTS = [
 ];
 
 const KYSUCE_BOUNDS = [
-  { lat: 49.520, lng: 18.550 }, { lat: 49.500, lng: 19.050 },
-  { lat: 49.350, lng: 19.050 }, { lat: 49.250, lng: 18.800 },
+  { lat: 49.520, lng: 18.550 },
+  { lat: 49.500, lng: 19.050 },
+  { lat: 49.350, lng: 19.050 },
+  { lat: 49.250, lng: 18.800 },
   { lat: 49.280, lng: 18.600 },
 ];
 
 interface CityMatch {
-  name: string; country: string; lat: number; lng: number;
-  postcode?: string; district?: string;
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+  postcode?: string;
+  district?: string;
+  distToNearest?: number;
+  nearestPoint?: string;
 }
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -82,10 +106,16 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
 }
 
 function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
-  distance: number; nearestPoint: string; isKysuce: boolean; isFree: boolean; price: number;
+  distance: number;
+  nearestPoint: string;
+  isKysuce: boolean;
+  isFree: boolean;
+  price: number;
 } | null {
   const isKysuce = isPointInPolygon(coords, KYSUCE_BOUNDS);
-  if (isKysuce) return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
+  if (isKysuce) {
+    return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
+  }
   let minDist = Infinity;
   let nearestPoint = '';
   for (const point of PICKUP_POINTS) {
@@ -109,24 +139,11 @@ function getNearestPoint(coords: { lat: number; lng: number }): { name: string; 
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => { const timer = setTimeout(() => setDebouncedValue(value), delay); return () => clearTimeout(timer); }, [value, delay]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
   return debouncedValue;
-}
-
-async function geocodeCity(cityName: string): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const query = encodeURIComponent(cityName.trim());
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=sk,cz&limit=1&accept-language=sk`,
-      { headers: { 'User-Agent': 'Socializea/1.0' } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-    }
-    return null;
-  } catch { return null; }
 }
 
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
@@ -143,7 +160,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
   const [deliverySelected, setDeliverySelected] = useState(false);
   const [deliveryCity, setDeliveryCity] = useState('');
-  const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<CityMatch[]>([]);
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
   const [searchingCities, setSearchingCities] = useState(false);
@@ -159,14 +175,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalItems = totalEquipmentQty + packageItems.length;
-  const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => {
-    const item = equipment.find((e) => e.id === id);
-    return { item, qty };
-  }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+  const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => { const item = equipment.find((e) => e.id === id); return { item, qty }; }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
   useEffect(() => { setDialogOpen(isOpen || showReservationSuccess); }, [isOpen, showReservationSuccess, setDialogOpen]);
   useEffect(() => { try { localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems)); } catch {} }, [packageItems]);
-
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const pkg = e.detail as PackageCartItem;
@@ -178,13 +190,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     window.addEventListener('add-package-to-cart', handler as EventListener);
     return () => window.removeEventListener('add-package-to-cart', handler as EventListener);
   }, []);
-
   useEffect(() => {
     const hasEquipment = Object.values(quantities).some(qty => qty > 0);
     if (!hasEquipment) { setInstallSelected(false); setInstallUninstallSelected(false); clearDelivery(); }
   }, [quantities]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!deliverySelected || !debouncedCitySearch.trim() || debouncedCitySearch.trim().length < 2 || cityLocked) {
       setCitySuggestions([]); setCityDropdownOpen(false); setSearchingCities(false); return;
     }
@@ -193,23 +204,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       setSearchingCities(true);
       try {
         const query = encodeURIComponent(debouncedCitySearch.trim());
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`,
-          { headers: { 'User-Agent': 'DjPartyRental/1.0' } }
-        );
-        if (cancelled || !res.ok) return;
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=sk,cz&limit=8&accept-language=sk&q=${query}`, { headers: { 'User-Agent': 'DjPartyRental/1.0' } });
+        if (cancelled) return;
+        if (!res.ok) throw new Error('API error');
         const data = await res.json();
         if (cancelled) return;
-        if (Array.isArray(data)) {
+        if (data && Array.isArray(data)) {
           const mapped: CityMatch[] = data.map((item: any) => {
             const address = item.address || {};
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
-            return {
-              name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch,
-              country: (item.country_code === 'cz' || (address.country || '').toLowerCase().includes('czech')) ? 'cz' : 'sk',
-              lat: coords.lat, lng: coords.lng, postcode: address.postcode || '', district: address.city_district || address.county || '',
-            };
+            const isCzech = (item.country_code === 'cz' || (address.country || '').toLowerCase().includes('czech'));
+            return { name: item.display_name?.split(',')[0] || item.name || debouncedCitySearch, country: isCzech ? 'cz' : 'sk', lat: coords.lat, lng: coords.lng, postcode: address.postcode || '', district: address.city_district || address.county || '', distToNearest: nearest.distance, nearestPoint: nearest.name };
           });
           const seen = new Set<string>();
           const unique = mapped.filter(c => { const key = c.name.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; });
@@ -231,7 +237,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
   useEffect(() => { if (isOpen) document.body.style.overflow = "hidden"; else document.body.style.overflow = "unset"; return () => { document.body.style.overflow = "unset"; }; }, [isOpen]);
   useEffect(() => { if (totalItems === 0 && isOpen) { setIsOpen(false); document.body.style.overflow = "unset"; } }, [totalItems, isOpen]);
 
@@ -252,19 +257,30 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const grandTotal = firstDayTotal + additionalDaysTotal + installCost + installUninstallCost + deliveryCost;
 
   const WEEKEND_DAYS = 3;
+
   const getPackageExtraDaysTotal = (pkg: PackageCartItem) => {
     if (days <= WEEKEND_DAYS) return 0;
     return (days - WEEKEND_DAYS) * pkg.price * 0.5;
   };
-  const packagesWeekendTotal = packageItems.reduce((sum, p) => sum + p.price + p.installPrice + p.deliveryPrice + p.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0), 0);
+
+  const packagesWeekendTotal = packageItems.reduce((sum, p) =>
+    sum + p.price + p.installPrice + p.deliveryPrice + p.extras.reduce((s, e) => s + e.pricePerDay * e.quantity, 0), 0
+  );
+
   const packagesExtraDaysTotal = packageItems.reduce((sum, p) => sum + getPackageExtraDaysTotal(p), 0);
+
   const packagesTotal = packagesWeekendTotal + packagesExtraDaysTotal;
 
   const packageHasInstall = packageItems.some(p => p.install === 'install' || p.install === 'install_uninstall');
   const packageHasDelivery = packageItems.some(p => p.arrival !== null);
-  const hasAnyAdditionalService = installSelected || installUninstallSelected || deliverySelected || packageHasInstall || packageHasDelivery;
+  const packageInstallCount = packageItems.filter(p => p.install === 'install').length;
+  const packageInstallUninstallCount = packageItems.filter(p => p.install === 'install_uninstall').length;
+  const hasAnyAdditionalService = installSelected || installUninstallSelected || deliverySelected || packageHasInstall || packageInstallUninstallCount > 0 || packageHasDelivery;
   const hasSomethingToShow = totalEquipmentQty > 0 || packageItems.length > 0;
-  const getPackageDisplayTotal = (pkg: PackageCartItem) => pkg.price + getPackageExtraDaysTotal(pkg);
+
+  const getPackageDisplayTotal = (pkg: PackageCartItem) => {
+    return pkg.price + getPackageExtraDaysTotal(pkg);
+  };
 
   const handleQuantityChange = (id: string, delta: number) => {
     setQuantities((prev) => {
@@ -279,38 +295,36 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const handleToSelect = (date: Date | undefined) => {
     if (date) { setFormData(prev => ({ ...prev, dateTo: format(date, "yyyy-MM-dd") })); setShowToCalendar(false); }
   };
-
   const toggleDelivery = () => { if (deliverySelected) clearDelivery(); else { setDeliverySelected(true); requestAnimationFrame(() => { const input = document.getElementById('cart-city-input'); if (input) input.focus(); }); } };
-
   const selectCity = (cityName: string, lat: number, lng: number) => {
     setDeliveryCity(cityName); setCityLocked(true); setCityDropdownOpen(false); setCitySuggestions([]);
-    setDeliveryCoords({ lat, lng });
     const result = calculateDelivery({ lat, lng }, cityName);
     setDeliveryResult(result);
-    if (result) { if (result.isFree) toast.success(`Doprava do ${cityName} je zadarmo!`); else toast.info(`Doprava do ${cityName}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`); }
+    if (result) { if (result.isFree) toast.success(`Doprava do ${cityName} je zadarmo!`); else toast.info(`Doprava do ${cityName}: ${result.price} €`); }
   };
-
-  const clearDelivery = () => { setDeliveryCity(''); setDeliveryCoords(null); setDeliveryResult(null); setDeliverySelected(false); setCityLocked(false); setCitySuggestions([]); setCityDropdownOpen(false); };
-
-  const handleCityKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && citySuggestions.length > 0) { e.preventDefault(); selectCity(citySuggestions[0].name, citySuggestions[0].lat, citySuggestions[0].lng); }
-    if (e.key === 'Escape') setCityDropdownOpen(false);
-  };
-
+  const clearDelivery = () => { setDeliveryCity(''); setDeliveryResult(null); setDeliverySelected(false); setCityLocked(false); setCitySuggestions([]); setCityDropdownOpen(false); };
+  const handleCityKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && citySuggestions.length > 0) { e.preventDefault(); selectCity(citySuggestions[0].name, citySuggestions[0].lat, citySuggestions[0].lng); } if (e.key === 'Escape') setCityDropdownOpen(false); };
   const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
 
   const handleMapLocationSelect = (lat: number, lng: number, name: string) => {
-    setDeliveryCity(name); setDeliveryCoords({ lat, lng }); setCityLocked(true); setCityDropdownOpen(false); setCitySuggestions([]);
+    setDeliveryCity(name);
+    setCityLocked(true);
+    setCityDropdownOpen(false);
+    setCitySuggestions([]);
     const result = calculateDelivery({ lat, lng }, name);
     setDeliveryResult(result);
-    if (result) { if (result.isFree) toast.success(`Doprava do ${name} je zadarmo!`); else toast.info(`Doprava do ${name}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`); }
+    if (result) {
+      if (result.isFree) {
+        toast.success(`Doprava do ${name} je zadarmo!`);
+      } else {
+        toast.info(
+          `Doprava do ${name}: ${result.price} € (vzdialenosť ${result.distance} km od ${result.nearestPoint})`
+        );
+      }
+    }
   };
 
-  const buildCartSummaryHtml = (coordsOverride?: { lat: number; lng: number } | null, packagesOverride?: PackageCartItem[]): string => {
-    const effectiveCoords = coordsOverride !== undefined ? coordsOverride : deliveryCoords;
-    const effectivePackages = packagesOverride !== undefined ? packagesOverride : packageItems;
-    const effectiveCity = effectiveCoords === deliveryCoords ? deliveryCity : (effectivePackages.find(p => p.arrival)?.arrival?.name || '');
-
+  const buildCartSummaryHtml = () => {
     let html = '';
 
     if (cartItems.length > 0) {
@@ -322,12 +336,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             <span style="font-size:11px;background:rgba(189,32,211,0.15);color:#BD20D3;padding:2px 10px;border-radius:20px;font-weight:600;">${cartItems.reduce((s,{qty}) => s + qty, 0)} ks</span>
           </h3>
           <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead><tr style="background:rgba(189,32,211,0.08);">
-              <th style="padding:8px 10px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th>
-              <th style="padding:8px 10px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th>
-              <th style="padding:8px 10px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th>
-              <th style="padding:8px 10px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th>
-            </tr></thead>
+            <thead>
+              <tr style="background:rgba(189,32,211,0.08);">
+                <th style="padding:8px 10px;text-align:left;color:#9ca3af;font-weight:600;">Položka</th>
+                <th style="padding:8px 10px;text-align:center;color:#9ca3af;font-weight:600;">Počet</th>
+                <th style="padding:8px 10px;text-align:right;color:#9ca3af;font-weight:600;">Cena/deň</th>
+                <th style="padding:8px 10px;text-align:right;color:#9ca3af;font-weight:600;">Spolu</th>
+              </tr>
+            </thead>
             <tbody>`;
       cartItems.forEach(({ item, qty }) => {
         html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -354,14 +370,14 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       </div></div>`;
     }
 
-    if (effectivePackages.length > 0) {
+    if (packageItems.length > 0) {
       html += `
         <div style="margin-bottom:20px;background:rgba(26,75,255,0.03);border:1px solid rgba(26,75,255,0.12);border-radius:16px;padding:16px 20px;">
           <h3 style="margin:0 0 12px 0;color:#1A4BFF;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;">
             📦 Balíky
-            <span style="font-size:11px;background:rgba(26,75,255,0.15);color:#1A4BFF;padding:2px 10px;border-radius:20px;font-weight:600;">${effectivePackages.length} ks</span>
+            <span style="font-size:11px;background:rgba(26,75,255,0.15);color:#1A4BFF;padding:2px 10px;border-radius:20px;font-weight:600;">${packageItems.length} ks</span>
           </h3>`;
-      effectivePackages.forEach((pkg) => {
+      packageItems.forEach((pkg) => {
         const displayTotal = getPackageDisplayTotal(pkg);
         html += `<div style="background:rgba(26,75,255,0.05);border:1px solid rgba(26,75,255,0.15);border-radius:12px;padding:12px 14px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -374,14 +390,6 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
             ${pkg.install === 'install_uninstall' ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(26,75,255,0.1);border:1px solid rgba(26,75,255,0.3);border-radius:8px;color:#1A4BFF;font-size:11px;font-weight:600;">🔧 Inšt.+Deinšt. (+'+pkg.installPrice+' €)</span>' : ''}
             ${pkg.arrival ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#10b981;font-size:11px;font-weight:600;">📍 '+pkg.arrival.name+(pkg.deliveryPrice>0 ? ' (+'+pkg.deliveryPrice+' €)' : ' (Zdarma)')+'</span>' : ''}
           </div>`;
-        if (pkg.arrival && pkg.arrival.lat && pkg.arrival.lng) {
-          html += `<div style="margin-top:8px;padding:8px 12px;background:rgba(26,75,255,0.05);border:1px solid rgba(26,75,255,0.2);border-radius:10px;text-align:center;">
-            <span style="color:#9ca3af;font-size:11px;">📍 Súradnice: ${pkg.arrival.lat.toFixed(6)}, ${pkg.arrival.lng.toFixed(6)}</span><br />
-            <a href="https://www.google.com/maps?q=${pkg.arrival.lat},${pkg.arrival.lng}" target="_blank" rel="noopener noreferrer" style="color:#1A4BFF;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(26,75,255,0.08);border-radius:8px;margin-top:6px;">
-              🗺️ Otvoriť v Mapách Google
-            </a>
-          </div>`;
-        }
         if (pkg.extras.length > 0) {
           html += `<div style="margin-top:8px;padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:8px;font-size:12px;">
             <div style="color:#9ca3af;font-weight:600;margin-bottom:4px;">Doplnkové produkty:</div>`;
@@ -393,9 +401,16 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         html += `</div>`;
       });
       if (days > WEEKEND_DAYS && packagesExtraDaysTotal > 0) {
+        const extraNights = nights - WEEKEND_DAYS + 1;
         html += `<div style="margin-top:8px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:#9ca3af;">Víkend (2 noci) – všetky položky v cene</span><span style="color:white;font-weight:600;">${packagesWeekendTotal.toFixed(2)} €</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;"><span style="color:#9ca3af;">${nights - 2} ${nights - 2 === 1 ? 'ďalšia noc' : 'ďalšie noci'} (+50 %)</span><span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
+            <span style="color:#9ca3af;">Víkend (2 noci) – všetky položky v cene</span>
+            <span style="color:white;font-weight:600;">${packagesWeekendTotal.toFixed(2)} €</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;">
+            <span style="color:#9ca3af;">${extraNights} ${extraNights === 1 ? 'ďalšia noc' : 'ďalšie noci'} (+50 % zo základnej ceny balíka)</span>
+            <span style="color:#10b981;font-weight:600;">+${packagesExtraDaysTotal.toFixed(2)} €</span>
+          </div>
         </div>`;
       }
       html += `<div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
@@ -404,31 +419,23 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       </div></div>`;
     }
 
-    const hasServices = installSelected || installUninstallSelected || deliveryResult || effectivePackages.some(p => p.install !== 'none' || p.arrival);
+    const hasServices = installSelected || installUninstallSelected || deliveryResult || packageItems.some(p => p.install !== 'none' || p.arrival);
     if (hasServices) {
       let servicesTotalCalc = 0;
       let servicesHtml = '';
       if (installSelected) { servicesTotalCalc += 20; servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Inštalácia</span><span style="color:#1A4BFF;font-weight:700;">+20,00 €</span></div>`; }
       if (installUninstallSelected) { servicesTotalCalc += 40; servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Inštalácia a deinštalácia</span><span style="color:#1A4BFF;font-weight:700;">+40,00 €</span></div>`; }
-      effectivePackages.filter(p => p.install !== 'none').forEach(p => {
-        servicesTotalCalc += p.installPrice;
+      packageItems.filter(p => p.install !== 'none').forEach(p => {
+        const amount = p.installPrice;
+        servicesTotalCalc += amount;
         const label = p.install === 'install' ? 'Inštalácia' : 'Inštalácia a deinštalácia';
-        servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">${label} <span style="color:rgba(255,255,255,0.4);">(${p.name})</span></span><span style="color:#1A4BFF;font-weight:700;">+${p.installPrice.toFixed(2)} €</span></div>`;
+        servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">${label} <span style="color:rgba(255,255,255,0.4);">(${p.name})</span></span><span style="color:#1A4BFF;font-weight:700;">+${amount.toFixed(2)} €</span></div>`;
       });
       if (deliveryResult) {
         servicesTotalCalc += deliveryResult.price;
-        const effectiveCityName = effectiveCity;
-        servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Doprava <span style="color:rgba(255,255,255,0.4);">(${effectiveCityName})</span></span><span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}</span></div>`;
-        if (effectiveCoords) {
-          servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">📍 Súradnice</span><span style="color:#9ca3af;font-size:12px;">${effectiveCoords.lat.toFixed(6)}, ${effectiveCoords.lng.toFixed(6)}</span></div>`;
-          servicesHtml += `<div style="margin-top:8px;padding:8px 12px;background:rgba(26,75,255,0.05);border:1px solid rgba(26,75,255,0.2);border-radius:10px;text-align:center;">
-            <a href="https://www.google.com/maps?q=${effectiveCoords.lat},${effectiveCoords.lng}" target="_blank" rel="noopener noreferrer" style="color:#1A4BFF;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(26,75,255,0.08);border-radius:8px;">
-              🗺️ Otvoriť v Mapách Google
-            </a>
-          </div>`;
-        }
+        servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Doprava <span style="color:rgba(255,255,255,0.4);">(${deliveryCity})</span></span><span style="color:${deliveryResult.isFree ? '#10b981' : '#1A4BFF'};font-weight:700;">${deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price.toFixed(2)} €`}</span></div>`;
       }
-      effectivePackages.filter(p => p.arrival).forEach(p => {
+      packageItems.filter(p => p.arrival).forEach(p => {
         if (p.deliveryPrice > 0) { servicesTotalCalc += p.deliveryPrice; servicesHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span style="color:#9ca3af;">Doprava <span style="color:rgba(255,255,255,0.4);">(${p.arrival!.name})</span></span><span style="color:#1A4BFF;font-weight:700;">+${p.deliveryPrice.toFixed(2)} €</span></div>`; }
       });
       html += `
@@ -443,9 +450,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       <div style="background:linear-gradient(135deg,rgba(189,32,211,0.08),rgba(26,75,255,0.05));border:2px solid rgba(189,32,211,0.3);border-radius:18px;padding:20px 24px;">
         <h3 style="margin:0 0 14px 0;color:#BD20D3;font-size:16px;font-weight:700;text-align:center;border-bottom:1px solid rgba(189,32,211,0.15);padding-bottom:10px;">💰 Súhrn objednávky</h3>`;
     if (cartItems.length > 0) html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🎧 Aparatúra</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${(firstDayTotal + additionalDaysTotal).toFixed(2)} €</span></div>`;
-    if (effectivePackages.length > 0) html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">📦 Balíky</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${packagesTotal.toFixed(2)} €</span></div>`;
+    if (packageItems.length > 0) html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">📦 Balíky</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${packagesTotal.toFixed(2)} €</span></div>`;
     if (hasServices) {
-      const servicesTotalCalc = (installSelected ? 20 : 0) + (installUninstallSelected ? 40 : 0) + (deliveryResult?.price ?? 0) + effectivePackages.reduce((s, p) => s + p.installPrice + (p.arrival ? p.deliveryPrice : 0), 0);
+      const servicesTotalCalc = (installSelected ? 20 : 0) + (installUninstallSelected ? 40 : 0) + (deliveryResult?.price ?? 0) +
+        packageItems.reduce((s, p) => s + p.installPrice + (p.arrival ? p.deliveryPrice : 0), 0);
       html += `<div style="display:flex;font-size:14px;padding:5px 0;"><span style="color:#9ca3af;">🔧 Doplnkové služby</span><span style="margin-left:auto;color:white;font-weight:600;min-width:80px;text-align:right;">${servicesTotalCalc.toFixed(2)} €</span></div>`;
     }
     html += `<div style="display:flex;align-items:center;margin-top:14px;padding-top:14px;border-top:2px solid #BD20D3;">
@@ -463,36 +471,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     if (!formData.dateFrom || !formData.dateTo) { toast.error("Prosím vyberte dátum od a do!"); return; }
     setIsSubmitting(true);
     const toastId = toast.loading('Odosielam dopyt...');
-
     try {
-      let resolvedDeliveryCoords = deliveryCoords;
-      if (deliverySelected && !resolvedDeliveryCoords && deliveryCity.trim()) {
-        resolvedDeliveryCoords = await geocodeCity(deliveryCity);
-      }
-
-      const resolvedPackageItems = await Promise.all(packageItems.map(async (pkg) => {
-        if (pkg.arrival && (!pkg.arrival.lat || !pkg.arrival.lng)) {
-          const coords = await geocodeCity(pkg.arrival.name);
-          if (coords) {
-            return { ...pkg, arrival: { name: pkg.arrival.name, lat: coords.lat, lng: coords.lng } };
-          }
-        }
-        return pkg;
-      }));
-
       const totalPrice = grandTotal + packagesTotal;
-      const cartSummary = buildCartSummaryHtml(resolvedDeliveryCoords, resolvedPackageItems);
       const htmlContent = generateEmailHtml('rezervacia', {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-        phone: formData.phone || 'Neuvedený',
+        name: `${formData.firstName} ${formData.lastName}`, email: formData.email, phone: formData.phone || 'Neuvedený',
         date: formData.dateFrom ? `${format(new Date(formData.dateFrom), "dd.MM.yyyy")} až ${format(new Date(formData.dateTo), "dd.MM.yyyy")}` : 'Neuvedený',
-        message: formData.message || '—',
-        cartSummaryHtml: cartSummary,
-        days,
-        totalPrice,
+        message: formData.message || '—', cartSummaryHtml: buildCartSummaryHtml(), days, totalPrice,
       });
-
       await emailjs.send('service_s8kq87k', 'template_st0hc2f', { message_html: htmlContent, title: 'Prenájom' }, 'hlWKyd9fiWgqJJT3r');
       toast.dismiss(toastId);
       setShowReservationSuccess(true);
@@ -530,6 +515,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         .cart-scroll-wrapper::-webkit-scrollbar { width: 4px; }
         .cart-scroll-wrapper::-webkit-scrollbar-track { background: transparent; }
         .cart-scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(189, 32, 211, 0.3); border-radius: 4px; }
+        .cart-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(189, 32, 211, 0.5); }
         .cart-item-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.75rem 1rem; }
         @media (min-width: 640px) { .cart-item-row { padding: 0.875rem 1rem; gap: 1rem; } }
         .cart-item-image { width: 48px; height: 48px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; background: rgba(0,0,0,0.4); }
@@ -647,52 +633,48 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   {hasSomethingToShow && (
                     <div className="bg-gradient-to-br from-[#1A4BFF]/[0.06] to-[#BD20D3]/[0.04] border border-white/[0.08] rounded-2xl p-4 space-y-2">
                       <span className="text-xs font-bold uppercase tracking-widest text-[#1A4BFF] flex items-center gap-1.5 pb-2 border-b border-white/[0.06]"><Wrench size={14} /> Doplnkové služby</span>
+
                       <div onClick={() => { if (packageHasInstall) return; setInstallSelected(!installSelected); if (!installSelected) setInstallUninstallSelected(false); }} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${packageHasInstall ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : installSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}>
                         <div className="flex items-center gap-2.5">
                           <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${packageHasInstall ? 'border-gray-600 bg-gray-700' : installSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
-                            {packageHasInstall && <span className="text-gray-400 text-[10px] font-bold">—</span>}
+                            {packageHasInstall && <Ban size={10} className="text-gray-400" />}
                             {!packageHasInstall && installSelected && <Check size={12} className="text-white stroke-[3]" />}
                           </div>
                           <span className={`text-xs font-medium ${packageHasInstall ? 'text-gray-500' : 'text-gray-300'}`}>{packageHasInstall ? 'Inštalácia (už v balíku)' : 'Inštalácia'}</span>
                         </div>
                         <span className={`text-xs font-bold ${packageHasInstall ? 'text-gray-600' : installSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>{packageHasInstall ? '—' : '+20 €'}</span>
                       </div>
+
                       <div onClick={() => { if (packageHasInstall) return; setInstallUninstallSelected(!installUninstallSelected); if (!installUninstallSelected) setInstallSelected(false); }} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${packageHasInstall ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : installUninstallSelected ? 'bg-[#1A4BFF]/10 border-[#1A4BFF]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}>
                         <div className="flex items-center gap-2.5">
                           <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${packageHasInstall ? 'border-gray-600 bg-gray-700' : installUninstallSelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
-                            {packageHasInstall && <span className="text-gray-400 text-[10px] font-bold">—</span>}
+                            {packageHasInstall && <Ban size={10} className="text-gray-400" />}
                             {!packageHasInstall && installUninstallSelected && <Check size={12} className="text-white stroke-[3]" />}
                           </div>
                           <span className={`text-xs font-medium ${packageHasInstall ? 'text-gray-500' : 'text-gray-300'}`}>{packageHasInstall ? 'Inštalácia a deinštalácia (už v balíku)' : 'Inštalácia a deinštalácia'}</span>
                         </div>
                         <span className={`text-xs font-bold ${packageHasInstall ? 'text-gray-600' : installUninstallSelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`}>{packageHasInstall ? '—' : '+40 €'}</span>
                       </div>
+
                       <div className="border-t border-white/[0.06] pt-2 space-y-2">
                         <div className="relative" ref={cityRef}>
                           <div onClick={() => { if (packageHasDelivery) return; toggleDelivery(); }} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${packageHasDelivery ? 'bg-gray-800/40 border-gray-700/50 opacity-50 cursor-not-allowed' : 'bg-black/20 border-white/5 hover:border-white/20'}`}>
                             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all shrink-0 ${packageHasDelivery ? 'border-gray-600 bg-gray-700' : deliverySelected ? 'bg-[#1A4BFF] border-[#1A4BFF]' : 'border-gray-500'}`}>
-                              {packageHasDelivery && <span className="text-gray-400 text-[10px] font-bold">—</span>}
+                              {packageHasDelivery && <Ban size={10} className="text-gray-400" />}
                               {!packageHasDelivery && deliverySelected && <Check size={12} className="text-white stroke-[3]" />}
                             </div>
                             <MapPin size={14} className={`shrink-0 ${packageHasDelivery ? 'text-gray-600' : deliverySelected ? 'text-[#1A4BFF]' : 'text-gray-500'}`} />
                             <div className="flex-1 min-w-0">
-                              {packageHasDelivery ? <span className="text-xs text-gray-500">Doprava (už v balíku)</span> : (
-                                <Input id="cart-city-input" type="text" value={deliveryCity}
-                                  onChange={(e) => { setDeliveryCity(e.target.value); setDeliveryCoords(null); setDeliveryResult(null); setCityLocked(false); }}
-                                  onKeyDown={handleCityKeyDown}
-                                  onFocus={() => { if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true); }}
-                                  placeholder="Mesto odberu (SK/CZ)..." readOnly={!deliverySelected}
-                                  className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500" />
+                              {packageHasDelivery ? (
+                                <span className="text-xs text-gray-500">Doprava (už v balíku)</span>
+                              ) : (
+                                <Input id="cart-city-input" type="text" value={deliveryCity} onChange={(e) => { setDeliveryCity(e.target.value); setDeliveryResult(null); setCityLocked(false); }} onKeyDown={handleCityKeyDown} onFocus={() => { if (deliveryCity.length >= 2 && deliverySelected && !cityLocked && citySuggestions.length > 0) setCityDropdownOpen(true); }} placeholder="Mesto odberu (SK/CZ)..." readOnly={!deliverySelected} className="bg-transparent border-0 text-white text-xs h-auto px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-500" />
                               )}
                             </div>
                             <div className="shrink-0 min-w-[70px] text-right">
-                              {packageHasDelivery ? <span className="text-xs text-gray-600">—</span> : deliverySelected && deliveryResult ? (
-                                <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span>
-                              ) : <span className="text-xs text-gray-500">Vybrať</span>}
+                              {packageHasDelivery ? <span className="text-xs text-gray-600">—</span> : deliverySelected && deliveryResult ? <span className={`text-xs font-bold ${deliveryResult.isFree ? 'text-emerald-400' : 'text-[#1A4BFF]'}`}>{deliveryResult.isFree ? 'Zdarma' : `+${deliveryResult.price} €`}</span> : <span className="text-xs text-gray-500">Vybrať</span>}
                             </div>
-                            {!packageHasDelivery && deliverySelected && (
-                              <button type="button" onClick={(e) => { e.stopPropagation(); clearDelivery(); }} className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0"><X size={10} /></button>
-                            )}
+                            {!packageHasDelivery && deliverySelected && (<button type="button" onClick={(e) => { e.stopPropagation(); clearDelivery(); }} className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-all shrink-0"><X size={10} /></button>)}
                           </div>
                           {!packageHasDelivery && cityDropdownOpen && citySuggestions.length > 0 && deliverySelected && !cityLocked && (
                             <div className="absolute top-full left-0 right-0 mt-0.5 bg-[#0a0d1f] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-60 overflow-y-auto">
@@ -701,27 +683,33 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                                 <button key={i} type="button" onClick={() => selectCity(city.name, city.lat, city.lng)} className="flex items-center gap-2.5 w-full p-2.5 transition-colors text-left border-b border-white/[0.06] last:border-b-0 hover:bg-[#1A4BFF]/5 cursor-pointer">
                                   <MapPin size={13} className="text-gray-500 shrink-0 self-start mt-0.5" />
                                   <div className="flex-1 min-w-0"><p className="text-xs text-white truncate">{city.name}</p><span className="text-[11px] text-gray-500/70 leading-tight block mt-0.5">{city.postcode ? `${city.postcode}, ` : ''}{city.district || ''}</span></div>
-                                  <div className="text-right shrink-0"><span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span></div>
+                                  <div className="text-right shrink-0"><span className="text-[9px] text-gray-500 uppercase block">{city.country === 'sk' ? 'SK' : 'CZ'}</span>{city.distToNearest !== undefined && city.distToNearest > 0 && (<span className="text-[10px] text-gray-600 mt-0.5 block whitespace-nowrap">~{city.distToNearest} km od {city.nearestPoint}</span>)}{city.distToNearest !== undefined && city.distToNearest <= 0 && (<span className="text-[10px] text-emerald-500/60 mt-0.5 block">v mieste odberu</span>)}</div>
                                 </button>
                               ))}
                             </div>
                           )}
-                          {!packageHasDelivery && deliverySelected && (
-                            <button type="button" onClick={() => setMapPickerOpen(true)} className="flex items-center gap-2 text-xs text-[#1A4BFF] hover:text-[#1A4BFF]/80 transition-colors py-1.5 px-3 rounded-lg bg-[#1A4BFF]/5 hover:bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 w-full justify-center">
-                              <MapPin size={14} /> Vybrať na mape
-                            </button>
-                          )}
                           {!packageHasDelivery && deliverySelected && deliveryResult && (
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] mt-1">
-                              <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>
-                                {deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price} €`}
-                              </span>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                              <span className={`font-bold px-2 py-0.5 rounded-full ${deliveryResult.isFree ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'}`}>{deliveryResult.isFree ? '✓ Doprava ZDARMA' : `${deliveryResult.price} €`}</span>
                               {!deliveryResult.isFree && <span className="text-gray-400 flex items-center gap-1"><Navigation size={10} /> {deliveryResult.distance} km od {deliveryResult.nearestPoint}</span>}
                               {deliveryResult.isKysuce && <span className="text-gray-500">(Kysuce – zadarmo)</span>}
                             </div>
                           )}
-                          <p className="text-[10px] text-gray-500 leading-relaxed mt-1">Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.</p>
                         </div>
+
+                        {/* Map picker button in cart */}
+                        {deliverySelected && !packageHasDelivery && (
+                          <button
+                            type="button"
+                            onClick={() => setMapPickerOpen(true)}
+                            className="flex items-center gap-2 text-xs text-[#1A4BFF] hover:text-[#1A4BFF]/80 transition-colors py-1.5 px-3 rounded-lg bg-[#1A4BFF]/5 hover:bg-[#1A4BFF]/10 border border-[#1A4BFF]/20 w-full justify-center"
+                          >
+                            <MapPin size={14} />
+                            Vybrať na mape
+                          </button>
+                        )}
+
+                        <p className="text-[10px] text-gray-500 leading-relaxed">Osobný odber v Žiline alebo Čadci je zadarmo. Doprava do 10 km od výdajných miest a po celých Kysuciach je bezplatná. Nad 10 km účtujeme 0,70 € / km.</p>
                       </div>
                     </div>
                   )}
@@ -754,7 +742,9 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                       </div>
                     )}
+
                     {cartItems.length > 0 && packageItems.length > 0 && <div className="border-t border-white/10"></div>}
+
                     {packageItems.length > 0 && (
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-[#1A4BFF] rounded-full"></span>Balíky</h4>
@@ -779,19 +769,24 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             </div>
                           ))}
                         </div>
+
                         {days > WEEKEND_DAYS && (
                           <div className="mt-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-1.5 text-xs">
                             <p className="text-emerald-400 font-bold uppercase tracking-wider mb-1">Výpočet na {nights} {nights === 1 ? 'noc' : 'noci'}</p>
                             <div className="flex justify-between text-gray-300"><span>Víkend (2 noci) – všetky položky v cene</span><span className="text-white font-semibold">{packagesWeekendTotal.toFixed(2)} €</span></div>
                             <div className="flex justify-between text-gray-300"><span>{nights - 2} {nights - 2 === 1 ? 'ďalšia noc' : 'ďalšie noci'} (+50 % základnej ceny)</span><span className="text-emerald-400 font-semibold">+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
+                            <div className="flex justify-between text-emerald-400 font-semibold border-t border-emerald-500/20 pt-1.5 mt-1"><span>Príplatok za nadštandardné dni (len základ balíka)</span><span>+{packagesExtraDaysTotal.toFixed(2)} €</span></div>
                           </div>
                         )}
+
                         <div className="flex justify-between text-sm font-bold mt-2 pt-2 border-t border-white/5">
                           <span className="text-gray-300">Balíky spolu</span><span className="text-white text-base">{packagesTotal.toFixed(2)} €</span>
                         </div>
                       </div>
                     )}
+
                     {((packageItems.length > 0 && hasAnyAdditionalService) || (cartItems.length > 0 && !packageItems.length && hasAnyAdditionalService)) && <div className="border-t border-white/10"></div>}
+
                     {hasAnyAdditionalService && (
                       <div>
                         <h4 className="text-sm font-bold uppercase text-white/80 mb-3 flex items-center gap-2"><span className="w-1.5 h-4 bg-emerald-400 rounded-full"></span>Doplnkové služby</h4>
@@ -805,6 +800,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                       </div>
                     )}
+
                     <div className="border-t-2 border-[#BD20D3]/30 pt-4 flex justify-between items-end">
                       <span className="text-white font-bold text-lg">Celková suma</span>
                       <span className="text-[#BD20D3] font-extrabold text-3xl">{(grandTotal + packagesTotal).toFixed(2)} €</span>
@@ -875,7 +871,11 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
         </div>
       )}
 
-      <MapPicker open={mapPickerOpen} onOpenChange={setMapPickerOpen} onLocationSelect={handleMapLocationSelect} />
+      <MapPicker
+        open={mapPickerOpen}
+        onOpenChange={setMapPickerOpen}
+        onLocationSelect={handleMapLocationSelect}
+      />
 
       <Dialog open={showReservationSuccess} onOpenChange={setShowReservationSuccess}>
         <DialogContent className="bg-[#0a0d1f] border border-[#BD20D3]/40 text-white max-w-md rounded-3xl shadow-2xl shadow-[#BD20D3]/20 p-8 text-center">
