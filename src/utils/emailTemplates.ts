@@ -80,7 +80,7 @@ export function generateEmailHtml(
 
   const coordHtml =
     data.deliveryLat && data.deliveryLng
-      ? `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;margin-top:24px;font-size:13px;color:#9ca3af;">
+      ? `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#9ca3af;">
            <strong style="color:#10b981;display:block;margin-bottom:6px;">📍 GPS súradnice doručenia</strong>
            <div style="display:flex;justify-content:space-between;padding:4px 0;">
              <span>Zemepisná šírka (lat):</span>
@@ -104,22 +104,22 @@ export function generateEmailHtml(
       <head>
         <meta charset="utf-8" />
         <style>
-          body { margin: 0; padding: 0; background-color: #020721; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+          body { margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
           .container { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
-          .card { background: #0a0d1f; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.5); }
-          .header { padding: 32px 28px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
-          .header h1 { margin: 0; font-size: 22px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; }
+          .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { padding: 32px 28px 20px; text-align: center; }
+          .header h1 { margin: 0; font-size: 22px; font-weight: 800; color: #111827; letter-spacing: -0.5px; }
           .badge { display: inline-block; margin-top: 10px; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; color: white; }
           .body { padding: 8px 28px 28px; }
-          .section { margin-bottom: 28px; }
-          .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-bottom: 12px; }
-          .field { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+          .section { margin-bottom: 18px; }
+          .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-bottom: 8px; }
+          .field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
           .field:last-child { border-bottom: none; }
-          .field-label { color: #9ca3af; }
-          .field-value { color: #FFFFFF; font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
-          .message-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 20px; font-size: 14px; color: #d1d5db; line-height: 1.7; white-space: pre-wrap; }
-          .footer { border-top: 1px solid rgba(255,255,255,0.08); padding: 20px 28px; text-align: center; }
-          .footer p { margin: 0; font-size: 12px; color: #6b7280; }
+          .field-label { color: #6b7280; }
+          .field-value { color: #111827; font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+          .message-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap; }
+          .footer { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px 28px; text-align: center; }
+          .footer p { margin: 0; font-size: 12px; color: #9ca3af; }
           @media (max-width: 480px) {
             .container { padding: 12px 8px; }
             .header { padding: 24px 16px 16px; }
@@ -157,7 +157,7 @@ export function generateEmailHtml(
               <div class="section">
                 <div class="section-title">💰 Cena</div>
                 <div class="field" style="border-bottom: 2px solid #BD20D3; padding-bottom: 12px;">
-                  <span class="field-label" style="font-weight:800;color:#FFFFFF;">Celková cena</span>
+                  <span class="field-label" style="font-weight:800;color:#111827;">Celková cena</span>
                   <span class="field-value" style="color:#BD20D3;font-size:18px;font-weight:900;">${data.totalPrice.toFixed(2)} €</span>
                 </div>
               </div>
