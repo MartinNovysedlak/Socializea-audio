@@ -47,58 +47,6 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
   }
   return inside;
 }
-```
-
-<dyad-write path="src/components/MapPicker.tsx" description="Creating a map picker component for selecting delivery location on a map of Slovakia.">
-"use client";
-
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { MapPin, Loader2, Navigation, Check, X, Search } from 'lucide-react';
-import { toast } from 'sonner';
-
-interface MapPickerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onLocationSelect: (lat: number, lng: number, name: string) => void;
-}
-
-const PICKUP_POINTS = [
-  { name: 'Žilina', lat: 49.2235, lng: 18.7394 },
-  { name: 'Čadca', lat: 49.4358, lng: 18.7889 },
-];
-
-const KYSUCE_BOUNDS: { lat: number; lng: number }[] = [
-  { lat: 49.520, lng: 18.550 },
-  { lat: 49.500, lng: 19.050 },
-  { lat: 49.350, lng: 19.050 },
-  { lat: 49.250, lng: 18.800 },
-  { lat: 49.280, lng: 18.600 },
-];
-
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i].lng, yi = polygon[i].lat;
-    const xj = polygon[j].lng, yj = polygon[j].lat;
-    const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
-      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
 
 function getNearestPoint(coords: { lat: number; lng: number }): { name: string; distance: number } {
   let minDist = Infinity;
@@ -114,18 +62,14 @@ function getNearestPoint(coords: { lat: number; lng: number }): { name: string; 
 }
 
 const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => {
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLng, setSelectedLng] = useState<number | null>(null);
   const [selectedName, setSelectedName] = useState<string>('');
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ lat: number; lng: number; name: string }[]>([]);
-  const [searching, setSearching] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
-  const leafletRef = useRef<any>(null);
 
   const initMap = useCallback(async () => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -133,15 +77,6 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
     try {
       const L = (await import('leaflet')).default;
       await import('leaflet/dist/leaflet.css');
-      leafletRef.current = L;
-
-      // Fix default marker icon
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      });
 
       const map = L.map(mapContainerRef.current!, {
         center: [48.7, 19.5],
@@ -169,7 +104,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
       });
 
       // Draw Kysuce polygon
-      const polygon = L.polygon(KYSUCE_BOUNDS, {
+      L.polygon(KYSUCE_BOUNDS, {
         color: '#BD20D3',
         fillColor: '#BD20D3',
         fillOpacity: 0.08,
@@ -210,20 +145,33 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         markerRef.current = L.marker([lat, lng], { icon: customIcon }).addTo(map);
       });
 
-      mapLoadedRef.current = true;
       mapRef.current = map;
-    };
+      setMapLoaded(true);
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to load map:', err);
+      setLoading(false);
+      toast.error('Nepodarilo sa načítať mapu.');
+    }
+  }, []);
 
-    initMap();
-
+  useEffect(() => {
+    if (open && !mapRef.current) {
+      setLoading(true);
+      // small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        initMap();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
     return () => {
-      if (mapRef.current) {
+      if (!open && mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
-        mapLoadedRef.current = false;
+        setMapLoaded(false);
       }
     };
-  }, []);
+  }, [open, initMap]);
 
   const handleConfirm = () => {
     if (selectedLat === null || selectedLng === null) {
