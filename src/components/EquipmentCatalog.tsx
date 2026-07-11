@@ -1,212 +1,152 @@
 "use client";
 
-import React, { useState } from "react";
-import { Filter, Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { EquipmentItem } from "@/lib/supabase";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingBag, Plus, Minus, Search, Loader2, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { EquipmentItem } from '@/lib/supabase';
 
 interface EquipmentCatalogProps {
   equipment: EquipmentItem[];
   loading: boolean;
   quantities: Record<string, number>;
   setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  usedInPackages?: Record<string, number>;
 }
 
-const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: EquipmentCatalogProps) => {
-  const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
+const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities, usedInPackages = {} }: EquipmentCatalogProps) => {
+  const [search, setSearch] = useState('');
 
-  const filteredEquipment = activeFilter === "all"
-    ? equipment
-    : equipment.filter((item) => item.category === activeFilter);
+  const filteredEquipment = equipment.filter(item =>
+    item.name.toLowerCase().includes(search.toLowerCase()) ||
+    item.category.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleQuantityChange = (id: string, delta: number) => {
-    const item = equipment.find((i) => i.id === id);
+    const item = equipment.find(i => i.id === id);
+    if (!item) return;
     const currentQty = quantities[id] ?? 0;
-    const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
-    setQuantities((prev) => ({ ...prev, [id]: newQty }));
+    const usedInPkg = usedInPackages[id] || 0;
+    const maxAvailable = item.available - usedInPkg;
+    const newQty = Math.max(0, Math.min(maxAvailable, currentQty + delta));
+    setQuantities(prev => ({ ...prev, [id]: newQty }));
   };
 
-  const handleAdd = (id: string) => {
-    handleQuantityChange(id, 1);
+  const getAvailable = (item: EquipmentItem) => {
+    const used = usedInPackages[item.id] || 0;
+    return item.available - used;
   };
-
-  const handleRemove = (id: string) => {
-    handleQuantityChange(id, -1);
-  };
-
-  const handleProductClick = () => {
-    sessionStorage.setItem('prenajom-scroll-position', String(window.scrollY));
-  };
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "sound": return "Zvuk";
-      case "lighting": return "Svetlá a efekty";
-      case "other": return "Ostatné";
-      default: return "";
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "sound": return <Volume2 size={13} />;
-      case "lighting": return <Lightbulb size={13} />;
-      default: return <Layers size={13} />;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "sound": return { bg: "bg-cyan-500/10", border: "border-cyan-500/25", text: "text-cyan-400", icon: "text-cyan-400" };
-      case "lighting": return { bg: "bg-amber-500/10", border: "border-amber-500/25", text: "text-amber-400", icon: "text-amber-400" };
-      default: return { bg: "bg-purple-500/10", border: "border-purple-500/25", text: "text-purple-400", icon: "text-purple-400" };
-    }
-  };
-
-  const getAvailabilityText = (available: number) => {
-    return `${available} ${available === 1 ? "kus" : "kusy"}`;
-  };
-
-  if (loading) {
-    return (
-      <section className="py-12 bg-transparent relative">
-        <div className="container mx-auto px-4">
-          <div className="text-center text-gray-400 py-12">Načítavam produktov...</div>
-        </div>
-      </section>
-    );
-  }
 
   return (
-    <section className="py-12 bg-transparent relative">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-[#020721] via-[#0a0d1f] to-[#020721] border border-[#BD20D3]/20 rounded-[2.5rem] p-6 md:p-8 backdrop-blur-xl overflow-hidden relative">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-[#BD20D3]/40 to-transparent rounded-bl rounded-br" />
-            
-            <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Ponuka aparatúry</h2>
-                  <p className="text-gray-400">Vyberte si jednotlivé položky a pridajte ich do kalkulačky</p>
-                </div>
+    <div className="space-y-6">
+      <div className="relative">
+        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+        <Input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Hľadať v katalógu..."
+          className="bg-black/40 border-white/10 text-white rounded-xl h-12 pl-12"
+        />
+      </div>
 
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl p-1.5 w-full md:w-auto">
-                  <Filter className="text-[#BD20D3] shrink-0" size={18} />
-                  <div className="flex gap-1 flex-wrap justify-center">
-                    {["all", "sound", "lighting", "other"].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setActiveFilter(filter as any)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs md:px-3 md:py-2 md:rounded-xl md:text-sm font-medium transition-all whitespace-nowrap ${
-                          activeFilter === filter ? "bg-[#BD20D3] text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
-                        }`}
-                      >
-                        {filter === "all" ? "Všetko" : getCategoryLabel(filter)}
-                      </button>
-                    ))}
+      {loading ? (
+        <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+          <Loader2 className="animate-spin" size={18} />
+          <span>Načítavam techniku...</span>
+        </div>
+      ) : filteredEquipment.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          <Package size={32} className="mx-auto mb-3 opacity-50" />
+          <p>Žiadna technika nenájdená</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEquipment.map((item) => {
+            const qty = quantities[item.id] ?? 0;
+            const available = getAvailable(item);
+            const disabled = available <= 0;
+            const maxReached = qty >= available;
+
+            return (
+              <Link
+                key={item.id}
+                to={`/prenajom/${item.id}`}
+                className="block group"
+              >
+                <div className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/50 transition-all h-full flex flex-col hover:shadow-lg hover:shadow-[#BD20D3]/10 hover:-translate-y-1">
+                  <div className="h-48 overflow-hidden relative bg-black/40">
+                    {item.main_image ? (
+                      <img
+                        src={item.main_image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : item.images && item.images.length > 0 ? (
+                      <img
+                        src={item.images[0]}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                        <Package size={32} className="text-gray-500" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-3 left-3">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        disabled ? 'bg-red-600/80 text-white' : 'bg-emerald-600/80 text-white'
+                      }`}>
+                        {disabled ? 'Vypredané' : `${available} ks`}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            {filteredEquipment.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                Žiadna technika nevyhovuje zadanému filtru.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredEquipment.map((item) => {
-                  const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
-                  const catColor = getCategoryColor(item.category);
-                  const inCartQty = quantities[item.id] ?? 0;
+                  <div className="p-5 flex flex-col flex-grow">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">
+                      {item.category === 'sound' ? 'Zvuk' : item.category === 'lighting' ? 'Svetlá' : 'Ostatné'}
+                    </p>
+                    <h3 className="text-base font-bold text-white group-hover:text-[#BD20D3] transition-colors line-clamp-2 mb-2">
+                      {item.name}
+                    </h3>
+                    <p className="text-xs text-gray-400 line-clamp-2 mb-4 flex-grow">
+                      {item.description}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
+                      <div>
+                        <span className="text-[#BD20D3] font-bold text-lg">{item.price_per_day} €</span>
+                        <span className="text-gray-500 text-xs ml-1">/ deň</span>
+                      </div>
 
-                  return (
-                    <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
-                      <Link 
-                        to={`/equipment/${item.id}`} 
-                        onClick={handleProductClick}
-                        className="w-full flex flex-col items-center mb-4 cursor-pointer"
-                      >
-                        <div className="w-32 h-32 rounded-2xl overflow-hidden border border-white/10 relative mb-4">
-                          <img
-                            src={displayImage}
-                            alt={item.name}
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
-                            }}
-                            style={{ objectPosition: "center" }}
-                          />
-                        </div>
-
-                        <div className={`inline-flex items-center gap-1.5 ${catColor.bg} border ${catColor.border} rounded-full px-3 py-1 mb-3`}>
-                          <span className={catColor.icon}>{getCategoryIcon(item.category)}</span>
-                          <span className={`text-xs font-semibold ${catColor.text} whitespace-nowrap`}>{getCategoryLabel(item.category)}</span>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-white group-hover:text-[#BD20D3] transition-colors mb-2 line-clamp-2">
-                          {item.name}
-                        </h3>
-                      </Link>
-
-                      <div className="flex-1 w-full flex flex-col justify-end">
-                        <div className="flex justify-center items-center gap-3 mb-4">
-                          <span className="text-2xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
-                          <span className="text-gray-400 text-sm">Dostupné: {getAvailabilityText(item.available)}</span>
-                        </div>
-
-                        {inCartQty === 0 ? (
-                          <Button
-                            onClick={() => handleAdd(item.id)}
-                            size="sm"
-                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg h-10 mb-4 transition-all"
-                          >
-                            <ShoppingBag size={14} className="mr-2" />
-                            Pridať do košíka
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => handleAdd(item.id)}
-                            disabled={inCartQty >= item.available}
-                            size="sm"
-                            className="w-full btn-cyber hover:opacity-95 text-white rounded-lg h-10 mb-4 transition-all border-none"
-                          >
-                            <Check size={14} className="mr-2 animate-pulse" />
-                            V košíku ({inCartQty})
-                          </Button>
-                        )}
-
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleRemove(item.id)}
-                            disabled={!quantities[item.id]}
-                            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                          >
-                            <Minus size={12} />
-                          </button>
-                          <span className="w-10 text-center text-white font-medium text-base">{quantities[item.id] ?? 0}</span>
-                          <button
-                            onClick={() => handleAdd(item.id)}
-                            disabled={(quantities[item.id] ?? 0) >= item.available}
-                            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                          >
-                            <Plus size={12} />
-                          </button>
-                        </div>
+                      <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(item.id, -1)}
+                          disabled={qty <= 0}
+                          className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="text-white font-bold text-sm w-8 text-center tabular-nums">{qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(item.id, 1)}
+                          disabled={maxReached || disabled}
+                          className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Plus size={14} />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-            
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />
-          </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 };
 
