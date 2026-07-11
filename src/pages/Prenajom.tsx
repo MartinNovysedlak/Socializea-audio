@@ -204,12 +204,9 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
     setIsDetailOpen(true);
   };
 
+  // 👇 Tento handler už nerobí scroll – len spustí kvíz
   const handleLaunchQuiz = () => {
     setShouldAutoOpenQuiz(true);
-    // Scroll down to the quiz section so user sees the context
-    setTimeout(() => {
-      handleScrollTo('interactive-quiz');
-    }, 100);
   };
 
   return (
@@ -292,7 +289,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
               </Button>
             </div>
 
-            {/* 🧠 Pekné tlačidlo na spustenie sprievodcu – zapadá do štýlu stránky */}
+            {/* 🧠 Pekné tlačidlo na spustenie sprievodcu – bez scrollu */}
             <div className="mt-8 pt-6 border-t border-white/5 max-w-md mx-auto">
               <button
                 onClick={handleLaunchQuiz}
