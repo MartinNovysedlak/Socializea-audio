@@ -30,6 +30,7 @@ import { EquipmentItem } from "@/lib/supabase";
 import { toast } from "sonner";
 import { DayPicker } from "react-day-picker";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
+import { sk } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
@@ -912,7 +913,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         {showFromCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker mode="single" selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showFromCalendar} />
+                            <DayPicker mode="single" locale={sk} selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showFromCalendar} />
                           </div>
                         )}
                       </div>
@@ -924,7 +925,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         </div>
                         {showToCalendar && (
                           <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
-                            <DayPicker mode="single" selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showToCalendar} />
+                            <DayPicker mode="single" locale={sk} selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showToCalendar} />
                           </div>
                         )}
                       </div>

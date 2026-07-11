@@ -10,6 +10,7 @@ import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
+import { sk } from "date-fns/locale";
 import { startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
 import { useDialogContext } from '@/contexts/DialogContext';
@@ -232,6 +233,7 @@ const DJContactDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
                 <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl dj-datepicker">
                   <DayPicker
                     mode="single"
+                    locale={sk}
                     selected={eventDate ? (() => {
                       const [d, m, y] = eventDate.split('.');
                       return new Date(Number(y), Number(m) - 1, Number(d));

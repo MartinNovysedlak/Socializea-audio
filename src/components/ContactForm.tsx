@@ -14,6 +14,7 @@ import emailjs from '@emailjs/browser';
 import { Send, Phone, Mail, MapPin, Calendar, Warehouse, Store, CheckCircle2, Loader2 } from 'lucide-react';
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
+import { sk } from "date-fns/locale";
 import { startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
 
@@ -251,6 +252,7 @@ const ContactForm = () => {
                                 <div className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 rounded-xl">
                                   <DayPicker
                                     mode="single"
+                                    locale={sk}
                                     selected={field.value ? (() => {
                                       const [d, m, y] = field.value.split('.');
                                       return new Date(Number(y), Number(m) - 1, Number(d));
