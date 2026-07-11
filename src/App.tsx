@@ -21,7 +21,7 @@ import AmbientBackground from './components/AmbientBackground';
 
 function App() {
   const { equipment } = useEquipment();
-  
+
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     try {
       const saved = localStorage.getItem("cyber_cart_quantities");
@@ -34,6 +34,7 @@ function App() {
   useEffect(() => {
     try {
       localStorage.setItem("cyber_cart_quantities", JSON.stringify(quantities));
+      window.dispatchEvent(new CustomEvent('cart-updated'));
     } catch (e) {
       console.error("Nedá sa uložiť košík do localStorage:", e);
     }
@@ -43,39 +44,39 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AmbientBackground />
-      
+
       <div className="relative z-10">
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route 
-            path="/prenajom" 
+          <Route
+            path="/prenajom"
             element={
-              <Prenajom 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
-                equipment={equipment} 
-              />
-            } 
-          />
-          <Route 
-            path="/prenajom/:id" 
-            element={
-              <EquipmentDetail 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
+              <Prenajom
+                quantities={quantities}
+                setQuantities={setQuantities}
                 equipment={equipment}
               />
-            } 
+            }
           />
-          <Route 
-            path="/equipment/:id" 
+          <Route
+            path="/prenajom/:id"
             element={
-              <EquipmentDetail 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
+              <EquipmentDetail
+                quantities={quantities}
+                setQuantities={setQuantities}
                 equipment={equipment}
               />
-            } 
+            }
+          />
+          <Route
+            path="/equipment/:id"
+            element={
+              <EquipmentDetail
+                quantities={quantities}
+                setQuantities={setQuantities}
+                equipment={equipment}
+              />
+            }
           />
           <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/admin" element={<Admin />} />
@@ -89,11 +90,10 @@ function App() {
         </Routes>
       </div>
 
-      {/* Globálny plávajúci košík – zobrazí sa na všetkých stránkach, ak má položky */}
-      <FloatingCart 
-        quantities={quantities} 
-        setQuantities={setQuantities} 
-        equipment={equipment} 
+      <FloatingCart
+        quantities={quantities}
+        setQuantities={setQuantities}
+        equipment={equipment}
       />
     </BrowserRouter>
   );
