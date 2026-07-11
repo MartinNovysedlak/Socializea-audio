@@ -1,14 +1,29 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, ShoppingBag } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
+
+  // Načítanie počtu položiek v košíku z localStorage (aktualizuje sa len pri načítaní stránky)
+  useEffect(() => {
+    try {
+      const qtyStr = localStorage.getItem("cyber_cart_quantities");
+      const pkgStr = localStorage.getItem("cyber_cart_packages");
+      const quantities = qtyStr ? JSON.parse(qtyStr) : {};
+      const packages = pkgStr ? JSON.parse(pkgStr) : [];
+      const count = Object.values(quantities).reduce((a: number, b: any) => a + (b as number), 0) + packages.length;
+      setCartCount(count);
+    } catch {
+      setCartCount(0);
+    }
+  }, []);
 
   const navLinks = [
     { name: 'Domov', href: '/' },
@@ -33,6 +48,10 @@ const Navbar = () => {
 
   const handleLinkClick = () => {
     closeMenu();
+  };
+
+  const openCart = () => {
+    window.dispatchEvent(new CustomEvent('open-floating-cart'));
   };
 
   return (
@@ -61,6 +80,21 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
+
+          {/* IKONA KOŠÍKA – v desktopovej časti */}
+          {cartCount > 0 && (
+            <button
+              onClick={openCart}
+              className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+              aria-label="Otvoriť košík"
+            >
+              <ShoppingBag size={18} />
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#BD20D3] text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0a0d1f]">
+                {cartCount}
+              </span>
+            </button>
+          )}
+
           <Link to="/kontakt">
             <Button className="btn-cyber rounded-full px-6 border-none transition-colors duration-200">
               Napíšte nám
@@ -70,6 +104,18 @@ const Navbar = () => {
 
         {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3">
+          {cartCount > 0 && (
+            <button
+              onClick={openCart}
+              className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+              aria-label="Otvoriť košík"
+            >
+              <ShoppingBag size={18} />
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#BD20D3] text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0a0d1f]">
+                {cartCount}
+              </span>
+            </button>
+          )}
           <button
             onClick={isMobileMenuOpen ? closeMenu : openMenu}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"

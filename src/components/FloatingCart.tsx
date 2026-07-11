@@ -175,6 +175,13 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     try { const saved = localStorage.getItem(PACKAGE_STORAGE_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
+  // Poslucháč na otvorenie košíka z iných miest (napr. z navigácie)
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener('open-floating-cart', handler);
+    return () => window.removeEventListener('open-floating-cart', handler);
+  }, []);
+
   const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalItems = totalEquipmentQty + packageItems.length;
   const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => { const item = equipment.find((e) => e.id === id); return { item, qty }; }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
