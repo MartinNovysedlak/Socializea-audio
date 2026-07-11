@@ -25,44 +25,7 @@ const KYSUCE_BOUNDS: { lat: number; lng: number }[] = [
   { lat: 49.280, lng: 18.600 },
 ];
 
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: number; lng: number }[]): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const xi = polygon[i].lng, yi = polygon[i].lat;
-    const xj = polygon[j].lng, yj = polygon[j].lat;
-    const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
-      (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
-
-function getNearestPoint(coords: { lat: number; lng: number }): { name: string; distance: number } {
-  let minDist = Infinity;
-  let nearest = '';
-  for (const point of PICKUP_POINTS) {
-    const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearest = point.name;
-    }
-  }
-  return { name: nearest, distance: Math.round(minDist * 10) / 10 };
-}
-
 const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => {
-  const [, setLoading] = useState(false);
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLng, setSelectedLng] = useState<number | null>(null);
   const [selectedName, setSelectedName] = useState<string>('');
@@ -89,28 +52,59 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         maxZoom: 19,
       }).addTo(map);
 
-      // Add pickup points
+      // Draw Kysuce free-delivery zone polygon
+      const kysucePolygon = L.polygon(KYSUCE_BOUNDS, {
+        color: '#10b981',
+        fillColor: '#10b981',
+        fillOpacity: 0.08,
+        weight: 2,
+        dashArray: '6, 6',
+      }).addTo(map);
+
+      kysucePolygon.bindPopup(`
+        <div style="padding:10px;min-width:200px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
+            <span style="font-weight:bold;font-size:14px;color:#10b981;">Oblasť Kysuce</span>
+          </div>
+          <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.4;">
+            Do tohto regiónu je doprava techniky <strong style="color:#10b981;">zdarma</strong>.
+            Patria sem: Čadca, Kysucké Nové Mesto, Turzovka, Krásno nad Kysucou a okolité obce.
+          </p>
+        </div>
+      `);
+
+      // Add pickup points with popups
       PICKUP_POINTS.forEach((point) => {
         const icon = L.divIcon({
           className: 'custom-pickup-marker',
-          html: `<div style="background:#1A4BFF;color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;white-space:nowrap;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;gap:4px;">
+          html: `<div style="background:#1A4BFF;color:white;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:bold;white-space:nowrap;border:2px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);display:flex;align-items:center;gap:4px;cursor:pointer;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             ${point.name}
           </div>`,
           iconSize: [0, 0],
           iconAnchor: [0, 0],
         });
-        L.marker([point.lat, point.lng], { icon }).addTo(map);
-      });
 
-      // Draw Kysuce polygon
-      L.polygon(KYSUCE_BOUNDS, {
-        color: '#BD20D3',
-        fillColor: '#BD20D3',
-        fillOpacity: 0.08,
-        weight: 2,
-        dashArray: '6, 6',
-      }).addTo(map);
+        const marker = L.marker([point.lat, point.lng], { icon }).addTo(map);
+
+        marker.bindPopup(`
+          <div style="padding:12px;min-width:220px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div style="width:10px;height:10px;border-radius:50%;background:#1A4BFF;"></div>
+              <span style="font-weight:bold;font-size:15px;color:#1A4BFF;">${point.name === 'Žilina' ? 'Odberné miesto Žilina' : 'Hlavný sklad a sídlo'}</span>
+            </div>
+            ${point.name === 'Žilina' 
+              ? '<p style="margin:0 0 4px 0;font-size:13px;color:#374151;"><strong>Adresa:</strong> Vysokoškolská 4, Budova SADOP</p><p style="margin:0;font-size:12px;color:#6b7280;">010 01 Žilina</p>'
+              : '<p style="margin:0 0 4px 0;font-size:13px;color:#374151;"><strong>Adresa:</strong> Čadečka 1924</p><p style="margin:0;font-size:12px;color:#6b7280;">022 01 Čadca</p>'
+            }
+            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #e5e7eb;">
+              <p style="margin:0;font-size:11px;color:#10b981;"><strong>✓</strong> Osobný odber zdarma</p>
+              <p style="margin:0;font-size:11px;color:#10b981;"><strong>✓</strong> Doprava do 10 km zadarmo</p>
+            </div>
+          </div>
+        `);
+      });
 
       map.on('click', (e: any) => {
         const { lat, lng } = e.latlng;
@@ -138,7 +132,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         }
         const customIcon = L.divIcon({
           className: 'custom-selected-marker',
-          html: `<div style="background:#BD20D3;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 12px rgba(189,32,211,0.6);font-size:16px;">📍</div>`,
+          html: `<div style="background:#BD20D3;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 3px 12px rgba(189,32,211,0.6);font-size:16px;">📍</div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 16],
         });
@@ -147,21 +141,15 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
 
       mapRef.current = map;
       setMapLoaded(true);
-      setLoading(false);
     } catch (err) {
       console.error('Failed to load map:', err);
-      setLoading(false);
       toast.error('Nepodarilo sa načítať mapu.');
     }
   }, []);
 
   useEffect(() => {
     if (open && !mapRef.current) {
-      setLoading(true);
-      // small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        initMap();
-      }, 100);
+      const timer = setTimeout(() => initMap(), 100);
       return () => clearTimeout(timer);
     }
     return () => {
@@ -193,15 +181,36 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         </DialogHeader>
 
         <div className="p-4 md:p-6 space-y-4">
-          <div
-            ref={mapContainerRef}
-            className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 relative"
-          >
-            {!mapLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
-                <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
+          <div className="relative">
+            <div
+              ref={mapContainerRef}
+              className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 relative"
+            >
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
+                  <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
+                </div>
+              )}
+            </div>
+
+            {/* Legenda – prekryv na mape */}
+            <div className="absolute bottom-4 left-4 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-lg max-w-[220px]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Legenda</p>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
+                  <span className="text-[10px] text-white">Výdajné miesto</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#10b981] border border-white/40 shrink-0"></div>
+                  <span className="text-[10px] text-white">Doprava ZDARMA</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-[10px]">📍</div>
+                  <span className="text-[10px] text-white">Vami vybrané miesto</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
 
           {selectedLat !== null && selectedLng !== null && (
@@ -212,14 +221,10 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Navigation size={12} />
-                <span>
-                  {selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}
-                </span>
+                <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span className="text-[10px] text-gray-500">
-                  Kliknite na mapu pre výber miesta. Modré body = výdajné miesta (Žilina, Čadca).
-                </span>
+              <div className="text-[10px] text-gray-500">
+                Kliknite na mapu pre výber miesta. Modré body = výdajné miesta (Žilina, Čadca). Zelená oblasť = Kysuce – doprava zadarmo.
               </div>
             </div>
           )}
