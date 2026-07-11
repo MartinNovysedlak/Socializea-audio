@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, ShoppingBag } from 'lucide-react';
+import { useCartContext } from '@/contexts/CartContext';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const location = useLocation();
+  const { totalItems, setCartOpen } = useCartContext();
 
   const navLinks = [
     { name: 'Domov', href: '/' },
@@ -61,6 +63,21 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
+
+          {/* Cart icon */}
+          {totalItems > 0 && (
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative w-10 h-10 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 flex items-center justify-center text-[#BD20D3] hover:bg-[#BD20D3]/20 transition-all"
+              aria-label="Otvoriť košík"
+            >
+              <ShoppingBag size={18} />
+              <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border border-[#020721]">
+                {totalItems}
+              </span>
+            </button>
+          )}
+
           <Link to="/kontakt">
             <Button className="btn-cyber rounded-full px-6 border-none transition-colors duration-200">
               Napíšte nám
@@ -70,6 +87,18 @@ const Navbar = () => {
 
         {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3">
+          {totalItems > 0 && (
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative w-10 h-10 rounded-full bg-[#BD20D3]/10 border border-[#BD20D3]/30 flex items-center justify-center text-[#BD20D3] hover:bg-[#BD20D3]/20 transition-all"
+              aria-label="Otvoriť košík"
+            >
+              <ShoppingBag size={18} />
+              <span className="absolute -top-1 -right-1 bg-white text-[#BD20D3] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center border border-[#020721]">
+                {totalItems}
+              </span>
+            </button>
+          )}
           <button
             onClick={isMobileMenuOpen ? closeMenu : openMenu}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"
@@ -80,24 +109,13 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE FULL-SCREEN OVERLAY MENU – slide from right */}
+      {/* MOBILE FULL-SCREEN OVERLAY MENU – rovnaký ako predtým, len pridať cart ikonku v mobile už je hore */}
       {(isMobileMenuOpen || isClosing) && (
         <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
-          {/* backdrop */}
-          <div 
-            className={`absolute inset-0 bg-black/60 ${isClosing ? 'animate-out fade-out duration-300' : 'animate-in fade-in duration-300'}`}
-            onClick={closeMenu}
-          />
-          
-          {/* panel */}
-          <div 
-            className={`relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 h-full flex flex-col ${
-              isClosing 
-                ? 'animate-out slide-out-to-right duration-300' 
-                : 'animate-in slide-in-from-right duration-300'
-            }`}
-          >
-            {/* Header s logom a krížikom */}
+          <div className={`absolute inset-0 bg-black/60 ${isClosing ? 'animate-out fade-out duration-300' : 'animate-in fade-in duration-300'}`} onClick={closeMenu} />
+          <div className={`relative w-full max-w-sm bg-[#0e122b] border-l border-[#BD20D3]/30 shadow-2xl shadow-[#BD20D3]/20 h-full flex flex-col ${
+            isClosing ? 'animate-out slide-out-to-right duration-300' : 'animate-in slide-in-from-right duration-300'
+          }`}>
             <div className="flex items-center justify-between px-6 h-20 border-b border-white/5 shrink-0">
               <Link to="/" onClick={handleLinkClick} className="flex items-center gap-2.5">
                 <div className="w-9 h-9 overflow-hidden rounded-lg border border-[#BD20D3]/30">
@@ -107,16 +125,11 @@ const Navbar = () => {
                   Socializea<span className="text-[#BD20D3]">-audio</span>
                 </span>
               </Link>
-              <button
-                onClick={closeMenu}
-                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
-                aria-label="Zavrieť menu"
-              >
+              <button onClick={closeMenu} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all" aria-label="Zavrieť menu">
                 <X size={20} />
               </button>
             </div>
 
-            {/* Navigačné linky – posunuté nižšie od vrchu */}
             <div className="flex-1 flex flex-col justify-start pt-12 md:pt-16 px-8">
               <div className="space-y-3">
                 {navLinks.map((link, idx) => {
@@ -143,8 +156,16 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Spodné tlačidlo */}
-            <div className="px-8 pb-8 shrink-0 border-t border-white/5 pt-6">
+            <div className="px-8 pb-8 shrink-0 border-t border-white/5 pt-6 space-y-3">
+              {totalItems > 0 && (
+                <button
+                  onClick={() => { setCartOpen(true); closeMenu(); }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#BD20D3]/20 border border-[#BD20D3]/30 text-white font-bold text-base hover:bg-[#BD20D3]/30 transition-all"
+                >
+                  <ShoppingBag size={18} />
+                  Košík ({totalItems})
+                </button>
+              )}
               <Link to="/kontakt" onClick={handleLinkClick}>
                 <Button className="w-full btn-cyber h-14 rounded-2xl border-none font-bold text-base flex items-center justify-center gap-2">
                   <span>Napíšte nám</span>

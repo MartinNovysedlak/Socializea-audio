@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
@@ -17,27 +17,12 @@ import NotFound from './pages/NotFound';
 import FloatingCart from './components/FloatingCart';
 import ScrollToTop from './components/ScrollToTop';
 import { useEquipment } from './hooks/useEquipment';
+import { useCartContext } from './contexts/CartContext';
 import AmbientBackground from './components/AmbientBackground';
 
 function App() {
   const { equipment } = useEquipment();
-  
-  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
-    try {
-      const saved = localStorage.getItem("cyber_cart_quantities");
-      return saved ? JSON.parse(saved) : {};
-    } catch (e) {
-      return {};
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("cyber_cart_quantities", JSON.stringify(quantities));
-    } catch (e) {
-      console.error("Nedá sa uložiť košík do localStorage:", e);
-    }
-  }, [quantities]);
+  const { quantities, setQuantities, cartOpen, setCartOpen, totalItems } = useCartContext();
 
   return (
     <BrowserRouter>
@@ -89,8 +74,10 @@ function App() {
         </Routes>
       </div>
 
-      {/* Globálny plávajúci košík – zobrazí sa na všetkých stránkach, ak má položky */}
+      {/* Globálny plávajúci košík – riadime cez CartContext */}
       <FloatingCart 
+        open={cartOpen}
+        onOpenChange={setCartOpen}
         quantities={quantities} 
         setQuantities={setQuantities} 
         equipment={equipment} 
