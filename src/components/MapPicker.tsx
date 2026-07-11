@@ -25,6 +25,26 @@ const KYSUCE_BOUNDS: { lat: number; lng: number }[] = [
   { lat: 49.280, lng: 18.600 },
 ];
 
+const ZILINA_CENTER = { lat: 49.2235, lng: 18.7394 };
+const ZILINA_RADIUS_KM = 10;
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function getKmToDegrees(km: number, latitude: number): number {
+  const latDeg = km / 111.32;
+  const lngDeg = km / (111.32 * Math.cos(latitude * Math.PI / 180));
+  return Math.max(latDeg, lngDeg);
+}
+
 const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => {
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLng, setSelectedLng] = useState<number | null>(null);
@@ -52,27 +72,66 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         maxZoom: 19,
       }).addTo(map);
 
-      // Draw Kysuce free-delivery zone polygon
+      // 1) Kysuce polygon (purple)
       const kysucePolygon = L.polygon(KYSUCE_BOUNDS, {
-        color: '#10b981',
-        fillColor: '#10b981',
-        fillOpacity: 0.08,
+        color: '#BD20D3',
+        fillColor: '#BD20D3',
+        fillOpacity: 0.1,
         weight: 2,
-        dashArray: '6, 6',
       }).addTo(map);
 
       kysucePolygon.bindPopup(`
-        <div style="padding:10px;min-width:200px;">
+        <div style="padding:10px;min-width:220px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:#10b981;"></div>
-            <span style="font-weight:bold;font-size:14px;color:#10b981;">Oblasť Kysuce</span>
+            <div style="width:10px;height:10px;border-radius:50%;background:#BD20D3;"></div>
+            <span style="font-weight:bold;font-size:14px;color:#BD20D3;">Oblasť Kysuce</span>
           </div>
           <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.4;">
-            Do tohto regiónu je doprava techniky <strong style="color:#10b981;">zdarma</strong>.
+            Do tohto regiónu je doprava techniky <strong style="color:#BD20D3;">zdarma</strong>.
             Patria sem: Čadca, Kysucké Nové Mesto, Turzovka, Krásno nad Kysucou a okolité obce.
           </p>
         </div>
       `);
+
+      // 2) Žilina 10km circle (blue)
+      const radiusInDegrees = getKmToDegrees(ZILINA_RADIUS_KM, ZILINA_CENTER.lat);
+      const zilinaCircle = L.circle([ZILINA_CENTER.lat, ZILINA_CENTER.lng], {
+        color: '#1A4BFF',
+        fillColor: '#1A4BFF',
+        fillOpacity: 0.08,
+        weight: 2,
+        dashArray: '4, 8',
+        radius: radiusInDegrees * 111320, // convert degrees to meters approx
+      }).addTo(map);
+
+      // More accurate circle using meters from center
+      zilinaCircle.setLatLng([ZILINA_CENTER.lat, ZILINA_CENTER.lng]);
+      // Override with accurate radius in meters
+      const circleAccurate = L.circle([ZILINA_CENTER.lat, ZILINA_CENTER.lng], {
+        color: '#1A4BFF',
+        fillColor: '#1A4BFF',
+        fillOpacity: 0.06,
+        weight: 2,
+        radius: ZILINA_RADIUS_KM * 1000,
+        dashArray: '8, 8',
+      }).addTo(map);
+
+      circleAccurate.bindPopup(`
+        <div style="padding:10px;min-width:220px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#1A4BFF;"></div>
+            <span style="font-weight:bold;font-size:14px;color:#1A4BFF;">10 km okruh od Žiliny</span>
+          </div>
+          <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.4;">
+            Do vzdialenosti 10 km od výdajného miesta v <strong style="color:#1A4BFF;">Žiline</strong> je doprava techniky <strong style="color:#1A4BFF;">zdarma</strong>.
+            <br/><br/>
+            <strong>Adresa:</strong> Vysokoškolská 4, Budova SADOP, 010 01 Žilina
+          </p>
+        </div>
+      `);
+
+      // Remove the less accurate circle
+      map.removeLayer(zilinaCircle);
 
       // Add pickup points with popups
       PICKUP_POINTS.forEach((point) => {
@@ -111,6 +170,10 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         setSelectedLat(lat);
         setSelectedLng(lng);
 
+        // Check if inside free zones
+        const distToZilina = haversineDistance(lat, lng, ZILINA_CENTER.lat, ZILINA_CENTER.lng);
+        const isInZilinaZone = distToZilina <= ZILINA_RADIUS_KM;
+        
         // Reverse geocode
         fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=sk`,
@@ -121,6 +184,11 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
             const address = data.address || {};
             const cityName = address.city || address.town || address.village || address.municipality || address.county || 'Neznáme miesto';
             setSelectedName(cityName);
+
+            // Show toast about free zone if applicable
+            if (isInZilinaZone) {
+              toast.success(`Miesto ${cityName} sa nachádza v 10 km zóne od Žiliny – doprava zdarma!`);
+            }
           })
           .catch(() => {
             setSelectedName('Neznáme miesto');
@@ -194,7 +262,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
             </div>
 
             {/* Legenda – prekryv na mape */}
-            <div className="absolute bottom-4 left-4 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-lg max-w-[220px]">
+            <div className="absolute bottom-4 left-4 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-lg max-w-[200px]">
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Legenda</p>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
@@ -202,8 +270,12 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
                   <span className="text-[10px] text-white">Výdajné miesto</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#10b981] border border-white/40 shrink-0"></div>
-                  <span className="text-[10px] text-white">Doprava ZDARMA</span>
+                  <div className="w-3 h-3 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
+                  <span className="text-[10px] text-white">Kysuce (doprava zdarma)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
+                  <span className="text-[10px] text-white">10 km okruh Žilina</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-[10px]">📍</div>
@@ -224,7 +296,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
                 <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
               </div>
               <div className="text-[10px] text-gray-500">
-                Kliknite na mapu pre výber miesta. Modré body = výdajné miesta (Žilina, Čadca). Zelená oblasť = Kysuce – doprava zadarmo.
+                Kliknite na mapu pre výber miesta. Fialová oblasť = Kysuce (doprava zdarma), modrý kruh = 10 km okolo Žiliny (doprava zdarma).
               </div>
             </div>
           )}
