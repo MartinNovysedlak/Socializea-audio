@@ -22,6 +22,7 @@ import {
 import { EquipmentItem } from '@/lib/supabase';
 import { packagesService, PackageData } from '@/lib/packagesService';
 import PackageDetailDialog, { PackageOption } from '@/components/PackageDetailDialog';
+import InteractiveQuiz from '@/components/InteractiveQuiz';
 
 interface PresetPackage {
   id: string;
@@ -280,6 +281,18 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                 <ArrowDown className="ml-2 animate-bounce" size={16} />
               </Button>
             </div>
+
+            {/* 🔗 Malý preklik na inteligentného poradcu */}
+            <div className="mt-6 pt-4">
+              <button
+                onClick={() => handleScrollTo('interactive-quiz')}
+                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#BD20D3] transition-colors underline underline-offset-4 decoration-dotted decoration-gray-600 hover:decoration-[#BD20D3]"
+              >
+                <Sparkles size={14} />
+                <span>Neviete si vybrať? Vyskúšajte nášho inteligentného poradcu</span>
+                <span className="text-[#BD20D3]">→</span>
+              </button>
+            </div>
           </div>
         </section>
 
@@ -383,6 +396,11 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
             </div>
           </div>
         </section>
+
+        {/* 🧠 Inteligentný poradca – rovnaká sekcia ako na hlavnej stránke */}
+        <div id="interactive-quiz">
+          <InteractiveQuiz />
+        </div>
 
         <section id="polozky" className="py-12 md:py-16 bg-[#020721]">
           <div className="container mx-auto px-4 text-center max-w-4xl mb-12">
