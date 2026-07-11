@@ -81,19 +81,19 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* IKONA KOŠÍKA – v desktopovej časti */}
-          {cartCount > 0 && (
-            <button
-              onClick={openCart}
-              className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
-              aria-label="Otvoriť košík"
-            >
-              <ShoppingBag size={18} />
+          {/* IKONA KOŠÍKA – v desktopovej časti, vždy viditeľná */}
+          <button
+            onClick={openCart}
+            className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+            aria-label="Otvoriť košík"
+          >
+            <ShoppingBag size={18} />
+            {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#BD20D3] text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0a0d1f]">
                 {cartCount}
               </span>
-            </button>
-          )}
+            )}
+          </button>
 
           <Link to="/kontakt">
             <Button className="btn-cyber rounded-full px-6 border-none transition-colors duration-200">
@@ -104,18 +104,18 @@ const Navbar = () => {
 
         {/* MOBILE BURGER TOGGLE */}
         <div className="flex lg:hidden items-center gap-3">
-          {cartCount > 0 && (
-            <button
-              onClick={openCart}
-              className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
-              aria-label="Otvoriť košík"
-            >
-              <ShoppingBag size={18} />
+          <button
+            onClick={openCart}
+            className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+            aria-label="Otvoriť košík"
+          >
+            <ShoppingBag size={18} />
+            {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#BD20D3] text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0a0d1f]">
                 {cartCount}
               </span>
-            </button>
-          )}
+            )}
+          </button>
           <button
             onClick={isMobileMenuOpen ? closeMenu : openMenu}
             className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all focus:outline-none"
