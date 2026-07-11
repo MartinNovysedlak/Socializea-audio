@@ -125,15 +125,11 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   let nearestPoint = '';
   for (const point of PICKUP_POINTS) {
     const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearestPoint = point.name;
-    }
+    if (dist < minDist) { minDist = dist; nearestPoint = point.name; }
   }
 
   const isFree = minDist <= 10;
   const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
-
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
 }
 
@@ -142,10 +138,7 @@ function getNearestPoint(coords: { lat: number; lng: number }): { name: string; 
   let nearest = '';
   for (const point of PICKUP_POINTS) {
     const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearest = point.name;
-    }
+    if (dist < minDist) { minDist = dist; nearest = point.name; }
   }
   return { name: nearest, distance: Math.round(minDist * 10) / 10 };
 }
@@ -543,13 +536,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         pricePerDay: itemPrice,
       };
       setAdditionalProducts(updated);
-      toast.success(`Množstvo zvýšené na ${newQty} ks (${itemPrice} € / ks / víkend (2 noci))`);
     } else {
       setAdditionalProducts((prev) => [
         ...prev,
         { id: selectedItem.id, label: `${itemQuantity} x ${selectedItem.name}`, quantity: itemQuantity, pricePerDay: itemPrice },
       ]);
-      toast.success(`Produkt pridaný (${itemQuantity} ks × ${itemPrice} € / víkend (2 noci))`);
     }
 
     setSelectedItem(null);
