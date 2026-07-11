@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Filter, Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { EquipmentItem } from "@/lib/supabase";
+import { 
+  loadUsedCountsFromStorage, 
+  getAvailableCount 
+} from '@/utils/packageItemUtils';
 
 interface EquipmentCatalogProps {
   equipment: EquipmentItem[];
@@ -15,6 +19,21 @@ interface EquipmentCatalogProps {
 
 const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: EquipmentCatalogProps) => {
   const [activeFilter, setActiveFilter] = useState<"all" | "sound" | "lighting" | "other">("all");
+  const [usedFromPackages, setUsedFromPackages] = useState<Record<string, number>>({});
+
+  // Pravidelne načítavame usedFromPackages z localStorage
+  useEffect(() => {
+    const updateUsed = () => {
+      setUsedFromPackages(loadUsedCountsFromStorage());
+    };
+    updateUsed();
+    const interval = setInterval(updateUsed, 500);
+    window.addEventListener('cart-updated', updateUsed);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('cart-updated', updateUsed);
+    };
+  }, []);
 
   const filteredEquipment = activeFilter === "all"
     ? equipment
@@ -22,9 +41,17 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
 
   const handleQuantityChange = (id: string, delta: number) => {
     const item = equipment.find((i) => i.id === id);
+    if (!item) return;
+
     const currentQty = quantities[id] ?? 0;
-    const newQty = Math.max(0, Math.min(item?.available ?? 0, currentQty + delta));
+    const newQty = currentQty + delta;
+    if (newQty < 0) return;
+
+    const maxAllowed = getAvailableCount(item, usedFromPackages, 0) + currentQty;
+    if (newQty > maxAllowed) return;
+
     setQuantities((prev) => ({ ...prev, [id]: newQty }));
+    setTimeout(() => window.dispatchEvent(new CustomEvent('cart-updated')), 0);
   };
 
   const handleAdd = (id: string) => {
@@ -64,7 +91,8 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
     }
   };
 
-  const getAvailabilityText = (available: number) => {
+  const getAvailabilityText = (item: EquipmentItem) => {
+    const available = getAvailableCount(item, usedFromPackages, quantities[item.id] ?? 0);
     return `${available} ${available === 1 ? "kus" : "kusy"}`;
   };
 
@@ -121,6 +149,9 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                   const displayImage = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&auto=format&fit=crop&q=80";
                   const catColor = getCategoryColor(item.category);
                   const inCartQty = quantities[item.id] ?? 0;
+                  const realAvailable = getAvailableCount(item, usedFromPackages, inCartQty);
+                  const isSoldOut = realAvailable <= 0;
+                  const maxToAdd = realAvailable;
 
                   return (
                     <div key={item.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center hover:border-[#BD20D3]/30 hover:translate-y-[-4px] transition-all duration-300 group">
@@ -154,24 +185,25 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                       <div className="flex-1 w-full flex flex-col justify-end">
                         <div className="flex justify-center items-center gap-3 mb-4">
                           <span className="text-2xl font-bold text-[#BD20D3]">{item.price_per_day} €</span>
-                          <span className="text-gray-400 text-sm">Dostupné: {getAvailabilityText(item.available)}</span>
+                          <span className="text-gray-400 text-sm">Dostupné: {getAvailabilityText(item)}</span>
                         </div>
 
                         {inCartQty === 0 ? (
                           <Button
                             onClick={() => handleAdd(item.id)}
+                            disabled={isSoldOut}
                             size="sm"
-                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg h-10 mb-4 transition-all"
+                            className="w-full bg-[#BD20D3] hover:bg-[#BD20D3]/85 text-white rounded-lg h-10 mb-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <ShoppingBag size={14} className="mr-2" />
-                            Pridať do košíka
+                            {isSoldOut ? 'Vypredané' : 'Pridať do košíka'}
                           </Button>
                         ) : (
                           <Button
                             onClick={() => handleAdd(item.id)}
-                            disabled={inCartQty >= item.available}
+                            disabled={maxToAdd <= 0}
                             size="sm"
-                            className="w-full btn-cyber hover:opacity-95 text-white rounded-lg h-10 mb-4 transition-all border-none"
+                            className="w-full btn-cyber hover:opacity-95 text-white rounded-lg h-10 mb-4 transition-all border-none disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Check size={14} className="mr-2 animate-pulse" />
                             V košíku ({inCartQty})
@@ -189,7 +221,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
                           <span className="w-10 text-center text-white font-medium text-base">{quantities[item.id] ?? 0}</span>
                           <button
                             onClick={() => handleAdd(item.id)}
-                            disabled={(quantities[item.id] ?? 0) >= item.available}
+                            disabled={maxToAdd <= 0}
                             className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                           >
                             <Plus size={12} />
