@@ -146,6 +146,10 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+function dispatchCartUpdate() {
+  window.dispatchEvent(new CustomEvent('cart-updated'));
+}
+
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -187,7 +191,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => { const item = equipment.find((e) => e.id === id); return { item, qty }; }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
 
   useEffect(() => { setDialogOpen(isOpen || showReservationSuccess); }, [isOpen, showReservationSuccess, setDialogOpen]);
-  useEffect(() => { try { localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems)); } catch {} }, [packageItems]);
+  useEffect(() => { try { localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems)); dispatchCartUpdate(); } catch {} }, [packageItems]);
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const pkg = e.detail as PackageCartItem;
@@ -297,6 +301,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const item = equipment.find((e) => e.id === id);
       return { ...prev, [id]: Math.max(0, Math.min(item?.available ?? 0, currentQty + delta)) };
     });
+    // dispatch cart update after this render cycle
+    setTimeout(dispatchCartUpdate, 0);
   };
   const handleFromSelect = (date: Date | undefined) => {
     if (date) { setFormData(prev => ({ ...prev, dateFrom: format(date, "yyyy-MM-dd") })); setShowFromCalendar(false); if (formData.dateTo && isBefore(new Date(formData.dateTo), date)) setFormData(prev => ({ ...prev, dateTo: "" })); }
@@ -321,7 +327,10 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     setDeliveryResult(null); setDeliverySelected(false); setCityLocked(false); setCitySuggestions([]); setCityDropdownOpen(false);
   };
   const handleCityKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && citySuggestions.length > 0) { e.preventDefault(); selectCity(citySuggestions[0].name, citySuggestions[0].lat, citySuggestions[0].lng); } if (e.key === 'Escape') setCityDropdownOpen(false); };
-  const removePackage = (id: string) => setPackageItems(prev => prev.filter(p => p.id !== id));
+  const removePackage = (id: string) => {
+    setPackageItems(prev => prev.filter(p => p.id !== id));
+    setTimeout(dispatchCartUpdate, 0);
+  };
 
   const handleMapLocationSelect = (lat: number, lng: number, name: string) => {
     setDeliveryCity(name);
@@ -513,6 +522,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       setQuantities({}); setPackageItems([]); setInstallSelected(false); setInstallUninstallSelected(false); clearDelivery();
       setFormData({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
       setIsOpen(false);
+      dispatchCartUpdate();
     } catch (error) {
       toast.dismiss(toastId);
       toast.error("Nepodarilo sa odoslať dopyt.", { description: "Skúste to prosím neskôr alebo nás kontaktujte telefonicky." });
