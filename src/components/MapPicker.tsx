@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogPortal } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { MapPin, Loader2, Navigation, Check, X, Euro } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,17 +27,6 @@ const KYSUCE_BOUNDS: { lat: number; lng: number }[] = [
 
 const ZILINA_CENTER = { lat: 49.2235, lng: 18.7394 };
 const ZILINA_RADIUS_KM = 10;
-
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
   distance: number;
@@ -80,10 +69,7 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   let nearestPoint = '';
   for (const point of PICKUP_POINTS) {
     const dist = distance(coords.lat, coords.lng, point.lat, point.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearestPoint = point.name;
-    }
+    if (dist < minDist) { minDist = dist; nearestPoint = point.name; }
   }
 
   const isFree = minDist <= 10;
@@ -126,7 +112,6 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         maxZoom: 19,
       }).addTo(map);
 
-      // Kysuce polygon (purple)
       const kysucePolygon = L.polygon(KYSUCE_BOUNDS, {
         color: '#BD20D3',
         fillColor: '#BD20D3',
@@ -142,12 +127,10 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
           </div>
           <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.4;">
             Do tohto regiónu je doprava techniky <strong style="color:#BD20D3;">zdarma</strong>.
-            Patria sem: Čadca, Kysucké Nové Mesto, Turzovka, Krásno nad Kysucou a okolité obce.
           </p>
         </div>
       `);
 
-      // Žilina 10km circle (blue)
       const zilinaCircle = L.circle([ZILINA_CENTER.lat, ZILINA_CENTER.lng], {
         color: '#1A4BFF',
         fillColor: '#1A4BFF',
@@ -164,14 +147,11 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
             <span style="font-weight:bold;font-size:14px;color:#1A4BFF;">10 km okruh od Žiliny</span>
           </div>
           <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.4;">
-            Do vzdialenosti 10 km od výdajného miesta v <strong style="color:#1A4BFF;">Žiline</strong> je doprava techniky <strong style="color:#1A4BFF;">zdarma</strong>.
-            <br/><br/>
-            <strong>Adresa:</strong> Vysokoškolská 4, Budova SADOP, 010 01 Žilina
+            Do vzdialenosti 10 km je doprava <strong style="color:#1A4BFF;">zdarma</strong>.
           </p>
         </div>
       `);
 
-      // Pickup points with popups
       PICKUP_POINTS.forEach((point) => {
         const icon = L.divIcon({
           className: 'custom-pickup-marker',
@@ -183,24 +163,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
           iconAnchor: [0, 0],
         });
 
-        const marker = L.marker([point.lat, point.lng], { icon }).addTo(map);
-
-        marker.bindPopup(`
-          <div style="padding:12px;min-width:220px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <div style="width:10px;height:10px;border-radius:50%;background:#1A4BFF;"></div>
-              <span style="font-weight:bold;font-size:15px;color:#1A4BFF;">${point.name === 'Žilina' ? 'Odberné miesto Žilina' : 'Hlavný sklad a sídlo'}</span>
-            </div>
-            ${point.name === 'Žilina' 
-              ? '<p style="margin:0 0 4px 0;font-size:13px;color:#374151;"><strong>Adresa:</strong> Vysokoškolská 4, Budova SADOP</p><p style="margin:0;font-size:12px;color:#6b7280;">010 01 Žilina</p>'
-              : '<p style="margin:0 0 4px 0;font-size:13px;color:#374151;"><strong>Adresa:</strong> Čadečka 1924</p><p style="margin:0;font-size:12px;color:#6b7280;">022 01 Čadca</p>'
-            }
-            <div style="margin-top:8px;padding-top:6px;border-top:1px solid #e5e7eb;">
-              <p style="margin:0;font-size:11px;color:#10b981;"><strong>✓</strong> Osobný odber zdarma</p>
-              <p style="margin:0;font-size:11px;color:#10b981;"><strong>✓</strong> Doprava do 10 km zadarmo</p>
-            </div>
-          </div>
-        `);
+        L.marker([point.lat, point.lng], { icon }).addTo(map);
       });
 
       map.on('click', (e: any) => {
@@ -208,17 +171,15 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         setSelectedLat(lat);
         setSelectedLng(lng);
 
-        // Calculate delivery price immediately
         const result = calculateDelivery({ lat, lng }, '');
         if (result) {
           setDeliveryPrice(result.price);
           setDeliveryIsFree(result.isFree);
         }
 
-        // Reverse geocode with street and house number
         fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=sk`,
-          { headers: { 'User-Agent': 'DjPartyRental/1.0 (djparty@example.com)' } }
+          { headers: { 'User-Agent': 'DjPartyRental/1.0' } }
         )
           .then((res) => res.json())
           .then((data) => {
@@ -226,17 +187,11 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
             const road = address.road || '';
             const houseNumber = address.house_number || '';
             const city = address.city || address.town || address.village || address.municipality || address.county || 'Neznáme miesto';
-            const fullName = [road, houseNumber, city].filter(Boolean).join(', ');
-            setSelectedName(fullName);
+            setSelectedName([road, houseNumber, city].filter(Boolean).join(', '));
           })
-          .catch(() => {
-            setSelectedName('Neznáme miesto');
-          });
+          .catch(() => setSelectedName('Neznáme miesto'));
 
-        // Update marker
-        if (markerRef.current) {
-          map.removeLayer(markerRef.current);
-        }
+        if (markerRef.current) map.removeLayer(markerRef.current);
         const customIcon = L.divIcon({
           className: 'custom-selected-marker',
           html: `<div style="background:#BD20D3;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 3px 12px rgba(189,32,211,0.6);font-size:16px;">📍</div>`,
@@ -279,98 +234,87 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl overflow-hidden shadow-2xl shadow-[#BD20D3]/20 p-0">
-        <DialogHeader className="p-4 md:p-6 border-b border-white/5 shrink-0">
-          <DialogTitle className="text-lg font-bold flex items-center gap-2 text-white">
-            <MapPin className="text-[#BD20D3]" size={20} />
-            Vyberte miesto na mape
-          </DialogTitle>
-        </DialogHeader>
+      <DialogPortal>
+        <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl overflow-hidden shadow-2xl shadow-[#BD20D3]/20 p-0 z-[9999]">
+          <DialogHeader className="p-4 md:p-6 border-b border-white/5 shrink-0">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-white">
+              <MapPin className="text-[#BD20D3]" size={20} />
+              Vyberte miesto na mape
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Map area */}
-        <div className="relative">
-          <div
-            ref={mapContainerRef}
-            className="w-full h-[240px] md:h-[320px] bg-zinc-900 border-b border-white/10 relative"
-          >
-            {!mapLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
-                <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
+          <div className="relative">
+            <div
+              ref={mapContainerRef}
+              className="w-full h-[240px] md:h-[320px] bg-zinc-900 border-b border-white/10 relative"
+            >
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
+                  <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
+                </div>
+              )}
+            </div>
+
+            <div className="absolute top-3 left-3 z-[9999] pointer-events-auto bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[160px]">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
+                  <span className="text-[9px] text-white">Výdajné miesto</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
+                  <span className="text-[9px] text-white">Kysuce (zdarma)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
+                  <span className="text-[9px] text-white">10 km okruh Žilina</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px]">📍</span>
+                  <span className="text-[9px] text-white">Vami vybrané miesto</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 md:p-5 space-y-3">
+            {selectedLat !== null && selectedLng !== null ? (
+              <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-xl p-3 space-y-1.5">
+                <div className="flex items-center gap-2 text-xs">
+                  <MapPin size={14} className="text-[#BD20D3] shrink-0" />
+                  <span className="text-white font-medium truncate">{selectedName}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                    <Navigation size={10} />
+                    <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Euro size={12} className={deliveryIsFree ? 'text-emerald-400' : 'text-[#1A4BFF]'} />
+                    <span className={deliveryIsFree ? 'text-emerald-400 font-bold' : 'text-white font-bold'}>
+                      {deliveryIsFree ? 'Doprava ZDARMA' : `${deliveryPrice} €`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-[11px] text-gray-500 py-1">
+                Kliknite na mapu pre výber miesta
               </div>
             )}
-          </div>
 
-          {/* Legenda – now positioned at top-left inside the map */}
-          <div className="absolute top-3 left-3 z-[9999] pointer-events-auto bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[160px]">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
-                <span className="text-[9px] text-white">Výdajné miesto</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
-                <span className="text-[9px] text-white">Kysuce (zdarma)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
-                <span className="text-[9px] text-white">10 km okruh Žilina</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[9px]">📍</span>
-                <span className="text-[9px] text-white">Vami vybrané miesto</span>
-              </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-white/10 text-white hover:bg-white/5 rounded-xl h-10 flex-1 text-xs">
+                <X size={14} className="mr-1" /> Zrušiť
+              </Button>
+              <Button type="button" onClick={handleConfirm} disabled={selectedLat === null} className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-xl h-10 flex-1 font-bold text-xs disabled:opacity-40 transition-all">
+                <Check size={14} className="mr-1" /> Potvrdiť výber
+              </Button>
             </div>
           </div>
-        </div>
-
-        {/* Info + buttons section – compact, no scrolling needed */}
-        <div className="p-4 md:p-5 space-y-3">
-          {selectedLat !== null && selectedLng !== null ? (
-            <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-xl p-3 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs">
-                <MapPin size={14} className="text-[#BD20D3] shrink-0" />
-                <span className="text-white font-medium truncate">{selectedName}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-[10px] text-gray-400">
-                  <Navigation size={10} />
-                  <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <Euro size={12} className={deliveryIsFree ? 'text-emerald-400' : 'text-[#1A4BFF]'} />
-                  <span className={deliveryIsFree ? 'text-emerald-400 font-bold' : 'text-white font-bold'}>
-                    {deliveryIsFree ? 'Doprava ZDARMA' : `${deliveryPrice} €`}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-[11px] text-gray-500 py-1">
-              Kliknite na mapu pre výber miesta
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="border-white/10 text-white hover:bg-white/5 rounded-xl h-10 flex-1 text-xs"
-            >
-              <X size={14} className="mr-1" /> Zrušiť
-            </Button>
-            <Button
-              type="button"
-              onClick={handleConfirm}
-              disabled={selectedLat === null}
-              className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-xl h-10 flex-1 font-bold text-xs disabled:opacity-40 transition-all"
-            >
-              <Check size={14} className="mr-1" /> Potvrdiť výber
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 };
