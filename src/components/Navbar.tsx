@@ -11,18 +11,27 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
 
-  // Načítanie počtu položiek v košíku z localStorage (aktualizuje sa len pri načítaní stránky)
+  // Pravidelná kontrola localStorage pre aktuálny počet položiek v košíku (každých 500 ms)
   useEffect(() => {
-    try {
-      const qtyStr = localStorage.getItem("cyber_cart_quantities");
-      const pkgStr = localStorage.getItem("cyber_cart_packages");
-      const quantities = qtyStr ? JSON.parse(qtyStr) : {};
-      const packages = pkgStr ? JSON.parse(pkgStr) : [];
-      const count = Object.values(quantities).reduce((a: number, b: any) => a + (b as number), 0) + packages.length;
-      setCartCount(count);
-    } catch {
-      setCartCount(0);
-    }
+    const updateCount = () => {
+      try {
+        const qtyStr = localStorage.getItem("cyber_cart_quantities");
+        const pkgStr = localStorage.getItem("cyber_cart_packages");
+        const quantities = qtyStr ? JSON.parse(qtyStr) : {};
+        const packages = pkgStr ? JSON.parse(pkgStr) : [];
+        const count = Object.values(quantities).reduce((a: number, b: any) => a + (b as number), 0) + packages.length;
+        setCartCount(count);
+      } catch {
+        setCartCount(0);
+      }
+    };
+
+    // Ihned po načítaní
+    updateCount();
+
+    // Pravidelná kontrola
+    const interval = setInterval(updateCount, 500);
+    return () => clearInterval(interval);
   }, []);
 
   const navLinks = [
