@@ -26,19 +26,11 @@ import {
   ChevronRight,
   Expand,
   Map,
-  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
 import MapPicker from './MapPicker';
-import {
-  extractBaseNameAndCount,
-  getPackageUsedCounts,
-  getUsedInPackageForDbItem,
-  getAvailableCount,
-  loadUsedCountsFromStorage,
-} from '@/utils/packageItemUtils';
 
 export interface PackageOption {
   id: string;
@@ -128,12 +120,14 @@ function calculateDelivery(coords: { lat: number; lng: number }, cityName: strin
   if (isKysuce) {
     return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
   }
+
   let minDist = Infinity;
   let nearestPoint = '';
   for (const point of PICKUP_POINTS) {
     const dist = haversineDistance(coords.lat, coords.lng, point.lat, point.lng);
     if (dist < minDist) { minDist = dist; nearestPoint = point.name; }
   }
+
   const isFree = minDist <= 10;
   const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
   return { distance: Math.round(minDist * 10) / 10, nearestPoint, isKysuce: false, isFree, price };
@@ -166,7 +160,7 @@ interface PackageDetailDialogProps {
   selectedPackage: PackageOption | null;
 }
 
-function extractBaseNameAndCountFromSpec(spec: string): { name: string; count: number } {
+function extractBaseNameAndCount(spec: string): { name: string; count: number } {
   const match = spec.match(/^(\d+)\s*(x|ks|kus)\s+/i);
   if (match) return { name: spec.replace(match[0], '').trim(), count: parseInt(match[1], 10) };
   const simpleMatch = spec.match(/^(\d+)\s+/);
@@ -174,15 +168,31 @@ function extractBaseNameAndCountFromSpec(spec: string): { name: string; count: n
   return { name: spec.trim(), count: 1 };
 }
 
-function getPackageUsedCountsFromSpecs(soundSpecs: string[], lightSpecs: string[], otherSpecs: string[]): Record<string, number> {
+function getPackageUsedCounts(pkg: PackageOption): Record<string, number> {
   const map: Record<string, number> = {};
-  const allSpecs = [...soundSpecs, ...lightSpecs, ...otherSpecs];
+  const allSpecs = [...pkg.soundSpecs, ...pkg.lightSpecs, ...(pkg.otherSpecs || [])];
   for (const spec of allSpecs) {
-    const { name, count } = extractBaseNameAndCountFromSpec(spec);
+    const { name, count } = extractBaseNameAndCount(spec);
     const key = name.trim();
     map[key] = (map[key] || 0) + count;
   }
   return map;
+}
+
+function getUsedInPackageForDbItem(dbItemName: string, packageUsedCounts: Record<string, number>): number {
+  const dbLower = dbItemName.toLowerCase().trim();
+  let totalUsed = 0;
+  for (const [pkgItemName, count] of Object.entries(packageUsedCounts)) {
+    const pkgLower = pkgItemName.toLowerCase().trim();
+    if (dbLower.includes(pkgLower) || pkgLower.includes(dbLower)) totalUsed += count;
+  }
+  return totalUsed;
+}
+
+function getInstallType(installSelected: boolean, installUninstallSelected: boolean): 'none' | 'install' | 'install_uninstall' {
+  if (installUninstallSelected) return 'install_uninstall';
+  if (installSelected) return 'install';
+  return 'none';
 }
 
 const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDetailDialogProps) => {
@@ -217,8 +227,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const cityRef = useRef<HTMLDivElement>(null);
 
   const [packageUsedCounts, setPackageUsedCounts] = useState<Record<string, number>>({});
-  const [cartUsedCounts, setCartUsedCounts] = useState<Record<string, number>>({});
-  const [cartQuantities, setCartQuantities] = useState<Record<string, number>>({});
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -250,12 +258,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setSearchTerm('');
       setSelectedItem(null);
       setItemQuantity(1);
-      const used = getPackageUsedCountsFromSpecs(
-        selectedPackage.soundSpecs,
-        selectedPackage.lightSpecs,
-        selectedPackage.otherSpecs || []
-      );
-      setPackageUsedCounts(used);
+      setPackageUsedCounts(getPackageUsedCounts(selectedPackage));
       setLightboxOpen(false);
       setLightboxIndex(0);
       setQuestionDialogOpen(false);
@@ -266,29 +269,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setQuestionMessage("");
       setSendingQuestion(false);
       setMapPickerOpen(false);
-      
-      // Načítame aktuálny stav košíka z localStorage
-      try {
-        const savedUsed = localStorage.getItem('cyber_cart_package_used_counts');
-        if (savedUsed) {
-          setCartUsedCounts(JSON.parse(savedUsed));
-        } else {
-          setCartUsedCounts({});
-        }
-      } catch {
-        setCartUsedCounts({});
-      }
-      
-      try {
-        const savedQuantities = localStorage.getItem('cyber_cart_quantities');
-        if (savedQuantities) {
-          setCartQuantities(JSON.parse(savedQuantities));
-        } else {
-          setCartQuantities({});
-        }
-      } catch {
-        setCartQuantities({});
-      }
     }
   }, [open, selectedPackage]);
 
@@ -378,6 +358,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         if (data && Array.isArray(data)) {
           const mapped: CityMatch[] = data.map((item: any) => {
             const address = item.address || {};
+            const district = address.city_district || address.county || address.state_district || address.municipality || '';
+            const postcode = address.postcode || '';
             const coords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
             const nearest = getNearestPoint(coords);
             const countryCode = item.country_code || '';
@@ -388,8 +370,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
               country: isCzech ? 'cz' : 'sk',
               lat: coords.lat,
               lng: coords.lng,
-              postcode: address.postcode,
-              district: address.city_district || address.county || address.state_district || address.municipality || '',
+              postcode,
+              district,
               distToNearest: nearest.distance,
               nearestPoint: nearest.name,
             };
@@ -524,24 +506,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         return labelLower.includes(dbLower) || dbLower.includes(labelLower);
       })
       .reduce((sum, p) => sum + p.quantity, 0);
-    
-    const usedInCartPackages = getUsedInPackageForDbItem(dbItemName, cartUsedCounts);
-    
-    let inCartQuantity = 0;
-    for (const [id, qty] of Object.entries(cartQuantities)) {
-      if (qty > 0) {
-        const cartItem = rentalItems.find(r => r.id === id);
-        if (cartItem) {
-          const cartItemName = cartItem.name.toLowerCase().trim();
-          const dbNameLower = dbItemName.toLowerCase().trim();
-          if (dbNameLower.includes(cartItemName) || cartItemName.includes(dbNameLower)) {
-            inCartQuantity += qty;
-          }
-        }
-      }
-    }
-    
-    return Math.max(0, dbAvailable - usedInPackage - alreadyAdded - usedInCartPackages - inCartQuantity);
+    return Math.max(0, dbAvailable - usedInPackage - alreadyAdded);
   };
 
   const confirmRentalItem = useCallback(() => {
@@ -549,11 +514,10 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
     const maxAvailable = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
     const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
-    const usedInCartPackages = getUsedInPackageForDbItem(selectedItem.name, cartUsedCounts);
 
     if (itemQuantity > maxAvailable) {
       toast.error(
-        `Môžete pridať maximálne ${maxAvailable} ks. ${selectedItem.availableCount} ks skladom, ${usedInPkg} ks už je v balíku, ${usedInCartPackages} ks v iných balíkoch v košíku.`
+        `Môžete pridať maximálne ${maxAvailable} ks. ${selectedItem.availableCount} ks skladom, ${usedInPkg} ks už je v balíku.`
       );
       return;
     }
@@ -584,7 +548,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
     setFilteredItems([]);
     setItemQuantity(1);
     searchInputRef.current?.focus();
-  }, [selectedItem, itemQuantity, additionalProducts, packageUsedCounts, cartUsedCounts, cartQuantities, rentalItems]);
+  }, [selectedItem, itemQuantity, additionalProducts, packageUsedCounts, rentalItems]);
 
   const removeAdditionalProduct = (id: string) => {
     setAdditionalProducts((prev) => prev.filter((p) => p.id !== id));
@@ -610,9 +574,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       arrival: deliverySelected && deliveryCity
         ? { name: deliveryCity, lat: deliveryLat, lng: deliveryLng }
         : null,
-      install: (installSelected || installUninstallSelected)
-        ? (installUninstallSelected ? 'install_uninstall' as const : 'install' as const)
-        : 'none' as const,
+      install: getInstallType(installSelected, installUninstallSelected),
       installPrice,
       deliveryPrice,
       extras: additionalProducts.map(p => ({
@@ -621,9 +583,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
         quantity: p.quantity,
         pricePerDay: p.pricePerDay,
       })),
-      soundSpecs: selectedPackage.soundSpecs,
-      lightSpecs: selectedPackage.lightSpecs,
-      otherSpecs: selectedPackage.otherSpecs,
     };
     window.dispatchEvent(new CustomEvent('add-package-to-cart', { detail: pkg }));
     onOpenChange(false);
@@ -1081,21 +1040,17 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                           <span className="w-8 text-center text-white font-bold text-sm">{itemQuantity}</span>
                           <button
                             type="button"
-                            onClick={() => {
-                              const maxAvail = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
-                              setItemQuantity(prev => Math.min(maxAvail, prev + 1));
-                            }}
+                            onClick={() => { const maxAvail = getAvailableForItem(selectedItem.name, selectedItem.availableCount); setItemQuantity(Math.min(maxAvail, itemQuantity + 1)); }}
                             disabled={itemQuantity >= getAvailableForItem(selectedItem.name, selectedItem.availableCount)}
                             className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
                           ><Plus size={12} /></button>
                         </div>
                       </div>
-                      <p className="text-[9px] text-gray-500 mt-1">
+                      <p className="text-[9px] text-gray-500 mt-1 whitespace-nowrap">
                         {(() => {
                           const maxAvail = getAvailableForItem(selectedItem.name, selectedItem.availableCount);
                           const usedInPkg = getUsedInPackageForDbItem(selectedItem.name, packageUsedCounts);
-                          const usedInCart = getUsedInPackageForDbItem(selectedItem.name, cartUsedCounts);
-                          return `Maximálne ${maxAvail} ks (${usedInPkg} ks v tomto balíku, ${usedInCart} ks v iných balíkoch v košíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 noci)`;
+                          return `Maximálne ${maxAvail} ks (${usedInPkg} ks už v balíku) – cena: ${((selectedItem.price ?? 0) * itemQuantity).toFixed(2)} € / víkend (2 noci)`;
                         })()}
                       </p>
                       <div className="flex gap-2 mt-2">

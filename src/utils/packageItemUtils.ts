@@ -34,12 +34,6 @@ export function getPackageUsedCounts(pkg: PackageCartItem): Record<string, numbe
     const key = name.trim();
     map[key] = (map[key] || 0) + count;
   }
-  // Tiež započítame extras (pridané položky v balíku)
-  for (const extra of (pkg.extras || [])) {
-    const { name } = extractBaseNameAndCount(extra.label);
-    const key = name.trim();
-    map[key] = (map[key] || 0) + extra.quantity;
-  }
   return map;
 }
 
