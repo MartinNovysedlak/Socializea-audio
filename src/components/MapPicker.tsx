@@ -279,7 +279,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-0 overflow-hidden shadow-2xl shadow-[#BD20D3]/20 flex flex-col max-h-[90vh]">
+      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl overflow-hidden shadow-2xl shadow-[#BD20D3]/20 p-0">
         <DialogHeader className="p-4 md:p-6 border-b border-white/5 shrink-0">
           <DialogTitle className="text-lg font-bold flex items-center gap-2 text-white">
             <MapPin className="text-[#BD20D3]" size={20} />
@@ -287,80 +287,86 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 md:p-6 pt-0 overflow-y-auto flex-1">
-          <div className="relative mb-4">
-            <div
-              ref={mapContainerRef}
-              className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 relative"
-            >
-              {!mapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
-                  <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
-                </div>
-              )}
-            </div>
+        {/* Map area */}
+        <div className="relative">
+          <div
+            ref={mapContainerRef}
+            className="w-full h-[240px] md:h-[320px] bg-zinc-900 border-b border-white/10 relative"
+          >
+            {!mapLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
+                <Loader2 size={24} className="animate-spin text-[#BD20D3]" />
+              </div>
+            )}
+          </div>
 
-            {/* Legenda */}
-            <div className="absolute bottom-3 left-3 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[180px]">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
-              <div className="space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
-                  <span className="text-[9px] text-white">Výdajné miesto</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
-                  <span className="text-[9px] text-white">Kysuce (zdarma)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
-                  <span className="text-[9px] text-white">10 km okruh Žilina</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px]">📍</span>
-                  <span className="text-[9px] text-white">Vami vybrané miesto</span>
-                </div>
+          {/* Legenda – now positioned at top-left inside the map */}
+          <div className="absolute top-3 left-3 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[160px]">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
+                <span className="text-[9px] text-white">Výdajné miesto</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
+                <span className="text-[9px] text-white">Kysuce (zdarma)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
+                <span className="text-[9px] text-white">10 km okruh Žilina</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px]">📍</span>
+                <span className="text-[9px] text-white">Vami vybrané miesto</span>
               </div>
             </div>
           </div>
-
-          {selectedLat !== null && selectedLng !== null && (
-            <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin size={16} className="text-[#BD20D3] shrink-0" />
-                <span className="text-white font-medium break-all">{selectedName}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <Navigation size={12} />
-                <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Euro size={16} className={deliveryIsFree ? 'text-emerald-400' : 'text-[#1A4BFF]'} />
-                <span className={deliveryIsFree ? 'text-emerald-400 font-bold' : 'text-white font-bold'}>
-                  {deliveryIsFree ? 'Doprava ZDARMA' : `Cena dopravy: ${deliveryPrice} €`}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="p-4 md:p-6 pt-4 border-t border-white/5 shrink-0">
+        {/* Info + buttons section – compact, no scrolling needed */}
+        <div className="p-4 md:p-5 space-y-3">
+          {selectedLat !== null && selectedLng !== null ? (
+            <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-xl p-3 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <MapPin size={14} className="text-[#BD20D3] shrink-0" />
+                <span className="text-white font-medium truncate">{selectedName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                  <Navigation size={10} />
+                  <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <Euro size={12} className={deliveryIsFree ? 'text-emerald-400' : 'text-[#1A4BFF]'} />
+                  <span className={deliveryIsFree ? 'text-emerald-400 font-bold' : 'text-white font-bold'}>
+                    {deliveryIsFree ? 'Doprava ZDARMA' : `${deliveryPrice} €`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-[11px] text-gray-500 py-1">
+              Kliknite na mapu pre výber miesta
+            </div>
+          )}
+
           <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-white/10 text-white hover:bg-white/5 rounded-xl h-11 flex-1"
+              className="border-white/10 text-white hover:bg-white/5 rounded-xl h-10 flex-1 text-xs"
             >
-              <X size={16} className="mr-1" /> Zrušiť
+              <X size={14} className="mr-1" /> Zrušiť
             </Button>
             <Button
               type="button"
               onClick={handleConfirm}
               disabled={selectedLat === null}
-              className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-xl h-11 flex-1 font-bold disabled:opacity-40 transition-all"
+              className="bg-[#BD20D3] hover:bg-[#BD20D3]/80 text-white rounded-xl h-10 flex-1 font-bold text-xs disabled:opacity-40 transition-all"
             >
-              <Check size={16} className="mr-1" /> Potvrdiť výber
+              <Check size={14} className="mr-1" /> Potvrdiť výber
             </Button>
           </div>
         </div>
