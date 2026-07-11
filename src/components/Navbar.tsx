@@ -11,8 +11,8 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
 
-  // Načítanie počtu položiek v košíku z localStorage, vrátane obnovy pri zmene
-  const updateCartCount = () => {
+  // Načítanie počtu položiek v košíku z localStorage (aktualizuje sa len pri načítaní stránky)
+  useEffect(() => {
     try {
       const qtyStr = localStorage.getItem("cyber_cart_quantities");
       const pkgStr = localStorage.getItem("cyber_cart_packages");
@@ -23,13 +23,6 @@ const Navbar = () => {
     } catch {
       setCartCount(0);
     }
-  };
-
-  useEffect(() => {
-    updateCartCount();
-    // Počúvame na udalosť, keď sa košík zmení
-    window.addEventListener('cart-updated', updateCartCount);
-    return () => window.removeEventListener('cart-updated', updateCartCount);
   }, []);
 
   const navLinks = [
