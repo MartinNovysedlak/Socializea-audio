@@ -648,14 +648,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     })}
                     {packageItems.map((pkg) => (
                       <div key={pkg.id} className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 bg-[#BD20D3]/5 border border-[#BD20D3]/30 rounded-xl p-3 sm:p-4 relative">
-                        <button
-                          type="button"
-                          onClick={() => removePackage(pkg.id)}
-                          className="absolute top-2 right-2 flex items-center gap-1 bg-red-500/80 hover:bg-red-500 text-white text-[10px] font-semibold px-2 py-1 rounded-lg transition-colors z-10"
-                        >
-                          <X size={10} />
-                          <span>Odstrániť</span>
-                        </button>
+                        <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
                         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40"><img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} /></div>
                         <div className="flex-grow min-w-0 pr-6 sm:pr-0">
                           <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
