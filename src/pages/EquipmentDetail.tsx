@@ -98,10 +98,6 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         toast.error(`Nemôžete pridať viac kusov. Maximálne dostupné množstvo je ${item.available}.`);
         return prev;
       }
-      
-      toast.success("Produkt bol pridaný do košíka!", {
-        description: `${desiredQuantity} ks ${item.name} je teraz vo vašom košíku (Spolu: ${newTotal} ks).`,
-      });
       return {
         ...prev,
         [item.id]: newTotal
