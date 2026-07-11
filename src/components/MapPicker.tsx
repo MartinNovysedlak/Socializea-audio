@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { MapPin, Loader2, Navigation, Check, X } from 'lucide-react';
+import { MapPin, Loader2, Navigation, Check, X, Euro } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface MapPickerProps {
@@ -39,16 +39,70 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-function getKmToDegrees(km: number, latitude: number): number {
-  const latDeg = km / 111.32;
-  const lngDeg = km / (111.32 * Math.cos(latitude * Math.PI / 180));
-  return Math.max(latDeg, lngDeg);
+function calculateDelivery(coords: { lat: number; lng: number }, cityName: string): {
+  distance: number;
+  nearestPoint: string;
+  isKysuce: boolean;
+  isFree: boolean;
+  price: number;
+} | null {
+  const R = 6371;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  function distance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  const isKysuce = (() => {
+    const polygon = KYSUCE_BOUNDS;
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].lng, yi = polygon[i].lat;
+      const xj = polygon[j].lng, yj = polygon[j].lat;
+      const intersect = ((yi > coords.lat) !== (yj > coords.lat)) &&
+        (coords.lng < (xj - xi) * (coords.lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  })();
+
+  if (isKysuce) {
+    return { distance: 0, nearestPoint: 'Kysuce', isKysuce: true, isFree: true, price: 0 };
+  }
+
+  let minDist = Infinity;
+  let nearestPoint = '';
+  for (const point of PICKUP_POINTS) {
+    const dist = distance(coords.lat, coords.lng, point.lat, point.lng);
+    if (dist < minDist) {
+      minDist = dist;
+      nearestPoint = point.name;
+    }
+  }
+
+  const isFree = minDist <= 10;
+  const price = isFree ? 0 : Math.round((minDist - 10) * 0.70);
+  return {
+    distance: Math.round(minDist * 10) / 10,
+    nearestPoint,
+    isKysuce: false,
+    isFree,
+    price,
+  };
 }
 
 const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => {
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLng, setSelectedLng] = useState<number | null>(null);
   const [selectedName, setSelectedName] = useState<string>('');
+  const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
+  const [deliveryIsFree, setDeliveryIsFree] = useState<boolean>(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -72,7 +126,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         maxZoom: 19,
       }).addTo(map);
 
-      // 1) Kysuce polygon (purple)
+      // Kysuce polygon (purple)
       const kysucePolygon = L.polygon(KYSUCE_BOUNDS, {
         color: '#BD20D3',
         fillColor: '#BD20D3',
@@ -93,30 +147,17 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         </div>
       `);
 
-      // 2) Žilina 10km circle (blue)
-      const radiusInDegrees = getKmToDegrees(ZILINA_RADIUS_KM, ZILINA_CENTER.lat);
+      // Žilina 10km circle (blue)
       const zilinaCircle = L.circle([ZILINA_CENTER.lat, ZILINA_CENTER.lng], {
-        color: '#1A4BFF',
-        fillColor: '#1A4BFF',
-        fillOpacity: 0.08,
-        weight: 2,
-        dashArray: '4, 8',
-        radius: radiusInDegrees * 111320, // convert degrees to meters approx
-      }).addTo(map);
-
-      // More accurate circle using meters from center
-      zilinaCircle.setLatLng([ZILINA_CENTER.lat, ZILINA_CENTER.lng]);
-      // Override with accurate radius in meters
-      const circleAccurate = L.circle([ZILINA_CENTER.lat, ZILINA_CENTER.lng], {
         color: '#1A4BFF',
         fillColor: '#1A4BFF',
         fillOpacity: 0.06,
         weight: 2,
-        radius: ZILINA_RADIUS_KM * 1000,
         dashArray: '8, 8',
+        radius: ZILINA_RADIUS_KM * 1000,
       }).addTo(map);
 
-      circleAccurate.bindPopup(`
+      zilinaCircle.bindPopup(`
         <div style="padding:10px;min-width:220px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
             <div style="width:10px;height:10px;border-radius:50%;background:#1A4BFF;"></div>
@@ -130,10 +171,7 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         </div>
       `);
 
-      // Remove the less accurate circle
-      map.removeLayer(zilinaCircle);
-
-      // Add pickup points with popups
+      // Pickup points with popups
       PICKUP_POINTS.forEach((point) => {
         const icon = L.divIcon({
           className: 'custom-pickup-marker',
@@ -170,11 +208,14 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
         setSelectedLat(lat);
         setSelectedLng(lng);
 
-        // Check if inside free zones
-        const distToZilina = haversineDistance(lat, lng, ZILINA_CENTER.lat, ZILINA_CENTER.lng);
-        const isInZilinaZone = distToZilina <= ZILINA_RADIUS_KM;
-        
-        // Reverse geocode
+        // Calculate delivery price immediately
+        const result = calculateDelivery({ lat, lng }, '');
+        if (result) {
+          setDeliveryPrice(result.price);
+          setDeliveryIsFree(result.isFree);
+        }
+
+        // Reverse geocode with street and house number
         fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=sk`,
           { headers: { 'User-Agent': 'DjPartyRental/1.0 (djparty@example.com)' } }
@@ -182,13 +223,11 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
           .then((res) => res.json())
           .then((data) => {
             const address = data.address || {};
-            const cityName = address.city || address.town || address.village || address.municipality || address.county || 'Neznáme miesto';
-            setSelectedName(cityName);
-
-            // Show toast about free zone if applicable
-            if (isInZilinaZone) {
-              toast.success(`Miesto ${cityName} sa nachádza v 10 km zóne od Žiliny – doprava zdarma!`);
-            }
+            const road = address.road || '';
+            const houseNumber = address.house_number || '';
+            const city = address.city || address.town || address.village || address.municipality || address.county || 'Neznáme miesto';
+            const fullName = [road, houseNumber, city].filter(Boolean).join(', ');
+            setSelectedName(fullName);
           })
           .catch(() => {
             setSelectedName('Neznáme miesto');
@@ -240,19 +279,19 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-0 overflow-hidden shadow-2xl shadow-[#BD20D3]/20">
-        <DialogHeader className="p-4 md:p-6 border-b border-white/5">
+      <DialogContent className="bg-[#0a0d1f] border-white/10 text-white max-w-3xl rounded-3xl p-0 overflow-hidden shadow-2xl shadow-[#BD20D3]/20 flex flex-col max-h-[90vh]">
+        <DialogHeader className="p-4 md:p-6 border-b border-white/5 shrink-0">
           <DialogTitle className="text-lg font-bold flex items-center gap-2 text-white">
             <MapPin className="text-[#BD20D3]" size={20} />
             Vyberte miesto na mape
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 md:p-6 space-y-4">
-          <div className="relative">
+        <div className="p-4 md:p-6 pt-0 overflow-y-auto flex-1">
+          <div className="relative mb-4">
             <div
               ref={mapContainerRef}
-              className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 relative"
+              className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 relative"
             >
               {!mapLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
@@ -261,25 +300,25 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
               )}
             </div>
 
-            {/* Legenda – prekryv na mape */}
-            <div className="absolute bottom-4 left-4 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-lg max-w-[200px]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Legenda</p>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
-                  <span className="text-[10px] text-white">Výdajné miesto</span>
+            {/* Legenda */}
+            <div className="absolute bottom-3 left-3 z-20 bg-[#0a0d1f]/90 backdrop-blur-sm border border-white/10 rounded-xl p-2.5 shadow-lg max-w-[180px]">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Legenda</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#1A4BFF] border border-white/40 shrink-0"></div>
+                  <span className="text-[9px] text-white">Výdajné miesto</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
-                  <span className="text-[10px] text-white">Kysuce (doprava zdarma)</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded border border-dashed border-[#BD20D3] bg-[#BD20D3]/20 shrink-0"></div>
+                  <span className="text-[9px] text-white">Kysuce (zdarma)</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
-                  <span className="text-[10px] text-white">10 km okruh Žilina</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full border border-dashed border-[#1A4BFF] bg-[#1A4BFF]/20 shrink-0"></div>
+                  <span className="text-[9px] text-white">10 km okruh Žilina</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-[10px]">📍</div>
-                  <span className="text-[10px] text-white">Vami vybrané miesto</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px]">📍</span>
+                  <span className="text-[9px] text-white">Vami vybrané miesto</span>
                 </div>
               </div>
             </div>
@@ -289,18 +328,23 @@ const MapPicker = ({ open, onOpenChange, onLocationSelect }: MapPickerProps) => 
             <div className="bg-gradient-to-br from-[#1A4BFF]/[0.08] to-[#BD20D3]/[0.06] border border-white/[0.12] rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <MapPin size={16} className="text-[#BD20D3] shrink-0" />
-                <span className="text-white font-medium">{selectedName}</span>
+                <span className="text-white font-medium break-all">{selectedName}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Navigation size={12} />
                 <span>{selectedLat.toFixed(4)}, {selectedLng.toFixed(4)}</span>
               </div>
-              <div className="text-[10px] text-gray-500">
-                Kliknite na mapu pre výber miesta. Fialová oblasť = Kysuce (doprava zdarma), modrý kruh = 10 km okolo Žiliny (doprava zdarma).
+              <div className="flex items-center gap-2 text-sm">
+                <Euro size={16} className={deliveryIsFree ? 'text-emerald-400' : 'text-[#1A4BFF]'} />
+                <span className={deliveryIsFree ? 'text-emerald-400 font-bold' : 'text-white font-bold'}>
+                  {deliveryIsFree ? 'Doprava ZDARMA' : `Cena dopravy: ${deliveryPrice} €`}
+                </span>
               </div>
             </div>
           )}
+        </div>
 
+        <div className="p-4 md:p-6 pt-4 border-t border-white/5 shrink-0">
           <div className="flex gap-2">
             <Button
               type="button"
