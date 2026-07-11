@@ -609,34 +609,34 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       {totalItems > 0 && !isAnyDialogOpen && (
         <div className="fixed bottom-8 right-8 z-[999] flex flex-col items-end" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           {isHovered && !isOpen && (
-            <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="mb-4 w-80 max-h-[400px] overflow-hidden bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">📋 Prehľad košíka</h4>
-              <div className="space-y-2 cart-scroll-wrapper">
+              <div className="space-y-2 cart-scroll-wrapper max-h-[180px]">
                 {cartItems.map(({ item, qty }) => {
                   const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                   return (
                     <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
-                      <img src={img} alt="" className="w-8 h-8 rounded object-cover border border-white/10" />
+                      <img src={img} alt="" className="w-8 h-8 rounded object-cover border border-white/10 shrink-0" />
                       <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
-                      <span className="truncate flex-grow">{item.name}</span>
-                      <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
+                      <span className="truncate flex-grow min-w-0 text-[13px]">{item.name}</span>
+                      <span className="text-white text-xs font-semibold shrink-0 ml-1">{(item.price_per_day * qty)} €</span>
                     </div>
                   );
                 })}
                 {packageItems.map((pkg) => (
                   <div key={pkg.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <img src={pkg.image} alt={pkg.name} className="w-8 h-8 rounded object-cover border border-white/10" />
+                    <img src={pkg.image} alt="" className="w-8 h-8 rounded object-cover border border-white/10 shrink-0" />
                     <span className="font-semibold text-[#BD20D3] shrink-0">1x</span>
-                    <span className="truncate flex-grow">{pkg.name}</span>
-                    <span className="text-white text-xs font-semibold shrink-0">{getPackageDisplayTotal(pkg)} €</span>
+                    <span className="truncate flex-grow min-w-0 text-[13px]">{pkg.name}</span>
+                    <span className="text-white text-xs font-semibold shrink-0 ml-1">{getPackageDisplayTotal(pkg)} €</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-white/10 mt-3 pt-3 flex justify-between items-center text-xs">
+              <div className="border-t border-white/10 mt-2 pt-2 flex justify-between items-center text-xs">
                 <span className="text-gray-400">Cena / deň:</span>
                 <span className="text-[#BD20D3] font-bold text-sm">{subtotalPerDay.toFixed(2)} €</span>
               </div>
-              <button onClick={() => setIsOpen(true)} className="w-full mt-3 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1">
+              <button onClick={() => setIsOpen(true)} className="w-full mt-2 py-2 bg-[#BD20D3]/20 hover:bg-[#BD20D3]/30 border border-[#BD20D3]/40 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1">
                 <span>Otvoriť rezerváciu</span><ChevronRight size={14} />
               </button>
             </div>
