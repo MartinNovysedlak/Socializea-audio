@@ -17,7 +17,8 @@ import {
   Volume2,
   Lightbulb,
   Package,
-  ChevronRight
+  ChevronRight,
+  WandSparkles
 } from 'lucide-react';
 import { EquipmentItem } from '@/lib/supabase';
 import { packagesService, PackageData } from '@/lib/packagesService';
@@ -132,6 +133,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const [, setLoadingPackages] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [shouldAutoOpenQuiz, setShouldAutoOpenQuiz] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,6 +202,14 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
   const handleOpenDetail = (pkg: PackageOption) => {
     setSelectedPackage(pkg);
     setIsDetailOpen(true);
+  };
+
+  const handleLaunchQuiz = () => {
+    setShouldAutoOpenQuiz(true);
+    // Scroll down to the quiz section so user sees the context
+    setTimeout(() => {
+      handleScrollTo('interactive-quiz');
+    }, 100);
   };
 
   return (
@@ -282,15 +292,15 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
               </Button>
             </div>
 
-            {/* 🔗 Malý preklik na inteligentného poradcu */}
-            <div className="mt-6 pt-4">
+            {/* 🧠 Pekné tlačidlo na spustenie sprievodcu – zapadá do štýlu stránky */}
+            <div className="mt-8 pt-6 border-t border-white/5 max-w-md mx-auto">
               <button
-                onClick={() => handleScrollTo('interactive-quiz')}
-                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#BD20D3] transition-colors underline underline-offset-4 decoration-dotted decoration-gray-600 hover:decoration-[#BD20D3]"
+                onClick={handleLaunchQuiz}
+                className="group relative inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#BD20D3]/10 to-[#1A4BFF]/10 border border-[#BD20D3]/20 hover:border-[#BD20D3]/50 text-sm text-gray-300 hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(189,32,211,0.05)] hover:shadow-[0_0_25px_rgba(189,32,211,0.2)]"
               >
-                <Sparkles size={14} />
-                <span>Neviete si vybrať? Vyskúšajte nášho inteligentného poradcu</span>
-                <span className="text-[#BD20D3]">→</span>
+                <WandSparkles size={16} className="text-[#BD20D3] group-hover:animate-pulse shrink-0" />
+                <span>Spustiť sprievodcu výberom</span>
+                <span className="text-[#BD20D3] group-hover:translate-x-1 transition-transform">→</span>
               </button>
             </div>
           </div>
@@ -399,7 +409,7 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
 
         {/* 🧠 Inteligentný poradca – rovnaká sekcia ako na hlavnej stránke */}
         <div id="interactive-quiz">
-          <InteractiveQuiz />
+          <InteractiveQuiz autoOpen={shouldAutoOpenQuiz} onAutoOpenHandled={() => setShouldAutoOpenQuiz(false)} />
         </div>
 
         <section id="polozky" className="py-12 md:py-16 bg-[#020721]">

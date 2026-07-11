@@ -29,6 +29,11 @@ interface QuizAnswers {
   eventType: string;
 }
 
+interface InteractiveQuizProps {
+  autoOpen?: boolean;
+  onAutoOpenHandled?: () => void;
+}
+
 const PACKAGE_NAME_MAPPING: Record<string, string> = {
   'oslava-mini': 'Oslava MINI',
   'party-mini': 'Párty MINI',
@@ -40,7 +45,7 @@ const PACKAGE_NAME_MAPPING: Record<string, string> = {
   'open-air-arena': 'Open-Air ARENA',
 };
 
-const InteractiveQuiz = () => {
+const InteractiveQuiz = ({ autoOpen = false, onAutoOpenHandled }: InteractiveQuizProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<QuizAnswers>({
@@ -54,6 +59,14 @@ const InteractiveQuiz = () => {
 
   const [loadedPackages, setLoadedPackages] = useState<PackageOption[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
+
+  // Auto-open dialog when autoOpen prop is set
+  useEffect(() => {
+    if (autoOpen && !isOpen) {
+      setIsOpen(true);
+      if (onAutoOpenHandled) onAutoOpenHandled();
+    }
+  }, [autoOpen]);
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -217,7 +230,7 @@ const InteractiveQuiz = () => {
                 <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if(!open) resetQuiz(); }}>
                   <DialogTrigger asChild>
                     <Button className="btn-cyber w-full md:w-auto text-base px-8 py-6 rounded-2xl border-none shadow-[0_0_20px_rgba(189,32,211,0.4)] hover:scale-105 transition-transform">
-                      Nakonfigurovať aparatúru
+                      Spustiť sprievodcu
                       <ArrowRight className="ml-2" size={18} />
                     </Button>
                   </DialogTrigger>
