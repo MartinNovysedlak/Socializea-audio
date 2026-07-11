@@ -180,6 +180,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
     try { const saved = localStorage.getItem(PACKAGE_STORAGE_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
+  // Poslucháč na otvorenie košíka z iných miest (napr. z navigácie)
   useEffect(() => {
     const handler = () => setIsOpen(true);
     window.addEventListener('open-floating-cart', handler);
@@ -301,6 +302,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       const item = equipment.find((e) => e.id === id);
       return { ...prev, [id]: Math.max(0, Math.min(item?.available ?? 0, currentQty + delta)) };
     });
+    // dispatch cart update after this render cycle
     setTimeout(dispatchCartUpdate, 0);
   };
   const handleFromSelect = (date: Date | undefined) => {
@@ -649,7 +651,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                         <button type="button" onClick={() => removePackage(pkg.id)} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white z-10"><X size={12} /></button>
                         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-[#BD20D3]/40 shrink-0 bg-black/40"><img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100"; }} /></div>
                         <div className="flex-grow min-w-0 pr-6 sm:pr-0">
-                          <h4 className="text-sm sm:text-base font-bold text-white mb-0.5 break-words whitespace-normal max-w-full">{pkg.name}</h4>
+                          <h4 className="text-sm sm:text-base font-bold text-white mb-0.5">{pkg.name}</h4>
                           <p className="text-[#BD20D3] font-bold text-sm sm:text-base mt-0.5 mb-1.5">{getPackageDisplayTotal(pkg)} € {days > WEEKEND_DAYS ? `(${days} dní)` : '/ víkend'}</p>
                           <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {pkg.hasLights && <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-lg text-[#BD20D3] flex items-center gap-1 font-medium"><Lightbulb size={11} /> So svetlami</span>}
@@ -800,7 +802,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                           {packageItems.map((pkg) => (
                             <div key={pkg.id} className="bg-black/20 rounded-lg p-3 space-y-1.5">
                               <div className="flex justify-between items-start">
-                                <span className="text-white font-semibold text-sm break-words whitespace-normal max-w-[70%]">{pkg.name}</span>
+                                <span className="text-white font-semibold text-sm">{pkg.name}</span>
                                 <span className="text-[#BD20D3] font-bold text-sm ml-4 shrink-0">{getPackageDisplayTotal(pkg).toFixed(2)} €</span>
                               </div>
                               <div className="flex flex-wrap gap-1">
