@@ -1,174 +1,185 @@
-"use client";
-
-export interface ContactFormData {
+type ContactFormData = {
   name: string;
   email: string;
   phone: string;
   date: string;
   message: string;
-}
+  packageName?: string;
+  deliveryLat?: number;
+  deliveryLng?: number;
+};
 
-export interface ReservationFormData extends ContactFormData {
-  cartSummaryHtml: string;
-  days: number;
-  totalPrice: number;
-}
+type ReservationFormData = {
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  message: string;
+  cartSummaryHtml?: string;
+  days?: number;
+  totalPrice?: number;
+  deliveryLat?: number;
+  deliveryLng?: number;
+};
 
-export interface ProductInquiryData extends ContactFormData {
-  productName: string;
-  productPrice: string;
-  productCondition: string;
-  quantity?: number;
-}
+type ProductInquiryData = {
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  message: string;
+  packageName?: string;
+  deliveryLat?: number;
+  deliveryLng?: number;
+};
 
-export interface PackageQuestionData extends ContactFormData {
-  packageName: string;
-}
+type PackageQuestionData = {
+  name: string;
+  email: string;
+  phone: string;
+  date: string;
+  message: string;
+  packageName?: string;
+  deliveryLat?: number;
+  deliveryLng?: number;
+};
 
 export function generateEmailHtml(
-  type: 'contact' | 'rezervacia' | 'produkt' | 'package-question',
+  type: 'rezervacia' | 'package-question' | 'contact' | 'product-inquiry',
   data: ContactFormData | ReservationFormData | ProductInquiryData | PackageQuestionData
 ): string {
-  switch (type) {
-    case 'contact':
-      return buildBaseHtml({
-        title: '📬 Nový kontaktný dopyt',
-        subtitle: 'Kontaktný formulár z webu Socializea-audio',
-        content: buildContactContent(data as ContactFormData),
-      });
-    case 'produkt':
-      return buildBaseHtml({
-        title: '🛒 Dopyt na kúpu produktu',
-        subtitle: 'Záujem o kúpu z webu Socializea-audio',
-        content: buildProductContent(data as ProductInquiryData),
-      });
-    case 'rezervacia':
-      return buildBaseHtml({
-        title: '🔊 Nová nezáväzná rezervácia',
-        subtitle: 'Kalkulácia a rezervácia z webu Socializea-audio',
-        content: buildReservationContent(data as ReservationFormData),
-      });
-    case 'package-question':
-      return buildBaseHtml({
-        title: '📦 Otázka k balíku',
-        subtitle: 'Zákazník sa pýta na konkrétny balík z webu Socializea-audio',
-        content: buildPackageQuestionContent(data as PackageQuestionData),
-      });
-    default:
-      return '';
-  }
-}
-
-function buildBaseHtml(opts: { title: string; subtitle: string; content: string }): string {
-  return `
-<div style="background:#020721;color:white;font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid rgba(189,32,211,0.3);">
-  <div style="background:linear-gradient(135deg,#0a0d1f,#020721);padding:30px 24px 20px;text-align:center;border-bottom:1px solid rgba(189,32,211,0.2);">
-    <h1 style="color:#BD20D3;font-size:24px;margin:0;">${opts.title}</h1>
-    <p style="color:#9ca3af;font-size:14px;margin-top:8px;">${opts.subtitle}</p>
-  </div>
-
-  <div style="padding:24px;">
-    ${opts.content}
-
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(189,32,211,0.2);text-align:center;">
-      <p style="color:#9ca3af;font-size:12px;">Tento e-mail bol odoslaný automaticky z webovej stránky <a href="https://socializea.sk" style="color:#BD20D3;text-decoration:none;">Socializea-audio</a>.</p>
-    </div>
-  </div>
-</div>`;
-}
-
-function buildContactInfo(data: { name: string; email: string; phone: string; date: string }, showDate: boolean = true): string {
-  let rows = `
-    <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.name)}</td></tr>
-    <tr><td style="padding:4px 0;color:#9ca3af;">E-mail:</td><td style="padding:4px 0;color:#BD20D3;">${escapeHtml(data.email)}</td></tr>
-    <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${escapeHtml(data.phone)}</td></tr>`;
-  if (showDate) {
-    rows += `
-    <tr><td style="padding:4px 0;color:#9ca3af;">Dátum:</td><td style="padding:4px 0;color:white;">${escapeHtml(data.date)}</td></tr>`;
-  }
-  return `
-<h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
-<table style="width:100%;font-size:14px;color:#d1d5db;">
-  ${rows}
-</table>`;
-}
-
-function buildMessageBlock(message: string): string {
-  if (!message.trim()) return '';
-  return `
-<h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">💬 Správa</h2>
-<div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;color:#d1d5db;font-size:13px;line-height:1.5;white-space:pre-wrap;">${escapeHtml(message)}</div>`;
-}
-
-function buildContactContent(data: ContactFormData): string {
-  return `
-    ${buildContactInfo(data, true)}
-    ${buildMessageBlock(data.message)}
-  `;
-}
-
-function buildProductContent(data: ProductInquiryData): string {
-  // Zobrazíme počet kusov namiesto dátumu
-  const contactInfoRows = `
-    <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Meno:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.name)}</td></tr>
-    <tr><td style="padding:4px 0;color:#9ca3af;">E-mail:</td><td style="padding:4px 0;color:#BD20D3;">${escapeHtml(data.email)}</td></tr>
-    <tr><td style="padding:4px 0;color:#9ca3af;">Telefón:</td><td style="padding:4px 0;color:white;">${escapeHtml(data.phone)}</td></tr>
-    <tr><td style="padding:4px 0;color:#9ca3af;">Počet kusov:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(String(data.quantity || 'Neuvedený'))}</td></tr>`;
-
-  return `
-    <h2 style="color:#BD20D3;font-size:16px;margin:0 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">👤 Kontaktné údaje</h2>
-    <table style="width:100%;font-size:14px;color:#d1d5db;">
-      ${contactInfoRows}
-    </table>
-
-    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">🛒 Záujem o produkt</h2>
-    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;font-size:14px;">
-      <table style="width:100%;color:#d1d5db;">
-        <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Produkt:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.productName)}</td></tr>
-        <tr><td style="padding:4px 0;color:#9ca3af;">Stav:</td><td style="padding:4px 0;color:${data.productCondition === 'new' ? '#10b981' : '#f59e0b'};font-weight:600;">${data.productCondition === 'new' ? 'Nový kus' : 'B-Stock / Použitý'}</td></tr>
-        <tr><td style="padding:4px 0;color:#9ca3af;">Cena:</td><td style="padding:4px 0;color:#BD20D3;font-weight:700;">${escapeHtml(data.productPrice)}</td></tr>
-      </table>
-    </div>
-
-    ${buildMessageBlock(data.message)}
-  `;
-}
-
-function buildReservationContent(data: ReservationFormData): string {
-  return `
-    ${buildContactInfo(data, true)}
-
-    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Obsah košíka</h2>
-    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;font-size:13px;">
-      ${data.cartSummaryHtml}
-    </div>
-
-    ${buildMessageBlock(data.message)}
-  `;
-}
-
-function buildPackageQuestionContent(data: PackageQuestionData): string {
-  return `
-    ${buildContactInfo(data, false)}
-
-    <h2 style="color:#BD20D3;font-size:16px;margin:20px 0 12px;border-bottom:1px solid rgba(189,32,211,0.2);padding-bottom:8px;">📦 Otázka k balíku</h2>
-    <div style="background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;font-size:14px;">
-      <table style="width:100%;color:#d1d5db;">
-        <tr><td style="padding:4px 0;color:#9ca3af;width:100px;">Balík:</td><td style="padding:4px 0;color:white;font-weight:600;">${escapeHtml(data.packageName)}</td></tr>
-      </table>
-    </div>
-
-    ${buildMessageBlock(data.message)}
-  `;
-}
-
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&',
-    '<': '<',
-    '>': '>',
-    '"': '&quot;',
-    "'": '&#039;',
+  const getTypeLabel = () => {
+    switch (type) {
+      case 'rezervacia':
+        return '📋 Nová nezáväzná rezervácia';
+      case 'package-question':
+        return '❓ Otázka k balíku';
+      case 'contact':
+        return '📧 Kontaktný formulár';
+      case 'product-inquiry':
+        return '🔍 Dopyt na produkt';
+      default:
+        return 'Správa z webu';
+    }
   };
-  return text.replace(/[&<>"']/g, (char) => map[char] || char);
+
+  const getTypeColor = () => {
+    switch (type) {
+      case 'rezervacia':
+        return '#BD20D3';
+      case 'package-question':
+        return '#1A4BFF';
+      case 'contact':
+        return '#10b981';
+      case 'product-inquiry':
+        return '#f59e0b';
+      default:
+        return '#10b981';
+    }
+  };
+
+  const coordHtml =
+    data.deliveryLat && data.deliveryLng
+      ? `<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#9ca3af;">
+           <strong style="color:#10b981;display:block;margin-bottom:6px;">📍 GPS súradnice doručenia</strong>
+           <div style="display:flex;justify-content:space-between;padding:4px 0;">
+             <span>Zemepisná šírka (lat):</span>
+             <span style="color:white;font-weight:600;font-family:monospace;">${data.deliveryLat.toFixed(6)}</span>
+           </div>
+           <div style="display:flex;justify-content:space-between;padding:4px 0;">
+             <span>Zemepisná dĺžka (lng):</span>
+             <span style="color:white;font-weight:600;font-family:monospace;">${data.deliveryLng.toFixed(6)}</span>
+           </div>
+           <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);text-align:center;">
+             <a href="https://www.google.com/maps?q=${data.deliveryLat},${data.deliveryLng}" target="_blank" style="color:#1A4BFF;font-size:12px;font-weight:600;text-decoration:underline;">
+               🌍 Otvoriť v Google Maps
+             </a>
+           </div>
+         </div>`
+      : '';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          body { margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+          .container { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+          .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { padding: 32px 28px 20px; text-align: center; }
+          .header h1 { margin: 0; font-size: 22px; font-weight: 800; color: #111827; letter-spacing: -0.5px; }
+          .badge { display: inline-block; margin-top: 10px; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; color: white; }
+          .body { padding: 8px 28px 28px; }
+          .section { margin-bottom: 18px; }
+          .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-bottom: 8px; }
+          .field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+          .field:last-child { border-bottom: none; }
+          .field-label { color: #6b7280; }
+          .field-value { color: #111827; font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+          .message-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap; }
+          .footer { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px 28px; text-align: center; }
+          .footer p { margin: 0; font-size: 12px; color: #9ca3af; }
+          @media (max-width: 480px) {
+            .container { padding: 12px 8px; }
+            .header { padding: 24px 16px 16px; }
+            .header h1 { font-size: 18px; }
+            .body { padding: 4px 16px 16px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="card">
+            <div class="header">
+              <h1>${getTypeLabel()}</h1>
+              <div class="badge" style="background:${getTypeColor()};">${data.name}</div>
+            </div>
+            <div class="body">
+              <div class="section">
+                <div class="section-title">📞 Kontaktné údaje</div>
+                <div class="field"><span class="field-label">Meno a priezvisko</span><span class="field-value">${data.name}</span></div>
+                <div class="field"><span class="field-label">E-mail</span><span class="field-value">${data.email}</span></div>
+                <div class="field"><span class="field-label">Telefón</span><span class="field-value">${data.phone}</span></div>
+              </div>
+              <div class="section">
+                <div class="section-title">📅 Dátum</div>
+                <div class="field"><span class="field-label">Dátum / obdobie</span><span class="field-value">${data.date}</span></div>
+                ${'days' in data && data.days ? `<div class="field"><span class="field-label">Počet dní</span><span class="field-value">${data.days}</span></div>` : ''}
+              </div>
+              ${'packageName' in data && data.packageName ? `
+              <div class="section">
+                <div class="section-title">📦 Balík</div>
+                <div class="field"><span class="field-label">Názov balíka</span><span class="field-value">${data.packageName}</span></div>
+              </div>
+              ` : ''}
+              ${'totalPrice' in data && data.totalPrice !== undefined ? `
+              <div class="section">
+                <div class="section-title">💰 Cena</div>
+                <div class="field" style="border-bottom: 2px solid #BD20D3; padding-bottom: 12px;">
+                  <span class="field-label" style="font-weight:800;color:#111827;">Celková cena</span>
+                  <span class="field-value" style="color:#BD20D3;font-size:18px;font-weight:900;">${data.totalPrice.toFixed(2)} €</span>
+                </div>
+              </div>
+              ` : ''}
+              ${'cartSummaryHtml' in data && data.cartSummaryHtml ? `
+              <div class="section">
+                <div class="section-title">🛒 Súhrn objednávky</div>
+                ${data.cartSummaryHtml}
+              </div>
+              ` : ''}
+              ${coordHtml}
+              <div class="section">
+                <div class="section-title">💬 Správa</div>
+                <div class="message-box">${data.message}</div>
+              </div>
+            </div>
+            <div class="footer">
+              <p>Správa odoslaná z webového formulára<br />DJ & Party Rental</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
 }

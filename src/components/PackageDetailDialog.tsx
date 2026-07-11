@@ -104,7 +104,7 @@ function isPointInPolygon(point: { lat: number; lng: number }, polygon: { lat: n
     const xj = polygon[j].lng, yj = polygon[j].lat;
     const intersect = ((yi > point.lat) !== (yj > point.lat)) &&
       (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
-    if (intersect) inside = !inside;
+    if (inside) inside = !inside;
   }
   return inside;
 }
@@ -208,6 +208,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
   const [installUninstallSelected, setInstallUninstallSelected] = useState(false);
 
   const [deliveryCity, setDeliveryCity] = useState('');
+  const [deliveryLat, setDeliveryLat] = useState(0);
+  const [deliveryLng, setDeliveryLng] = useState(0);
   const [citySuggestions, setCitySuggestions] = useState<CityMatch[]>([]);
   const [deliveryResult, setDeliveryResult] = useState<ReturnType<typeof calculateDelivery>>(null);
   const [deliverySelected, setDeliverySelected] = useState(false);
@@ -253,6 +255,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       setInstallSelected(false);
       setInstallUninstallSelected(false);
       setDeliveryCity('');
+      setDeliveryLat(0);
+      setDeliveryLng(0);
       setCitySuggestions([]);
       setDeliveryResult(null);
       setDeliverySelected(false);
@@ -430,6 +434,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const selectCity = (cityName: string, lat: number, lng: number) => {
     setDeliveryCity(cityName);
+    setDeliveryLat(lat);
+    setDeliveryLng(lng);
     setCityLocked(true);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
@@ -448,6 +454,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const handleMapLocationSelect = (lat: number, lng: number, name: string) => {
     setDeliveryCity(name);
+    setDeliveryLat(lat);
+    setDeliveryLng(lng);
     setCityLocked(true);
     setCityDropdownOpen(false);
     setCitySuggestions([]);
@@ -466,6 +474,8 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
 
   const clearDelivery = () => {
     setDeliveryCity('');
+    setDeliveryLat(0);
+    setDeliveryLng(0);
     setDeliveryResult(null);
     setDeliverySelected(false);
     setCityLocked(false);
@@ -570,7 +580,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       price: activePackagePrice,
       hasLights: includeLights,
       image: selectedPackage.image,
-      arrival: deliverySelected && deliveryCity ? { name: deliveryCity } : null,
+      arrival: deliverySelected && deliveryCity
+        ? { name: deliveryCity, lat: deliveryLat, lng: deliveryLng }
+        : null,
       install: getInstallType(installSelected, installUninstallSelected),
       installPrice,
       deliveryPrice,
@@ -671,7 +683,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             <div className="md:col-span-4">
               {allImages.length > 0 ? (
                 <>
-                  {/* Main clickable image */}
                   <div
                     onClick={() => {
                       setLightboxIndex(0);
@@ -688,7 +699,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       <Expand className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
                     </div>
                   </div>
-                  {/* Thumbnails */}
                   {allImages.length > 1 && (
                     <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
                       {allImages.slice(0, 5).map((img, idx) => (
@@ -914,11 +924,15 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     </span>
                     {!deliveryResult.isFree && <span className="text-gray-400 flex items-center gap-1"><Navigation size={10} />{deliveryResult.distance} km od {deliveryResult.nearestPoint}</span>}
                     {deliveryResult.isKysuce && <span className="text-gray-500">(Kysuce – zadarmo)</span>}
+                    {deliveryLat !== 0 && deliveryLng !== 0 && (
+                      <span className="text-gray-500 flex items-center gap-1">
+                        <span>📍 GPS: {deliveryLat.toFixed(6)}, {deliveryLng.toFixed(6)}</span>
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Map picker button */}
               {deliverySelected && (
                 <button
                   type="button"
@@ -1212,7 +1226,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogContent className="bg-black/95 border-white/10 max-w-4xl rounded-3xl p-0 overflow-hidden shadow-2xl shadow-black/80">
           <div className="relative flex items-center justify-center min-h-[50vh] md:min-h-[70vh]">
-            {/* Close button */}
             <button
               type="button"
               onClick={() => setLightboxOpen(false)}
@@ -1220,13 +1233,9 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
             >
               <X size={18} />
             </button>
-
-            {/* Image counter */}
             <div className="absolute top-4 left-4 z-20 bg-black/60 border border-white/10 rounded-full px-3 py-1 text-xs text-white">
               {lightboxIndex + 1} / {allImages.length}
             </div>
-
-            {/* Previous button */}
             {allImages.length > 1 && (
               <button
                 type="button"
@@ -1239,15 +1248,11 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <ChevronLeft size={20} />
               </button>
             )}
-
-            {/* Image */}
             <img
               src={allImages[lightboxIndex]}
               alt={`${selectedPackage.name} – obrázok ${lightboxIndex + 1}`}
               className="w-full h-full object-contain max-h-[80vh]"
             />
-
-            {/* Next button */}
             {allImages.length > 1 && (
               <button
                 type="button"
@@ -1260,8 +1265,6 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                 <ChevronRight size={20} />
               </button>
             )}
-
-            {/* Thumbnail strip at bottom */}
             {allImages.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/60 border border-white/10 rounded-xl px-3 py-2 max-w-[90%] overflow-x-auto">
                 {allImages.map((img, idx) => (
