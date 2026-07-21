@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Youtube, Settings, FileText, Shield } from 'lucide-react';
+import { Instagram, Facebook, Settings, FileText, Shield } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -24,17 +24,23 @@ const Footer = () => {
 
           <div className="flex flex-col items-center gap-3">
             <div className="flex justify-center gap-6">
-              <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
+              <a
+                href="https://www.instagram.com/socializea_audio?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-[#BD20D3] transition-colors"
+              >
                 <span className="sr-only">Instagram</span>
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
+              <a
+                href="https://www.facebook.com/p/Socializea-Audio-61556243854211/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-[#BD20D3] transition-colors"
+              >
                 <span className="sr-only">Facebook</span>
                 <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-500 hover:text-[#BD20D3] transition-colors">
-                <span className="sr-only">Youtube</span>
-                <Youtube size={20} />
               </a>
             </div>
             <div className="flex gap-5 text-xs text-gray-500">

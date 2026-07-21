@@ -12,7 +12,6 @@ import ContactForm from '@/components/ContactForm';
 import FAQSection from '@/components/FAQSection';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
   return (
@@ -49,7 +48,10 @@ const Index = () => {
               "postalCode": "022 01",
               "addressCountry": "SK"
             },
-            "sameAs": ["https://www.instagram.com/socializea"]
+            "sameAs": [
+              "https://www.instagram.com/socializea_audio",
+              "https://www.facebook.com/p/Socializea-Audio-61556243854211/"
+            ]
           })}
         </script>
       </Helmet>
@@ -86,7 +88,6 @@ const Index = () => {
           </ScrollReveal>
         </main>
         <Footer />
-        <MadeWithDyad />
       </div>
     </>
   );
