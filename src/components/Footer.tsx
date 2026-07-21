@@ -9,15 +9,13 @@ const Footer = () => {
     <footer className="bg-[#020721] border-t border-white/10 py-12">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-3">
-            <div className="w-10 h-10 overflow-hidden rounded-lg border border-[#BD20D3]/30">
-              <img 
-                src="/logo.png" 
-                alt="Socializea Logo" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-lg font-bold tracking-tighter text-white uppercase">
+          <div className="flex items-center justify-center md:justify-start gap-2.5">
+            <img
+              src="/logo-icon.png"
+              alt=""
+              className="h-10 w-10 object-contain"
+            />
+            <span className="text-lg font-bold tracking-tighter text-white uppercase leading-none">
               Socializea<span className="text-[#BD20D3]">-audio</span>
             </span>
           </div>

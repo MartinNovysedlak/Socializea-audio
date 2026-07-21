@@ -71,11 +71,13 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-[100] bg-[#0a0d1f] border-b border-white/10">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300">
-          <div className="w-12 h-12 overflow-hidden rounded-lg border border-[#BD20D3]/30 shadow-[0_0_15px_rgba(189,32,211,0.2)]">
-            <img src="/logo.png" alt="Socializea Logo" className="w-full h-full object-cover" />
-          </div>
-          <span className="text-lg sm:text-xl font-bold tracking-tighter text-white uppercase">
+        <Link to="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity duration-300 shrink-0">
+          <img
+            src="/logo-icon.png"
+            alt=""
+            className="h-10 w-10 sm:h-11 sm:w-11 object-contain"
+          />
+          <span className="text-base sm:text-lg font-bold tracking-tighter text-white uppercase leading-none">
             Socializea<span className="text-[#BD20D3]">-audio</span>
           </span>
         </Link>
@@ -159,10 +161,8 @@ const Navbar = () => {
             {/* Header s logom a krížikom */}
             <div className="flex items-center justify-between px-6 h-20 border-b border-white/5 shrink-0">
               <Link to="/" onClick={handleLinkClick} className="flex items-center gap-2.5">
-                <div className="w-9 h-9 overflow-hidden rounded-lg border border-[#BD20D3]/30">
-                  <img src="/logo.png" alt="" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-sm font-bold tracking-tighter text-white uppercase">
+                <img src="/logo-icon.png" alt="" className="h-9 w-9 object-contain" />
+                <span className="text-sm font-bold tracking-tighter text-white uppercase leading-none">
                   Socializea<span className="text-[#BD20D3]">-audio</span>
                 </span>
               </Link>
