@@ -74,19 +74,19 @@ const BlogPostDetail = () => {
         <title>{post.title} | Socializea Audio Blog</title>
         <meta name="description" content={post.excerpt?.substring(0, 160) || ''} />
         <meta name="keywords" content="blog audio technika, rady ozvučenie, tipy svetelná show, DJ technika blog, svadobné ozvučenie, event technika" />
-        <link rel="canonical" href={`https://socializea.sk/blog/${post.id}`} />
+        <link rel="canonical" href={`https://socializea-audio.com/blog/${post.id}`} />
         <meta property="og:title" content={`${post.title} | Socializea Audio Blog`} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://socializea.sk/blog/${post.id}`} />
-        <meta property="og:image" content={post.image || 'https://socializea.sk/logo.png'} />
+        <meta property="og:url" content={`https://socializea-audio.com/blog/${post.id}`} />
+        <meta property="og:image" content={post.image || 'https://socializea-audio.com/logo.png'} />
         <meta property="og:locale" content="sk_SK" />
         <meta property="article:published_time" content={post.published_at} />
         <meta property="article:author" content={post.author} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${post.title} | Socializea Audio Blog`} />
         <meta name="twitter:description" content={post.excerpt} />
-        <meta name="twitter:image" content={post.image || 'https://socializea.sk/logo.png'} />
+        <meta name="twitter:image" content={post.image || 'https://socializea-audio.com/logo.png'} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -99,7 +99,7 @@ const BlogPostDetail = () => {
               "name": post.author
             },
             "datePublished": post.published_at,
-            "url": `https://socializea.sk/blog/${post.id}`
+            "url": `https://socializea-audio.com/blog/${post.id}`
           })}
         </script>
       </Helmet>

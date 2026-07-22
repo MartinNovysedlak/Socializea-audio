@@ -18,7 +18,7 @@ const NotFound = () => {
         <title>Stránka nenájdená (404) | Socializea Audio</title>
         <meta name="description" content="Stránka, ktorú hľadáte, nebola nájdená. Vráťte sa na hlavnú stránku Socializea Audio – prenájom a predaj zvukovej a svetelnej techniky." />
         <meta name="robots" content="noindex, follow" />
-        <link rel="canonical" href="https://socializea.sk" />
+        <link rel="canonical" href="https://socializea-audio.com" />
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-100">

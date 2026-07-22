@@ -36,17 +36,17 @@ const Predaj = () => {
         <title>Predaj Audio & Svetelnej Techniky | Socializea Audio</title>
         <meta name="description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje. Nové kusy aj overený B-Stock so zárukou." />
         <meta name="keywords" content="predaj audio techniky, predaj reproduktorov, predaj svetiel, predaj DJ techniky, kúpa ozvučenia, bazár audio technika, nové reproduktory, Behringer, Auna, BeamZ" />
-        <link rel="canonical" href="https://socializea.sk/predaj" />
+        <link rel="canonical" href="https://socializea-audio.com/predaj" />
         <meta property="og:title" content="Predaj Audio & Svetelnej Techniky | Socializea Audio" />
         <meta property="og:description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery. Nové kusy aj overený B-Stock so zárukou." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea.sk/predaj" />
-        <meta property="og:image" content="https://socializea.sk/logo.png" />
+        <meta property="og:url" content="https://socializea-audio.com/predaj" />
+        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
         <meta property="og:locale" content="sk_SK" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Predaj Audio & Svetelnej Techniky | Socializea Audio" />
         <meta name="twitter:description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery." />
-        <meta name="twitter:image" content="https://socializea.sk/logo.png" />
+        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
       </Helmet>
 
       <main className="min-h-screen bg-[#020721] relative overflow-hidden">

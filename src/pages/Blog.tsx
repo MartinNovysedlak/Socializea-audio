@@ -31,23 +31,23 @@ const Blog = () => {
         <title>Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio</title>
         <meta name="description" content="Prečítajte si odborné články o správnom nastavení svetiel, výbere ozvučenia na svadbu, najnovších trendoch v eventovej technike a DJ vybavení. Praktické rady pre organizátorov podujatí." />
         <meta name="keywords" content="blog audio technika, rady ozvučenie, tipy svetelná show, DJ technika blog, svadobné ozvučenie rady, event technika, Socializea blog" />
-        <link rel="canonical" href="https://socializea.sk/blog" />
+        <link rel="canonical" href="https://socializea-audio.com/blog" />
         <meta property="og:title" content="Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio" />
         <meta property="og:description" content="Odborné články o nastavení svetiel, výbere ozvučenia na svadbu, trendoch v eventovej technike a DJ vybavení." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea.sk/blog" />
-        <meta property="og:image" content="https://socializea.sk/logo.png" />
+        <meta property="og:url" content="https://socializea-audio.com/blog" />
+        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
         <meta property="og:locale" content="sk_SK" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio" />
         <meta name="twitter:description" content="Odborné články o nastavení svetiel, výbere ozvučenia na svadbu, trendoch v eventovej technike a DJ vybavení." />
-        <meta name="twitter:image" content="https://socializea.sk/logo.png" />
+        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Blog",
             "name": "Socializea Audio Blog",
-            "url": "https://socializea.sk/blog",
+            "url": "https://socializea-audio.com/blog",
             "description": "Odborné články, rady, tipy a novinky zo sveta profesionálnej audio a svetelnej techniky.",
             "author": {
               "@type": "Organization",

@@ -12,6 +12,7 @@ import ContactForm from '@/components/ContactForm';
 import FAQSection from '@/components/FAQSection';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import { SITE_URL, absoluteAsset } from '@/lib/site';
 
 const Index = () => {
   return (
@@ -20,24 +21,24 @@ const Index = () => {
         <title>Socializea Audio – Prenájom & Predaj Profesionálnej Zvukovej a Svetelnej Techniky</title>
         <meta name="description" content="Profesionálny prenájom a predaj zvukovej a svetelnej techniky pre svadby, firemné akcie, párty a festivaly. Špičkový zvuk, dychberúce osvetlenie a DJ služby po celom Slovensku." />
         <meta name="keywords" content="prenájom ozvučenia, prenájom reproduktorov, prenájom svetiel, DJ technika prenájom, svadobné ozvučenie, ozvučenie na párty, predaj audio techniky, svetelná show, Socializea, Čadca, Žilina" />
-        <link rel="canonical" href="https://socializea.sk" />
+        <link rel="canonical" href={SITE_URL} />
         <meta property="og:title" content="Socializea Audio – Prenájom & Predaj Profesionálnej Zvukovej a Svetelnej Techniky" />
         <meta property="og:description" content="Profesionálny prenájom a predaj zvukovej a svetelnej techniky pre svadby, firemné akcie, párty a festivaly." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea.sk" />
-        <meta property="og:image" content="https://socializea.sk/logo.png" />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:image" content={absoluteAsset('/logo.png')} />
         <meta property="og:locale" content="sk_SK" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Socializea Audio – Prenájom & Predaj Profesionálnej Zvukovej a Svetelnej Techniky" />
         <meta name="twitter:description" content="Profesionálny prenájom a predaj zvukovej a svetelnej techniky pre svadby, firemné akcie, párty a festivaly." />
-        <meta name="twitter:image" content="https://socializea.sk/logo.png" />
+        <meta name="twitter:image" content={absoluteAsset('/logo.png')} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Socializea Audio",
-            "url": "https://socializea.sk",
-            "logo": "https://socializea.sk/logo.png",
+            "url": SITE_URL,
+            "logo": absoluteAsset('/logo.png'),
             "description": "Profesionálny prenájom a predaj zvukovej a svetelnej techniky.",
             "email": "socializea@socializea.com",
             "telephone": "+421948070577",

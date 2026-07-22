@@ -215,17 +215,17 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
         <title>Prenájom Audio & Svetelnej Techniky | Socializea Audio</title>
         <meta name="description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje. Hotové balíky aj samostatné položky pre svadby, párty a eventy." />
         <meta name="keywords" content="prenájom ozvučenia, prenájom reproduktorov, prenájom svetiel, prenájom DJ techniky, svadobné ozvučenie, ozvučenie na párty, prenájom subwooferov, prenájom mixpultov, prenájom osvetlenia, Čadca, Žilina" />
-        <link rel="canonical" href="https://socializea.sk/prenajom" />
+        <link rel="canonical" href="https://socializea-audio.com/prenajom" />
         <meta property="og:title" content="Prenájom Audio & Svetelnej Techniky | Socializea Audio" />
         <meta property="og:description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea.sk/prenajom" />
-        <meta property="og:image" content="https://socializea.sk/logo.png" />
+        <meta property="og:url" content="https://socializea-audio.com/prenajom" />
+        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
         <meta property="og:locale" content="sk_SK" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Prenájom Audio & Svetelnej Techniky | Socializea Audio" />
         <meta name="twitter:description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje." />
-        <meta name="twitter:image" content="https://socializea.sk/logo.png" />
+        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",

@@ -13,7 +13,7 @@ const ObchodnePodmienky = () => {
         <title>Obchodné podmienky | Socializea-audio – Prenájom & Predaj Techniky</title>
         <meta name="description" content="Úplné obchodné podmienky prenájmu a predaja profesionálnej zvukovej a svetelnej techniky Socializea-audio. Podmienky rezervácie, dodania, zodpovednosti za škodu." />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://socializea.sk/obchodne-podmienky" />
+        <link rel="canonical" href="https://socializea-audio.com/obchodne-podmienky" />
       </Helmet>
 
       <main className="min-h-screen bg-[#020721]">
@@ -45,11 +45,11 @@ const ObchodnePodmienky = () => {
                 Miesto podnikania: Čadečka 1924, 022 01 Čadca, Slovenská republika<br />
                 Kontaktný e-mail: socializea@socializea.com<br />
                 Telefón: +421 948 070 577<br />
-                Web: socializea.sk<br />
+                Web: socializea-audio.com<br />
                 Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca
               </p>
               <p>
-                1.3. Tieto Podmienky sú záväzné pre všetky právne vzťahy vzniknuté medzi zmluvnými stranami v súvislosti s používaním webovej stránky socializea.sk, odoslaním objednávky, rezervácie alebo dopytu prostredníctvom formulárov na webovej stránke, e-mailovej komunikácie alebo telefonickej dohody.
+                1.3. Tieto Podmienky sú záväzné pre všetky právne vzťahy vzniknuté medzi zmluvnými stranami v súvislosti s používaním webovej stránky socializea-audio.com, odoslaním objednávky, rezervácie alebo dopytu prostredníctvom formulárov na webovej stránke, e-mailovej komunikácie alebo telefonickej dohody.
               </p>
 
               <h2 className="text-xl font-bold text-white">2. Vymedzenie pojmov</h2>
@@ -74,7 +74,7 @@ const ObchodnePodmienky = () => {
 
               <h2 className="text-xl font-bold text-white">3. Rezervácia a vznik zmluvného vzťahu</h2>
               <p>
-                3.1. Rezervácia Techniky sa vykonáva prostredníctvom rezervačného formulára na webovej stránke socializea.sk, e-mailom na adresu socializea@socializea.com, telefonicky na čísle +421 948 070 577 alebo osobnou návštevou v mieste podnikania.
+                3.1. Rezervácia Techniky sa vykonáva prostredníctvom rezervačného formulára na webovej stránke socializea-audio.com, e-mailom na adresu socializea@socializea.com, telefonicky na čísle +421 948 070 577 alebo osobnou návštevou v mieste podnikania.
               </p>
               <p>
                 3.2. Zaslaním rezervácie alebo objednávky Nájomca potvrdzuje, že sa oboznámil s týmito Podmienkami a bez výhrad s nimi súhlasí.
@@ -284,7 +284,7 @@ const ObchodnePodmienky = () => {
                 14.1. Tieto Podmienky sú platné od 1. 1. 2025 a nahrádzajú všetky predchádzajúce verzie.
               </p>
               <p>
-                14.2. Prenajímateľ si vyhradzuje právo jednostranne meniť tieto Podmienky. Zmeny sú účinné dňom ich zverejnenia na webovej stránke socializea.sk. Na už vzniknuté zmluvné vzťahy sa vzťahujú Podmienky platné v čase vzniku zmluvného vzťahu.
+                14.2. Prenajímateľ si vyhradzuje právo jednostranne meniť tieto Podmienky. Zmeny sú účinné dňom ich zverejnenia na webovej stránke socializea-audio.com. Na už vzniknuté zmluvné vzťahy sa vzťahujú Podmienky platné v čase vzniku zmluvného vzťahu.
               </p>
               <p>
                 14.3. Ak sa niektoré ustanovenie týchto Podmienok stane neplatným alebo nevymáhateľným, nedotýka sa to platnosti a vymáhateľnosti ostatných ustanovení. Strany sa zaväzujú nahradiť takéto ustanovenie platným ustanovením, ktoré svojím obsahom a účelom najlepšie zodpovedá pôvodnému.
@@ -298,7 +298,7 @@ const ObchodnePodmienky = () => {
 
               <div className="border-t border-white/5 pt-6 mt-6 text-xs text-gray-500">
                 <p>Socializea-audio (Martin Novysedlák) | Čadečka 1924, 022 01 Čadca | Živnosť zapísaná v živnostenskom registri Okresného úradu Čadca</p>
-                <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea.sk</p>
+                <p className="mt-1">E-mail: socializea@socializea.com | Tel: +421 948 070 577 | Web: socializea-audio.com</p>
               </div>
             </div>
           </div>
