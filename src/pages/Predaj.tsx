@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -10,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { ShoppingBag, ChevronRight, Filter, Check } from 'lucide-react';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { Link } from 'react-router-dom';
+import SeoHead from '@/components/SeoHead';
 
 const Predaj = () => {
   const [items, setItems] = useState<SalesItem[]>([]);
@@ -32,22 +32,13 @@ const Predaj = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Predaj Audio & Svetelnej Techniky | Socializea Audio</title>
-        <meta name="description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje. Nové kusy aj overený B-Stock so zárukou." />
-        <meta name="keywords" content="predaj audio techniky, predaj reproduktorov, predaj svetiel, predaj DJ techniky, kúpa ozvučenia, bazár audio technika, nové reproduktory, Behringer, Auna, BeamZ" />
-        <link rel="canonical" href="https://socializea-audio.com/predaj" />
-        <meta property="og:title" content="Predaj Audio & Svetelnej Techniky | Socializea Audio" />
-        <meta property="og:description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery. Nové kusy aj overený B-Stock so zárukou." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea-audio.com/predaj" />
-        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
-        <meta property="og:locale" content="sk_SK" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Predaj Audio & Svetelnej Techniky | Socializea Audio" />
-        <meta name="twitter:description" content="Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery." />
-        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
-      </Helmet>
+      <SeoHead
+        path="/predaj"
+        breadcrumbs={[
+          { name: 'Domov', path: '/' },
+          { name: 'Predaj', path: '/predaj' },
+        ]}
+      />
 
       <main className="min-h-screen bg-[#020721] relative overflow-hidden">
         <Navbar />

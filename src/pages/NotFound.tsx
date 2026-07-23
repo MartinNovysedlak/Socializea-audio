@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import SeoHead from "@/components/SeoHead";
 
 const NotFound = () => {
   const location = useLocation();
@@ -14,12 +14,12 @@ const NotFound = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Stránka nenájdená (404) | Socializea Audio</title>
-        <meta name="description" content="Stránka, ktorú hľadáte, nebola nájdená. Vráťte sa na hlavnú stránku Socializea Audio – prenájom a predaj zvukovej a svetelnej techniky." />
-        <meta name="robots" content="noindex, follow" />
-        <link rel="canonical" href="https://socializea-audio.com" />
-      </Helmet>
+      <SeoHead
+        path="/"
+        title="Stránka nenájdená (404) | Socializea Audio"
+        description="Stránka, ktorú hľadáte, nebola nájdená. Vráťte sa na hlavnú stránku Socializea Audio – prenájom a predaj ozvučenia a svetiel."
+        noindex
+      />
 
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">

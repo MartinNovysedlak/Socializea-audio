@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -10,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, User, Calendar, ArrowRight } from 'lucide-react';
 import { blogService, BlogPost } from '@/lib/blogService';
 import { Link } from 'react-router-dom';
+import SeoHead from '@/components/SeoHead';
+import { absoluteUrl } from '@/lib/site';
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -27,35 +28,21 @@ const Blog = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio</title>
-        <meta name="description" content="Prečítajte si odborné články o správnom nastavení svetiel, výbere ozvučenia na svadbu, najnovších trendoch v eventovej technike a DJ vybavení. Praktické rady pre organizátorov podujatí." />
-        <meta name="keywords" content="blog audio technika, rady ozvučenie, tipy svetelná show, DJ technika blog, svadobné ozvučenie rady, event technika, Socializea blog" />
-        <link rel="canonical" href="https://socializea-audio.com/blog" />
-        <meta property="og:title" content="Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio" />
-        <meta property="og:description" content="Odborné články o nastavení svetiel, výbere ozvučenia na svadbu, trendoch v eventovej technike a DJ vybavení." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea-audio.com/blog" />
-        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
-        <meta property="og:locale" content="sk_SK" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio" />
-        <meta name="twitter:description" content="Odborné články o nastavení svetiel, výbere ozvučenia na svadbu, trendoch v eventovej technike a DJ vybavení." />
-        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Blog",
-            "name": "Socializea Audio Blog",
-            "url": "https://socializea-audio.com/blog",
-            "description": "Odborné články, rady, tipy a novinky zo sveta profesionálnej audio a svetelnej techniky.",
-            "author": {
-              "@type": "Organization",
-              "name": "Socializea Audio"
-            }
-          })}
-        </script>
-      </Helmet>
+      <SeoHead
+        path="/blog"
+        breadcrumbs={[
+          { name: 'Domov', path: '/' },
+          { name: 'Blog', path: '/blog' },
+        ]}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          "name": "Socializea Audio Blog",
+          "url": absoluteUrl('/blog'),
+          "description": "Rady a tipy k ozvučeniu, svetelnej show a DJ technike.",
+          "author": { "@type": "Organization", "name": "Socializea Audio" }
+        }}
+      />
 
       <main className="min-h-screen bg-[#020721] relative overflow-hidden">
         <Navbar />

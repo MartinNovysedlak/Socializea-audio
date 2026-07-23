@@ -1,20 +1,21 @@
 "use client";
 
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SeoHead from '@/components/SeoHead';
 import { BookOpen } from 'lucide-react';
 
 const ObchodnePodmienky = () => {
   return (
     <>
-      <Helmet>
-        <title>Obchodné podmienky | Socializea-audio – Prenájom & Predaj Techniky</title>
-        <meta name="description" content="Úplné obchodné podmienky prenájmu a predaja profesionálnej zvukovej a svetelnej techniky Socializea-audio. Podmienky rezervácie, dodania, zodpovednosti za škodu." />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://socializea-audio.com/obchodne-podmienky" />
-      </Helmet>
+      <SeoHead
+        path="/obchodne-podmienky"
+        breadcrumbs={[
+          { name: 'Domov', path: '/' },
+          { name: 'Obchodné podmienky', path: '/obchodne-podmienky' },
+        ]}
+      />
 
       <main className="min-h-screen bg-[#020721]">
         <Navbar />

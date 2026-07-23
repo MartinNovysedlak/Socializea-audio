@@ -1,0 +1,64 @@
+{
+  "siteName": "Socializea Audio",
+  "siteUrl": "https://socializea-audio.com",
+  "defaultImage": "https://socializea-audio.com/logo.png",
+  "locale": "sk_SK",
+  "pages": [
+    {
+      "path": "/",
+      "title": "Prenájom a predaj ozvučenia a svetiel | Socializea Audio",
+      "description": "Socializea Audio – prenájom a predaj zvukovej a svetelnej techniky na svadby, firemné akcie a párty. Ozvučenie, svetlá a DJ služby – Čadca, Žilina a celé Slovensko.",
+      "keywords": "prenájom ozvučenia, prenájom svetiel, predaj audio techniky, DJ technika, svadobné ozvučenie, Čadca, Žilina, Socializea Audio",
+      "priority": 1.0,
+      "changefreq": "weekly"
+    },
+    {
+      "path": "/prenajom",
+      "title": "Prenájom ozvučenia a svetiel | Socializea Audio",
+      "description": "Prenájom reproduktorov, subwooferov, mikrofónov, LED svetiel a laserov. Hotové balíky aj samostatné položky pre svadby, párty a eventy na Slovensku.",
+      "keywords": "prenájom ozvučenia, prenájom reproduktorov, prenájom svetiel, prenájom mikrofónov, LED svetlá prenájom, Socializea",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    {
+      "path": "/predaj",
+      "title": "Predaj audio a svetelnej techniky | Socializea Audio",
+      "description": "Kúpte profesionálne reproduktory, mixážne pulty, mikrofóny a LED svetlá. Nové kusy aj overený B-Stock so zárukou – Socializea Audio.",
+      "keywords": "predaj audio techniky, predaj reproduktorov, predaj svetiel, predaj DJ techniky, B-Stock, Socializea",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    {
+      "path": "/blog",
+      "title": "Blog o audio a svetelnej technike | Socializea Audio",
+      "description": "Rady a tipy k ozvučeniu, svetelnej show a DJ technike. Praktické články pre organizátorov svadieb, párty a firemných eventov.",
+      "keywords": "blog audio technika, rady ozvučenie, tipy svetlá, DJ technika, Socializea blog",
+      "priority": 0.7,
+      "changefreq": "weekly"
+    },
+    {
+      "path": "/kontakt",
+      "title": "Kontakt | Socializea Audio – Čadca a Žilina",
+      "description": "Ozvite sa Socializea Audio: +421 948 070 577 alebo socializea@socializea.com. Prenájom a predaj ozvučenia a svetiel – Čadca, Žilina a celé Slovensko.",
+      "keywords": "kontakt Socializea Audio, prenájom ozvučenia Čadca, prenájom svetiel Žilina",
+      "priority": 0.8,
+      "changefreq": "monthly"
+    },
+    {
+      "path": "/obchodne-podmienky",
+      "title": "Obchodné podmienky | Socializea Audio",
+      "description": "Obchodné podmienky prenájmu a predaja zvukovej a svetelnej techniky Socializea Audio – rezervácia, doprava, zodpovednosť a reklamácie.",
+      "keywords": "obchodné podmienky, prenájom techniky, Socializea Audio",
+      "priority": 0.3,
+      "changefreq": "yearly"
+    },
+    {
+      "path": "/podmienky-pouzivania",
+      "title": "Ochrana súkromia a podmienky | Socializea Audio",
+      "description": "Podmienky používania webu socializea-audio.com, ochrana osobných údajov (GDPR) a cookies politika Socializea Audio.",
+      "keywords": "GDPR, ochrana súkromia, podmienky používania, Socializea Audio",
+      "priority": 0.3,
+      "changefreq": "yearly"
+    }
+  ]
+}

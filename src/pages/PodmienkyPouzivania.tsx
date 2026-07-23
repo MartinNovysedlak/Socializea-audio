@@ -1,20 +1,21 @@
 "use client";
 
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SeoHead from '@/components/SeoHead';
 import { Shield } from 'lucide-react';
 
 const PodmienkyPouzivania = () => {
   return (
     <>
-      <Helmet>
-        <title>Podmienky používania a Ochrana súkromia | Socializea-audio</title>
-        <meta name="description" content="Podmienky používania webovej stránky socializea-audio.com vrátane ochrany osobných údajov (GDPR), cookies politiky a autorských práv." />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://socializea-audio.com/podmienky-pouzivania" />
-      </Helmet>
+      <SeoHead
+        path="/podmienky-pouzivania"
+        breadcrumbs={[
+          { name: 'Domov', path: '/' },
+          { name: 'Ochrana súkromia', path: '/podmienky-pouzivania' },
+        ]}
+      />
 
       <main className="min-h-screen bg-[#020721]">
         <Navbar />

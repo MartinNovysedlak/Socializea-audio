@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { absoluteUrl, absoluteAsset } from '@/lib/site';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -116,19 +117,19 @@ const ProductDetail = () => {
       <Helmet>
         <title>{product.name} | Socializea Audio – Predaj</title>
         <meta name="description" content={product.description?.substring(0, 160) || ''} />
-        <link rel="canonical" href={`https://socializea-audio.com/predaj/${product.id}`} />
+        <link rel="canonical" href={absoluteUrl(`/predaj/${product.id}`)} />
         <meta property="og:title" content={`${product.name} | Socializea Audio – Predaj`} />
         <meta property="og:description" content={product.description?.substring(0, 160) || ''} />
         <meta property="og:type" content="product" />
-        <meta property="og:url" content={`https://socializea-audio.com/predaj/${product.id}`} />
-        <meta property="og:image" content={images[0] || 'https://socializea-audio.com/logo.png'} />
+        <meta property="og:url" content={absoluteUrl(`/predaj/${product.id}`)} />
+        <meta property="og:image" content={images[0] || absoluteAsset('/logo.png')} />
         <meta property="og:locale" content="sk_SK" />
         <meta property="product:price:amount" content={String(product.price)} />
         <meta property="product:price:currency" content="EUR" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${product.name} | Socializea Audio – Predaj`} />
         <meta name="twitter:description" content={product.description?.substring(0, 160) || ''} />
-        <meta name="twitter:image" content={images[0] || 'https://socializea-audio.com/logo.png'} />
+        <meta name="twitter:image" content={images[0] || absoluteAsset('/logo.png')} />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
@@ -141,7 +142,7 @@ const ProductDetail = () => {
               price: product.price,
               priceCurrency: 'EUR',
               availability: product.available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-              url: `https://socializea-audio.com/predaj/${product.id}`,
+              url: absoluteUrl(`/predaj/${product.id}`),
             },
           })}
         </script>

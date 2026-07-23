@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import EquipmentCatalog from '@/components/EquipmentCatalog';
 import Footer from '@/components/Footer';
@@ -24,6 +23,7 @@ import { EquipmentItem } from '@/lib/supabase';
 import { packagesService, PackageData } from '@/lib/packagesService';
 import PackageDetailDialog, { PackageOption } from '@/components/PackageDetailDialog';
 import InteractiveQuiz from '@/components/InteractiveQuiz';
+import SeoHead from '@/components/SeoHead';
 
 interface PresetPackage {
   id: string;
@@ -211,23 +211,13 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
 
   return (
     <>
-      <Helmet>
-        <title>Prenájom Audio & Svetelnej Techniky | Socializea Audio</title>
-        <meta name="description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje. Hotové balíky aj samostatné položky pre svadby, párty a eventy." />
-        <meta name="keywords" content="prenájom ozvučenia, prenájom reproduktorov, prenájom svetiel, prenájom DJ techniky, svadobné ozvučenie, ozvučenie na párty, prenájom subwooferov, prenájom mixpultov, prenájom osvetlenia, Čadca, Žilina" />
-        <link rel="canonical" href="https://socializea-audio.com/prenajom" />
-        <meta property="og:title" content="Prenájom Audio & Svetelnej Techniky | Socializea Audio" />
-        <meta property="og:description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://socializea-audio.com/prenajom" />
-        <meta property="og:image" content="https://socializea-audio.com/logo.png" />
-        <meta property="og:locale" content="sk_SK" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Prenájom Audio & Svetelnej Techniky | Socializea Audio" />
-        <meta name="twitter:description" content="Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje." />
-        <meta name="twitter:image" content="https://socializea-audio.com/logo.png" />
-        <script type="application/ld+json">
-          {JSON.stringify({
+      <SeoHead
+        path="/prenajom"
+        breadcrumbs={[
+          { name: 'Domov', path: '/' },
+          { name: 'Prenájom', path: '/prenajom' },
+        ]}
+        jsonLd={{
             "@context": "https://schema.org",
             "@type": "ItemList",
             "name": "Ponuka prenájmu techniky",
@@ -246,9 +236,8 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
                 }
               }
             }))
-          })}
-        </script>
-      </Helmet>
+        }}
+      />
 
       <main className="min-h-screen bg-[#020721]" ref={mainRef} style={{ opacity: 0, transition: 'opacity 0.3s ease' }}>
         <Navbar />

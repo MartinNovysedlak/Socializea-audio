@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { absoluteUrl, absoluteAsset } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -233,15 +234,15 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
           name="keywords"
           content={`prenájom ${item.name}, ${item.category === "sound" ? "prenájom reproduktorov, prenájom ozvučenia" : item.category === "lighting" ? "prenájom svetiel, svetelná technika" : "príslušenstvo prenájom"}, Socializea, Čadca, Žilina`}
         />
-        <link rel="canonical" href={`https://socializea-audio.com/prenajom/${item.id}`} />
+        <link rel="canonical" href={absoluteUrl(`/prenajom/${item.id}`)} />
         <meta property="og:title" content={pageTitle} />
         <meta
           property="og:description"
           content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
         />
         <meta property="og:type" content="product" />
-        <meta property="og:url" content={`https://socializea-audio.com/prenajom/${item.id}`} />
-        <meta property="og:image" content={images[0] || "https://socializea-audio.com/logo.png"} />
+        <meta property="og:url" content={absoluteUrl(`/prenajom/${item.id}`)} />
+        <meta property="og:image" content={images[0] || absoluteAsset("/logo.png")} />
         <meta property="og:locale" content="sk_SK" />
         <meta property="product:price:amount" content={String(item.price_per_day)} />
         <meta property="product:price:currency" content="EUR" />
@@ -251,7 +252,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
           name="twitter:description"
           content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
         />
-        <meta name="twitter:image" content={images[0] || "https://socializea-audio.com/logo.png"} />
+        <meta name="twitter:image" content={images[0] || absoluteAsset("/logo.png")} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -265,7 +266,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
               price: item.price_per_day,
               priceCurrency: "EUR",
               availability: item.available > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              url: `https://socializea-audio.com/prenajom/${item.id}`
+              url: absoluteUrl(`/prenajom/${item.id}`),
             }
           })}
         </script>

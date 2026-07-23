@@ -1,64 +1,22 @@
 /**
  * Po vite build vytvorí HTML súbory pre marketingové routes
- * so správnymi meta tagmi v počiatočnom HTML (FB/WA/Twitter crawleri).
+ * so správnymi meta tagmi v počiatočnom HTML (Google/FB/WA/Twitter).
  */
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const distDir = join(root, 'dist');
-const SITE_URL = 'https://socializea-audio.com';
-const DEFAULT_IMAGE = `${SITE_URL}/logo.png`;
+const seo = JSON.parse(readFileSync(join(root, 'src/lib/seo-pages.json'), 'utf8'));
 
-const pages = [
-  {
-    path: '/',
-    title: 'Socializea Audio – Prenájom & Predaj Profesionálnej Zvukovej a Svetelnej Techniky',
-    description:
-      'Profesionálny prenájom a predaj zvukovej a svetelnej techniky pre svadby, firemné akcie, párty a festivaly. Špičkový zvuk, dychberúce osvetlenie a DJ služby po celom Slovensku.',
-  },
-  {
-    path: '/prenajom',
-    title: 'Prenájom Audio & Svetelnej Techniky | Socializea Audio',
-    description:
-      'Prenájom profesionálnej zvukovej a svetelnej techniky – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery, dymostroje.',
-  },
-  {
-    path: '/predaj',
-    title: 'Predaj Audio & Svetelnej Techniky | Socializea Audio',
-    description:
-      'Kúpte si profesionálnu audio a svetelnú techniku – reproduktory, subwoofery, mixážne pulty, mikrofóny, LED svetlá, lasery.',
-  },
-  {
-    path: '/blog',
-    title: 'Blog – Rady, Tipy & Novinky zo Sveta Audio Techniky | Socializea Audio',
-    description:
-      'Odborné články o nastavení svetiel, výbere ozvučenia na svadbu, trendoch v eventovej technike a DJ vybavení.',
-  },
-  {
-    path: '/kontakt',
-    title: 'Kontakt | Socializea Audio',
-    description:
-      'Kontaktujte Socializea Audio – prenájom a predaj zvukovej a svetelnej techniky. Čadca, Žilina a celé Slovensko.',
-  },
-  {
-    path: '/obchodne-podmienky',
-    title: 'Obchodné podmienky | Socializea-audio – Prenájom & Predaj Techniky',
-    description:
-      'Úplné obchodné podmienky prenájmu a predaja profesionálnej zvukovej a svetelnej techniky Socializea-audio.',
-  },
-  {
-    path: '/podmienky-pouzivania',
-    title: 'Podmienky používania a Ochrana súkromia | Socializea-audio',
-    description:
-      'Podmienky používania webovej stránky socializea-audio.com vrátane ochrany osobných údajov (GDPR), cookies politiky a autorských práv.',
-  },
-];
+const SITE_URL = seo.siteUrl;
+const DEFAULT_IMAGE = seo.defaultImage;
+const pages = seo.pages;
 
 function escapeAttr(value) {
-  return value
+  return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('"', '&quot;')
     .replaceAll('<', '&lt;')
@@ -74,6 +32,7 @@ function injectMeta(html, page) {
   const url = absoluteUrl(page.path);
   const title = escapeAttr(page.title);
   const description = escapeAttr(page.description);
+  const keywords = escapeAttr(page.keywords || '');
 
   let next = html;
 
@@ -82,6 +41,7 @@ function injectMeta(html, page) {
   const replacements = [
     [/<link rel="canonical" href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${url}" />`],
     [/<meta name="description" content="[^"]*"\s*\/?>/i, `<meta name="description" content="${description}" />`],
+    [/<meta name="keywords" content="[^"]*"\s*\/?>/i, `<meta name="keywords" content="${keywords}" />`],
     [/<meta property="og:title" content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${title}" />`],
     [/<meta property="og:description" content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${description}" />`],
     [/<meta property="og:url" content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${url}" />`],
@@ -115,16 +75,17 @@ for (const page of pages) {
   const outPath = outputPathFor(page.path);
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, html, 'utf8');
-  console.log(`prerender-seo: ${page.path} -> ${outPath.replace(root + '\\', '').replace(root + '/', '')}`);
+  console.log(`prerender-seo: ${page.path}`);
 }
 
-// Ensure crawlers can discover pages
+const today = new Date().toISOString().slice(0, 10);
 const sitemapUrls = pages
   .map(
     (p) => `  <url>
     <loc>${absoluteUrl(p.path)}</loc>
-    <changefreq>${p.path === '/' ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${p.path === '/' ? '1.0' : '0.8'}</priority>
+    <lastmod>${today}</lastmod>
+    <changefreq>${p.changefreq || 'monthly'}</changefreq>
+    <priority>${Number(p.priority ?? 0.5).toFixed(1)}</priority>
   </url>`
   )
   .join('\n');
@@ -136,5 +97,6 @@ ${sitemapUrls}
 `;
 
 writeFileSync(join(distDir, 'sitemap.xml'), sitemap, 'utf8');
+writeFileSync(join(root, 'public/sitemap.xml'), sitemap, 'utf8');
 console.log('prerender-seo: sitemap.xml written');
 console.log('prerender-seo: done');
