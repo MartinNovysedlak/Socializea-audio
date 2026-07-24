@@ -1,5 +1,67 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/shop",
+      "destination": "/predaj",
+      "permanent": true
+    },
+    {
+      "source": "/shop/",
+      "destination": "/predaj",
+      "permanent": true
+    },
+    {
+      "source": "/shop/p/lily-29z7f",
+      "destination": "/predaj/sale-4",
+      "permanent": true
+    },
+    {
+      "source": "/shop/p/:slug",
+      "destination": "/predaj",
+      "permanent": true
+    },
+    {
+      "source": "/shop/:path*",
+      "destination": "/predaj",
+      "permanent": true
+    },
+    {
+      "source": "/rent",
+      "destination": "/prenajom",
+      "permanent": true
+    },
+    {
+      "source": "/rent/",
+      "destination": "/prenajom",
+      "permanent": true
+    },
+    {
+      "source": "/rent/:path*",
+      "destination": "/prenajom",
+      "permanent": true
+    },
+    {
+      "source": "/contact-us",
+      "destination": "/kontakt",
+      "permanent": true
+    },
+    {
+      "source": "/contact-us/",
+      "destination": "/kontakt",
+      "permanent": true
+    },
+    {
+      "source": "/terms-of-service",
+      "destination": "/obchodne-podmienky",
+      "permanent": true
+    },
+    {
+      "source": "/terms-of-service/",
+      "destination": "/obchodne-podmienky",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",
