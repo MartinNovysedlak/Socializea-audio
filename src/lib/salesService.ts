@@ -12,6 +12,10 @@ export interface SalesItem {
   available_count: number;
   available: boolean;
   created_at?: string;
+  /** Google Merchant – voliteľné */
+  brand?: string;
+  gtin?: string;
+  mpn?: string;
 }
 
 const LOCAL_STORAGE_KEY = 'socializea_sales_items';
