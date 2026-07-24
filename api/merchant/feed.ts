@@ -1,31 +1,53 @@
 import { createClient } from '@supabase/supabase-js';
-import { MERCHANT_PRODUCT_IDS, resolveMerchantMeta } from './catalog';
 
-const SITE_URL = 'https://socializea-audio.com';
+const SITE_URL = 'https://www.socializea-audio.com';
 
 type SalesRow = {
   id: string;
   name: string;
   price: number;
-  condition: 'new' | 'used' | string;
-  description: string | null;
-  images: string[] | null;
-  available: boolean | null;
-  available_count: number | null;
-  brand?: string | null;
-  gtin?: string | null;
-  mpn?: string | null;
+  condition?: string;
+  description?: string | null;
+  images?: string[] | null;
+  available?: boolean | null;
+  available_count?: number | null;
 };
 
-type Req = { method?: string };
-type Res = {
-  status: (code: number) => Res;
-  setHeader: (name: string, value: string) => void;
-  send: (body: string) => void;
-  json: (body: Record<string, unknown>) => void;
+type MerchantMeta = {
+  brand: string;
+  mpn: string;
+  google_product_category: string;
+  product_type: string;
 };
 
-const FALLBACK_PRODUCTS: SalesRow[] = [
+const CATALOG: Record<string, MerchantMeta> = {
+  'sale-3': {
+    brand: 'StagePulse',
+    mpn: 'SP-LASER-BAR-65W-RED',
+    google_product_category: '549',
+    product_type: 'Svetelná technika > Laserové efekty',
+  },
+  'sale-4': {
+    brand: 'StagePulse',
+    mpn: 'SP-RGBW-HEAD-90W',
+    google_product_category: '549',
+    product_type: 'Svetelná technika > Moving Head',
+  },
+  'sale-5': {
+    brand: 'StagePulse',
+    mpn: 'SP-FLAME-MACHINE',
+    google_product_category: '549',
+    product_type: 'Svetelná technika > Špeciálne efekty',
+  },
+  'sale-6': {
+    brand: 'StagePulse',
+    mpn: 'SP-RGBW-BAR-36W',
+    google_product_category: '549',
+    product_type: 'Svetelná technika > LED BAR',
+  },
+};
+
+const FALLBACK: SalesRow[] = [
   {
     id: 'sale-3',
     name: 'Profesionálny výkonný pohyblivý Laserový BAR 65W (červený)',
@@ -74,62 +96,52 @@ const FALLBACK_PRODUCTS: SalesRow[] = [
 
 function escapeXml(value: string): string {
   return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 function stripHtml(value: string): string {
   return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function formatPrice(price: number): string {
-  return `${price.toFixed(2)} EUR`;
-}
+function buildItem(item: SalesRow): string | null {
+  const meta = CATALOG[item.id];
+  if (!meta) return null;
 
-function mapCondition(condition: string): 'new' | 'used' | 'refurbished' {
-  if (condition === 'used') return 'used';
-  return 'new';
-}
-
-function buildItemXml(item: SalesRow): string | null {
-  const name = (item.name || '').trim();
+  const name = String(item.name || '').trim();
   const price = Number(item.price);
   if (!name || !Number.isFinite(price) || price <= 0) return null;
 
-  const meta = resolveMerchantMeta(item.id, name);
-  if (!meta) return null;
-
-  const brand = (item.brand || meta.brand).trim();
-  const mpn = (item.mpn || meta.mpn).trim();
-
   const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
-  const imageLink = images[0];
-  if (!imageLink) return null;
+  if (!images[0]) return null;
 
-  const available =
-    item.available === true || (item.available_count != null && item.available_count > 0);
+  const inStock =
+    item.available === true ||
+    (typeof item.available_count === 'number' && item.available_count > 0);
+
   const description = stripHtml(item.description || name).slice(0, 5000);
+  const condition = item.condition === 'used' ? 'used' : 'new';
   const link = `${SITE_URL}/predaj/${encodeURIComponent(item.id)}`;
-  const additionalImages = images.slice(1, 10);
+  const extraImages = images.slice(1, 10);
 
-  const lines = [
+  return [
     '    <item>',
     `      <g:id>${escapeXml(item.id)}</g:id>`,
     `      <g:title>${escapeXml(name.slice(0, 150))}</g:title>`,
     `      <g:description>${escapeXml(description)}</g:description>`,
     `      <g:link>${escapeXml(link)}</g:link>`,
-    `      <g:image_link>${escapeXml(imageLink)}</g:image_link>`,
-    ...additionalImages.map(
+    `      <g:image_link>${escapeXml(images[0])}</g:image_link>`,
+    ...extraImages.map(
       (img) => `      <g:additional_image_link>${escapeXml(img)}</g:additional_image_link>`
     ),
-    `      <g:availability>${available ? 'in_stock' : 'out_of_stock'}</g:availability>`,
-    `      <g:price>${formatPrice(price)}</g:price>`,
-    `      <g:brand>${escapeXml(brand)}</g:brand>`,
-    `      <g:condition>${mapCondition(String(item.condition || 'new'))}</g:condition>`,
-    `      <g:mpn>${escapeXml(mpn)}</g:mpn>`,
+    `      <g:availability>${inStock ? 'in_stock' : 'out_of_stock'}</g:availability>`,
+    `      <g:price>${price.toFixed(2)} EUR</g:price>`,
+    `      <g:brand>${escapeXml(meta.brand)}</g:brand>`,
+    `      <g:condition>${condition}</g:condition>`,
+    `      <g:mpn>${escapeXml(meta.mpn)}</g:mpn>`,
     '      <g:identifier_exists>no</g:identifier_exists>',
     `      <g:google_product_category>${escapeXml(meta.google_product_category)}</g:google_product_category>`,
     `      <g:product_type>${escapeXml(meta.product_type)}</g:product_type>`,
@@ -139,65 +151,72 @@ function buildItemXml(item: SalesRow): string | null {
     '        <g:price>0.00 EUR</g:price>',
     '      </g:shipping>',
     '    </item>',
-  ];
-
-  return lines.join('\n');
-}
-
-function onlyMerchantProducts(rows: SalesRow[]): SalesRow[] {
-  const allowed = new Set(MERCHANT_PRODUCT_IDS);
-  return rows.filter((row) => allowed.has(row.id));
+  ].join('\n');
 }
 
 async function loadProducts(): Promise<SalesRow[]> {
-  const supabaseUrl =
-    process.env.VITE_SUPABASE_URL || 'https://prlkuuhsvtlpcziekqcx.supabase.co';
-  const supabaseAnonKey =
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    'sb_publishable_XrmQIGBiXHBVhKPx29RTnQ_mW6lpaUT';
+  const allowed = new Set(Object.keys(CATALOG));
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL || 'https://prlkuuhsvtlpcziekqcx.supabase.co',
+      process.env.VITE_SUPABASE_ANON_KEY ||
+        'sb_publishable_XrmQIGBiXHBVhKPx29RTnQ_mW6lpaUT'
+    );
+
     const { data, error } = await supabase
       .from('sales')
-      .select('*')
+      .select('id,name,price,condition,description,images,available,available_count')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    if (data && data.length > 0) {
-      const filtered = onlyMerchantProducts(data as SalesRow[]);
+    if (!error && data && data.length > 0) {
+      const filtered = (data as SalesRow[]).filter((row) => allowed.has(row.id));
       if (filtered.length > 0) return filtered;
     }
   } catch {
-    // fallback nižšie
+    // fallback
   }
 
-  return FALLBACK_PRODUCTS;
+  return FALLBACK;
 }
 
-export default async function handler(req: Req, res: Res) {
-  if (req.method !== 'GET') {
-    res.status(405);
-    return res.json({ status: 'error', message: 'Method not allowed' });
-  }
+function sendXml(res: any, status: number, xml: string) {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=900');
+  res.end(xml);
+}
 
-  const products = await loadProducts();
-  const itemsXml = products
-    .map(buildItemXml)
-    .filter((x): x is string => Boolean(x))
-    .join('\n');
+function sendJson(res: any, status: number, body: Record<string, unknown>) {
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.end(JSON.stringify(body));
+}
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+export default async function handler(req: any, res: any) {
+  try {
+    if (req.method && req.method !== 'GET' && req.method !== 'HEAD') {
+      return sendJson(res, 405, { status: 'error', message: 'Method not allowed' });
+    }
+
+    const products = await loadProducts();
+    const items = products.map(buildItem).filter(Boolean).join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
     <title>Socializea Audio – Predaj techniky</title>
     <link>${SITE_URL}/predaj</link>
     <description>Predaj profesionálnej audio a svetelnej techniky – Socializea Audio.</description>
-${itemsXml}
+${items}
   </channel>
 </rss>`;
 
-  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
-  res.status(200).send(xml);
+    return sendXml(res, 200, xml);
+  } catch (err: any) {
+    return sendJson(res, 500, {
+      status: 'error',
+      message: err?.message || 'Feed generation failed',
+    });
+  }
 }
