@@ -107,18 +107,6 @@ const initialSales: SalesItem[] = [
     ],
     available_count: 8,
     available: true
-  },
-  {
-    id: 'sale-1',
-    name: 'Pioneer DJ DDJ-FLX4',
-    price: 319,
-    condition: 'new',
-    description: '2-kanálový DJ ovládač pre začiatočníkov aj pokročilých.',
-    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600'],
-    specs: ['2 kanály', 'USB-C', 'Podpora rekordbox/Serato'],
-    features: ['Smart Fader', 'Kompaktný dizajn'],
-    available_count: 3,
-    available: true
   }
 ];
 

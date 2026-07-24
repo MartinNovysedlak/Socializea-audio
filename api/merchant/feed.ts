@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { resolveMerchantMeta } from './catalog';
+import { MERCHANT_PRODUCT_IDS, resolveMerchantMeta } from './catalog';
 
 const SITE_URL = 'https://socializea-audio.com';
 
@@ -70,16 +70,6 @@ const FALLBACK_PRODUCTS: SalesRow[] = [
     available: true,
     available_count: 8,
   },
-  {
-    id: 'sale-1',
-    name: 'Pioneer DJ DDJ-FLX4',
-    price: 319,
-    condition: 'new',
-    description: '2-kanálový DJ ovládač pre začiatočníkov aj pokročilých.',
-    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600'],
-    available: true,
-    available_count: 3,
-  },
 ];
 
 function escapeXml(value: string): string {
@@ -110,10 +100,10 @@ function buildItemXml(item: SalesRow): string | null {
   if (!name || !Number.isFinite(price) || price <= 0) return null;
 
   const meta = resolveMerchantMeta(item.id, name);
+  if (!meta) return null;
+
   const brand = (item.brand || meta.brand).trim();
   const mpn = (item.mpn || meta.mpn).trim();
-  const gtin = (item.gtin || meta.gtin || '').trim();
-  const hasGtin = gtin.length > 0;
 
   const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
   const imageLink = images[0];
@@ -140,14 +130,7 @@ function buildItemXml(item: SalesRow): string | null {
     `      <g:brand>${escapeXml(brand)}</g:brand>`,
     `      <g:condition>${mapCondition(String(item.condition || 'new'))}</g:condition>`,
     `      <g:mpn>${escapeXml(mpn)}</g:mpn>`,
-    `      <g:identifier_exists>${hasGtin ? 'yes' : 'no'}</g:identifier_exists>`,
-  ];
-
-  if (hasGtin) {
-    lines.push(`      <g:gtin>${escapeXml(gtin)}</g:gtin>`);
-  }
-
-  lines.push(
+    '      <g:identifier_exists>no</g:identifier_exists>',
     `      <g:google_product_category>${escapeXml(meta.google_product_category)}</g:google_product_category>`,
     `      <g:product_type>${escapeXml(meta.product_type)}</g:product_type>`,
     '      <g:shipping>',
@@ -155,10 +138,15 @@ function buildItemXml(item: SalesRow): string | null {
     '        <g:service>Standard</g:service>',
     '        <g:price>0.00 EUR</g:price>',
     '      </g:shipping>',
-    '    </item>'
-  );
+    '    </item>',
+  ];
 
   return lines.join('\n');
+}
+
+function onlyMerchantProducts(rows: SalesRow[]): SalesRow[] {
+  const allowed = new Set(MERCHANT_PRODUCT_IDS);
+  return rows.filter((row) => allowed.has(row.id));
 }
 
 async function loadProducts(): Promise<SalesRow[]> {
@@ -176,7 +164,10 @@ async function loadProducts(): Promise<SalesRow[]> {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (data && data.length > 0) return data as SalesRow[];
+    if (data && data.length > 0) {
+      const filtered = onlyMerchantProducts(data as SalesRow[]);
+      if (filtered.length > 0) return filtered;
+    }
   } catch {
     // fallback nižšie
   }
