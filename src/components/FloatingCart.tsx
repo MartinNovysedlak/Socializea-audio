@@ -37,6 +37,7 @@ import { generateEmailHtml } from '@/utils/emailTemplates';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useDialogContext } from '@/contexts/DialogContext';
 import MapPicker from './MapPicker';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PackageCartItem {
   id: string;
@@ -152,8 +153,12 @@ function dispatchCartUpdate() {
 }
 
 const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProps) => {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [mobilePreview, setMobilePreview] = useState(false);
+  const prevTotalRef = useRef(0);
+  const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showFromCalendar, setShowFromCalendar] = useState(false);
   const [showToCalendar, setShowToCalendar] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -189,7 +194,27 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const totalEquipmentQty = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
   const totalItems = totalEquipmentQty + packageItems.length;
+  const showPreview = !isOpen && (isMobile ? mobilePreview : isHovered);
   const cartItems = Object.entries(quantities).filter(([_, qty]) => qty > 0).map(([id, qty]) => { const item = equipment.find((e) => e.id === id); return { item, qty }; }).filter((entry): entry is { item: EquipmentItem; qty: number } => entry.item !== undefined);
+
+  useEffect(() => {
+    if (isMobile && totalItems > prevTotalRef.current && totalItems > 0 && !isOpen) {
+      setMobilePreview(true);
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = setTimeout(() => {
+        setMobilePreview(false);
+        previewTimerRef.current = null;
+      }, 1000);
+    }
+    if (totalItems === 0) setMobilePreview(false);
+    prevTotalRef.current = totalItems;
+  }, [isMobile, totalItems, isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => { setDialogOpen(isOpen || showReservationSuccess); }, [isOpen, showReservationSuccess, setDialogOpen]);
   useEffect(() => { try { localStorage.setItem(PACKAGE_STORAGE_KEY, JSON.stringify(packageItems)); dispatchCartUpdate(); } catch {} }, [packageItems]);
@@ -573,8 +598,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       `}</style>
 
       {totalItems > 0 && !isAnyDialogOpen && (
-        <div className="fixed bottom-8 right-8 z-[999] flex flex-col items-end" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-          {isHovered && !isOpen && (
+        <div
+          className="fixed bottom-8 right-8 z-[999] flex flex-col items-end"
+          onMouseEnter={() => { if (!isMobile) setIsHovered(true); }}
+          onMouseLeave={() => { if (!isMobile) setIsHovered(false); }}
+        >
+          {showPreview && (
             <div className="mb-4 w-80 bg-gradient-to-br from-[#0a0d1f]/95 to-[#020721]/95 border border-[#BD20D3]/40 rounded-2xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
               <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 border-b border-white/10 pb-2">Položky v košíku</h4>
               <div className="space-y-2 cart-scroll-wrapper">
