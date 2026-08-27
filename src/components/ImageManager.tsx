@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
-import { Upload, Trash2, GripVertical } from 'lucide-react';
+import { Upload, Trash2, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { equipmentService } from '@/lib/equipmentService';
 
@@ -13,14 +13,17 @@ interface ImageManagerProps {
 
 const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const dragFromRef = useRef<number | null>(null);
+  const overRef = useRef<number | null>(null);
+  const [isFileHover, setIsFileHover] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
   const handleFiles = async (files: FileList) => {
-    const validImageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-    
+    const validImageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+
     if (validImageFiles.length === 0) {
       toast.error('Zvoľte prosím iba obrázky!');
       return;
@@ -31,21 +34,17 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
 
     try {
       const successfulUrls: string[] = [];
-      
-      // Nahrávame postupne jeden po druhom, aby sme predišli problémom so súbežnosťou
+
       for (const file of validImageFiles) {
         try {
           const url = await equipmentService.uploadImage(file);
-          if (url) {
-            successfulUrls.push(url);
-          }
+          if (url) successfulUrls.push(url);
         } catch (err) {
           console.error(`Chyba pri nahrávaní súboru ${file.name}:`, err);
         }
       }
-      
+
       if (successfulUrls.length > 0) {
-        // Pridáme všetky úspešne nahrané URL k existujúcim
         onChange([...images, ...successfulUrls]);
         toast.dismiss(toastId);
         toast.success(`Úspešne nahraných ${successfulUrls.length} obrázkov!`);
@@ -59,10 +58,7 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       console.error(error);
     } finally {
       setIsUploading(false);
-      // Resetujeme input, aby bolo možné znova vybrať rovnaké súbory ak treba
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -72,18 +68,21 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const isExternalFileDrag = (e: React.DragEvent) =>
+    [...e.dataTransfer.types].includes('Files') && dragFromRef.current === null;
+
+  const handleZoneDragOver = (e: React.DragEvent) => {
+    if (!isExternalFileDrag(e)) return;
     e.preventDefault();
-    setIsDragging(true);
+    setIsFileHover(true);
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+  const handleZoneDragLeave = () => setIsFileHover(false);
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleZoneDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    setIsFileHover(false);
+    if (dragFromRef.current !== null) return;
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
@@ -92,44 +91,70 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
   const handleRemove = async (indexToRemove: number) => {
     const imageUrl = images[indexToRemove];
     await equipmentService.deleteImage(imageUrl);
-    
-    const updated = images.filter((_, idx) => idx !== indexToRemove);
-    onChange(updated);
+    onChange(images.filter((_, idx) => idx !== indexToRemove));
     toast.success('Obrázok odstránený.');
   };
 
-  const handleCardDragStart = (e: React.DragEvent, index: number) => {
-    setDragIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
+  const moveImage = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= images.length || to >= images.length) return;
+    const updated = [...images];
+    const [moved] = updated.splice(from, 1);
+    updated.splice(to, 0, moved);
+    onChange(updated);
   };
 
-  const handleCardDragOver = (e: React.DragEvent, index: number) => {
+  const indexFromPoint = (x: number, y: number): number | null => {
+    const nodes = gridRef.current?.querySelectorAll<HTMLElement>('[data-image-index]');
+    if (!nodes) return null;
+    for (const node of nodes) {
+      const r = node.getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+        const idx = Number(node.dataset.imageIndex);
+        return Number.isNaN(idx) ? null : idx;
+      }
+    }
+    return null;
+  };
+
+  const finishPointerDrag = () => {
+    const from = dragFromRef.current;
+    const to = overRef.current;
+    dragFromRef.current = null;
+    overRef.current = null;
+    setDragFrom(null);
+    setOverIndex(null);
+    if (from !== null && to !== null && from !== to) {
+      moveImage(from, to);
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent, index: number) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (e.button !== 0) return;
     e.preventDefault();
-    if (dragIndex === null || dragIndex === index) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragFromRef.current = index;
+    overRef.current = index;
+    setDragFrom(index);
     setOverIndex(index);
   };
 
-  const handleCardDrop = (e: React.DragEvent, targetIndex: number) => {
-    e.preventDefault();
-    if (dragIndex === null || dragIndex === targetIndex) {
-      setDragIndex(null);
-      setOverIndex(null);
-      return;
-    }
-
-    const updated = [...images];
-    const [moved] = updated.splice(dragIndex, 1);
-    updated.splice(targetIndex, 0, moved);
-    onChange(updated);
-
-    setDragIndex(null);
-    setOverIndex(null);
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (dragFromRef.current === null) return;
+    const next = indexFromPoint(e.clientX, e.clientY);
+    if (next === null || next === overRef.current) return;
+    overRef.current = next;
+    setOverIndex(next);
   };
 
-  const handleCardDragEnd = () => {
-    setDragIndex(null);
-    setOverIndex(null);
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (dragFromRef.current === null) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // already released
+    }
+    finishPointerDrag();
   };
 
   return (
@@ -137,20 +162,20 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       <div>
         <Label className="text-gray-300 text-base font-semibold">Fotografie produktu</Label>
         <p className="text-xs text-gray-400 mt-1">
-          Nahrajte fotky a zmeňte ich poradie presunutím. Prvá fotka bude automaticky nastavená ako hlavná.
+          Nahrajte fotky a zmeňte ich poradie pretiahnutím. Prvá fotka bude hlavná.
         </p>
       </div>
 
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDragOver={handleZoneDragOver}
+        onDragLeave={handleZoneDragLeave}
+        onDrop={handleZoneDrop}
         onClick={() => !isUploading && fileInputRef.current?.click()}
         className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 flex flex-col items-center justify-center gap-3 ${
-          isUploading 
-            ? 'border-[#BD20D3]/50 bg-[#BD20D3]/5 cursor-wait' 
-            : isDragging 
-              ? 'border-[#BD20D3] bg-[#BD20D3]/10 cursor-pointer' 
+          isUploading
+            ? 'border-[#BD20D3]/50 bg-[#BD20D3]/5 cursor-wait'
+            : isFileHover
+              ? 'border-[#BD20D3] bg-[#BD20D3]/10 cursor-pointer'
               : 'border-white/10 bg-black/30 hover:border-[#BD20D3]/50 hover:bg-white/5 cursor-pointer'
         }`}
       >
@@ -174,21 +199,21 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
       </div>
 
       {images.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
+        <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
           {images.map((img, index) => {
             const isMain = index === 0;
-            const isBeingDragged = dragIndex === index;
-            const isDragOver = overIndex === index;
+            const isBeingDragged = dragFrom === index;
+            const isDragOver = overIndex === index && dragFrom !== index;
 
             return (
-              <div 
-                key={`${img}-${index}`} 
-                draggable
-                onDragStart={(e) => handleCardDragStart(e, index)}
-                onDragOver={(e) => handleCardDragOver(e, index)}
-                onDrop={(e) => handleCardDrop(e, index)}
-                onDragEnd={handleCardDragEnd}
-                className={`relative group rounded-xl overflow-hidden border bg-black/40 flex flex-col cursor-grab active:cursor-grabbing transition-all duration-200 ${
+              <div
+                key={`${img}-${index}`}
+                data-image-index={index}
+                onPointerDown={(e) => handlePointerDown(e, index)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                className={`relative group rounded-xl overflow-hidden border bg-black/40 flex flex-col select-none touch-none cursor-grab active:cursor-grabbing transition-all duration-150 ${
                   isMain ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]' : 'border-white/10'
                 } ${isBeingDragged ? 'opacity-40 scale-95' : ''} ${
                   isDragOver ? 'border-[#BD20D3] bg-[#BD20D3]/10 scale-105' : ''
@@ -201,17 +226,17 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
                     className="w-full h-full object-cover pointer-events-none"
                     draggable={false}
                   />
-                  
-                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white/80 p-1.5 rounded-lg">
+
+                  <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white/80 p-1.5 rounded-lg pointer-events-none">
                     <GripVertical size={14} />
                   </div>
 
                   {isMain && (
-                    <span className="absolute bottom-2 left-2 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-md">
+                    <span className="absolute bottom-2 left-2 bg-gradient-to-r from-[#BD20D3] to-[#1A4BFF] text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-md pointer-events-none">
                       Hlavná
                     </span>
                   )}
-                  
+
                   <button
                     type="button"
                     onClick={(e) => {
@@ -223,6 +248,36 @@ const ImageManager = ({ images, onChange }: ImageManagerProps) => {
                     <Trash2 size={14} />
                   </button>
                 </div>
+                {images.length > 1 && (
+                  <div className="flex border-t border-white/10">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveImage(index, index - 1);
+                      }}
+                      className="flex-1 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:pointer-events-none"
+                      aria-label="Posunúť doľava"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === images.length - 1}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveImage(index, index + 1);
+                      }}
+                      className="flex-1 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:pointer-events-none border-l border-white/10"
+                      aria-label="Posunúť doprava"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

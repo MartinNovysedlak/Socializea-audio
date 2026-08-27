@@ -949,8 +949,10 @@ const Admin = () => {
                                 >
                                   <td 
                                     className={`px-4 py-4 cursor-grab active:cursor-grabbing text-center ${dragBorderClass}`}
-                                    onMouseDown={() => setCanDrag(true)}
-                                    onMouseUp={() => setCanDrag(false)}
+                                    onMouseEnter={() => setCanDrag(true)}
+                                    onMouseLeave={() => {
+                                      if (draggedIndex === null) setCanDrag(false);
+                                    }}
                                   >
                                     <GripVertical size={16} className="text-gray-500 mx-auto" />
                                   </td>

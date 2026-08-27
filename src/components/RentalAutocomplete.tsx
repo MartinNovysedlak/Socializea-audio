@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Search, Loader2, Check, Package, Minus, ShoppingBag } from 'lucide-react';
+import { Plus, X, Search, Loader2, Package, Minus, ShoppingBag, GripVertical } from 'lucide-react';
 
 interface RentalItem {
   id: string;
@@ -34,6 +34,8 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const quantityRef = useRef<HTMLDivElement>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   // Fetch rental items from database (equipment table)
   useEffect(() => {
@@ -115,6 +117,40 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
     onChange(items.filter((_, i) => i !== index));
   }, [items, onChange]);
 
+  const handleItemDragStart = (e: React.DragEvent, index: number) => {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleItemDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragIndex === null || dragIndex === index) return;
+    setOverIndex(index);
+  };
+
+  const handleItemDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dragIndex === null || dragIndex === targetIndex) {
+      setDragIndex(null);
+      setOverIndex(null);
+      return;
+    }
+    const next = [...items];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    onChange(next);
+    setDragIndex(null);
+    setOverIndex(null);
+  };
+
+  const handleItemDragEnd = () => {
+    setDragIndex(null);
+    setOverIndex(null);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -139,28 +175,42 @@ const RentalAutocomplete = ({ label, placeholder, items, onChange }: RentalAutoc
       <div className="flex items-center justify-between">
         <Label className="text-gray-300">{label}</Label>
         {selectedCount > 0 && (
-          <span className="text-xs text-gray-500">{selectedCount} položiek</span>
+          <span className="text-xs text-gray-500">{selectedCount} položiek · pretiahni pre poradie</span>
         )}
       </div>
 
       {/* Selected items as bubbles */}
       {items.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="group flex items-center gap-2 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full pl-4 pr-2 py-1.5 text-sm text-white transition-all hover:bg-[#BD20D3]/20"
-            >
-              <span className="max-w-[200px] truncate">{item}</span>
-              <button
-                type="button"
-                onClick={() => handleRemoveItem(index)}
-                className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-colors"
+        <div className="flex flex-col gap-2">
+          {items.map((item, index) => {
+            const isDragging = dragIndex === index;
+            const isOver = overIndex === index && dragIndex !== index;
+            return (
+              <div
+                key={`${item}-${index}`}
+                draggable
+                onDragStart={(e) => handleItemDragStart(e, index)}
+                onDragOver={(e) => handleItemDragOver(e, index)}
+                onDrop={(e) => handleItemDrop(e, index)}
+                onDragEnd={handleItemDragEnd}
+                className={`group flex items-center gap-2 bg-[#BD20D3]/10 border rounded-xl pl-2 pr-2 py-1.5 text-sm text-white transition-all cursor-grab active:cursor-grabbing ${
+                  isDragging ? 'opacity-40 border-[#BD20D3]/50' : 'border-[#BD20D3]/30 hover:bg-[#BD20D3]/20'
+                } ${isOver ? 'border-[#BD20D3] bg-[#BD20D3]/25 ring-1 ring-[#BD20D3]' : ''}`}
               >
-                <X size={12} />
-              </button>
-            </div>
-          ))}
+                <GripVertical size={14} className="text-[#BD20D3]/80 shrink-0" />
+                <span className="flex-1 min-w-0 truncate">{item}</span>
+                <button
+                  type="button"
+                  draggable={false}
+                  onClick={() => handleRemoveItem(index)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="w-5 h-5 rounded-full bg-white/10 hover:bg-red-500/80 flex items-center justify-center transition-colors shrink-0"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 

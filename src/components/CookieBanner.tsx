@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Cookie, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +11,7 @@ import {
 } from '@/lib/cookieConsent';
 
 const CookieBanner = () => {
+  const location = useLocation();
   const [visible, setVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [analytics, setAnalytics] = useState(false);
@@ -59,6 +60,7 @@ const CookieBanner = () => {
   };
 
   if (!visible) return null;
+  if (location.pathname.startsWith('/admin')) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[200] p-3 md:p-5">

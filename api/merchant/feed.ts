@@ -48,6 +48,12 @@ const CATALOG: Record<string, MerchantMeta> = {
     google_product_category: '549',
     product_type: 'Svetelná technika > LED BAR',
   },
+  'sale-7': {
+    brand: 'StagePulse',
+    mpn: 'SP-FLAME-MACHINE-80W',
+    google_product_category: '549',
+    product_type: 'Svetelná technika > Špeciálne efekty',
+  },
 };
 
 const HOSTED_JPEG: Record<string, string> = {
@@ -77,6 +83,7 @@ function normalizeName(value: string): string {
 function resolveMerchantId(item: SalesRow): string {
   const n = normalizeName(item.name || '');
   if (n.includes('laser')) return 'sale-3';
+  if (n.includes('80w') && (n.includes('flame') || n.includes('ohn'))) return 'sale-7';
   if (n.includes('flame') || n.includes('ohna')) return 'sale-5';
   if (n.includes('hlava') || n.includes('90w')) return 'sale-4';
   if (n.includes('36w') || n.includes('lista')) return 'sale-6';
