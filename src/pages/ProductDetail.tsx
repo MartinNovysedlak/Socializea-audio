@@ -237,7 +237,7 @@ const ProductDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
                 {product.specs && product.specs.length > 0 && (
                   <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické parametre:</h3>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Technické špecifikácie:</h3>
                     <ul className="space-y-2">
                       {product.specs.map((spec, i) => (
                         <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
@@ -250,7 +250,7 @@ const ProductDetail = () => {
                 )}
                 {product.features && product.features.length > 0 && (
                   <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové výhody:</h3>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Kľúčové vlastnosti:</h3>
                     <ul className="space-y-2">
                       {product.features.map((f, i) => (
                         <li key={i} className="text-sm text-gray-300 flex items-start gap-2.5">
