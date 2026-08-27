@@ -1,5 +1,34 @@
 import { supabase, EquipmentItem } from './supabase';
 
+const GOOGLE_SAFE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif']);
+
+async function ensureGoogleCompatibleImage(file: File): Promise<File> {
+  if (GOOGLE_SAFE_TYPES.has(file.type)) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', 0.9)
+    );
+    if (!blob) return file;
+
+    const base = file.name.replace(/\.[^.]+$/, '') || 'image';
+    return new File([blob], `${base}.jpg`, { type: 'image/jpeg' });
+  } catch {
+    return file;
+  }
+}
+
 export const equipmentService = {
   async getAll(): Promise<EquipmentItem[]> {
     const { data, error } = await supabase
@@ -148,13 +177,14 @@ export const equipmentService = {
   },
 
   async uploadImage(file: File): Promise<string | null> {
-    const fileExt = file.name.split('.').pop();
+    const prepared = await ensureGoogleCompatibleImage(file);
+    const fileExt = prepared.name.split('.').pop() || 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('equipment-images')
-      .upload(filePath, file);
+      .upload(filePath, prepared);
 
     if (uploadError) {
       console.error('Error uploading image:', uploadError);

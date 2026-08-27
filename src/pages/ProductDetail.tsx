@@ -41,9 +41,7 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  const images = product?.images && product.images.length > 0
-    ? product.images
-    : ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800'];
+  const images = product?.images && product.images.length > 0 ? product.images : [];
 
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +160,11 @@ const ProductDetail = () => {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
             <div className="lg:col-span-7 space-y-8">
               <div className="aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden border border-white/10 relative bg-black/40 group">
-                <img src={images[activeImage]} alt={product.name} className="w-full h-full object-contain" />
+                {images[activeImage] ? (
+                  <img src={images[activeImage]} alt={product.name} className="w-full h-full object-contain" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">Bez fotografie</div>
+                )}
                 <div className="absolute bottom-4 left-4">
                   <span className={`px-3 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider ${product.condition === 'new' ? 'bg-cyan-600/90 border border-cyan-400/50 text-white' : 'bg-amber-600/90 border border-amber-400/50 text-white'}`}>
                     {product.condition === 'new' ? 'Nový kus' : 'B-Stock'}

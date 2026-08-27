@@ -88,6 +88,10 @@ const Predaj = () => {
 
           {loading ? (
             <div className="text-center text-gray-400 py-16">Načítavam produkty pre vás...</div>
+          ) : items.length === 0 ? (
+            <div className="text-center text-gray-400 py-16 bg-white/5 border border-white/10 rounded-2xl max-w-5xl mx-auto">
+              Momentálne nie sú v ponuke žiadne produkty.
+            </div>
           ) : filteredItems.length === 0 ? (
             <div className="text-center text-gray-400 py-16 bg-white/5 border border-white/10 rounded-2xl max-w-5xl mx-auto">
               Žiadne produkty nezodpovedajú zvolenému filtru.
@@ -95,7 +99,7 @@ const Predaj = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
               {filteredItems.map((item, index) => {
-                const mainImg = item.images?.[0] || 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
+                const mainImg = item.images?.[0];
                 return (
                   <ScrollReveal key={item.id} direction="up" delay={index * 0.1}>
                     <Link 
@@ -106,14 +110,17 @@ const Predaj = () => {
                         className="bg-gradient-to-br from-[#0a0d1f] to-[#020721] border border-white/10 rounded-3xl overflow-hidden hover:border-[#BD20D3]/50 hover:shadow-[0_0_40px_rgba(189,32,211,0.15)] hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative"
                       >
                         <div className="h-64 md:h-72 md:h-80 overflow-hidden relative bg-black/40 border-b border-white/5">
-                          <img 
-                            src={mainImg} 
-                            alt={item.name} 
-                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&auto=format&fit=crop&q=80';
-                            }}
-                          />
+                          {mainImg ? (
+                            <img 
+                              src={mainImg} 
+                              alt={item.name} 
+                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
+                              Bez fotografie
+                            </div>
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                           
                           <div className="absolute bottom-4 right-4">

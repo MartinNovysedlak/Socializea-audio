@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://www.socializea-audio.com';
+const SHIPPING_PRICE = '4.90 EUR';
 
 type SalesRow = {
   id: string;
@@ -11,6 +12,8 @@ type SalesRow = {
   images?: string[] | null;
   available?: boolean | null;
   available_count?: number | null;
+  brand?: string | null;
+  mpn?: string | null;
 };
 
 type MerchantMeta = {
@@ -47,52 +50,9 @@ const CATALOG: Record<string, MerchantMeta> = {
   },
 };
 
-const FALLBACK: SalesRow[] = [
-  {
-    id: 'sale-3',
-    name: 'Profesionálny výkonný pohyblivý Laserový BAR 65W (červený)',
-    price: 270,
-    condition: 'new',
-    description:
-      'Profesionálny výkonný pohyblivý Laserový BAR o výkone 65W je ideálnou voľbou pre DJ akcie, kluby, bary, diskotéky, svadby, eventy alebo domáce party.',
-    images: ['https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800'],
-    available: true,
-    available_count: 2,
-  },
-  {
-    id: 'sale-4',
-    name: 'Profesionálna otočná a rotujúca RGBW LED hlava 90W',
-    price: 140,
-    condition: 'new',
-    description:
-      'Profesionálna rotujúca RGBW hlava o výkone 90W je ideálna pre DJ akcie, koncerty a klubové večery.',
-    images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'],
-    available: true,
-    available_count: 4,
-  },
-  {
-    id: 'sale-5',
-    name: 'Profesionálny výrobník ohňa – Flame Machine',
-    price: 120,
-    condition: 'new',
-    description:
-      'Dramatické efekty pre koncerty a vystúpenia. Produkcia realistického a bezpečného plameňa.',
-    images: ['https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?w=800'],
-    available: true,
-    available_count: 2,
-  },
-  {
-    id: 'sale-6',
-    name: 'Profesionálna RGBW 4v1 LED BAR svetelná lišta 36W',
-    price: 35,
-    condition: 'new',
-    description:
-      'Ideálna pre DJ akcie, kluby, svadby a divadlá. Vytvára bohaté farebné efekty a dynamickú atmosféru.',
-    images: ['https://images.unsplash.com/photo-1557683316-973673baf926?w=800'],
-    available: true,
-    available_count: 8,
-  },
-];
+const HOSTED_JPEG: Record<string, string> = {
+  'sale-4': `${SITE_URL}/merchant/sale-4.jpg`,
+};
 
 function escapeXml(value: string): string {
   return value
@@ -107,15 +67,67 @@ function stripHtml(value: string): string {
   return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function normalizeName(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function resolveMerchantId(item: SalesRow): string {
+  const n = normalizeName(item.name || '');
+  if (n.includes('laser')) return 'sale-3';
+  if (n.includes('flame') || n.includes('ohna')) return 'sale-5';
+  if (n.includes('hlava') || n.includes('90w')) return 'sale-4';
+  if (n.includes('36w') || n.includes('lista')) return 'sale-6';
+  return item.id;
+}
+
+function getMeta(merchantId: string, item: SalesRow): MerchantMeta {
+  if (CATALOG[merchantId]) return CATALOG[merchantId];
+  const fallbackMpn = `SP-${merchantId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20).toUpperCase() || 'ITEM'}`;
+  return {
+    brand: (item.brand || 'StagePulse').trim() || 'StagePulse',
+    mpn: (item.mpn || fallbackMpn).trim() || fallbackMpn,
+    google_product_category: '549',
+    product_type: 'Svetelná technika',
+  };
+}
+
+function isGoogleImage(url: string): boolean {
+  return /\.(jpe?g|png|gif)(\?|#|$)/i.test(url);
+}
+
+function pickGoogleImages(item: SalesRow, merchantId: string): string[] {
+  const fromDb = (Array.isArray(item.images) ? item.images : []).filter(
+    (url): url is string => typeof url === 'string' && isGoogleImage(url)
+  );
+  if (fromDb.length > 0) return fromDb.slice(0, 10);
+  if (HOSTED_JPEG[merchantId]) return [HOSTED_JPEG[merchantId]];
+  return [];
+}
+
+function shippingBlock(country: string, minTransit: number, maxTransit: number): string {
+  return [
+    '      <g:shipping>',
+    `        <g:country>${country}</g:country>`,
+    '        <g:service>Standard</g:service>',
+    `        <g:price>${SHIPPING_PRICE}</g:price>`,
+    `        <g:min_transit_time>${minTransit}</g:min_transit_time>`,
+    `        <g:max_transit_time>${maxTransit}</g:max_transit_time>`,
+    '      </g:shipping>',
+  ].join('\n');
+}
+
 function buildItem(item: SalesRow): string | null {
-  const meta = CATALOG[item.id];
-  if (!meta) return null;
+  const merchantId = resolveMerchantId(item);
+  const meta = getMeta(merchantId, item);
 
   const name = String(item.name || '').trim();
   const price = Number(item.price);
   if (!name || !Number.isFinite(price) || price <= 0) return null;
 
-  const images = Array.isArray(item.images) ? item.images.filter(Boolean) : [];
+  const images = pickGoogleImages(item, merchantId);
   if (!images[0]) return null;
 
   const inStock =
@@ -129,7 +141,7 @@ function buildItem(item: SalesRow): string | null {
 
   return [
     '    <item>',
-    `      <g:id>${escapeXml(item.id)}</g:id>`,
+    `      <g:id>${escapeXml(merchantId)}</g:id>`,
     `      <g:title>${escapeXml(name.slice(0, 150))}</g:title>`,
     `      <g:description>${escapeXml(description)}</g:description>`,
     `      <g:link>${escapeXml(link)}</g:link>`,
@@ -145,39 +157,28 @@ function buildItem(item: SalesRow): string | null {
     '      <g:identifier_exists>no</g:identifier_exists>',
     `      <g:google_product_category>${escapeXml(meta.google_product_category)}</g:google_product_category>`,
     `      <g:product_type>${escapeXml(meta.product_type)}</g:product_type>`,
-    '      <g:shipping>',
-    '        <g:country>SK</g:country>',
-    '        <g:service>Standard</g:service>',
-    '        <g:price>0.00 EUR</g:price>',
-    '      </g:shipping>',
+    '      <g:min_handling_time>1</g:min_handling_time>',
+    '      <g:max_handling_time>2</g:max_handling_time>',
+    shippingBlock('SK', 1, 3),
+    shippingBlock('CZ', 2, 5),
     '    </item>',
   ].join('\n');
 }
 
 async function loadProducts(): Promise<SalesRow[]> {
-  const allowed = new Set(Object.keys(CATALOG));
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL || 'https://prlkuuhsvtlpcziekqcx.supabase.co',
+    process.env.VITE_SUPABASE_ANON_KEY ||
+      'sb_publishable_XrmQIGBiXHBVhKPx29RTnQ_mW6lpaUT'
+  );
 
-  try {
-    const supabase = createClient(
-      process.env.VITE_SUPABASE_URL || 'https://prlkuuhsvtlpcziekqcx.supabase.co',
-      process.env.VITE_SUPABASE_ANON_KEY ||
-        'sb_publishable_XrmQIGBiXHBVhKPx29RTnQ_mW6lpaUT'
-    );
-
-    const { data, error } = await supabase
-      .from('sales')
+  const { data, error } = await supabase
+    .from('sales')
       .select('id,name,price,condition,description,images,available,available_count')
-      .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
-    if (!error && data && data.length > 0) {
-      const filtered = (data as SalesRow[]).filter((row) => allowed.has(row.id));
-      if (filtered.length > 0) return filtered;
-    }
-  } catch {
-    // fallback
-  }
-
-  return FALLBACK;
+  if (error) throw error;
+  return (data || []) as SalesRow[];
 }
 
 function sendXml(res: any, status: number, xml: string) {
