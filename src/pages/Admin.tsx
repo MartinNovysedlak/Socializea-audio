@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -23,6 +24,7 @@ import {
   Lock, 
   LogOut, 
   LayoutDashboard, 
+  BarChart3, 
   Plus, 
   Edit, 
   Trash2, 
@@ -855,6 +857,12 @@ const Admin = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
+                  <Button asChild className="btn-cyber rounded-xl h-11 px-5 border-none">
+                    <Link to="/admin/analytika">
+                      <BarChart3 size={18} className="mr-2" />
+                      Analytika
+                    </Link>
+                  </Button>
                   <Button 
                     onClick={handleLogout} 
                     variant="outline" 

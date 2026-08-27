@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Index from './pages/Index';
 import Prenajom from './pages/Prenajom';
 import EquipmentDetail from './pages/EquipmentDetail';
@@ -15,12 +15,21 @@ import ObchodnePodmienky from './pages/ObchodnePodmienky';
 import PodmienkyPouzivania from './pages/PodmienkyPouzivania';
 import NotFound from './pages/NotFound';
 import FloatingCart from './components/FloatingCart';
+import CookieBanner from './components/CookieBanner';
 import ScrollToTop from './components/ScrollToTop';
 import { useEquipment } from './hooks/useEquipment';
 import AmbientBackground from './components/AmbientBackground';
+import SeoDedupe from './components/SeoDedupe';
+import AnalyticsInit from './components/AnalyticsInit';
+import AdminAnalytics from './pages/AdminAnalytics';
+
+function LegacyEquipmentRedirect() {
+  const { id } = useParams();
+  return <Navigate to={id ? `/prenajom/${id}` : '/prenajom'} replace />;
+}
 
 function App() {
-  const { equipment } = useEquipment();
+  const { equipment, loading: equipmentLoading } = useEquipment();
   
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     try {
@@ -42,6 +51,8 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <SeoDedupe />
+      <AnalyticsInit />
       <AmbientBackground />
       
       <div className="relative z-10">
@@ -53,7 +64,8 @@ function App() {
               <Prenajom 
                 quantities={quantities} 
                 setQuantities={setQuantities} 
-                equipment={equipment} 
+                equipment={equipment}
+                loading={equipmentLoading}
               />
             } 
           />
@@ -67,18 +79,10 @@ function App() {
               />
             } 
           />
-          <Route 
-            path="/equipment/:id" 
-            element={
-              <EquipmentDetail 
-                quantities={quantities} 
-                setQuantities={setQuantities} 
-                equipment={equipment}
-              />
-            } 
-          />
+          <Route path="/equipment/:id" element={<LegacyEquipmentRedirect />} />
           <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/analytika" element={<AdminAnalytics />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPostDetail />} />
           <Route path="/predaj" element={<Predaj />} />
@@ -95,6 +99,7 @@ function App() {
         setQuantities={setQuantities} 
         equipment={equipment} 
       />
+      <CookieBanner />
     </BrowserRouter>
   );
 }

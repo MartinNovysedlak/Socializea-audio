@@ -38,6 +38,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useDialogContext } from '@/contexts/DialogContext';
 import MapPicker from './MapPicker';
 import { useIsMobile } from '@/hooks/use-mobile';
+import FieldError from '@/components/FieldError';
+import LegalConsent from '@/components/LegalConsent';
+import { cn } from '@/lib/utils';
 
 interface PackageCartItem {
   id: string;
@@ -181,6 +184,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
   const debouncedCitySearch = useDebounce(deliveryCity, 400);
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [packageItems, setPackageItems] = useState<PackageCartItem[]>(() => {
     try { const saved = localStorage.getItem(PACKAGE_STORAGE_KEY); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
@@ -528,9 +533,15 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstName.trim() || !formData.lastName.trim()) { toast.error("Prosím vyplňte meno a priezvisko!"); return; }
-    if (!formData.email.trim()) { toast.error("Prosím vyplňte platný email!"); return; }
-    if (!formData.dateFrom || !formData.dateTo) { toast.error("Prosím vyberte dátum od a do!"); return; }
+    const nextErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) nextErrors.firstName = "Zadajte meno.";
+    if (!formData.lastName.trim()) nextErrors.lastName = "Zadajte priezvisko.";
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) nextErrors.email = "Zadajte platný email.";
+    if (!formData.dateFrom) nextErrors.dateFrom = "Vyberte dátum od.";
+    if (!formData.dateTo) nextErrors.dateTo = "Vyberte dátum do.";
+    if (!legalAccepted) nextErrors.legal = "Potrebujeme váš súhlas so spracovaním údajov.";
+    setFormErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
     setIsSubmitting(true);
     const toastId = toast.loading('Odosielam dopyt...');
     try {
@@ -547,6 +558,8 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
       setShowReservationSuccess(true);
       setQuantities({}); setPackageItems([]); setInstallSelected(false); setInstallUninstallSelected(false); clearDelivery();
       setFormData({ firstName: "", lastName: "", email: "", phone: "", dateFrom: "", dateTo: "", message: "" });
+      setLegalAccepted(false);
+      setFormErrors({});
       setIsOpen(false);
       dispatchCartUpdate();
     } catch (error) {
@@ -611,7 +624,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                   const img = item.main_image || (item.images && item.images[0]) || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50";
                   return (
                     <div key={item.id} className="flex items-center gap-2 text-sm text-gray-300">
-                      <img src={img} alt="" className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
+                      <img src={img} alt={item.name} className="w-8 h-8 rounded object-cover border border-white/10" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50"; }} />
                       <span className="font-semibold text-[#BD20D3] shrink-0">{qty}x</span>
                       <span className="truncate flex-grow">{item.name}</span>
                       <span className="text-white text-xs font-semibold shrink-0">{(item.price_per_day * qty)} €</span>
@@ -916,17 +929,20 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
                         <Label htmlFor="firstName" className="text-gray-300 flex items-center gap-1.5 text-sm"><User size={14} className="text-[#BD20D3]" /> Meno *</Label>
-                        <Input id="firstName" type="text" placeholder="Ján" value={formData.firstName} onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11" required />
+                        <Input id="firstName" type="text" placeholder="Ján" value={formData.firstName} onChange={(e) => { setFormData(prev => ({ ...prev, firstName: e.target.value })); setFormErrors(p => ({ ...p, firstName: '' })); }} className={cn("bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11", formErrors.firstName && "border-red-500")} required />
+                        <FieldError message={formErrors.firstName} />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="lastName" className="text-gray-300 flex items-center gap-1.5 text-sm"><User size={14} className="text-[#BD20D3]" /> Priezvisko *</Label>
-                        <Input id="lastName" type="text" placeholder="Novák" value={formData.lastName} onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11" required />
+                        <Input id="lastName" type="text" placeholder="Novák" value={formData.lastName} onChange={(e) => { setFormData(prev => ({ ...prev, lastName: e.target.value })); setFormErrors(p => ({ ...p, lastName: '' })); }} className={cn("bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11", formErrors.lastName && "border-red-500")} required />
+                        <FieldError message={formErrors.lastName} />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div className="space-y-1.5">
                         <Label htmlFor="email" className="text-gray-300 flex items-center gap-1.5 text-sm"><Mail size={14} className="text-[#BD20D3]" /> Email *</Label>
-                        <Input id="email" type="email" placeholder="jan@priklad.sk" value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11" required />
+                        <Input id="email" type="email" placeholder="jan@priklad.sk" value={formData.email} onChange={(e) => { setFormData(prev => ({ ...prev, email: e.target.value })); setFormErrors(p => ({ ...p, email: '' })); }} className={cn("bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11", formErrors.email && "border-red-500")} required />
+                        <FieldError message={formErrors.email} />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="phone" className="text-gray-300 flex items-center gap-1.5 text-sm"><Phone size={14} className="text-[#BD20D3]" /> Telefón</Label>
@@ -937,7 +953,7 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                       <div className="space-y-1.5 relative" ref={fromRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Od dátumu *</Label>
                         <div className="relative">
-                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""} onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateFrom ? format(new Date(formData.dateFrom), "dd.MM.yyyy") : ""} onClick={() => { setShowFromCalendar(!showFromCalendar); setShowToCalendar(false); setFormErrors(p => ({ ...p, dateFrom: '' })); }} className={cn("bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10", formErrors.dateFrom && "border-red-500")} required />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showFromCalendar && (
@@ -945,11 +961,12 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             <DayPicker mode="single" locale={sk} selected={formData.dateFrom ? new Date(formData.dateFrom) : undefined} onSelect={handleFromSelect} disabled={[{ before: startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showFromCalendar} />
                           </div>
                         )}
+                        <FieldError message={formErrors.dateFrom} />
                       </div>
                       <div className="space-y-1.5 relative" ref={toRef}>
                         <Label className="text-gray-300 flex items-center gap-1.5 text-sm"><Calendar size={14} className="text-[#BD20D3]" /> Do dátumu *</Label>
                         <div className="relative">
-                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""} onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); }} className="bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10" required />
+                          <Input type="text" readOnly placeholder="Vyberte dátum" value={formData.dateTo ? format(new Date(formData.dateTo), "dd.MM.yyyy") : ""} onClick={() => { setShowToCalendar(!showToCalendar); setShowFromCalendar(false); setFormErrors(p => ({ ...p, dateTo: '' })); }} className={cn("bg-black/50 border-white/10 text-white rounded-xl h-10 md:h-11 cursor-pointer pr-10", formErrors.dateTo && "border-red-500")} required />
                           <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BD20D3] pointer-events-none" />
                         </div>
                         {showToCalendar && (
@@ -957,12 +974,18 @@ const FloatingCart = ({ quantities, setQuantities, equipment }: FloatingCartProp
                             <DayPicker mode="single" locale={sk} selected={formData.dateTo ? new Date(formData.dateTo) : undefined} onSelect={handleToSelect} disabled={[{ before: formData.dateFrom ? addDays(new Date(formData.dateFrom), 1) : startOfDay(new Date()) }]} weekStartsOn={1} initialFocus={showToCalendar} />
                           </div>
                         )}
+                        <FieldError message={formErrors.dateTo} />
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="message" className="text-gray-300 flex items-center gap-1.5 text-sm"><MessageSquare size={14} className="text-[#BD20D3]" /> Poznámka k objednávke</Label>
                       <Textarea id="message" placeholder="Napíšte nám podrobnosti..." value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} className="bg-black/50 border-white/10 text-white rounded-xl min-h-[60px] md:min-h-[80px]" />
                     </div>
+                    <LegalConsent
+                      checked={legalAccepted}
+                      onChange={(v) => { setLegalAccepted(v); setFormErrors(p => ({ ...p, legal: '' })); }}
+                      error={formErrors.legal}
+                    />
                     <Button type="submit" disabled={isSubmitting} className="w-full btn-cyber h-11 md:h-12 rounded-xl text-sm md:text-base font-bold border-none mt-2 md:mt-4 flex items-center justify-center gap-2">
                       {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Odosielám...</> : <><Send size={16} /> Odoslať nezáväznú rezerváciu</>}
                     </Button>

@@ -7,6 +7,7 @@ import ContactMap from '@/components/ContactMap';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import SeoHead from '@/components/SeoHead';
+import FAQSection from '@/components/FAQSection';
 
 const Kontakt = () => {
   return (
@@ -25,6 +26,9 @@ const Kontakt = () => {
         </ScrollReveal>
         <ScrollReveal direction="up" delay={0.15}>
           <ContactMap />
+        </ScrollReveal>
+        <ScrollReveal direction="up" delay={0.2}>
+          <FAQSection />
         </ScrollReveal>
       </div>
       <Footer />

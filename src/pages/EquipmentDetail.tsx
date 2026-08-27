@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { absoluteUrl, absoluteAsset } from "@/lib/site";
+import { absoluteUrl, absoluteAsset, clipMeta } from "@/lib/site";
+import SeoHead from "@/components/SeoHead";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -183,10 +184,11 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
     return (
       <main className="min-h-screen bg-[#020721] flex flex-col justify-between">
         <Navbar />
-        <div className="flex-grow pt-48 pb-24 flex items-center justify-center animate-fade-slide-up">
-          <div className="text-center text-gray-400">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BD20D3] mx-auto mb-4"></div>
-            Načítavam detail aparatúry...
+        <div className="flex-grow pt-48 pb-24 flex items-center justify-center">
+          <div className="w-full max-w-5xl px-4 animate-pulse">
+            <div className="h-72 rounded-3xl bg-white/5 border border-white/10 mb-6" />
+            <div className="h-8 w-2/3 rounded-lg bg-white/10 mb-3" />
+            <div className="h-4 w-1/2 rounded-lg bg-white/5" />
           </div>
         </div>
         <Footer />
@@ -197,6 +199,12 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
   if (!item) {
     return (
       <main className="min-h-screen bg-[#020721]">
+        <SeoHead
+          path="/prenajom"
+          title="Položka nenájdená | Socializea Audio"
+          description="Požadovaná položka prenájmu nebola nájdená. Pozrite aktuálny katalóg Socializea Audio."
+          noindex
+        />
         <Navbar />
         <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] bg-[#020721] animate-fade-slide-up">
           <div className="text-white text-center">
@@ -218,6 +226,10 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         ? "Svetelná technika"
         : "Ostatná technika";
   const pageTitle = `${item.name} – Prenájom ${categoryLabel} | Socializea Audio`;
+  const descSnippet = clipMeta(item.description, '', 120);
+  const pageDescription = descSnippet
+    ? `Prenájom ${item.name} – ${descSnippet}${descSnippet.endsWith('…') ? '' : '.'} Cena: ${item.price_per_day} € / deň.`
+    : `Prenájom ${item.name}. Cena: ${item.price_per_day} € / deň. Kategória: ${categoryLabel}. Socializea Audio.`;
 
   const isSoldOut = item.available === 0;
   const maxToAdd = item.available - cartQuantity;
@@ -228,7 +240,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         <title>{pageTitle}</title>
         <meta
           name="description"
-          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň. Dostupné: ${item.available} ks. Kategória: ${categoryLabel}.`}
+          content={pageDescription}
         />
         <meta
           name="keywords"
@@ -236,10 +248,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         />
         <link rel="canonical" href={absoluteUrl(`/prenajom/${item.id}`)} />
         <meta property="og:title" content={pageTitle} />
-        <meta
-          property="og:description"
-          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
-        />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={absoluteUrl(`/prenajom/${item.id}`)} />
         <meta property="og:image" content={images[0] || absoluteAsset("/logo.png")} />
@@ -248,17 +257,14 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
         <meta property="product:price:currency" content="EUR" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
-        <meta
-          name="twitter:description"
-          content={`Prenájom ${item.name} – ${item.description?.substring(0, 155) || ""}. Cena: ${item.price_per_day} € / deň.`}
-        />
+        <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={images[0] || absoluteAsset("/logo.png")} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
             name: item.name,
-            description: item.description,
+            description: item.description || pageDescription,
             image: images[0],
             category: categoryLabel,
             offers: {
@@ -354,7 +360,7 @@ const EquipmentDetail = ({ quantities, setQuantities, equipment }: EquipmentDeta
                     >
                       <img
                         src={imgUrl}
-                        alt=""
+                        alt={`${item.name} – náhľad ${idx + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =

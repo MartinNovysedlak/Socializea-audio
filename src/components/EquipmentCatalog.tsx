@@ -5,6 +5,7 @@ import { Filter, Minus, Plus, Volume2, Lightbulb, Layers, ShoppingBag, Check } f
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { EquipmentItem } from "@/lib/supabase";
+import CatalogSkeleton from "@/components/CatalogSkeleton";
 
 interface EquipmentCatalogProps {
   equipment: EquipmentItem[];
@@ -72,7 +73,7 @@ const EquipmentCatalog = ({ equipment, loading, quantities, setQuantities }: Equ
     return (
       <section className="py-12 bg-transparent relative">
         <div className="container mx-auto px-4">
-          <div className="text-center text-gray-400 py-12">Načítavam produktov...</div>
+          <CatalogSkeleton count={6} />
         </div>
       </section>
     );

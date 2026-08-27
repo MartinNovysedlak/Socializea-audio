@@ -3,7 +3,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles, Phone } from 'lucide-react';
+import { COMPANY } from '@/lib/company';
 
 const Hero = () => {
   return (
@@ -50,6 +51,13 @@ const Hero = () => {
                   </Button>
                 </Link>
               </div>
+              <a
+                href={COMPANY.phoneHref}
+                className="inline-flex items-center gap-2 mt-6 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                <Phone size={16} className="text-[#BD20D3]" />
+                Alebo zavolajte {COMPANY.phone} – ozveme sa do 24 hodín
+              </a>
             </div>
             
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#1A4BFF]/40 to-transparent rounded-tl rounded-tr" />

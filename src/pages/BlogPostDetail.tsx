@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { absoluteUrl, absoluteAsset } from '@/lib/site';
+import { absoluteUrl, absoluteAsset, clipMeta } from '@/lib/site';
+import SeoHead from '@/components/SeoHead';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,6 +57,12 @@ const BlogPostDetail = () => {
   if (!post) {
     return (
       <main className="min-h-screen bg-[#020721]">
+        <SeoHead
+          path="/blog"
+          title="Článok nenájdený | Socializea Audio"
+          description="Hľadaný článok neexistuje alebo bol odstránený. Pozrite blog Socializea Audio."
+          noindex
+        />
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] text-white space-y-4">
           <h2 className="text-2xl font-bold">Článok nebol nájdený</h2>
@@ -69,15 +76,21 @@ const BlogPostDetail = () => {
     );
   }
 
+  const postTitle = `${post.title} | Socializea Audio Blog`;
+  const postDescription = clipMeta(
+    post.excerpt,
+    `${post.title}. Článok na blogu Socializea Audio o ozvučení a svetelnej technike.`
+  );
+
   return (
     <>
       <Helmet>
-        <title>{post.title} | Socializea Audio Blog</title>
-        <meta name="description" content={post.excerpt?.substring(0, 160) || ''} />
+        <title>{postTitle}</title>
+        <meta name="description" content={postDescription} />
         <meta name="keywords" content="blog audio technika, rady ozvučenie, tipy svetelná show, DJ technika blog, svadobné ozvučenie, event technika" />
         <link rel="canonical" href={absoluteUrl(`/blog/${post.id}`)} />
-        <meta property="og:title" content={`${post.title} | Socializea Audio Blog`} />
-        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:title" content={postTitle} />
+        <meta property="og:description" content={postDescription} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={absoluteUrl(`/blog/${post.id}`)} />
         <meta property="og:image" content={post.image || absoluteAsset('/logo.png')} />
@@ -85,15 +98,15 @@ const BlogPostDetail = () => {
         <meta property="article:published_time" content={post.published_at} />
         <meta property="article:author" content={post.author} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${post.title} | Socializea Audio Blog`} />
-        <meta name="twitter:description" content={post.excerpt} />
+        <meta name="twitter:title" content={postTitle} />
+        <meta name="twitter:description" content={postDescription} />
         <meta name="twitter:image" content={post.image || absoluteAsset('/logo.png')} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             "headline": post.title,
-            "description": post.excerpt,
+            "description": postDescription,
             "image": post.image,
             "author": {
               "@type": "Person",
@@ -166,7 +179,7 @@ const BlogPostDetail = () => {
                       <div key={index} className="rounded-2xl overflow-hidden border border-white/5 bg-black/30 my-8 shadow-xl">
                         <img 
                           src={block.value} 
-                          alt="" 
+                          alt={`${post.title} – ilustrácia`} 
                           className="w-full h-auto max-h-[500px] object-cover mx-auto"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800";

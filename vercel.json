@@ -2,6 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
+      "source": "/equipment/:id",
+      "destination": "/prenajom/:id",
+      "permanent": true
+    },
+    {
       "source": "/shop",
       "destination": "/predaj",
       "permanent": true
@@ -57,8 +62,18 @@
       "permanent": true
     },
     {
-      "source": "/terms-of-service/",
-      "destination": "/obchodne-podmienky",
+      "source": "/privacy-policy",
+      "destination": "/podmienky-pouzivania",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy/",
+      "destination": "/podmienky-pouzivania",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/podmienky-pouzivania",
       "permanent": true
     }
   ],
@@ -72,6 +87,10 @@
     {
       "path": "/api/cron/keep-alive",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/analytics-cleanup",
+      "schedule": "0 9 * * *"
     }
   ]
 }

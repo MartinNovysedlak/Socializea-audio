@@ -52,14 +52,14 @@ const SeoHead = ({
       <meta name="description" content={finalDescription} />
       {finalKeywords ? <meta name="keywords" content={finalKeywords} /> : null}
       <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
-      <link rel="canonical" href={canonical} />
+      {!noindex ? <link rel="canonical" href={canonical} /> : null}
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Socializea Audio" />
       <meta property="og:locale" content="sk_SK" />
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
-      <meta property="og:url" content={canonical} />
+      {!noindex ? <meta property="og:url" content={canonical} /> : null}
       <meta property="og:image" content={finalImage} />
 
       <meta name="twitter:card" content="summary_large_image" />

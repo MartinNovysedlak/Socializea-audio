@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { absoluteUrl, absoluteAsset } from '@/lib/site';
+import { absoluteUrl, absoluteAsset, clipMeta } from '@/lib/site';
+import SeoHead from '@/components/SeoHead';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,9 @@ import { salesService, SalesItem } from '@/lib/salesService';
 import { toast } from 'sonner';
 import emailjs from '@emailjs/browser';
 import { generateEmailHtml } from '@/utils/emailTemplates';
+import FieldError from '@/components/FieldError';
+import LegalConsent from '@/components/LegalConsent';
+import { cn } from '@/lib/utils';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -29,6 +33,8 @@ const ProductDetail = () => {
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [sendingInquiry, setSendingInquiry] = useState(false);
   const [showInquirySuccess, setShowInquirySuccess] = useState(false);
+  const [inquiryErrors, setInquiryErrors] = useState<Record<string, string>>({});
+  const [inquiryLegal, setInquiryLegal] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -45,10 +51,14 @@ const ProductDetail = () => {
 
   const handleSendInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inquiryFirstName.trim() || !inquiryLastName.trim() || !inquiryEmail.trim() || !inquiryMessage.trim()) {
-      toast.error("Prosím vyplňte všetky povinné polia!");
-      return;
-    }
+    const next: Record<string, string> = {};
+    if (!inquiryFirstName.trim()) next.firstName = "Zadajte meno.";
+    if (!inquiryLastName.trim()) next.lastName = "Zadajte priezvisko.";
+    if (!inquiryEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inquiryEmail)) next.email = "Zadajte platný email.";
+    if (!inquiryMessage.trim()) next.message = "Napíšte správu.";
+    if (!inquiryLegal) next.legal = "Potrebujeme váš súhlas so spracovaním údajov.";
+    setInquiryErrors(next);
+    if (Object.keys(next).length > 0) return;
     setSendingInquiry(true);
     try {
       const htmlContent = generateEmailHtml('product-inquiry', {
@@ -74,6 +84,8 @@ const ProductDetail = () => {
       setInquiryEmail('');
       setInquiryPhone('');
       setInquiryMessage('');
+      setInquiryLegal(false);
+      setInquiryErrors({});
     } catch (error) {
       console.error('EmailJS error:', error);
       toast.error('Odoslanie zlyhalo. Skúste to prosím neskôr.');
@@ -86,8 +98,15 @@ const ProductDetail = () => {
     return (
       <main className="min-h-screen bg-[#020721]">
         <Navbar />
-        <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] text-gray-400">
-          Načítavam produkt...
+        <div className="pt-36 pb-16 container mx-auto px-4 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-pulse">
+            <div className="lg:col-span-7 h-[360px] rounded-3xl bg-white/5 border border-white/10" />
+            <div className="lg:col-span-5 space-y-4">
+              <div className="h-8 w-3/4 rounded-lg bg-white/10" />
+              <div className="h-6 w-1/3 rounded-lg bg-white/5" />
+              <div className="h-32 rounded-3xl bg-white/5" />
+            </div>
+          </div>
         </div>
         <Footer />
       </main>
@@ -97,6 +116,12 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <main className="min-h-screen bg-[#020721]">
+        <SeoHead
+          path="/predaj"
+          title="Produkt nenájdený | Socializea Audio"
+          description="Hľadaný produkt neexistuje alebo bol odstránený. Pozrite aktuálnu ponuku predaja Socializea Audio."
+          noindex
+        />
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] text-white space-y-4">
           <h2 className="text-2xl font-bold">Produkt nebol nájdený</h2>
@@ -110,14 +135,20 @@ const ProductDetail = () => {
     );
   }
 
+  const productTitle = `${product.name} | Socializea Audio – Predaj`;
+  const productDescription = clipMeta(
+    product.description,
+    `Kúpte ${product.name} v Socializea Audio. Profesionálna audio a svetelná technika.`
+  );
+
   return (
     <>
       <Helmet>
-        <title>{product.name} | Socializea Audio – Predaj</title>
-        <meta name="description" content={product.description?.substring(0, 160) || ''} />
+        <title>{productTitle}</title>
+        <meta name="description" content={productDescription} />
         <link rel="canonical" href={absoluteUrl(`/predaj/${product.id}`)} />
-        <meta property="og:title" content={`${product.name} | Socializea Audio – Predaj`} />
-        <meta property="og:description" content={product.description?.substring(0, 160) || ''} />
+        <meta property="og:title" content={productTitle} />
+        <meta property="og:description" content={productDescription} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={absoluteUrl(`/predaj/${product.id}`)} />
         <meta property="og:image" content={images[0] || absoluteAsset('/logo.png')} />
@@ -125,15 +156,15 @@ const ProductDetail = () => {
         <meta property="product:price:amount" content={String(product.price)} />
         <meta property="product:price:currency" content="EUR" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${product.name} | Socializea Audio – Predaj`} />
-        <meta name="twitter:description" content={product.description?.substring(0, 160) || ''} />
+        <meta name="twitter:title" content={productTitle} />
+        <meta name="twitter:description" content={productDescription} />
         <meta name="twitter:image" content={images[0] || absoluteAsset('/logo.png')} />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Product',
             name: product.name,
-            description: product.description,
+            description: product.description || productDescription,
             image: images[0],
             offers: {
               '@type': 'Offer',
@@ -191,7 +222,7 @@ const ProductDetail = () => {
                 <div className="flex flex-wrap gap-3">
                   {images.map((img, idx) => (
                     <button key={idx} onClick={() => setActiveImage(idx)} className={`w-20 h-16 rounded-xl overflow-hidden border transition-all ${activeImage === idx ? 'border-[#BD20D3] ring-1 ring-[#BD20D3]' : 'border-white/10 opacity-60 hover:opacity-100'}`}>
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt={`${product.name} – náhľad ${idx + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -267,16 +298,19 @@ const ProductDetail = () => {
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
                             <label className="text-xs text-gray-400 font-bold uppercase">Meno *</label>
-                            <input type="text" required value={inquiryFirstName} onChange={(e) => setInquiryFirstName(e.target.value)} placeholder="Napr. Ján" className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm" />
+                            <input type="text" required value={inquiryFirstName} onChange={(e) => { setInquiryFirstName(e.target.value); setInquiryErrors(p => ({ ...p, firstName: '' })); }} placeholder="Napr. Ján" className={cn("w-full bg-black/40 border text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm", inquiryErrors.firstName ? "border-red-500" : "border-white/10")} />
+                            <FieldError message={inquiryErrors.firstName} />
                           </div>
                           <div className="space-y-1.5">
                             <label className="text-xs text-gray-400 font-bold uppercase">Priezvisko *</label>
-                            <input type="text" required value={inquiryLastName} onChange={(e) => setInquiryLastName(e.target.value)} placeholder="Napr. Novák" className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm" />
+                            <input type="text" required value={inquiryLastName} onChange={(e) => { setInquiryLastName(e.target.value); setInquiryErrors(p => ({ ...p, lastName: '' })); }} placeholder="Napr. Novák" className={cn("w-full bg-black/40 border text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm", inquiryErrors.lastName ? "border-red-500" : "border-white/10")} />
+                            <FieldError message={inquiryErrors.lastName} />
                           </div>
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-xs text-gray-400 font-bold uppercase">E-mail *</label>
-                          <input type="email" required value={inquiryEmail} onChange={(e) => setInquiryEmail(e.target.value)} placeholder="jan.novak@email.sk" className="w-full bg-black/40 border border-white/10 text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm" />
+                          <input type="email" required value={inquiryEmail} onChange={(e) => { setInquiryEmail(e.target.value); setInquiryErrors(p => ({ ...p, email: '' })); }} placeholder="jan.novak@email.sk" className={cn("w-full bg-black/40 border text-white rounded-xl h-11 px-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm", inquiryErrors.email ? "border-red-500" : "border-white/10")} />
+                          <FieldError message={inquiryErrors.email} />
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-xs text-gray-400 font-bold uppercase">Telefón (voliteľný)</label>
@@ -284,8 +318,14 @@ const ProductDetail = () => {
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-xs text-gray-400 font-bold uppercase">Vaša správa *</label>
-                          <textarea required value={inquiryMessage} onChange={(e) => setInquiryMessage(e.target.value)} placeholder="Čo by ste chceli vedieť?" className="w-full bg-black/40 border border-white/10 text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed" />
+                          <textarea required value={inquiryMessage} onChange={(e) => { setInquiryMessage(e.target.value); setInquiryErrors(p => ({ ...p, message: '' })); }} placeholder="Čo by ste chceli vedieť?" className={cn("w-full bg-black/40 border text-white rounded-xl min-h-[100px] p-4 focus:outline-none focus:ring-1 focus:ring-[#BD20D3] text-sm leading-relaxed", inquiryErrors.message ? "border-red-500" : "border-white/10")} />
+                          <FieldError message={inquiryErrors.message} />
                         </div>
+                        <LegalConsent
+                          checked={inquiryLegal}
+                          onChange={(v) => { setInquiryLegal(v); setInquiryErrors(p => ({ ...p, legal: '' })); }}
+                          error={inquiryErrors.legal}
+                        />
                         <Button type="submit" disabled={sendingInquiry} className="w-full btn-cyber h-11 rounded-xl font-bold border-none text-sm mt-2">
                           {sendingInquiry ? <><Loader2 size={16} className="mr-2 animate-spin" />Odosiela sa...</> : 'Odoslať dopyt'}
                         </Button>

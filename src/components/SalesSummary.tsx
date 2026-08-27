@@ -61,7 +61,7 @@ const SalesSummary = () => {
                   <div className="col-span-5 space-y-4">
                     <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                       <img 
-                        src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=600" 
+                        src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=600" 
                         alt="Svetelná technika" 
                         className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
                       />

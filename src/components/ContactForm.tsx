@@ -17,6 +17,8 @@ import { format } from "date-fns";
 import { sk } from "date-fns/locale";
 import { startOfDay } from "date-fns";
 import "react-day-picker/dist/style.css";
+import { cn } from '@/lib/utils';
+import LegalConsent from '@/components/LegalConsent';
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "Zadajte meno." }),
@@ -25,6 +27,7 @@ const formSchema = z.object({
   phone: z.string().min(10, { message: "Zadajte platné telefónne číslo." }).optional().or(z.literal('')),
   date: z.string().optional(),
   message: z.string().min(10, { message: "Správa musí mať aspoň 10 znakov." }),
+  legal: z.boolean().refine((v) => v === true, { message: "Potrebujeme váš súhlas so spracovaním údajov." }),
 });
 
 const ContactForm = () => {
@@ -35,6 +38,7 @@ const ContactForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched',
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -42,6 +46,7 @@ const ContactForm = () => {
       phone: "",
       date: "",
       message: "",
+      legal: false,
     },
   });
 
@@ -167,30 +172,30 @@ const ContactForm = () => {
                           <FormField
                             control={form.control}
                             name="firstName"
-                            render={({ field }) => (
+                            render={({ field, fieldState }) => (
                               <FormItem>
                                 <FormLabel className="text-gray-300">
                                   Meno <span className="text-red-400">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Ján" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                  <Input placeholder="Ján" {...field} className={cn("bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]", fieldState.error && "border-red-500 focus-visible:ring-red-400")} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-red-400" />
                               </FormItem>
                             )}
                           />
                           <FormField
                             control={form.control}
                             name="lastName"
-                            render={({ field }) => (
+                            render={({ field, fieldState }) => (
                               <FormItem>
                                 <FormLabel className="text-gray-300">
                                   Priezvisko <span className="text-red-400">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Novák" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                  <Input placeholder="Novák" {...field} className={cn("bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]", fieldState.error && "border-red-500 focus-visible:ring-red-400")} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-red-400" />
                               </FormItem>
                             )}
                           />
@@ -199,15 +204,15 @@ const ContactForm = () => {
                         <FormField
                           control={form.control}
                           name="email"
-                          render={({ field }) => (
+                          render={({ field, fieldState }) => (
                             <FormItem>
                               <FormLabel className="text-gray-300">
                                 Email <span className="text-red-400">*</span>
                               </FormLabel>
                               <FormControl>
-                                <Input placeholder="jan@priklad.sk" {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input placeholder="jan@priklad.sk" {...field} className={cn("bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]", fieldState.error && "border-red-500 focus-visible:ring-red-400")} />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-400" />
                             </FormItem>
                           )}
                         />
@@ -215,13 +220,13 @@ const ContactForm = () => {
                         <FormField
                           control={form.control}
                           name="phone"
-                          render={({ field }) => (
+                          render={({ field, fieldState }) => (
                             <FormItem>
                               <FormLabel className="text-gray-300">Telefón</FormLabel>
                               <FormControl>
-                                <Input placeholder="+421 ..." {...field} className="bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]" />
+                                <Input placeholder="+421 ..." {...field} className={cn("bg-black/50 border-white/10 text-white h-12 rounded-xl focus:ring-[#BD20D3]", fieldState.error && "border-red-500 focus-visible:ring-red-400")} />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-400" />
                             </FormItem>
                           )}
                         />
@@ -264,7 +269,7 @@ const ContactForm = () => {
                                   />
                                 </div>
                               )}
-                              <FormMessage />
+                                <FormMessage className="text-red-400" />
                             </FormItem>
                           )}
                         />
@@ -272,7 +277,7 @@ const ContactForm = () => {
                         <FormField
                           control={form.control}
                           name="message"
-                          render={({ field }) => (
+                          render={({ field, fieldState }) => (
                             <FormItem>
                               <FormLabel className="text-gray-300">
                                 Vaša správa <span className="text-red-400">*</span>
@@ -280,11 +285,24 @@ const ContactForm = () => {
                               <FormControl>
                                 <Textarea 
                                   placeholder="Napíšte nám viac o vašom podujatí..." 
-                                  className="bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]" 
+                                  className={cn("bg-black/50 border-white/10 text-white min-h-[120px] rounded-xl focus:ring-[#BD20D3]", fieldState.error && "border-red-500")} 
                                   {...field} 
                                 />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-400" />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="legal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <LegalConsent
+                                checked={field.value}
+                                onChange={field.onChange}
+                                error={form.formState.errors.legal?.message}
+                              />
                             </FormItem>
                           )}
                         />

@@ -704,7 +704,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                             idx === lightboxIndex && lightboxOpen ? 'border-[#BD20D3]' : 'border-white/10'
                           }`}
                         >
-                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <img src={img} alt={`${selectedPackage.name} – náhľad ${idx + 1}`} className="w-full h-full object-cover" />
                         </button>
                       ))}
                       {allImages.length > 5 && (
@@ -1028,7 +1028,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                     <div className="absolute top-full left-0 right-24 mt-1 bg-[#0a0d1f] border border-[#1A4BFF]/30 rounded-xl p-3 shadow-2xl z-50">
                       <div className="flex items-center gap-2.5 mb-2">
                         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
-                          <img src={selectedItem.image} alt="" className="w-full h-full object-cover" />
+                          <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
                         </div>
                         <p className="text-xs font-bold text-white truncate flex-1">{selectedItem.name}</p>
                         {selectedItem.price != null && <span className="text-[10px] text-gray-300 font-bold whitespace-nowrap">{selectedItem.price} € / ks / víkend (2 noci)</span>}
@@ -1267,7 +1267,7 @@ const PackageDetailDialog = ({ open, onOpenChange, selectedPackage }: PackageDet
                       idx === lightboxIndex ? 'border-[#BD20D3]' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt={`${selectedPackage.name} – náhľad ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

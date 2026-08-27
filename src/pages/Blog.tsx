@@ -11,6 +11,7 @@ import { blogService, BlogPost } from '@/lib/blogService';
 import { Link } from 'react-router-dom';
 import SeoHead from '@/components/SeoHead';
 import { absoluteUrl } from '@/lib/site';
+import CatalogSkeleton from '@/components/CatalogSkeleton';
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -68,7 +69,7 @@ const Blog = () => {
           </div>
 
           {loading ? (
-            <div className="text-center text-gray-400 py-16">Pripravujem blogové príspevky...</div>
+            <CatalogSkeleton count={6} />
           ) : posts.length === 0 ? (
             <div className="text-center text-gray-400 py-16 bg-white/5 border border-white/10 rounded-2xl max-w-5xl mx-auto">
               Žiadne uverejnené články na tejto stránke.

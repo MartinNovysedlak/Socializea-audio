@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { HelpCircle, Loader2 } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { faqService, FAQItem } from '@/lib/faqService';
 
 const FAQSection = () => {
@@ -28,9 +28,11 @@ const FAQSection = () => {
     return (
       <section className="py-12 bg-transparent relative">
         <div className="container mx-auto px-4">
-          <div className="text-center text-gray-400 flex items-center justify-center gap-2">
-            <Loader2 size={16} className="animate-spin text-[#BD20D3]" />
-            Načítavam časté otázky...
+          <div className="max-w-3xl mx-auto space-y-3">
+            <div className="h-8 w-64 mx-auto rounded-lg bg-white/10 animate-pulse mb-8" />
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-16 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+            ))}
           </div>
         </div>
       </section>

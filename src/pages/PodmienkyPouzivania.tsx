@@ -25,12 +25,12 @@ const PodmienkyPouzivania = () => {
               <div className="w-10 h-10 bg-[#BD20D3]/10 border border-[#BD20D3]/30 rounded-full flex items-center justify-center text-[#BD20D3]">
                 <Shield size={20} />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white">Podmienky používania a ochrana súkromia</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white">Zásady ochrany súkromia</h1>
             </div>
 
             <p className="text-gray-400 text-sm border-b border-white/5 pb-4">
               <strong className="text-white">Dátum účinnosti:</strong> 1. 1. 2025 | 
-              <strong className="text-white ml-3">Verzia:</strong> 2.2
+              <strong className="text-white ml-3">Verzia:</strong> 2.3
             </p>
 
             <div className="text-gray-300 space-y-6 text-sm md:text-base leading-relaxed">
@@ -163,22 +163,22 @@ const PodmienkyPouzivania = () => {
 
               <h2 className="text-xl font-bold text-white">7. Cookies a podobné technológie</h2>
               <p>
-                7.1. Webová stránka používa súbory cookies a podobné technológie (ďalej len „Cookies") na zabezpečenie správneho fungovania, analýzu návštevnosti a personalizáciu obsahu.
+                7.1. Webová stránka používa súbory cookies a podobné technológie (ďalej len „Cookies"), ako aj úložisko prehliadača (localStorage) na zabezpečenie správneho fungovania. Súhlas s voliteľnými cookies zbierame prostredníctvom cookie bannera.
               </p>
               <p>
-                7.2. <strong className="text-white">Aké cookies používame:</strong>
+                7.2. <strong className="text-white">Aké cookies a úložisko používame:</strong>
               </p>
               <p>
-                <strong className="text-white">a) Nevyhnutné cookies:</strong> Sú potrebné na fungovanie Webovej stránky. Bez nich by stránka nefungovala správne. Nie je možné ich odmietnuť.
+                <strong className="text-white">a) Nevyhnutné:</strong> Košík rezervácie, technické nastavenia relácie a uloženie vášho súhlasu s cookies. Bez nich by stránka nefungovala správne. Nie je možné ich odmietnuť.
               </p>
               <p>
-                <strong className="text-white">b) Analytické cookies:</strong> Používame ich na zber anonymných štatistík o návštevnosti (napr. Google Analytics 4, dáta sú anonymizované). Údaje sú agregované a nie je možné identifikovať konkrétneho používateľa.
+                <strong className="text-white">b) Analytické:</strong> Zapnú sa len po vašom súhlase v cookie banneri. Slúžia na anonymné štatistiky návštevnosti. Ak súhlas neudelíte, tieto cookies nespúšťame.
               </p>
               <p>
-                <strong className="text-white">c) Marketingové cookies:</strong> V súčasnosti tieto cookies nepoužívame.
+                <strong className="text-white">c) Marketingové:</strong> Zapnú sa len po vašom súhlase. V súčasnosti reklamné meranie nespúšťame, aj keď súhlas udelíte, kým ho v systéme výslovne nezapneme.
               </p>
               <p>
-                7.3. Váš prehliadač vám umožňuje cookies spravovať, blokovať alebo mazať. Návody nájdete v nastaveniach konkrétneho prehliadača (Chrome, Firefox, Safari, Edge).
+                7.3. Súhlas môžete kedykoľvek zmeniť cez odkaz „Nastavenie cookies“ v pätičke stránky. Cookies môžete spravovať aj v nastaveniach prehliadača (Chrome, Firefox, Safari, Edge).
               </p>
 
               <h2 className="text-xl font-bold text-white">8. Obmedzenie zodpovednosti</h2>

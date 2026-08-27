@@ -1,0 +1,15 @@
+export const COMPANY = {
+  brand: 'Socializea-audio',
+  owner: 'Martin Novysedlák',
+  street: 'Čadečka 1924',
+  zip: '022 01',
+  city: 'Čadca',
+  country: 'Slovensko',
+  fullAddress: 'Čadečka 1924, 022 01 Čadca, Slovensko',
+  pickupZilina: 'Vysokoškolská 4, Budova SADOP',
+  pickupZilinaCity: '010 01 Žilina, Slovensko',
+  email: 'socializea@socializea.com',
+  phone: '+421 948 070 577',
+  phoneHref: 'tel:+421948070577',
+  emailHref: 'mailto:socializea@socializea.com',
+} as const;

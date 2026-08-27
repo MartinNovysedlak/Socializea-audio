@@ -24,6 +24,7 @@ import { packagesService, PackageData } from '@/lib/packagesService';
 import PackageDetailDialog, { PackageOption } from '@/components/PackageDetailDialog';
 import InteractiveQuiz from '@/components/InteractiveQuiz';
 import SeoHead from '@/components/SeoHead';
+import FAQSection from '@/components/FAQSection';
 
 interface PresetPackage {
   id: string;
@@ -126,9 +127,10 @@ interface PrenajomProps {
   quantities: Record<string, number>;
   setQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   equipment: EquipmentItem[];
+  loading?: boolean;
 }
 
-const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
+const Prenajom = ({ quantities, setQuantities, equipment, loading = false }: PrenajomProps) => {
   const [displayedPackages, setDisplayedPackages] = useState<PackageOption[]>([]);
   const [, setLoadingPackages] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<PackageOption | null>(null);
@@ -413,11 +415,13 @@ const Prenajom = ({ quantities, setQuantities, equipment }: PrenajomProps) => {
 
           <EquipmentCatalog 
             equipment={equipment} 
-            loading={equipment.length === 0} 
+            loading={loading} 
             quantities={quantities} 
             setQuantities={setQuantities} 
           />
         </section>
+
+        <FAQSection />
 
         <PackageDetailDialog
           open={isDetailOpen}

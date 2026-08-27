@@ -10,6 +10,8 @@ import { ShoppingBag, ChevronRight, Filter, Check } from 'lucide-react';
 import { salesService, SalesItem } from '@/lib/salesService';
 import { Link } from 'react-router-dom';
 import SeoHead from '@/components/SeoHead';
+import CatalogSkeleton from '@/components/CatalogSkeleton';
+import { COMPANY } from '@/lib/company';
 
 const Predaj = () => {
   const [items, setItems] = useState<SalesItem[]>([]);
@@ -61,6 +63,12 @@ const Predaj = () => {
             <p className="text-gray-400 text-base md:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
               Vyberte si zo širokej ponuky úplne nových kusov od svetových značiek alebo prevereného B-Stock bazáru so zárukou.
             </p>
+            <a
+              href={COMPANY.phoneHref}
+              className="inline-flex items-center gap-2 mt-6 text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Potrebujete poradiť? Zavolajte {COMPANY.phone}
+            </a>
           </div>
 
           <div className="w-full max-w-5xl mx-auto mb-8 flex items-center gap-3 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md animate-fade-slide-up [animation-delay:0.1s]">
@@ -87,7 +95,7 @@ const Predaj = () => {
           </div>
 
           {loading ? (
-            <div className="text-center text-gray-400 py-16">Načítavam produkty pre vás...</div>
+            <CatalogSkeleton count={4} />
           ) : items.length === 0 ? (
             <div className="text-center text-gray-400 py-16 bg-white/5 border border-white/10 rounded-2xl max-w-5xl mx-auto">
               Momentálne nie sú v ponuke žiadne produkty.

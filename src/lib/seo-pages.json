@@ -1,7 +1,7 @@
 {
   "siteName": "Socializea Audio",
-  "siteUrl": "https://socializea-audio.com",
-  "defaultImage": "https://socializea-audio.com/logo.png",
+  "siteUrl": "https://www.socializea-audio.com",
+  "defaultImage": "https://www.socializea-audio.com/logo.png",
   "locale": "sk_SK",
   "pages": [
     {
@@ -54,9 +54,9 @@
     },
     {
       "path": "/podmienky-pouzivania",
-      "title": "Ochrana súkromia a podmienky | Socializea Audio",
-      "description": "Podmienky používania webu socializea-audio.com, ochrana osobných údajov (GDPR) a cookies politika Socializea Audio.",
-      "keywords": "GDPR, ochrana súkromia, podmienky používania, Socializea Audio",
+      "title": "Zásady ochrany súkromia | Socializea Audio",
+      "description": "Zásady ochrany súkromia Socializea Audio – GDPR, cookies, spracúvanie osobných údajov a práva návštevníkov webu socializea-audio.com.",
+      "keywords": "GDPR, ochrana súkromia, cookies, zásady ochrany súkromia, Socializea Audio",
       "priority": 0.3,
       "changefreq": "yearly"
     }

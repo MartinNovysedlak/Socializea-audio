@@ -18,7 +18,7 @@ const DJSection = () => {
             <div className="absolute inset-0 z-0 opacity-10">
               <img 
                 src="https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?auto=format&fit=crop&q=80&w=2000" 
-                alt="DJ at work" 
+                alt="DJ pri práci" 
                 className="w-full h-full object-cover grayscale"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-[#020721]/80 via-transparent to-[#020721]/80" />

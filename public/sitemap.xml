@@ -1,45 +1,261 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://socializea-audio.com</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/prenajom</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/prenajom</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/predaj</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/predaj</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/blog</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/blog</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/kontakt</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/kontakt</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/obchodne-podmienky</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/obchodne-podmienky</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://socializea-audio.com/podmienky-pouzivania</loc>
-    <lastmod>2026-07-23</lastmod>
+    <loc>https://www.socializea-audio.com/podmienky-pouzivania</loc>
+    <lastmod>2026-08-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/predaj/60e2ec1b-544e-4484-a8e4-e26f4b65fc67</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/predaj/10885a6a-fd07-4e8d-8fc9-3fde6349eda1</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/predaj/ae4d898d-caab-4e8b-80b3-6f0b3dbe9827</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/predaj/c0988802-91da-4b23-ab83-d54949e62e5b</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/7ef311bc-e196-4f81-b32a-c2527cf27521</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/69d10f4a-c6a3-4d8b-81dd-613f0ce91121</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/84c44f99-88bf-40ea-8034-4b10c989a4b9</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/f75309cd-59ed-42de-a37d-ecac88b6b745</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/c628f12b-1c19-49ef-87fa-0ce482863ae6</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/6b440085-bd35-44f1-89f6-687295b1ddd8</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/f9e2a52e-9845-4579-a486-23b4926721b3</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/3880dbd9-da4a-4875-9f8f-56c313d042f4</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/ce66c880-deb0-4f87-8cdb-8e86d3ca8f9c</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/eddf31c6-9496-4a29-a852-6e37d419be82</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/2d32ca1c-94d0-4497-a9ce-f40d6379a1d2</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/02254522-8896-4a58-8b85-a6e25883dc49</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/a69384ae-e81a-4dfe-bda7-c569109f4e31</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/63de0094-ad72-47c4-87c7-fb4fa8bb6938</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/74c9f630-1054-4542-bf8d-2954103c965d</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/d287712e-b21b-4cbb-a667-c4023b7e71bd</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/0e021668-549d-4e73-a224-04214f4246ed</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/1117325b-fa48-4c19-901f-cf9fb66f6c57</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/bc27d83f-f917-4035-bca2-129aba4bef64</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/d9c32203-1e26-4f71-bfbf-5a088f7c3034</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/77755107-7b58-42c5-a1b6-d73b2b25bedd</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/c24b3705-38af-4246-9d0d-124870e42fb1</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/cd567f7f-e310-4db9-aaf3-c65d76ed3016</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/87e920f9-e927-4659-9e53-ffcbad1408e8</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/6367bccb-5356-4c3e-a102-e41c64a1fb6b</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/ff9ed9f2-22b4-45bb-a763-3e1c7aed38ce</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/52ad2103-8554-4681-a913-f2b2d29d5d18</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/f791184a-da26-485d-91b9-3490de9b8e60</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/c3cbbb25-f2f7-4250-9c65-207b47c7fa2c</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/prenajom/ecb6727f-c85f-45a2-9417-ff63524d6225</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/blog/blog-1</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.socializea-audio.com/blog/blog-2</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
