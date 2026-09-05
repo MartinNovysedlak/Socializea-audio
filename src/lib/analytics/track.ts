@@ -70,19 +70,13 @@ function enqueue(partial: Omit<AnalyticsEventPayload, 'session_id' | 'page_url' 
     referrer: document.referrer || null,
   };
   queue.push(event);
-  if (queue.length >= MAX_QUEUE) flush(false);
+  if (queue.length >= MAX_QUEUE) flush();
 }
 
-function flush(useBeacon: boolean) {
+function flush() {
   if (queue.length === 0) return;
   const batch = queue.splice(0, MAX_QUEUE);
   const body = JSON.stringify({ events: batch });
-
-  if (useBeacon && typeof navigator.sendBeacon === 'function') {
-    const blob = new Blob([body], { type: 'application/json' });
-    const ok = navigator.sendBeacon('/api/track', blob);
-    if (ok) return;
-  }
 
   void fetch('/api/track', {
     method: 'POST',
@@ -160,7 +154,7 @@ export function trackPageview(path?: string) {
   pageEnteredAt = now;
   maxScroll = currentScrollPercent();
   enqueue({ event_type: 'pageview', page_url: next });
-  flush(false);
+  flush();
 }
 
 export function initAnalytics(): () => void {
@@ -191,7 +185,7 @@ export function initAnalytics(): () => void {
 
   const onHide = () => {
     sendPageLeave(currentPath);
-    flush(true);
+    flush();
   };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') onHide();
@@ -200,7 +194,7 @@ export function initAnalytics(): () => void {
 
   window.addEventListener('cookie-consent-updated', onConsent);
 
-  flushTimer = window.setInterval(() => flush(false), FLUSH_MS);
+  flushTimer = window.setInterval(() => flush(), FLUSH_MS);
 
   cleanupFns = [
     () => document.removeEventListener('click', onClick, true),
@@ -214,7 +208,7 @@ export function initAnalytics(): () => void {
 
   return () => {
     sendPageLeave(currentPath);
-    flush(true);
+    flush();
     cleanupFns.forEach((fn) => fn());
     cleanupFns = [];
     started = false;
