@@ -1,4 +1,6 @@
 import { getCookieConsent } from '@/lib/cookieConsent';
+import { supabase } from '@/lib/supabase';
+import { sanitizeEvent } from './sanitize';
 import type { AnalyticsEventPayload, AnalyticsEventType } from './types';
 
 const SESSION_KEY = 'sa_analytics_session';
@@ -56,7 +58,7 @@ function enqueue(partial: Omit<AnalyticsEventPayload, 'session_id' | 'page_url' 
   page_url?: string;
 }) {
   if (shouldSkip()) return;
-  const event: AnalyticsEventPayload = {
+  const event = sanitizeEvent({
     session_id: touchSessionId(),
     page_url: partial.page_url ?? pageUrl(),
     event_type: partial.event_type,
@@ -68,27 +70,29 @@ function enqueue(partial: Omit<AnalyticsEventPayload, 'session_id' | 'page_url' 
     duration_ms: partial.duration_ms ?? null,
     scroll_percent: partial.scroll_percent ?? null,
     referrer: document.referrer || null,
-  };
+  });
+  if (!event) return;
   queue.push(event);
   if (queue.length >= MAX_QUEUE) flush();
+}
+
+function postTrack(batch: AnalyticsEventPayload[]) {
+  void fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ events: batch }),
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 function flush() {
   if (queue.length === 0) return;
   const batch = queue.splice(0, MAX_QUEUE);
-  const body = JSON.stringify({ events: batch });
 
-  void fetch('/api/track', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-    keepalive: true,
-  }).then((res) => {
-    if (!res.ok) throw new Error('track endpoint unavailable');
-  }).catch(() => {
-    import('@/lib/supabase').then(({ supabase }) => {
-      void supabase.from('analytics_events').insert(batch);
-    });
+  void supabase.from('analytics_events').insert(batch).then(({ error }) => {
+    if (error) postTrack(batch);
+  }, () => {
+    postTrack(batch);
   });
 }
 
